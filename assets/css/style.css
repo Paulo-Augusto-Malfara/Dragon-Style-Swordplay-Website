@@ -1,0 +1,83 @@
+@import url("https://fonts.googleapis.com/css2?family=Quintessential&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Rubik&display=swap");
+
+:root {
+  /*   --primary-color: rgba(21, 31, 40, 255);
+  --secondary-color: rgba(181, 134, 54, 255);
+  --hov-primary-color: rgba(60, 56, 43, 255);
+  --text--color: rgb(221, 221, 221); */
+  --primary-color: #121212;
+  --secondary-color: #102a43;
+  --box-primary-color: #222222;
+  --text-primary-color: #e0e0e0;
+  --text-secondary-color: #e1e1e1;
+}
+
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+}
+ */
+
+body {
+  background-color: var(--primary-color);
+  color: var(--text-primary-color);
+  font-family: "rubik", sans-serif;
+}
+
+header {
+  background-color: var(--secondary-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 15px;
+  width: 90%;
+  margin: auto;
+}
+
+main {
+  background-color: var(--box-primary-color);
+  width: 90%;
+  margin: auto;
+  border-radius: 15px;
+}
+
+p {
+  color: var(--text-secondary-color);
+}
+
+#logo-ds {
+  width: 8em;
+}
+
+.header-menu-item {
+  text-decoration: none;
+  color: var(--text-primary-color);
+}
+
+/* ======== CLASSES ======== */
+
+#classes {
+  margin-top: 2em;
+  text-align: justify;
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+.h1-classes {
+  padding: 1.5em;
+  text-align: center !important;
+  font-size: 2em;
+  text-shadow: 3px 3px black;
+}
+
+.h2-classes {
+  text-shadow: 3px 3px black;
+  border-radius: 20px;
+}
+
+.p-classes {
+  margin-left: 2em;
+}
