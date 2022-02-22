@@ -7,7 +7,8 @@
   --hov-primary-color: rgba(60, 56, 43, 255);
   --text--color: rgb(221, 221, 221); */
   --primary-color: #121212;
-  --secondary-color: #102a43;
+  --secondary-color: #151f28;
+  --golden-color: #b58636;
   --box-primary-color: #222222;
   --text-primary-color: #e0e0e0;
   --text-secondary-color: #e1e1e1;
@@ -27,16 +28,6 @@ body {
   font-family: "rubik", sans-serif;
 }
 
-header {
-  background-color: var(--secondary-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-radius: 15px;
-  width: 90%;
-  margin: auto;
-}
-
 main {
   background-color: var(--box-primary-color);
   width: 90%;
@@ -48,13 +39,45 @@ p {
   color: var(--text-secondary-color);
 }
 
-/* #logo-ds {
-  
-} */
+/* ======== HEADER ======== */
+
+header {
+  width: 90%;
+  margin: auto;
+  overflow: hidden;
+}
+
+.header-logo {
+  background-color: var(--secondary-color);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1em;
+}
 
 .header-menu-item {
   text-decoration: none;
   color: var(--text-primary-color);
+}
+
+#logo-ds{
+  margin-left: 4em;
+}
+
+#header-icons-div {
+  display: flex;
+  justify-content: flex-end;
+  gap: 3em;
+  margin-right: 6em;
+}
+
+.header-icon {
+  color: var(--golden-color);
+}
+
+ion-icon {
+  font-size: 32px;
 }
 
 /* ======== CLASSES ======== */
