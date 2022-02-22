@@ -61,7 +61,7 @@ header {
   color: var(--text-primary-color);
 }
 
-#logo-ds{
+#logo-ds {
   margin-left: 4em;
 }
 
@@ -103,4 +103,63 @@ ion-icon {
 
 .p-classes {
   margin-left: 2em;
+}
+
+/* ======== MEDIA QUERYS ======== */
+
+@media (max-width: 900px) {
+  header {
+    width: 95%;
+  }
+  #logo-ds {
+    margin-left: 1em;
+  }
+  #header-icons-div {
+    margin-right: 1em;
+    gap: 2em;
+  }
+}
+
+@media (max-width: 740px) {
+  header {
+    width: 100%;
+  }
+  .header-logo {
+    padding: 0.5em;
+    overflow: hidden;
+  }
+  #logo-ds {
+    margin-left: 0.5em;
+    max-width: 50%;
+  }
+  #header-icons-div {
+    margin-right: 1em;
+    gap: 1.5em;
+  }
+}
+
+@media (max-width: 580px) {
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 380px) {
+  #logo-ds {
+    margin-left: 0.1em;
+    max-width: 50%;
+  }
+  #header-icons-div {
+    margin-right: 0.1em;
+    gap: 1em;
+  }
+  ion-icon {
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 280px) {
+  #header-icons-div {
+    gap: 0.5em;
+  }
 }
