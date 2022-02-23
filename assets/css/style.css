@@ -11,6 +11,7 @@
   --box-primary-color: #222222;
   --text-primary-color: #e0e0e0;
   --text-secondary-color: #e1e1e1;
+  --border-dark-color: #222222;
 }
 
 * {
@@ -192,6 +193,7 @@ ion-icon {
     display: none;
     flex-direction: column;
     align-items: flex-start;
+    font-size: 1.3em;
   }
   .navbar-links.active {
     display: flex;
@@ -203,6 +205,13 @@ ion-icon {
   }
   .navbar-menu-item-a {
     padding: 0.5rem 1rem;
+  }
+  .navbar-menu-item {
+    border-bottom: 1px solid var(--border-dark-color);
+    width: 200px;
+  }
+  .navbar-menu-item:last-of-type {
+    border-bottom: none;
   }
 }
 
@@ -245,7 +254,7 @@ p {
   }
   #logo-ds {
     margin-left: 0.5em;
-    max-width: 50%;
+    max-width: 60%;
   }
   #header-icons-div {
     margin-right: 1em;
@@ -268,7 +277,7 @@ p {
 @media (max-width: 380px) {
   #logo-ds {
     margin-left: 0.1em;
-    max-width: 50%;
+    max-width: 60%;
   }
   #header-icons-div {
     margin-right: 0.1em;
