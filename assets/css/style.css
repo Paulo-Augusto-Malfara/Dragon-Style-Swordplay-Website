@@ -12,6 +12,7 @@
   --text-primary-color: #e0e0e0;
   --text-secondary-color: #e1e1e1;
   --border-dark-color: #222222;
+  --border-dark-color-2: #333333;
 }
 
 * {
@@ -131,7 +132,7 @@ ion-icon {
 .navbar-menu-item {
   margin-left: -10px;
   padding-right: 20px;
-  border-right: 1px solid #c7c7c7;
+  border-right: 2px solid var(--border-dark-color-2);
   display: flex;
   align-content: center;
   justify-content: center;
