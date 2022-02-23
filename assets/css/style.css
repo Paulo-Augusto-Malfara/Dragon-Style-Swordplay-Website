@@ -207,8 +207,8 @@ ion-icon {
     padding: 0.5rem 1rem;
   }
   .navbar-menu-item {
-    border-bottom: 1px solid var(--border-dark-color);
-    width: 200px;
+    border-bottom: 2px solid var(--border-dark-color);
+    max-width: 180px;
   }
   .navbar-menu-item:last-of-type {
     border-bottom: none;
