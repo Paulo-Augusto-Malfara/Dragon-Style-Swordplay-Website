@@ -155,14 +155,11 @@ ion-icon {
 /* ======== RESPONSIVE NAVIGATION MENU ======== */
 
 .toggle-button {
-  position: absolute;
-  top: 2rem;
-  right: 2rem;
-  display: none;
-  flex-direction: column;
-  justify-content: space-between;
-  width: 30px;
-  height: 21px;
+  font-family: "Bree Serif", sans-serif;
+  color: white;
+  margin: auto;
+  align-content: center;
+  justify-content: center;
 }
 
 .toggle-button .bar {
@@ -177,14 +174,11 @@ ion-icon {
   .toggle-button {
     display: flex;
   }
-  .navbar {
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
+
+  .toggle-button.active {
+    color: var(--golden-color);
   }
-  #header-icons-div {
-    display: none;
-  }
+
   .navbar-links li {
     margin-left: 0;
     padding-right: 0;
@@ -194,8 +188,11 @@ ion-icon {
   }
   .navbar-links {
     width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
   }
-  .navbar.active {
+  .navbar-links.active {
     display: flex;
   }
   .navbar-ul {
@@ -205,7 +202,6 @@ ion-icon {
   }
   .navbar-menu-item-a {
     padding: 0.5rem 1rem;
-/*     border: 1px solid red; */
   }
 }
 
