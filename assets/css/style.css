@@ -160,6 +160,7 @@ ion-icon {
   margin: auto;
   align-content: center;
   justify-content: center;
+  display: none;
 }
 
 .toggle-button .bar {
