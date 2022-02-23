@@ -74,31 +74,6 @@ ion-icon {
   font-size: 32px;
 }
 
-/* ======== CLASSES ======== */
-
-#classes {
-  margin-top: 2em;
-  text-align: justify;
-  margin-left: 2em;
-  margin-right: 2em;
-}
-
-.h1-classes {
-  padding: 1.5em;
-  text-align: center !important;
-  font-size: 2em;
-  text-shadow: 3px 3px black;
-}
-
-.h2-classes {
-  text-shadow: 3px 3px black;
-  border-radius: 20px;
-}
-
-.p-classes {
-  margin-left: 2em;
-}
-
 /* ======== NAVIGATION MENU ======== */
 
 .navbar {
@@ -235,6 +210,31 @@ p {
 } */
 
 /* ======== CONTEÚDO INDEX ======== */
+
+/* ======== CONTEÚDO CLASSES ======== */
+
+#classes {
+  margin-top: 2em;
+  text-align: justify;
+  margin-left: 2em;
+  margin-right: 2em;
+}
+
+.h1-classes {
+  padding: 1.5em;
+  text-align: center !important;
+  font-size: 2em;
+  text-shadow: 3px 3px black;
+}
+
+.h2-classes {
+  text-shadow: 3px 3px black;
+  border-radius: 20px;
+}
+
+.p-classes {
+  margin-left: 2em;
+}
 
 /* ======== MEDIA QUERYS ======== */
 
