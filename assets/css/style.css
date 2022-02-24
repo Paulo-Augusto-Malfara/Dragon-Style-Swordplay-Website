@@ -224,6 +224,7 @@ h1 {
   text-shadow: 3px 3px black;
   top: 0;
   left: 0;
+  border-top: none;
   border-width: 1px 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
