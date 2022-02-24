@@ -224,8 +224,7 @@ h1 {
   text-shadow: 3px 3px black;
   top: 0;
   left: 0;
-  border-top: none;
-  border-width: 1px 0;
+  border-width: 0 0 1px;
   border-image-slice: 1;
   border-image-source: linear-gradient(
     90deg,
@@ -237,7 +236,6 @@ h1 {
   );
   border-style: solid;
   position: relative;
-  border-top: none;
 }
 
 h2 {
