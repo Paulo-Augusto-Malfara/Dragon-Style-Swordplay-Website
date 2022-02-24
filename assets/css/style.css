@@ -294,7 +294,8 @@ p {
   text-transform: uppercase;
   display: flex;
   justify-content: center;
-/*   border-width: 0 0 1px 0;
+  border-bottom: 1px solid var(--border-dark-color-2);
+  /*   border-width: 0 0 1px 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
     90deg,
@@ -305,8 +306,8 @@ p {
     var(--secondary-color)
   );
   border-style: solid;
-  border-radius: 20px;
-  max-width: 40%; */
+  border-radius: 20px;*/
+  max-width: 40%;
 }
 
 .modalidades p {
@@ -317,8 +318,8 @@ p {
   display: none;
 }
 
-.modalidades-box-h2.active-modalidades{
-  border-width: 0;
+.modalidades-box-h2.active-modalidades {
+  border-bottom: none;
 }
 
 .modalidades-conteudo.active-modalidades {
