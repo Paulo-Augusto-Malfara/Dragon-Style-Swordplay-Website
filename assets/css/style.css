@@ -290,11 +290,11 @@ p {
 
 /* ======== CONTEÚDO MODALIDADES ======== */
 
-.modalidades-h2 {
+.modalidades h2 {
   text-transform: uppercase;
   display: flex;
   justify-content: center;
-  border-bottom: 1px solid var(--border-dark-color-2);
+  /* border-bottom: 1px solid var(--border-dark-color-2); */
   /*   border-width: 0 0 1px 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
@@ -310,6 +310,23 @@ p {
   max-width: 40%;
 }
 
+.h2-bottom-border {
+  margin: auto;
+  max-width: 10%;
+  border-width: 0 0 1px 0;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(
+    90deg,
+    var(--secondary-color),
+    #c7c7c7,
+    var(--text-primary-color),
+    #c7c7c7,
+    var(--secondary-color)
+  );
+  border-style: solid;
+  border-radius: 20px; /*  */
+}
+
 .modalidades p {
   text-indent: 0;
 }
@@ -318,7 +335,7 @@ p {
   display: none;
 }
 
-.modalidades-h2.active-modalidades{
+.h2-bottom-border.active-modalidades {
   border-bottom: none;
 }
 
@@ -397,6 +414,9 @@ p {
   .modalidades-box h2 {
     max-width: 60%;
   }
+  .h2-bottom-border {
+    max-width: 20%;
+  }
 }
 
 @media (max-width: 580px) {
@@ -408,6 +428,9 @@ p {
   }
   .modalidades-box h2 {
     max-width: 80%;
+  }
+  .h2-bottom-border {
+    max-width: 30%;
   }
 }
 

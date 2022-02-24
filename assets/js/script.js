@@ -17,7 +17,7 @@
   const modalidadesConteudo = document.getElementsByClassName(
     "modalidades-conteudo"
   )[0];
-  const modalidadesH2 = document.getElementsByClassName("modalidades-h2")[0];
+  const modalidadesH2 = document.getElementsByClassName("h2-bottom-border")[0];
 
   ToggleButton.addEventListener("click", () => {
     modalidadesConteudo.classList.toggle("active-modalidades");
