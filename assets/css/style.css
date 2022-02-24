@@ -290,7 +290,7 @@ p {
 
 /* ======== CONTEÚDO MODALIDADES ======== */
 
-.modalidades-box h2 {
+.modalidades-h2 {
   text-transform: uppercase;
   display: flex;
   justify-content: center;
@@ -318,7 +318,7 @@ p {
   display: none;
 }
 
-.modalidades-box-h2.active-modalidades {
+.modalidades-h2.active-modalidades{
   border-bottom: none;
 }
 

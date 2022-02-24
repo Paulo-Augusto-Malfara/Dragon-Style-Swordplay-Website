@@ -14,9 +14,13 @@
 
 (function dinamicModalidades() {
   const ToggleButton = document.getElementsByClassName("modalidades-button")[0];
-  const modalidadesConteudo = document.getElementsByClassName("modalidades-conteudo")[0];
+  const modalidadesConteudo = document.getElementsByClassName(
+    "modalidades-conteudo"
+  )[0];
+  const modalidadesH2 = document.getElementsByClassName("modalidades-h2")[0];
 
   ToggleButton.addEventListener("click", () => {
     modalidadesConteudo.classList.toggle("active-modalidades");
+    modalidadesH2.classList.toggle("active-modalidades");
   });
 })();
