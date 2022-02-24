@@ -146,6 +146,10 @@ ion-icon {
   color: var(--golden-color);
 }
 
+.active-page {
+  color: var(--golden-color);
+}
+
 /* ======== RESPONSIVE NAVIGATION MENU ======== */
 
 .toggle-button {
