@@ -26,7 +26,7 @@ body {
   background-color: var(--primary-color);
   color: var(--text-primary-color);
   font-family: "Rubik", sans-serif;
-  background: url(/assets/img/backgroundPreto.png) no-repeat center fixed;
+  background: url(/assets/img/backgroundPreto.png) no-repeat center center fixed;
   background-size: cover;
 }
 
