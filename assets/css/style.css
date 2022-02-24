@@ -227,6 +227,7 @@ main {
 h1 {
   display: flex;
   justify-content: center;
+  text-transform: uppercase;
   max-width: 90%;
   font-size: 2em;
   margin: auto;
