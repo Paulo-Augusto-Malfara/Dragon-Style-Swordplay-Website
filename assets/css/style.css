@@ -222,7 +222,8 @@ h1 {
   margin-bottom: 2em;
   padding: 30px 10px 10px 10px;
   text-shadow: 3px 3px black;
-  border: 1px solid red;
+  top: 0;
+  left: 0;
   border-width: 1px 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
