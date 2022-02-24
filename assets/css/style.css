@@ -219,7 +219,7 @@ main {
   position: relative;
   padding: 10px;
   margin: auto;
-  min-height: 600px;
+  min-height: 10000px;
   background-color: var(--secondary-color-opacity);
   box-shadow: 0 0 1em black;
 }

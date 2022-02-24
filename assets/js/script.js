@@ -12,15 +12,34 @@
   });
 })();
 
-(function dinamicModalidades() {
-  const ToggleButton = document.getElementsByClassName("modalidades-button")[0];
+/* FUNÇÃO QUE FUNCIONA SOMENTE NO 1º BOTÃO */
+
+/* (function dinamicModalidades() {
+  const toggleButton = document.getElementsByClassName("modalidades-button")[0];
   const modalidadesConteudo = document.getElementsByClassName(
     "modalidades-conteudo"
   )[0];
   const modalidadesH2 = document.getElementsByClassName("h2-bottom-border")[0];
 
-  ToggleButton.addEventListener("click", () => {
+  toggleButton.addEventListener("click", () => {
     modalidadesConteudo.classList.toggle("active-modalidades");
     modalidadesH2.classList.toggle("active-modalidades");
+  });
+})(); */
+
+(function dinamicModalidadesTeste1() {
+  document.addEventListener("DOMContentLoaded", () => {
+    let myBtns = document.querySelectorAll(".modalidades-button");
+    let modalidadesConteudo = document.querySelectorAll(
+      ".modalidades-conteudo"
+    );
+    myBtns.forEach(function (btn) {
+      btn.addEventListener("click", () => {
+        modalidadesConteudo.forEach((b) =>
+          b.classList.remove("active-modalidades")
+        );
+        btn.classList.add("active-modalidades");
+      });
+    });
   });
 })();
