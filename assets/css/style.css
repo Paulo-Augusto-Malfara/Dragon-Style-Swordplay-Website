@@ -231,7 +231,7 @@ h1 {
   max-width: 90%;
   font-size: 2em;
   margin: auto;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
   padding: 30px 10px 10px 10px;
   text-shadow: 3px 3px black;
   border-width: 0 0 1px;
@@ -250,14 +250,23 @@ h1 {
 
 h2 {
   padding: 10px;
-  margin-left: 3em;
+  width: 90%;
+  margin: auto;
   font-size: 1.2em;
   text-shadow: 2px 2px black;
   color: var(--golden-color);
 }
 
+h3 {
+  padding: 10px;
+  width: 90%;
+  margin: auto;
+  font-size: 1em;
+  text-shadow: 2px 2px black;
+  color: var(--text-primary-color);
+}
+
 p {
-  padding: 15px;
   width: 90%;
   margin: auto;
   text-indent: 1.5em;
@@ -278,6 +287,35 @@ p {
 /* ======== CONTEÚDO INDEX ======== */
 
 /* ======== CONTEÚDO SOBRE NÓS ======== */
+
+/* ======== CONTEÚDO MODALIDADES ======== */
+
+.modalidades-box h2 {
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  border-width: 0 0 1px 0;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(
+    90deg,
+    var(--secondary-color),
+    #c7c7c7,
+    var(--text-primary-color),
+    #c7c7c7,
+    var(--secondary-color)
+  );
+  border-style: solid;
+  border-radius: 20px;
+  max-width: 40%;
+}
+
+.modalidades-conteudo {
+  display: none;
+}
+
+.modalidades-conteudo.active-modalidades {
+  display: block;
+}
 
 /* ======== CONTEÚDO CLASSES ======== */
 
@@ -335,6 +373,9 @@ p {
   .navbar-menu-item-a {
     font-size: 0.7em;
   }
+  .modalidades-box h2 {
+    max-width: 60%;
+  }
 }
 
 @media (max-width: 580px) {
@@ -343,6 +384,9 @@ p {
   }
   #header-icons-div {
     gap: 1em;
+  }
+  .modalidades-box h2 {
+    max-width: 80%;
   }
 }
 
@@ -360,6 +404,24 @@ p {
   }
   .toggle-button {
     font-size: 0.7em;
+  }
+  h1 {
+    font-size: 1em;
+    padding: 10px 10px 10px 10px;
+  }
+
+  h2 {
+    font-size: 0.8em;
+  }
+  h3 {
+    font-size: 0.8em;
+  }
+  p {
+    font-size: 0.7em;
+    line-height: 1.3em;
+  }
+  .modalidades-box h2 {
+    max-width: 100%;
   }
 }
 
