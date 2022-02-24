@@ -41,12 +41,7 @@ header {
   border-bottom: linear;
 }
 
-.header-logo {
-  background-color: var(--secondary-color);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1em;
+.header-top {
   border-width: 1px 0 0 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
@@ -58,6 +53,14 @@ header {
     rgba(184, 134, 45, 0)
   );
   border-style: solid;
+}
+
+.header-logo {
+  background-color: var(--secondary-color);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1em;
 }
 
 #logo-anchor {
