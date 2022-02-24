@@ -294,6 +294,35 @@ p {
   text-transform: uppercase;
   display: flex;
   justify-content: center;
+/*   border-width: 0 0 1px 0;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(
+    90deg,
+    var(--secondary-color),
+    #c7c7c7,
+    var(--text-primary-color),
+    #c7c7c7,
+    var(--secondary-color)
+  );
+  border-style: solid;
+  border-radius: 20px;
+  max-width: 40%; */
+}
+
+.modalidades p {
+  text-indent: 0;
+}
+
+.modalidades-conteudo {
+  display: none;
+}
+
+.modalidades-box-h2.active-modalidades{
+  border-width: 0;
+}
+
+.modalidades-conteudo.active-modalidades {
+  display: block;
   border-width: 0 0 1px 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
@@ -306,15 +335,6 @@ p {
   );
   border-style: solid;
   border-radius: 20px;
-  max-width: 40%;
-}
-
-.modalidades-conteudo {
-  display: none;
-}
-
-.modalidades-conteudo.active-modalidades {
-  display: block;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
