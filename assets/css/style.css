@@ -6,7 +6,7 @@
 :root {
   --primary-color: #121212;
   --secondary-color: #151f28;
-  --secondary-color-opacity: rgba(21, 31, 40, 0.8);
+  --secondary-color-opacity: rgba(21, 31, 40, 0.85);
   --golden-color: #e8ac46;
   --box-primary-color: #222222;
   --text-primary-color: #e0e0e0;
@@ -26,11 +26,8 @@ body {
   background-color: var(--primary-color);
   color: var(--text-primary-color);
   font-family: "Rubik", sans-serif;
-  /*   background: url(/assets/img/background.png) no-repeat center center fixed;
-  -webkit-background-size: cover;
-  -moz-background-size: cover;
-  -o-background-size: cover;
-  background-size: cover; */
+  background: url(/assets/img/background.png) no-repeat fixed;
+  background-size: cover;
 }
 
 /* ======== HEADER ======== */
@@ -39,6 +36,20 @@ header {
   margin: auto;
   overflow: hidden;
   border-bottom: linear;
+}
+
+.header-top {
+  border-width: 1px 0 0 0;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(
+    90deg,
+    rgba(184, 134, 45, 0),
+    #b8862d,
+    #ffdf91,
+    #b8862d,
+    rgba(184, 134, 45, 0)
+  );
+  border-style: solid;
 }
 
 .header-logo {
@@ -199,9 +210,10 @@ ion-icon {
 
 /* ======== CONTEÚDO PRINCIPAL ======== */
 
-/* main {
+main {
   margin: auto;
   position: relative;
+  padding: 10px;
   width: 95%;
   margin: auto;
   margin-top: 2em;
@@ -209,13 +221,62 @@ ion-icon {
   border-radius: 15px;
   min-height: 600px;
   background-color: var(--secondary-color-opacity);
+  box-shadow: 0 0 1em black;
+}
+
+h1 {
+  display: flex;
+  justify-content: center;
+  max-width: 90%;
+  font-size: 2em;
+  margin: auto;
+  margin-bottom: 2em;
+  padding: 30px 10px 10px 10px;
+  text-shadow: 3px 3px black;
+  border-width: 0 0 1px;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(
+    90deg,
+    rgba(184, 134, 45, 0),
+    #b8862d,
+    #ffdf91,
+    #b8862d,
+    rgba(184, 134, 45, 0)
+  );
+  border-style: solid;
+  position: relative;
+}
+
+h2 {
+  padding: 10px;
+  margin-left: 3em;
+  font-size: 1.2em;
+  text-shadow: 2px 2px black;
+  color: var(--golden-color);
 }
 
 p {
-  color: var(--text-secondary-color);
-} */
+  padding: 15px;
+  width: 90%;
+  margin: auto;
+  text-indent: 1.5em;
+  text-align: justify;
+  line-height: 1.5rem;
+}
+
+.main-img {
+  display: flex;
+  margin: auto;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  max-width: 80%;
+  border-radius: 20px;
+  box-shadow: 0 0 1em black;
+}
 
 /* ======== CONTEÚDO INDEX ======== */
+
+/* ======== CONTEÚDO SOBRE NÓS ======== */
 
 /* ======== CONTEÚDO CLASSES ======== */
 
