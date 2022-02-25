@@ -23,7 +23,6 @@
 }
 
 body {
-  background-color: var(--primary-color);
   color: var(--text-primary-color);
   font-family: "Rubik", sans-serif;
   background: url(/assets/img/backgroundPreto.png) no-repeat center center fixed;
@@ -215,13 +214,10 @@ ion-icon {
 /* ======== CONTEÚDO PRINCIPAL ======== */
 
 main {
-  margin: auto;
-  position: relative;
   padding: 10px;
-  margin: auto;
-  min-height: 10000px;
-  background-color: var(--secondary-color-opacity);
   box-shadow: 0 0 1em black;
+  min-height: 1080px;
+  background-color: var(--secondary-color-opacity);
 }
 
 h1 {
@@ -294,19 +290,6 @@ p {
   text-transform: uppercase;
   display: flex;
   justify-content: center;
-  /* border-bottom: 1px solid var(--border-dark-color-2); */
-  /*   border-width: 0 0 1px 0;
-  border-image-slice: 1;
-  border-image-source: linear-gradient(
-    90deg,
-    var(--secondary-color),
-    #c7c7c7,
-    var(--text-primary-color),
-    #c7c7c7,
-    var(--secondary-color)
-  );
-  border-style: solid;
-  border-radius: 20px;*/
   max-width: 40%;
 }
 
