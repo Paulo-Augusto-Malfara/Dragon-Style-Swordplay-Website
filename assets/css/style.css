@@ -369,7 +369,7 @@ p {
 width: 90%;
 margin: auto;
 font-size: 1em;
-text-shadow: 2px 2px black;
+/* text-shadow: 2px 2px black; */
 font-family: "Noto-sans";
 color: var(--text-primary-color);
 text-align: justify;
