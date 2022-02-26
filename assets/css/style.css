@@ -247,6 +247,8 @@ h1 {
 h2 {
   padding: 10px;
   width: 90%;
+  display: flex;
+  justify-content: center;
   margin: auto;
   font-size: 1.2em;
   text-shadow: 2px 2px black;
@@ -260,6 +262,15 @@ h3 {
   font-size: 1em;
   text-shadow: 2px 2px black;
   color: var(--text-primary-color);
+}
+
+h4 {
+padding: 10px;
+width: 90%;
+margin: auto;
+font-size: 0.9em;
+text-shadow: 2px 2px black;
+color: var(--text-primary-color);
 }
 
 p {
@@ -286,6 +297,7 @@ p {
 
 /* ======== CONTEÚDO MODALIDADES ======== */
 
+
 .modalidades h2 {
   text-transform: uppercase;
   display: flex;
@@ -305,41 +317,66 @@ p {
     var(--text-primary-color),
     #c7c7c7,
     var(--secondary-color)
-  );
-  border-style: solid;
-  border-radius: 20px; /*  */
+    );
+    border-style: solid;
+    border-radius: 20px; /*  */
+  }
+  
+  .modalidades p {
+    text-indent: 0;
+  }
+  
+  .modalidades-conteudo {
+    display: none;
+  }
+  
+  .h2-bottom-border.active-modalidades {
+    border-bottom: none;
+  }
+  
+  .modalidades-conteudo.active-modalidades {
+    display: block;
+    border-width: 0 0 1px 0;
+    border-image-slice: 1;
+    border-image-source: linear-gradient(
+      90deg,
+      var(--secondary-color),
+      #c7c7c7,
+      var(--text-primary-color),
+      #c7c7c7,
+      var(--secondary-color)
+      );
+      border-style: solid;
+      border-radius: 20px;
+    }
+
+/* ======== CONTEÚDO EQUIPAMENTOS ======== */
+
+.tabela-de-equipamentos h3 {
+  display: flex;
+  justify-content: center;
+  font-size: 1.2em;
+  padding: 1em 1em 1em 1em;
+  color: var(--golden-color);
 }
 
-.modalidades p {
-  text-indent: 0;
+.tabela-de-equipamentos ul {
+  line-height: 1.3em;
+  margin-left: 1.5em;
 }
 
-.modalidades-conteudo {
-  display: none;
-}
-
-.h2-bottom-border.active-modalidades {
-  border-bottom: none;
-}
-
-.modalidades-conteudo.active-modalidades {
-  display: block;
-  border-width: 0 0 1px 0;
-  border-image-slice: 1;
-  border-image-source: linear-gradient(
-    90deg,
-    var(--secondary-color),
-    #c7c7c7,
-    var(--text-primary-color),
-    #c7c7c7,
-    var(--secondary-color)
-  );
-  border-style: solid;
-  border-radius: 20px;
+.tabela-de-equipamentos ul li{
+width: 90%;
+margin: auto;
+font-size: 1em;
+text-shadow: 2px 2px black;
+font-family: "Noto-sans";
+color: var(--text-primary-color);
+text-align: justify;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
-
+    
 #classes {
   margin-top: 2em;
   text-align: justify;
@@ -434,9 +471,8 @@ p {
   }
   h1 {
     font-size: 1em;
-    padding: 10px 10px 10px 10px;
+    padding: 3px 10px 10px 10px;
   }
-
   h2 {
     font-size: 0.8em;
   }
@@ -449,6 +485,14 @@ p {
   }
   .modalidades-box h2 {
     max-width: 100%;
+  }
+  .h3-equip {
+    font-size: 0.9em !important;
+  }
+  .tabela-de-equipamentos ul {
+    line-height: 1.2em;
+    margin-left: 0.7em;
+    font-size: 0.9em;
   }
 }
 
