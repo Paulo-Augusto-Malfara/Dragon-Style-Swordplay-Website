@@ -471,8 +471,11 @@ text-align: justify;
   .h2-bottom-border {
     max-width: 30%;
   }
-  .h3-equip {
+  .h2-equip {
     font-size: 1em !important;
+  }
+  .h3-equip {
+    font-size: 0.9em !important;
   }
   .tabela-de-equipamentos {
     margin-right: 0.7em;
