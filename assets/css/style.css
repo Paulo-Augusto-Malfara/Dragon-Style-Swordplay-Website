@@ -375,6 +375,11 @@ color: var(--text-primary-color);
 text-align: justify;
 }
 
+.equip-arma {
+  padding: 5px 0 5px 0;
+  color: var(--golden-color);
+}
+
 /* ======== CONTEÚDO CLASSES ======== */
     
 #classes {
