@@ -281,6 +281,16 @@ p {
   line-height: 1.5rem;
 }
 
+.links-de-texto {
+  text-decoration: underline;
+  font-style: italic;
+  color: var(--text-primary-color);
+}
+
+.links-de-texto:hover {
+  color: var(--golden-color);
+}
+
 .main-img {
   display: flex;
   margin: auto;
@@ -352,11 +362,17 @@ p {
 
 /* ======== CONTEÚDO EQUIPAMENTOS ======== */
 
+.h2-equip {
+  font-size: 1.3em;
+  padding: 20px 10px 10px 10px;
+}
+
 .tabela-de-equipamentos h3 {
+  text-transform: uppercase;
   display: flex;
   justify-content: center;
   font-size: 1.2em;
-  padding: 1em 1em 1em 1em;
+  padding: 1em 1em 0.7em 1em;
   color: var(--golden-color);
 }
 
@@ -369,15 +385,13 @@ p {
 width: 90%;
 margin: auto;
 font-size: 1em;
-/* text-shadow: 2px 2px black; */
-font-family: "Noto-sans";
 color: var(--text-primary-color);
 text-align: justify;
 }
 
 .equip-arma {
   padding: 5px 0 5px 0;
-  color: var(--golden-color);
+  font-size: 1.1em !important;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
@@ -458,7 +472,7 @@ text-align: justify;
     max-width: 30%;
   }
   .h3-equip {
-    font-size: 0.9em !important;
+    font-size: 1em !important;
   }
   .tabela-de-equipamentos {
     margin-right: 0.7em;
