@@ -265,12 +265,12 @@ h3 {
 }
 
 h4 {
-padding: 10px;
-width: 90%;
-margin: auto;
-font-size: 0.9em;
-text-shadow: 2px 2px black;
-color: var(--text-primary-color);
+  padding: 10px;
+  width: 90%;
+  margin: auto;
+  font-size: 0.9em;
+  text-shadow: 2px 2px black;
+  color: var(--text-primary-color);
 }
 
 p {
@@ -307,7 +307,6 @@ p {
 
 /* ======== CONTEÚDO MODALIDADES ======== */
 
-
 .modalidades h2 {
   text-transform: uppercase;
   display: flex;
@@ -327,38 +326,38 @@ p {
     var(--text-primary-color),
     #c7c7c7,
     var(--secondary-color)
-    );
-    border-style: solid;
-    border-radius: 20px; /*  */
-  }
-  
-  .modalidades p {
-    text-indent: 0;
-  }
-  
-  .modalidades-conteudo {
-    display: none;
-  }
-  
-  .h2-bottom-border.active-modalidades {
-    border-bottom: none;
-  }
-  
-  .modalidades-conteudo.active-modalidades {
-    display: block;
-    border-width: 0 0 1px 0;
-    border-image-slice: 1;
-    border-image-source: linear-gradient(
-      90deg,
-      var(--secondary-color),
-      #c7c7c7,
-      var(--text-primary-color),
-      #c7c7c7,
-      var(--secondary-color)
-      );
-      border-style: solid;
-      border-radius: 20px;
-    }
+  );
+  border-style: solid;
+  border-radius: 20px; /*  */
+}
+
+.modalidades p {
+  text-indent: 0;
+}
+
+.modalidades-conteudo {
+  display: none;
+}
+
+.h2-bottom-border.active-modalidades {
+  border-bottom: none;
+}
+
+.modalidades-conteudo.active-modalidades {
+  display: block;
+  border-width: 0 0 1px 0;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(
+    90deg,
+    var(--secondary-color),
+    #c7c7c7,
+    var(--text-primary-color),
+    #c7c7c7,
+    var(--secondary-color)
+  );
+  border-style: solid;
+  border-radius: 20px;
+}
 
 /* ======== CONTEÚDO EQUIPAMENTOS ======== */
 
@@ -378,24 +377,25 @@ p {
 
 .tabela-de-equipamentos ul {
   line-height: 1.3em;
-  margin-left: 1.5em;
+  margin-left: 1.8em;
 }
 
-.tabela-de-equipamentos ul li{
-width: 90%;
-margin: auto;
-font-size: 1em;
-color: var(--text-primary-color);
-text-align: justify;
+.tabela-de-equipamentos ul li {
+  width: 90%;
+  margin: auto;
+  font-size: 1em;
+  color: var(--text-primary-color);
+  text-align: justify;
 }
 
 .equip-arma {
   padding: 5px 0 5px 0;
+  list-style-type: none;
   font-size: 1.1em !important;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
-    
+
 #classes {
   margin-top: 2em;
   text-align: justify;
