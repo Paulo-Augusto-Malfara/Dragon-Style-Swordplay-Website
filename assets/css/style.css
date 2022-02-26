@@ -452,6 +452,28 @@ text-align: justify;
   .h2-bottom-border {
     max-width: 30%;
   }
+  .h3-equip {
+    font-size: 0.9em !important;
+  }
+  .tabela-de-equipamentos ul {
+    line-height: 1.2em;
+    margin-left: 0.7em;
+    font-size: 0.9em;
+  }
+  h1 {
+    font-size: 1em;
+    padding: 3px 10px 10px 10px;
+  }
+  h2 {
+    font-size: 0.8em;
+  }
+  h3 {
+    font-size: 0.8em;
+  }
+  p {
+    font-size: 0.7em;
+    line-height: 1.3em;
+  }
 }
 
 @media (max-width: 380px) {
@@ -469,30 +491,8 @@ text-align: justify;
   .toggle-button {
     font-size: 0.7em;
   }
-  h1 {
-    font-size: 1em;
-    padding: 3px 10px 10px 10px;
-  }
-  h2 {
-    font-size: 0.8em;
-  }
-  h3 {
-    font-size: 0.8em;
-  }
-  p {
-    font-size: 0.7em;
-    line-height: 1.3em;
-  }
   .modalidades-box h2 {
     max-width: 100%;
-  }
-  .h3-equip {
-    font-size: 0.9em !important;
-  }
-  .tabela-de-equipamentos ul {
-    line-height: 1.2em;
-    margin-left: 0.7em;
-    font-size: 0.9em;
   }
 }
 
