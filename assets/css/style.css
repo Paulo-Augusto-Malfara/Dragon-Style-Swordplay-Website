@@ -393,6 +393,10 @@ p {
   font-size: 1.1em !important;
 }
 
+.descricao-arma {
+  margin-left: 2.5em !important;
+}
+
 /* ======== CONTEÚDO CLASSES ======== */
 
 #classes {
