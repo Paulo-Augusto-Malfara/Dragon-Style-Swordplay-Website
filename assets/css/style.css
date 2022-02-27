@@ -215,6 +215,7 @@ ion-icon {
 
 main {
   padding: 10px;
+  min-width: 100%;
   box-shadow: 0 0 1em black;
   min-height: 1080px;
   background-color: var(--secondary-color-opacity);
@@ -376,7 +377,6 @@ p {
 
 .tabela-de-equipamentos ul {
   line-height: 1.3em;
-  margin-left: 1em;
 }
 
 .tabela-de-equipamentos ul li {
@@ -394,7 +394,7 @@ p {
 }
 
 .descricao-arma {
-  margin-left: 2.5em !important;
+  margin-left: 2.7em !important;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
@@ -409,7 +409,6 @@ p {
 .h1-classes {
   padding: 1.5em;
   text-align: center !important;
-  font-size: 2em;
   text-shadow: 3px 3px black;
 }
 
@@ -474,20 +473,18 @@ p {
   .h2-bottom-border {
     max-width: 30%;
   }
-  .h2-equip {
-    font-size: 1em !important;
-  }
-  .h3-equip {
-    font-size: 0.9em !important;
-  }
   .tabela-de-equipamentos {
-    margin-right: 0.7em;
+    overflow: hidden;
+    width: 98%;
+    margin-right: 0.5em;
+  }
+  .descricao-arma {
+    margin-left: 0.5em;
+/*     font-size: 0.8em !important; */
   }
   .tabela-de-equipamentos ul {
     line-height: 1.2em;
-    margin-left: 0.8em;
     font-size: 0.9em;
-    width: 98%;
   }
   h1 {
     font-size: 1em;
