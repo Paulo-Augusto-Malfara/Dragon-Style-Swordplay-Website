@@ -376,7 +376,7 @@ p {
 }
 
 .tabela-de-equipamentos ul {
-  line-height: 1.3em;
+  line-height: 1.8em;
 }
 
 .tabela-de-equipamentos ul li {
@@ -480,10 +480,9 @@ p {
   }
   .descricao-arma {
     margin-left: 0.5em;
-/*     font-size: 0.8em !important; */
   }
   .tabela-de-equipamentos ul {
-    line-height: 1.2em;
+    line-height: 1.7em;
     font-size: 0.9em;
   }
   h1 {
