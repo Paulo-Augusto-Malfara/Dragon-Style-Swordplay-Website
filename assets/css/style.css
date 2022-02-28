@@ -376,7 +376,7 @@ p {
 }
 
 .tabela-de-equipamentos ul {
-  line-height: 1.8em;
+  line-height: 1.5em;
 }
 
 .tabela-de-equipamentos ul li {
@@ -395,6 +395,10 @@ p {
 
 .descricao-arma {
   margin-left: 2.7em !important;
+}
+
+.descricao-arma > li {
+  padding: 5px 0 5px 0;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
@@ -482,7 +486,7 @@ p {
     margin-left: 0.5em;
   }
   .tabela-de-equipamentos ul {
-    line-height: 1.7em;
+    line-height: 1.5em;
     font-size: 0.9em;
   }
   h1 {
