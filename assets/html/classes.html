@@ -5,37 +5,85 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
-    <title>Classes</title>
+    <link rel="shortcut icon" href="/assets/img/favIcon (2).ico" />
+    <script src="/assets/js/script.js" defer></script>
+    <title>Classes - Dragon Style - Swordplay e Eventos</title>
   </head>
   <body>
     <header>
+      <!-- LOGO & SOCIAL MEDIA -->
+
       <section>
-        <div class="header">
-          <img
-            id="logo-ds"
-            src="/assets/img/logo-ds-site.png"
-            alt="Logo do Dragon Style Swordplay e Eventos"
-          />
-          <nav class="header-menu">
-            <a class="header-menu-item" href="/assets/html/homepage.html"
-              >Início</a
-            >
-            <a class="header-menu-item" href="/assets/html/classes.html"
-              >Classes</a
-            >
-            <a class="header-menu-item" href="/assets/html/modalidades.html"
-              >Modalidades</a
-            >
-            <a class="header-menu-item" href="/assets/html/clãs.html">Clãs</a>
-          </nav>
+        <div class="header-top">
+          <div class="header-logo">
+            <a id="logo-anchor" href="/index.html"
+              ><img
+                id="logo-ds"
+                src="/assets/img/logo-ds-landscape.png"
+                alt="Logo do Dragon Style Swordplay e Eventos"
+            /></a>
+            <div id="header-icons-div">
+              <a
+                target="_blank "
+                href="https://www.facebook.com/groups/227828760657044"
+              >
+                <ion-icon class="header-icon" name="logo-facebook"></ion-icon
+              ></a>
+              <ion-icon class="header-icon" name="logo-instagram"></ion-icon>
+              <ion-icon class="header-icon" name="logo-discord"></ion-icon>
+              <a
+                target="_blank"
+                href="https://chat.whatsapp.com/J5KIqI5LsuBLqEecV5Fv34"
+              >
+                <ion-icon class="header-icon" name="logo-whatsapp"></ion-icon
+              ></a>
+            </div>
+          </div>
         </div>
+      </section>
+
+      <!-- NAVIGATION MENU -->
+
+      <section>
+        <nav class="navbar">
+          <div>
+            <a href="#" class="toggle-button button-toggle">Menu</a>
+          </div>
+          <div class="navbar-links">
+            <ul class="navbar-ul">
+              <li class="navbar-menu-item">
+                <a
+                  class="navbar-menu-item-a"
+                  href="/assets/html/sobre-nos.html"
+                  >Sobre Nós
+                </a>
+              </li>
+              <li class="navbar-menu-item">
+                <a class="navbar-menu-item-a" href="#">O que é Swordplay?</a>
+              </li>
+              <li class="navbar-menu-item">
+                <a class="navbar-menu-item-a" href="/assets/html/equipamentos.html">Equipamentos</a>
+              </li>
+              <li class="navbar-menu-item">
+                <a class="navbar-menu-item-a active-page" href="/assets/html/classes.html">Classes</a>
+              </li>
+              <li class="navbar-menu-item">
+                <a
+                  class="navbar-menu-item-a"
+                  href="/assets/html/modalidades.html"
+                  >Modalidades</a
+                >
+              </li>
+            </ul>
+          </div>
+        </nav>
       </section>
     </header>
     <main>
       <section>
         <div id="classes">
           <h1 class="h1-classes">Sistema de Classes</h1>
-          <h2 class="h2-classes" id="descricao">- Descrição:</h2>
+          <h2 class="h2-classes" id="descricao">Descrição</h2>
           <div class="p-classes">
             <p>
               O sistema de classes foi criado para gerar um incentivo de
@@ -57,7 +105,7 @@
               desse combatente é 8 (oito).
             </p>
           </div>
-          <h2 class="h2-classes" id="niveis">- Níveis:</h2>
+          <h2 class="h2-classes" id="niveis">Níveis</h2>
           <div class="p-classes">
             <p>
               Os níveis serão divididos por classe serão contabilizados por
@@ -94,51 +142,14 @@
               especializar em menos classes.
             </p>
           </div>
-          <h2 class="h2-classes" id="classes-h2">- Classes:</h2>
+          <h2 class="h2-classes" id="classes-h2">Classes</h2>
           <div>
-            <ul>
-              <li class="classes-li">Assassino</li>
-              <p><strong>Equipamentos:</strong> Adaga e adagas duplas.</p>
-              <li class="classes-li">Guerreiro</li>
-              <p><strong>Equipamentos:</strong> Clava/Espada + escudo.</p>
-              <li class="classes-li">Cavaleiro</li>
-              <p>
-                <strong>Equipamentos:</strong> Espada Longa, espada montante,
-                alabarda média.
-              </p>
-              <li class="classes-li">Lanceiro</li>
-              <p>
-                <strong>Equipamentos:</strong> Lança de duas mãos, alabarda
-                longa, sabre duplo.
-              </p>
-              <li class="classes-li">Hoplita</li>
-              <p>
-                <strong>Equipamentos:</strong> Lança de uma mão (curta) e escudo
-                + espada extra.
-              </p>
-              <li class="classes-li">Espadachim</li>
-              <p><strong>Equipamentos:</strong> Clavas/espadas duplas.</p>
-              <li class="classes-li">Arqueiro</li>
-              <p>
-                <strong>Equipamentos:</strong> Arco e flecha/besta + uma ou duas
-                espadas/adagas extras.
-              </p>
-              <li class="classes-li">Bárbaro</li>
-              <p>
-                <strong>Equipamentos:</strong> Machados duplos, machado longo de
-                duas mãos.
-              </p>
-              <li class="classes-li">Viking</li>
-              <p><strong>Equipamentos:</strong> Machado e escudo.</p>
-              <li class="classes-li">Cruzado</li>
-              <p>
-                <strong>Equipamentos:</strong> Maça/Mangual/Martelo médio com ou
-                sem escudo.
-              </p>
-            </ul>
-          </div>
         </div>
       </section>
     </main>
+    <script
+    type="module"
+    src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
+  ></script>
   </body>
 </html>

@@ -29,6 +29,8 @@ body {
   background-size: cover;
 }
 
+/* ======== SCROLL TO TOP ======== */
+
 /* ======== HEADER ======== */
 
 header {
@@ -254,6 +256,7 @@ h2 {
   font-size: 1.4em;
   text-shadow: 2px 2px black;
   color: var(--golden-color);
+  text-transform: uppercase;
 }
 
 h3 {
