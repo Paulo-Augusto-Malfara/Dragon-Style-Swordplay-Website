@@ -152,6 +152,10 @@ ion-icon {
   color: var(--golden-color);
 }
 
+.navbar-links > ul > li > ul {
+  display: none;
+}
+
 /* ======== RESPONSIVE NAVIGATION MENU ======== */
 
 .toggle-button {
@@ -443,22 +447,16 @@ p {
   transition: all .2s ease-in-out;
 }
 
-.grid-classes > div > h3 {
+.grid-classes > div > a > h3 {
   display: flex;
   justify-content: center;
   align-items: center;
   cursor: pointer;
 }
 
-.grid-classes > div > h3:hover {
+.grid-classes > div > a > h3:hover {
   color: var(--golden-color);
 }
-
-/* .crusader {
-  background-image: url(/assets/img/logo-classes/Cruzado-removebg.png);
-  background-size: cover;
-  background-position: no-repeat center center fixed;
-} */
 
 /* ======== MEDIA QUERYS ======== */
 
