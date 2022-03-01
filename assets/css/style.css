@@ -8,6 +8,7 @@
   --secondary-color: #151f28;
   --secondary-color-opacity: rgba(21, 31, 40, 0.85);
   --golden-color: #e8ac46;
+  --golden-color-opaco: rgba(232, 172, 70, 0.65);
   --box-primary-color: #222222;
   --text-primary-color: #e0e0e0;
   --text-secondary-color: #e1e1e1;
@@ -421,7 +422,7 @@ p {
   justify-content: center;
   align-items: center;
   padding: 20px;
-  border: 1px solid var(--golden-color);
+  border: 1px solid var(--golden-color-opaco);
   background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat center;
   background-color: var(--secondary-color-opacity);
   border-radius: 20px;
