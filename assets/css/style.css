@@ -421,7 +421,7 @@ p {
   justify-content: center;
   align-items: center;
   padding: 20px;
-  border: 1px solid white;
+  border: 1px solid var(--golden-color);
   background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat center;
   background-color: var(--secondary-color-opacity);
   border-radius: 20px;
