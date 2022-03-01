@@ -413,7 +413,7 @@ p {
   justify-content: center;
   margin: auto;
   grid-template-columns: repeat(auto-fill, 250px);
-  gap: 10px;
+  gap: 20px;
 }
 
 .grid-classes > div {
@@ -423,7 +423,8 @@ p {
   align-items: center;
   padding: 20px;
   border: 1px solid var(--golden-color-opaco);
-  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat center;
+  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
+    center;
   background-color: var(--secondary-color-opacity);
   border-radius: 20px;
   box-shadow: 0 0 1em black;
@@ -437,10 +438,16 @@ p {
   margin-bottom: 10px;
 }
 
+.grid-classes > div > img:hover {
+  transform: scale(1.2);
+  transition: all .2s ease-in-out;
+}
+
 .grid-classes > div > h3 {
   display: flex;
   justify-content: center;
   align-items: center;
+  cursor: pointer;
 }
 
 .grid-classes > div > h3:hover {
@@ -520,7 +527,6 @@ p {
   .grid-classes > div > h3 {
     font-size: 1.1em;
   }
-
   h1 {
     font-size: 1em;
     padding: 3px 10px 10px 10px;
