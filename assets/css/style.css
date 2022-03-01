@@ -422,6 +422,7 @@ p {
   align-items: center;
   padding: 20px;
   border: 1px solid white;
+  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat center;
   background-color: var(--secondary-color-opacity);
   border-radius: 20px;
   box-shadow: 0 0 1em black;
@@ -433,7 +434,6 @@ p {
   max-width: 200px;
   max-height: 200px;
   margin-bottom: 10px;
-/*   border: 1px solid green; */
 }
 
 .grid-classes > div > h3 {
