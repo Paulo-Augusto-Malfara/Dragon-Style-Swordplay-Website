@@ -406,27 +406,51 @@ p {
 
 /* ======== CONTEÚDO CLASSES ======== */
 
-#classes {
-  margin-top: 2em;
-  text-align: justify;
-  margin-left: 2em;
-  margin-right: 2em;
+.grid-classes {
+  display: grid;
+  max-width: 95%;
+  justify-content: center;
+  margin: auto;
+  grid-template-columns: repeat(auto-fill, 250px);
+  gap: 10px;
 }
 
-.h1-classes {
-  padding: 1.5em;
-  text-align: center !important;
-  text-shadow: 3px 3px black;
-}
-
-.h2-classes {
-  text-shadow: 3px 3px black;
+.grid-classes > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border: 1px solid white;
+  background-color: var(--secondary-color-opacity);
   border-radius: 20px;
+  box-shadow: 0 0 1em black;
+  min-width: 100px;
+  min-height: 100px;
 }
 
-.p-classes {
-  margin-left: 2em;
+.grid-classes > div > img {
+  max-width: 200px;
+  max-height: 200px;
+  margin-bottom: 10px;
+/*   border: 1px solid green; */
 }
+
+.grid-classes > div > h3 {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.grid-classes > div > h3:hover {
+  color: var(--golden-color);
+}
+
+/* .crusader {
+  background-image: url(/assets/img/logo-classes/Cruzado-removebg.png);
+  background-size: cover;
+  background-position: no-repeat center center fixed;
+} */
 
 /* ======== MEDIA QUERYS ======== */
 
