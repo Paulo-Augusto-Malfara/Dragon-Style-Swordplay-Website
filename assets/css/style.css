@@ -36,8 +36,8 @@ body {
 
 header {
   margin: auto;
-  overflow: hidden;
-  border-bottom: linear;
+  /*   overflow: hidden; */
+  /*   border-bottom: linear; */
 }
 
 .header-top {
@@ -95,7 +95,7 @@ ion-icon {
 
 /* ======== NAVIGATION MENU ======== */
 
-.navbar {
+/* .navbar {
   background-color: var(--primary-color);
   font-family: "Bree Serif", sans-serif !important;
   text-transform: uppercase;
@@ -113,109 +113,103 @@ ion-icon {
   );
   border-style: solid;
   position: relative;
-}
+} */
 
-.navbar-ul {
-  list-style-type: none;
-  display: flex;
-  align-content: center;
-  justify-content: center;
-  gap: 2em;
-}
-
-.navbar-menu-item {
-  margin-left: -10px;
-  padding-right: 20px;
-  border-right: 2px solid var(--border-dark-color-2);
-  display: flex;
-  align-content: center;
-  justify-content: center;
-}
-
-.navbar-menu-item:last-of-type {
-  border-right: none;
-}
-
-.navbar-menu-item ul ul li {
-  border-right: none;
-}
-
-.navbar-menu-item-a {
-  color: white;
-}
-
-.navbar-menu-item-a:hover {
-  color: var(--golden-color);
-}
-
-.active-page {
-  color: var(--golden-color);
-}
-
-.navbar-links > ul > li > ul {
-  display: none;
-}
-
-/* ======== RESPONSIVE NAVIGATION MENU ======== */
-
-.toggle-button {
-  font-family: "Bree Serif", sans-serif;
-  color: white;
+.container {
+  max-width: 85%;
   margin: auto;
-  align-content: center;
-  justify-content: center;
-  display: none;
 }
 
-.toggle-button .bar {
-  height: 3px;
-  width: 100%;
-  background-color: var(--golden-color);
-  border-radius: 10px;
-  border-radius: 10px;
+nav {
+  font-family: "Bree Serif", sans-serif;
+  padding: 10px;
+  border-width: 1px 0;
+  border-image-slice: 1;
+  border-image-source: linear-gradient(
+    90deg,
+    rgba(184, 134, 45, 0),
+    #b8862d,
+    #ffdf91,
+    #b8862d,
+    rgba(184, 134, 45, 0)
+  );
+  border-style: solid;
+
+  background: var(--primary-color);
 }
 
-@media (max-width: 580px) {
-  .toggle-button {
-    display: flex;
-  }
+nav ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  position: relative;
+  text-align: center;
+}
 
-  .toggle-button.active {
-    color: var(--golden-color);
-  }
+nav li {
+  display: inline-block;
+  padding: 0;
+  border-right: 2px solid var(--border-dark-color-2);
+  line-height: 2px;
+}
 
-  .navbar-links li {
-    margin-left: 0;
-    padding-right: 0;
-    border-right: none;
-    text-align: left;
-    justify-content: left;
-  }
-  .navbar-links {
-    width: 100%;
-    display: none;
-    flex-direction: column;
-    align-items: flex-start;
-    font-size: 1.3em;
-  }
-  .navbar-links.active {
-    display: flex;
-  }
-  .navbar-ul {
-    width: 100%;
-    flex-direction: column;
-    gap: 0;
-  }
-  .navbar-menu-item-a {
-    padding: 0.5rem 1rem;
-  }
-  .navbar-menu-item {
-    border-bottom: 2px solid var(--border-dark-color);
-    max-width: 180px;
-  }
-  .navbar-menu-item:last-of-type {
-    border-bottom: none;
-  }
+nav li:last-of-type {
+  border-right: none;
+}
+
+nav a {
+  color: white;
+  text-decoration: none;
+  text-transform: uppercase;
+  display: block;
+  padding: 0.5em 1.5em;
+}
+
+nav li:hover .menu-a {
+  color: var(--golden-color);
+}
+
+.menu-sub {
+  position: absolute;
+  top: 10px;
+  background: var(--primary-color);
+  max-width: 300px;
+  visibility: hidden;
+  color: white;
+  padding: 1em 1em 1em 1em;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  z-index: 99;
+  pointer-events: none;
+  border: 1px solid red;
+}
+
+nav li:hover .menu-sub {
+  visibility: visible;
+  transition: all 0.3s ease-in-out;
+  top: 30px;
+  pointer-events: auto;
+}
+
+.menu-sub li {
+  display: block;
+  border-right: none;
+}
+
+.menu-sub a {
+  padding: 0;
+  margin-bottom: 1.5em;
+  font-size: 13px;
+}
+
+.menu-category {
+  padding: 0 0 30px 0;
+  color: var(--golden-color);
+  text-transform: uppercase;
+}
+
+.menu-category:first-of-type {
+  margin-top: 0;
 }
 
 /* ======== CONTEÚDO PRINCIPAL ======== */
@@ -444,7 +438,7 @@ p {
 
 .grid-classes > div > img:hover {
   transform: scale(1.2);
-  transition: all .2s ease-in-out;
+  transition: all 0.2s ease-in-out;
 }
 
 .grid-classes > div > a > h3 {
