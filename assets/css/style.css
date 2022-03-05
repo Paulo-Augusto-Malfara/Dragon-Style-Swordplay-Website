@@ -23,6 +23,13 @@
   text-decoration: none;
 }
 
+ul,
+ol,
+li {
+  margin-left: 0;
+  padding-left: 0;
+}
+
 body {
   color: var(--text-primary-color);
   font-family: "Rubik", sans-serif;
@@ -121,7 +128,7 @@ ion-icon {
 }
 
 nav {
-  font-family: "Bree Serif", sans-serif;
+  font-family: "Bree Serif", sans-serif !important;
   padding: 10px;
   border-width: 1px 0;
   border-image-slice: 1;
@@ -134,7 +141,7 @@ nav {
     rgba(184, 134, 45, 0)
   );
   border-style: solid;
-
+  position: relative;
   background: var(--primary-color);
 }
 
@@ -148,7 +155,6 @@ nav ul {
 
 nav li {
   display: inline-block;
-  padding: 0;
   border-right: 2px solid var(--border-dark-color-2);
   line-height: 2px;
 }
@@ -157,12 +163,14 @@ nav li:last-of-type {
   border-right: none;
 }
 
-nav a {
+.menu-a {
   color: white;
   text-decoration: none;
   text-transform: uppercase;
   display: block;
   padding: 0.5em 1.5em;
+  cursor: pointer;
+  pointer-events: none;
 }
 
 nav li:hover .menu-a {
@@ -171,9 +179,9 @@ nav li:hover .menu-a {
 
 .menu-sub {
   position: absolute;
-  top: 10px;
+  top: 20px;
   background: var(--primary-color);
-  max-width: 300px;
+  min-width: 180px;
   visibility: hidden;
   color: white;
   padding: 1em 1em 1em 1em;
@@ -181,7 +189,10 @@ nav li:hover .menu-a {
   border-bottom-right-radius: 10px;
   z-index: 99;
   pointer-events: none;
-  border: 1px solid red;
+}
+
+.menu-sub ul {
+  text-align: center;
 }
 
 nav li:hover .menu-sub {
@@ -191,15 +202,19 @@ nav li:hover .menu-sub {
   pointer-events: auto;
 }
 
-.menu-sub li {
-  display: block;
+.menu-sub li{
+  display: inline;
   border-right: none;
 }
 
 .menu-sub a {
-  padding: 0;
   margin-bottom: 1.5em;
   font-size: 13px;
+  color: white;
+  text-decoration: none;
+  text-transform: uppercase;
+  display: table;
+/*   padding: 0.5em 1.5em; */
 }
 
 .menu-category {
