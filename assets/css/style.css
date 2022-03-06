@@ -102,28 +102,8 @@ ion-icon {
 
 /* ======== NAVIGATION MENU ======== */
 
-/* .navbar {
-  background-color: var(--primary-color);
-  font-family: "Bree Serif", sans-serif !important;
-  text-transform: uppercase;
-  padding: 10px;
-  width: 100%;
-  border-width: 1px 0;
-  border-image-slice: 1;
-  border-image-source: linear-gradient(
-    90deg,
-    rgba(184, 134, 45, 0),
-    #b8862d,
-    #ffdf91,
-    #b8862d,
-    rgba(184, 134, 45, 0)
-  );
-  border-style: solid;
-  position: relative;
-} */
-
 .container {
-  max-width: 85%;
+  max-width: 100%;
   margin: auto;
 }
 
@@ -168,7 +148,7 @@ nav li:last-of-type {
   text-decoration: none;
   text-transform: uppercase;
   display: block;
-  padding: 0.1em 1.5em;
+  padding: 0.1em 1em;
   cursor: pointer;
   background-color: inherit;
   font-family: inherit;
@@ -204,9 +184,14 @@ nav li:hover .menu-sub {
   transition: all 0.3s ease-in-out;
 }
 
-.menu-sub li{
+.menu-sub li {
   display: block;
   border-right: none;
+  border-bottom: 2px solid var(--border-dark-color-2);
+}
+
+.menu-sub li:last-of-type {
+  border-bottom: none;
 }
 
 .menu-sub a {
@@ -217,6 +202,7 @@ nav li:hover .menu-sub {
   display: flex;
   text-align: left;
   padding: 0.7em;
+  text-transform: none;
 }
 
 .menu-sub a:hover {
@@ -235,6 +221,10 @@ nav li:hover .menu-sub {
 .menu-category:first-of-type {
   margin-top: 0;
 }
+
+/* ======== RESPONSIVE NAVIGATION MENU ======== */
+
+
 
 /* ======== CONTEÚDO PRINCIPAL ======== */
 
