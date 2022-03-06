@@ -187,7 +187,7 @@ nav li:hover .menu-sub {
 .menu-sub li {
   display: block;
   border-right: none;
-  border-bottom: 2px solid var(--border-dark-color-2);
+  border-bottom: 2px solid var(--border-dark-color);
 }
 
 .menu-sub li:last-of-type {
@@ -224,7 +224,66 @@ nav li:hover .menu-sub {
 
 /* ======== RESPONSIVE NAVIGATION MENU ======== */
 
+.toggle-button {
+  font-family: "Bree Serif", sans-serif;
+  color: white;
+  margin: auto;
+  align-content: center;
+  justify-content: center;
+  display: none;
+}
 
+@media (max-width: 740px) {
+  .toggle-button {
+    display: flex;
+  }
+
+  .toggle-button.active {
+    color: var(--golden-color);
+  }
+
+  .menu-main {
+    position: relative;
+    width: 100%;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 14px;
+  }
+
+  .menu-main > li {
+    width: 30%;
+    padding-right: 0;
+    border-right: none;
+    text-align: left;
+    justify-content: left;
+    border-bottom: 2px solid var(--border-dark-color);
+  }
+
+  .menu-main > li:last-of-type {
+    border-bottom: none;
+  }
+
+  .menu-main.active {
+    display: flex;
+  }
+
+  .menu-a {
+    padding: 0.5rem 1rem;
+  }
+
+  .menu-sub {
+    top: 0px !important;
+    left: 25%;
+  }
+
+  nav li:hover .menu-sub {
+    left: 35%;
+    visibility: visible;
+    transition: all 0.3s ease-in-out;
+  }
+
+}
 
 /* ======== CONTEÚDO PRINCIPAL ======== */
 

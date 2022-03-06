@@ -2,7 +2,7 @@
 
 (function responsiveNavigationMenu() {
   const toggleButton = document.getElementsByClassName("toggle-button")[0];
-  const navbarLinks = document.getElementsByClassName("navbar-links")[0];
+  const navbarLinks = document.getElementsByClassName("menu-main")[0];
   const toggleButtonActive =
     document.getElementsByClassName("button-toggle")[0];
 
