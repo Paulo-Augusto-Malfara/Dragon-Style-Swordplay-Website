@@ -107,7 +107,7 @@ ion-icon {
   margin: auto;
 }
 
-nav {
+.nav {
   font-family: "Bree Serif", sans-serif !important;
   padding: 10px;
   border-width: 1px 0;
@@ -125,7 +125,7 @@ nav {
   background: var(--primary-color);
 }
 
-nav ul {
+.nav ul {
   margin: 0;
   padding: 0;
   list-style: none;
@@ -133,13 +133,13 @@ nav ul {
   text-align: center;
 }
 
-nav li {
+.nav li {
   display: inline-block;
   border-right: 2px solid var(--border-dark-color-2);
   line-height: 2px;
 }
 
-nav li:last-of-type {
+.nav li:last-of-type {
   border-right: none;
 }
 
@@ -157,7 +157,7 @@ nav li:last-of-type {
   font-size: 1em;
 }
 
-nav li:hover .menu-a {
+.nav li:hover .menu-a {
   color: var(--golden-color);
 }
 
@@ -178,7 +178,7 @@ nav li:hover .menu-a {
   text-align: center;
 }
 
-nav li:hover .menu-sub {
+.nav li:hover .menu-sub {
   visibility: visible;
   top: 25px;
   transition: all 0.3s ease-in-out;
@@ -252,7 +252,7 @@ nav li:hover .menu-sub {
   }
 
   .menu-main > li {
-    width: 30%;
+    width: 200px;
     padding-right: 0;
     border-right: none;
     text-align: left;
@@ -274,15 +274,30 @@ nav li:hover .menu-sub {
 
   .menu-sub {
     top: 0px !important;
-    left: 25%;
+    left: 195px;
   }
 
-  nav li:hover .menu-sub {
-    left: 35%;
+  .nav li:hover .menu-sub {
+    left: 200px;
     visibility: visible;
     transition: all 0.3s ease-in-out;
   }
+}
 
+@media (max-width: 420px) {
+  .menu-main > li {
+    width: 120px;
+  }
+
+  .menu-sub {
+    left: 115px;
+  }
+
+  .nav li:hover .menu-sub {
+    left: 120px;
+    visibility: visible;
+    transition: all 0.3s ease-in-out;
+  }
 }
 
 /* ======== CONTEÚDO PRINCIPAL ======== */
@@ -608,7 +623,7 @@ p {
   }
 }
 
-@media (max-width: 380px) {
+@media (max-width: 400px) {
   #logo-ds {
     margin-left: 0.1em;
     max-width: 95%;
