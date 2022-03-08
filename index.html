@@ -9,15 +9,11 @@
     <script src="/assets/js/script.js" defer></script>
     <script src="/jquery-3.6.0.min.js"></script>
     <title>Dragon Style - Swordplay e Eventos</title>
-    <script> 
-      $(function(){
-        $("#header").load("/assets/html/header/header.html"); 
-        /* $("#footer").load("footer.html");  */
-      });
-      </script>
       </head>
         <body>
-          <header id="header"></header>
+          <header>
+            <!--#include file="header.html" -->
+          </header>
             <main>
               <section>
                 <h1>bem-vindo</h1> 
@@ -25,7 +21,13 @@
             </main>
           <script
             type="module"
-            src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"
-          ></script>
+            src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js">
+          </script>
+<!--           <script async> 
+            $(function(){
+              $("#nav-bar").load("/assets/html/header/nav-bar.html"); 
+              /* $("#footer").load("footer.html");  */
+            });
+          </script> -->
         </body>
       </html>
