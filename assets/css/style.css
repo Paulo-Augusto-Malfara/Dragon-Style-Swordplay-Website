@@ -145,7 +145,6 @@ ion-icon {
 
 .menu-a {
   color: white;
-  text-decoration: none;
   text-transform: uppercase;
   display: block;
   padding: 0.1em 1em;
@@ -168,7 +167,7 @@ ion-icon {
   min-width: 150px;
   visibility: hidden;
   color: white;
-  padding: 1em 1em 1em 1em;
+  padding: 1em;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
   z-index: 99;
@@ -198,11 +197,9 @@ ion-icon {
   font-size: 14px;
   color: white;
   text-decoration: none;
-  text-transform: uppercase;
   display: flex;
   text-align: left;
   padding: 0.7em;
-  text-transform: none;
 }
 
 .menu-sub a:hover {
