@@ -261,13 +261,9 @@ ion-icon {
     border-bottom: none;
   }
 
-  .toggle-button:active .menu-main {
+  .menu-main.active {
     display: flex;
   }
-
-/*   .menu-main.active {
-    display: flex;
-  } */
 
   .menu-a {
     padding: 0.5rem 1rem;
