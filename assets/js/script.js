@@ -23,9 +23,9 @@
       </div>
     </div>
   </div>
-  </section>
-  
-  <section>
+</section>
+
+<section>
   <nav class="nav">
     <div class="container">
       <div>
@@ -43,7 +43,7 @@
             </ul>              
           </div>
         </li>
-  
+
         <li><button class="menu-a">Equipamentos</button>
           <div class="menu-sub">
             <ul>
@@ -71,11 +71,11 @@
             </ul>
           </div>
         </li>
-        <li><a href="/assets/html/modalidades.html" class="menu-a">Modalidades</a></li>
+        <li><button href="/assets/html/modalidades.html" class="menu-a">Modalidades</button></li>
       </ul>
     </div>
   </nav>
-  </section>
+</section>
     `
   
 })();
