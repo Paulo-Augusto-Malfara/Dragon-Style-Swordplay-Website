@@ -1,4 +1,4 @@
-    <!-- LOGO & SOCIAL MEDIA -->
+  <header>
     <section>
       <div class="header-top">
         <div class="header-logo">
@@ -23,7 +23,7 @@
         </div>
       </div>
     </section>
-    <!-- NAVIGATION MENU -->
+
     <section>
       <nav class="nav">
         <div class="container">
@@ -75,3 +75,4 @@
         </div>
       </nav>
     </section>
+  </header>

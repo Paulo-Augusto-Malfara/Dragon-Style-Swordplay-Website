@@ -7,17 +7,10 @@
     <link rel="stylesheet" type="text/css" href="/assets/css/style.css" />
     <link rel="shortcut icon" href="/assets/img/favIcon (2).ico" />
     <script src="/assets/js/script.js" defer></script>
-    <script src="/jquery-3.6.0.min.js"></script>
     <title>Dragon Style - Swordplay e Eventos</title>
-    <script>
-      $(function () {
-        $("#header").load("/assets/includes/header.html");
-        $("#footer").load("/assets/includes/footer.html");
-      });
-    </script>
   </head>
   <body>
-    <header id="header"></header>
+    <?php include ("/assets/php/header.php"); ?>
     <main>
       <section>
         <h1>bem-vindo</h1>
