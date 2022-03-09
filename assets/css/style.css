@@ -454,30 +454,30 @@ p {
   padding: 20px 10px 10px 10px;
 }
 
-.tabela-de-equipamentos h3 {
-  text-transform: uppercase;
-  display: flex;
-  justify-content: center;
-  padding: 1em 1em 0.7em 1em;
-  color: var(--golden-color);
-}
-
-.tabela-de-equipamentos ul {
+/* .tabela-de-equipamentos ul {
   line-height: 1.5em;
-}
+} */
 
-.tabela-de-equipamentos ul li {
+/* .tabela-de-equipamentos ul li {
   width: 90%;
   margin: auto;
   font-size: 1em;
   color: var(--text-primary-color);
   text-align: justify;
-}
+} */
 
 .equip-arma {
   padding: 5px 0 5px 0;
   list-style-type: none;
-  font-size: 1.1em !important;
+/*   font-size: 1.1em !important; */
+}
+
+.lista-de-equipamentos h3 {
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  padding: 1em 1em 0.7em 1em;
+  color: var(--golden-color);
 }
 
 .descricao-arma {
@@ -486,6 +486,37 @@ p {
 
 .descricao-arma > li {
   padding: 5px 0 5px 0;
+}
+
+.arma-card {
+  width: 80%;
+  margin: auto;
+/*   box-shadow: 0 0 1em black;
+  border: 2px solid var(--border-dark-color-2);
+  border-radius: 10px; */
+}
+
+.arma-display {
+  display: flex;
+  justify-content:space-evenly;
+/*   align-items: flex-start; */
+  width: 95%;
+}
+
+.arma-info {
+  margin-left: 2.7em;
+  margin-bottom: 0.5em;
+  list-style-type: none;
+}
+
+.arma-img {
+  border-radius: 10px;
+  margin-left: 2em;
+  margin-bottom: 1em;
+  max-width: 275px;
+  max-height: 250px;
+
+/*   box-shadow: 0 0 1em black; */
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
@@ -574,6 +605,9 @@ p {
   .h2-bottom-border {
     max-width: 20%;
   }
+  .arma-card {
+    width: 100%;
+  }
 }
 
 @media (max-width: 580px) {
@@ -591,8 +625,6 @@ p {
   }
   .tabela-de-equipamentos {
     overflow: hidden;
-    width: 98%;
-    margin-right: 0.5em;
   }
   .descricao-arma {
     margin-left: 0.5em;
@@ -603,6 +635,9 @@ p {
   }
   .grid-classes > div > h3 {
     font-size: 1.1em;
+  }
+  .arma-display {
+    font-size: 0.8em;
   }
   h1 {
     font-size: 1em;
