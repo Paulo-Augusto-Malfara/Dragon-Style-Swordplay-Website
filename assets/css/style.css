@@ -496,7 +496,6 @@ p {
   border: 1px solid var(--golden-color-opaco);
   background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
     center;
-  background-color: var(--secondary-color-opacity);
   border-radius: 10px;
   box-shadow: 0 0 1em black;
 }
@@ -681,6 +680,7 @@ p {
   .arma-display {
     display: flex;
     flex-direction: column;
+    width: 100%;
     margin: auto;
   }
   .arma-info {
