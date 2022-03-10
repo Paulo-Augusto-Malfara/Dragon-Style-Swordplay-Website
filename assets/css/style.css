@@ -147,13 +147,10 @@ ion-icon {
   color: white;
   text-transform: uppercase;
   display: block;
-  padding: 0.1em 1em;
+  padding: 0.6em;
   cursor: pointer;
-  background-color: inherit;
-  font-family: inherit;
-  border: none;
-  outline: none;
   font-size: 1em;
+/*   border: 1px solid red; */
 }
 
 .nav li:hover .menu-a {
@@ -162,7 +159,7 @@ ion-icon {
 
 .menu-sub {
   position: absolute;
-  top: 20px;
+  top: 15px;
   background: var(--primary-color);
   min-width: 150px;
   visibility: hidden;
@@ -179,7 +176,7 @@ ion-icon {
 
 .nav li:hover .menu-sub {
   visibility: visible;
-  top: 25px;
+  top: 20px;
   transition: all 0.3s ease-in-out;
 }
 
