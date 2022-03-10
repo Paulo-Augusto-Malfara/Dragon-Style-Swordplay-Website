@@ -469,7 +469,9 @@ p {
 .equip-arma {
   padding: 5px 0 5px 0;
   list-style-type: none;
-/*   font-size: 1.1em !important; */
+  /*   
+  font-size: 1.1em !important; 
+  */
 }
 
 .lista-de-equipamentos h3 {
@@ -480,33 +482,38 @@ p {
   color: var(--golden-color);
 }
 
-.descricao-arma {
+.arma-specs {
   margin-left: 2.7em !important;
 }
 
-.descricao-arma > li {
+.arma-specs > li {
   padding: 5px 0 5px 0;
 }
 
 .arma-card {
   width: 80%;
   margin: auto;
-/*   box-shadow: 0 0 1em black;
-  border: 2px solid var(--border-dark-color-2);
-  border-radius: 10px; */
+  border: 1px solid var(--golden-color-opaco);
+  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
+    center;
+  background-color: var(--secondary-color-opacity);
+  border-radius: 10px;
+  box-shadow: 0 0 1em black;
 }
 
 .arma-display {
   display: flex;
   justify-content:space-evenly;
-/*   align-items: flex-start; */
+  /*   
+  align-items: flex-start; 
+  */
   width: 95%;
 }
 
 .arma-info {
-  margin-left: 2.7em;
-  margin-bottom: 0.5em;
+  margin: 0.5em 0 0.5em 2.7em;
   list-style-type: none;
+  font-weight: 700;
 }
 
 .arma-img {
@@ -514,9 +521,7 @@ p {
   margin-left: 2em;
   margin-bottom: 1em;
   max-width: 275px;
-  max-height: 250px;
-
-/*   box-shadow: 0 0 1em black; */
+  max-height: 275px;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
@@ -626,7 +631,7 @@ p {
   .tabela-de-equipamentos {
     overflow: hidden;
   }
-  .descricao-arma {
+  .arma-specs {
     margin-left: 0.5em;
   }
   .tabela-de-equipamentos ul {
@@ -672,6 +677,19 @@ p {
   }
   .modalidades-box h2 {
     max-width: 100%;
+  }
+  .arma-display {
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+  }
+  .arma-info {
+    margin-left: 0;
+    margin-bottom: 1em;
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    font-weight: 700;
   }
 }
 
