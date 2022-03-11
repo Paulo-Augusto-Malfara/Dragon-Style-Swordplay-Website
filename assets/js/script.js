@@ -3,9 +3,9 @@
 // <section>
 //   <div class="header-top">
 //     <div class="header-logo">
-//       <a id="logo-anchor" 
-//         href="/index.html"><img id="logo-ds" 
-//         src="/assets/img/logo-ds-landscape.png" 
+//       <a id="logo-anchor"
+//         href="/index.html"><img id="logo-ds"
+//         src="/assets/img/logo-ds-landscape.png"
 //         alt="Logo do Dragon Style Swordplay e Eventos"/>
 //       </a>
 //       <div id="header-icons-div">
@@ -39,8 +39,8 @@
 //               <li><a href="">O que é Swordplay?</a></li>
 //               <li><a href="">Como Participar</a></li>
 //               <li><a href="/assets/html/sobre-nos/historia-do-ds.html">História do DS</a></li>
-//               <li><a href="">Organização</a></li>                    
-//             </ul>              
+//               <li><a href="">Organização</a></li>
+//             </ul>
 //           </div>
 //         </li>
 
@@ -83,7 +83,7 @@
 //   </nav>
 // </section>
 //     `
-  
+
 // })();
 
 /* AJAX */
@@ -111,7 +111,7 @@ document.addEventListener("click", (e) => {
   if (tag === "a") {
     e.preventDefault();
     carregaPagina(el);
-  } 
+  }
 });
 
 async function carregaPagina(el) {
