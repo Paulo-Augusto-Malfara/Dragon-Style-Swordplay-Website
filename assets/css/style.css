@@ -367,6 +367,18 @@ p {
   line-height: 1.5rem;
 }
 
+.lista-comum {
+  width: 90%;
+  margin: auto;
+  font-size: 1em;
+}
+
+.lista-comum > li {
+  margin-left: 3rem;
+  margin-bottom: 1em;
+  line-height: 1.5rem;
+}
+
 .links-de-texto {
   text-decoration: underline;
   font-style: italic;
@@ -398,7 +410,8 @@ table {
   border-collapse: collapse;
 }
 
-td, th {
+td,
+th {
   border: 1px solid var(--golden-color-opaco);
   text-align: center;
   padding: 8px;
@@ -673,6 +686,13 @@ th {
   }
   p {
     font-size: 0.8em;
+    line-height: 1.3em;
+  }
+  .lista-comum {
+    font-size: 0.8em;
+  }
+  .lista-comum > li {
+    margin-left: 1.5rem;
     line-height: 1.3em;
   }
 }
