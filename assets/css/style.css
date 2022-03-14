@@ -606,14 +606,26 @@ th {
 /* ======== CLASSES INDIVIDUAIS ======== */
 
 .classes-individual {
-  width: 100%;
+  width: 95%;
   margin: auto;
 }
 
-.classes-individual > img {
+.classes-individual-descricao {
+ /*  display: flex; */
+}
+
+.classes-individual-descricao > p {
+  position: absolute;
+  max-width: 75%;
+  margin-left: 2em;
+}
+
+.classes-individual-descricao > img {
+  position: absolute;
+  margin-right: 2em;
+  left: 80%;
   max-height: 300px;
-  display: block;
-  margin: auto;
+/*   border: 1px solid red; */
 }
 
 /* ======== MEDIA QUERYS ======== */
