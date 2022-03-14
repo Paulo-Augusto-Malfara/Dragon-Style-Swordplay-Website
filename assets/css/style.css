@@ -603,6 +603,19 @@ th {
   color: var(--golden-color);
 }
 
+/* ======== CLASSES INDIVIDUAIS ======== */
+
+.classes-individual {
+  width: 100%;
+  margin: auto;
+}
+
+.classes-individual > img {
+  max-height: 300px;
+  display: block;
+  margin: auto;
+}
+
 /* ======== MEDIA QUERYS ======== */
 
 @media (max-width: 900px) {
