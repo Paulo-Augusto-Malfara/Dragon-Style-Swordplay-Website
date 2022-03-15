@@ -374,9 +374,10 @@ p {
 }
 
 .lista-comum > li {
-  margin-left: 3rem;
+  margin-left: 1rem;
   margin-bottom: 1em;
   line-height: 1.5rem;
+  text-align: justify;
 }
 
 .links-de-texto {
@@ -604,16 +605,8 @@ th {
   margin: auto;
 }
 
-.classes-individual-descricao > p {
-  position: absolute;
-  max-width: 75%;
-  margin-left: 2em;
-}
-
 .classes-individual-descricao > img {
-  position: absolute;
-  margin-right: 2em;
-  left: 80%;
+  margin: auto;
   max-height: 300px;
 }
 
