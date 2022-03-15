@@ -699,7 +699,7 @@ th {
     font-size: 0.8em;
   }
   .lista-comum > li {
-    margin-left: 1.5rem;
+    margin-left: 1em;
     line-height: 1.3em;
   }
 }
