@@ -608,7 +608,7 @@ th {
 .classes-individual > img {
   display: flex;
   justify-content: center;
-  width: 50%;
+  width: 55%;
   margin: auto;
 }
 
@@ -621,6 +621,9 @@ th {
   #header-icons-div {
     margin-right: 1em;
     gap: 2em;
+  }
+  .classes-individual > img {
+    width: 80%
   }
 }
 
@@ -653,7 +656,7 @@ th {
     width: 100%;
   }
   .classes-individual > img {
-    width: 80%
+    width: 85%
   }
 }
 
