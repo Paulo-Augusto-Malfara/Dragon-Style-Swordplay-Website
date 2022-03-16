@@ -605,9 +605,11 @@ th {
   margin: auto;
 }
 
-.classes-individual-descricao > img {
+.classes-individual > img {
+  display: flex;
+  justify-content: center;
+  width: 50%;
   margin: auto;
-  max-height: 300px;
 }
 
 /* ======== MEDIA QUERYS ======== */
@@ -649,6 +651,9 @@ th {
   }
   .arma-card {
     width: 100%;
+  }
+  .classes-individual > img {
+    width: 80%
   }
 }
 
@@ -702,6 +707,9 @@ th {
     margin-left: 1em;
     line-height: 1.3em;
   }
+  .classes-individual > img {
+    width: 90%
+  }
 }
 
 @media (max-width: 400px) {
@@ -735,6 +743,9 @@ th {
     display: flex;
     justify-content: center;
     font-weight: 700;
+  }
+  .classes-individual > img {
+    width: 95%
   }
 }
 
