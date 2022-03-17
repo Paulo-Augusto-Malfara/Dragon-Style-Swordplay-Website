@@ -610,6 +610,7 @@ th {
   justify-content: center;
   width: 55%;
   margin: auto;
+  margin-top: 1em;
 }
 
 /* ======== MEDIA QUERYS ======== */
