@@ -522,6 +522,7 @@ th {
 .arma-card {
   width: 80%;
   margin: auto;
+  margin-bottom: 2.5rem;
   border: 1px solid var(--golden-color-opaco);
   background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
     center;
@@ -545,8 +546,8 @@ th {
   border-radius: 10px;
   margin-left: 2em;
   margin-bottom: 1em;
-  max-width: 275px;
-  max-height: 275px;
+  max-width: 320px;
+  max-height: 320px;
 }
 
 /* ======== CONTEÚDO CLASSES ======== */
@@ -624,7 +625,7 @@ th {
     gap: 2em;
   }
   .classes-individual > img {
-    width: 80%
+    width: 80%;
   }
 }
 
@@ -657,7 +658,7 @@ th {
     width: 100%;
   }
   .classes-individual > img {
-    width: 85%
+    width: 85%;
   }
 }
 
@@ -689,6 +690,27 @@ th {
   }
   .arma-display {
     font-size: 0.8em;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin: auto;
+  }
+  .arma-display > img {
+    width: 320px;
+    height: 320px;
+    display: flex;
+    justify-content: center;
+    margin-left: 0;
+    margin: auto;
+    margin-bottom: 1em;
+  }
+  .arma-info {
+    margin-left: 0;
+    margin-bottom: 1em;
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+    font-weight: 700;
   }
   h1 {
     font-size: 1em;
@@ -712,7 +734,7 @@ th {
     line-height: 1.3em;
   }
   .classes-individual > img {
-    width: 90%
+    width: 90%;
   }
 }
 
@@ -734,27 +756,21 @@ th {
   .modalidades-box h2 {
     max-width: 100%;
   }
-  .arma-display {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
-    margin: auto;
-  }
-  .arma-info {
-    margin-left: 0;
-    margin-bottom: 1em;
-    list-style-type: none;
-    display: flex;
-    justify-content: center;
-    font-weight: 700;
+  .arma-display > img {
+    width: 280px;
+    height: 280px;
   }
   .classes-individual > img {
-    width: 95%
+    width: 95%;
   }
 }
 
-@media (max-width: 280px) {
+@media (max-width: 300px) {
   #header-icons-div {
     gap: 0.5em;
+  }
+  .arma-display > img {
+    width: 230px;
+    height: 230px;
   }
 }
