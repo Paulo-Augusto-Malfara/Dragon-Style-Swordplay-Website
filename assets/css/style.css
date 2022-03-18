@@ -713,6 +713,9 @@ th {
     justify-content: center;
     font-weight: 700;
   }
+  .arma-specs {
+    margin-right: 1em;
+  }
   h1 {
     font-size: 1em;
     padding: 3px 10px 10px 10px;
