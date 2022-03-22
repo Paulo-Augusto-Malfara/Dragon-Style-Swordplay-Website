@@ -543,7 +543,7 @@ th {
 
 .arma-display {
   display: flex;
-  justify-content: space-evenly;
+  justify-content:flex-start;
   width: 95%;
 }
 
