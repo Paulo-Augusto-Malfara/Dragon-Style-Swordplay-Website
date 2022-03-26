@@ -527,6 +527,7 @@ th {
 
 .arma-specs > li {
   padding: 5px 0 5px 0;
+  list-style-type: style color var(--golden-color);
 }
 
 .arma-card {
