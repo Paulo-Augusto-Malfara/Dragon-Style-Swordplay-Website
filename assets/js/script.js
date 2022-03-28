@@ -147,6 +147,7 @@ function carregaResultado(response) {
 
 (function dinamicModalidades() {
   document.addEventListener("click", (e) => {
+    e.preventDefault();
     const el = e.target;
     const modalidadesConteudo = document.getElementsByClassName(
       "modalidades-conteudo"
