@@ -88,49 +88,51 @@
 
 /* AJAX */
 
-const request = (obj) => {
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open(obj.method, obj.url, true);
-    xhr.send();
+(function ajaxReqst() {
+  const request = (obj) => {
+    return new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(obj.method, obj.url, true);
+      xhr.send();
 
-    xhr.addEventListener("load", () => {
-      if (xhr.status >= 200 && xhr.status < 300) {
-        resolve(xhr.responseText);
-      } else {
-        reject(xhr.statusText);
-      }
+      xhr.addEventListener("load", () => {
+        if (xhr.status >= 200 && xhr.status < 300) {
+          resolve(xhr.responseText);
+        } else {
+          reject(xhr.statusText);
+        }
+      });
     });
+  };
+
+  document.addEventListener("click", (e) => {
+    const el = e.target;
+    const tag = el.tagName.toLowerCase();
+
+    if (tag === "a") {
+      e.preventDefault();
+      carregaPagina(el);
+    }
   });
-};
 
-document.addEventListener("click", (e) => {
-  const el = e.target;
-  const tag = el.tagName.toLowerCase();
-
-  if (tag === "a") {
-    e.preventDefault();
-    carregaPagina(el);
+  async function carregaPagina(el) {
+    const href = el.getAttribute("href");
+    try {
+      const response = await request({
+        method: "GET",
+        url: href,
+      });
+      carregaResultado(response);
+    } catch (e) {
+      console.log(e);
+    }
   }
-});
 
-async function carregaPagina(el) {
-  const href = el.getAttribute("href");
-  try {
-    const response = await request({
-      method: "GET",
-      url: href,
-    });
-    carregaResultado(response);
-  } catch (e) {
-    console.log(e);
+  function carregaResultado(response) {
+    const resultado = document.querySelector(".resultado");
+    resultado.innerHTML = response;
   }
-}
-
-function carregaResultado(response) {
-  const resultado = document.querySelector(".resultado");
-  resultado.innerHTML = response;
-}
+})();
 
 /* RESPONSIVE NAVIGATION MENU */
 
@@ -146,9 +148,9 @@ function carregaResultado(response) {
 })();
 
 (function dinamicModalidades() {
-  document.addEventListener("click", (e) => {
-    e.preventDefault();
-    const el = e.target;
+  document.addEventListener("click", (evento) => {
+    evento.preventDefault();
+    const el = evento.target;
     const modalidadesConteudo = document.getElementsByClassName(
       "modalidades-conteudo"
     )[document.activeElement.classList.value - 1];
