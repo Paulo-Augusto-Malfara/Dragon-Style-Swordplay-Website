@@ -149,7 +149,7 @@
 
 (function dinamicModalidades() {
   document.addEventListener("click", (evento) => {
-    evento.preventDefault();
+/*     evento.preventDefault(); */
     const el = evento.target;
     const modalidadesConteudo = document.getElementsByClassName(
       "modalidades-conteudo"
