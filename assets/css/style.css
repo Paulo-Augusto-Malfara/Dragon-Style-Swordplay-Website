@@ -453,6 +453,8 @@ th {
   display: flex;
   justify-content: center;
   max-width: 40%;
+  padding: 0.8em 1em 0.5em 1em;
+/*   border: 1px solid red; */
 }
 
 .h2-bottom-border {
@@ -473,7 +475,7 @@ th {
 }
 
 .modalidades p {
-  text-indent: 0;
+  text-indent: 1em;
 }
 
 .modalidades-conteudo {
