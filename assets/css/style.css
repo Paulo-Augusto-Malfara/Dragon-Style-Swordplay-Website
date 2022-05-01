@@ -457,6 +457,12 @@ th {
 /*   border: 1px solid red; */
 }
 
+.modalidades h3 {
+  color: var(--golden-color);
+/*   display: flex;
+  justify-content: center; */
+}
+
 .h2-bottom-border {
   margin: auto;
   max-width: 10%;
@@ -684,6 +690,10 @@ th {
   }
   .classes-individual > img {
     width: 85%;
+  }
+  .modalidades h3 {
+    display: flex;
+    justify-content: center;
   }
 }
 
