@@ -454,12 +454,12 @@ th {
   justify-content: center;
   max-width: 40%;
   padding: 0.8em 1em 0.5em 1em;
-/*   border: 1px solid red; */
+  /*   border: 1px solid red; */
 }
 
 .modalidades h3 {
   color: var(--golden-color);
-/*   display: flex;
+  /*   display: flex;
   justify-content: center; */
 }
 
@@ -494,6 +494,8 @@ th {
 
 .modalidades-conteudo.active-modalidades {
   display: block;
+  visibility: visible;
+  transition: all 0.3s ease-in-out;
   border-width: 0 0 1px 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
