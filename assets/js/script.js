@@ -167,7 +167,7 @@
                   >Como Funciona</a
                 >
               </li>
-              <li>
+<!--               <li>
                 <a href="/assets/html/classes/bonus-nivel-3.html"
                   >Bônus de Nível 3</a
                 >
@@ -176,7 +176,7 @@
                 <a href="/assets/html/classes/mentor-de-classe.html"
                   >Mentor de Classe</a
                 >
-              </li>
+              </li> -->
               <li>
                 <a href="/assets/html/classes/arqueiro.html">Arqueiro</a>
               </li>
