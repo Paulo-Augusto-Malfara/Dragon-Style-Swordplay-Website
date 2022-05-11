@@ -37,6 +37,22 @@ body {
   background-size: cover;
 }
 
+.short {
+  color: cyan;
+}
+.medium {
+  color: yellow;
+}
+.large {
+  color: red;
+}
+.medium-esp {
+  color: rgb(184, 12, 184);
+}
+.gold-title {
+  color: var(--golden-color);
+}
+
 /* ======== SCROLL TO TOP ======== */
 
 /* ======== HEADER ======== */
@@ -333,6 +349,7 @@ h2 {
   width: 90%;
   display: flex;
   justify-content: center;
+  text-align: center;
   margin: auto;
   font-size: 1.4em;
   text-shadow: 2px 2px black;
@@ -452,6 +469,7 @@ th {
   text-transform: uppercase;
   display: flex;
   justify-content: center;
+  text-align: center;
   max-width: 40%;
   padding: 0.8em 1em 0.5em 1em;
   /*   border: 1px solid red; */
