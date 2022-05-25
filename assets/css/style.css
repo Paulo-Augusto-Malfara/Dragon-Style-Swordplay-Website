@@ -437,6 +437,27 @@ p {
   box-shadow: 0 0 1em black;
 }
 
+#pagina-anterior-e-seguinte {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  padding: 1em;
+}
+
+.pagina-anterior ion-icon {
+  color: var(--golden-color);
+  padding: 0 0.3em;
+}
+.pagina-seguinte ion-icon {
+  color: var(--golden-color);
+  padding: 0 0 0 0.3em;
+}
+
+.pagina-anterior, .pagina-seguinte {
+  display: flex;
+  align-items: center;
+}
+
 /* ======== TABELAS ======== */
 
 table {
