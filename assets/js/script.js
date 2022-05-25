@@ -167,7 +167,12 @@
                   >Como Funciona</a
                 >
               </li>
-<!--               <li>
+              <li>
+                <a href="/assets/html/classes/resumo-das-classes.html"
+                  >Resumo das Classes</a
+                >
+              </li>
+              <!--               <li>
                 <a href="/assets/html/classes/bonus-nivel-3.html"
                   >Bônus de Nível 3</a
                 >

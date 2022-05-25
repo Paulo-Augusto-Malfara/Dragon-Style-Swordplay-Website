@@ -612,12 +612,18 @@ th {
   gap: 20px;
 }
 
+.grid-classes p {
+  text-align: justify;
+  text-indent: 0;
+  text-justify: auto;
+}
+
 .grid-classes > div {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  padding: 12px;
   border: 1px solid var(--golden-color-opaco);
   background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
     center;
@@ -629,8 +635,8 @@ th {
 }
 
 .grid-classes > div > img {
-  max-width: 200px;
-  max-height: 200px;
+  max-width: 250px;
+  max-height: 250px;
   margin-bottom: 10px;
 }
 
@@ -639,11 +645,15 @@ th {
   transition: all 0.2s ease-in-out;
 }
 
-.grid-classes > div > a > h3 {
+.grid-classes h2 {
+  margin-top: 0;
+}
+
+.grid-classes > div > a {
   display: flex;
   justify-content: center;
   align-items: center;
-  cursor: pointer;
+  margin-top: 0.5em;
 }
 
 .grid-classes > div > a > h3:hover {
