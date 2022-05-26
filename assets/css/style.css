@@ -441,7 +441,7 @@ p {
   position: relative;
   display: flex;
   justify-content: space-between;
-  padding: 1em;
+  padding: 0.5em;
 }
 
 .pagina-anterior ion-icon {
@@ -854,6 +854,17 @@ th {
   }
   .classes-individual > img {
     width: 95%;
+  }
+  #pagina-anterior-e-seguinte a {
+    font-size: 0.8em;
+  }
+  .pagina-anterior ion-icon {
+    color: var(--golden-color);
+    padding: 0 0.1em;
+  }
+  .pagina-seguinte ion-icon {
+    color: var(--golden-color);
+    padding: 0 0 0 0.1em;
   }
 }
 
