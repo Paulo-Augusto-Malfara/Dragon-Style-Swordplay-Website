@@ -64,6 +64,11 @@
                   >Administração</a
                 >
               </li>
+              <li>
+                <a href="/assets/html/sobre-nos/doacoes.html"
+                  >Doações</a
+                >
+              </li>
             </ul>
           </div>
         </li>
