@@ -453,7 +453,8 @@ p {
   padding: 0 0 0 0.3em;
 }
 
-.pagina-anterior, .pagina-seguinte {
+.pagina-anterior,
+.pagina-seguinte {
   display: flex;
   align-items: center;
 }
