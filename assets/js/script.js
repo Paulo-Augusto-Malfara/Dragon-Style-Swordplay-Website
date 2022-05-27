@@ -65,9 +65,7 @@
                 >
               </li>
               <li>
-                <a href="/assets/html/sobre-nos/doacoes.html"
-                  >Doações</a
-                >
+                <a href="/assets/html/sobre-nos/doacoes.html">Doações</a>
               </li>
             </ul>
           </div>
@@ -133,7 +131,11 @@
               <li>
                 <a href="/assets/html/equipamentos/escudos.html">Escudos</a>
               </li>
-              <li><a>Vestimentas</a></li>
+              <li>
+                <a href="/assets/html/equipamentos/vestimentas.html"
+                  >Vestimentas</a
+                >
+              </li>
               <!-- <li><a>Como Forjar</a></li> -->
             </ul>
           </div>
