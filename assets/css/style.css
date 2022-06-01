@@ -459,6 +459,10 @@ p {
   align-items: center;
 }
 
+.primeira-pagina-anterior {
+  visibility: hidden;
+}
+
 /* ======== TABELAS ======== */
 
 table {
