@@ -33,7 +33,8 @@ li {
 body {
   color: var(--text-primary-color);
   font-family: "Rubik", sans-serif;
-  background: url(/assets/img/backgroundPreto.png) no-repeat center center fixed;
+  background: url(/assets/img/background-definitivo.png) no-repeat center center
+    fixed;
   background-size: cover;
 }
 
@@ -314,10 +315,9 @@ ion-icon {
 
 main {
   padding: 10px;
-  min-width: 100%;
+/*   min-width: 100%;
   box-shadow: 0 0 1em black;
-  min-height: 1080px;
-  background-color: var(--secondary-color-opacity);
+  background-color: var(--secondary-color-opacity); */
 }
 
 h1 {
