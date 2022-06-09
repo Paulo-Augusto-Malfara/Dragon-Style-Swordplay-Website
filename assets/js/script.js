@@ -229,6 +229,9 @@
         <li>
           <a href="/assets/html/modalidades.html" class="menu-a">Modalidades</a>
         </li>
+        <li>
+          <a href="/assets/html/novidades.html" class="menu-a">Novidades</a>
+        </li>
       </ul>
     </div>
   </nav>
