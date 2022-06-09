@@ -315,7 +315,7 @@ ion-icon {
 
 main {
   padding: 10px;
-/*   min-width: 100%;
+  /*   min-width: 100%;
   box-shadow: 0 0 1em black;
   background-color: var(--secondary-color-opacity); */
 }
@@ -461,6 +461,34 @@ p {
 
 .primeira-pagina-anterior {
   visibility: hidden;
+}
+
+/* ======== NOVIDADES ======== */
+
+.news > h3 {
+  color: var(--golden-color);
+}
+
+.news > ul {
+  width: 90%;
+  margin: auto;
+  font-size: 1em;
+}
+
+.news > ul > li {
+  margin-left: 2rem;
+  margin-bottom: 1em;
+  line-height: 1.5rem;
+  text-align: justify;
+}
+
+.news > ul > li > ul {
+  margin-left: 1.5rem;
+}
+
+.news > ul > li > ul > li > ul {
+  margin-left: 0.5rem;
+  list-style-type: none;
 }
 
 /* ======== TABELAS ======== */
@@ -833,6 +861,9 @@ th {
   .classes-individual > img {
     width: 90%;
   }
+  .news > h3 {
+   font-size: 0.9em;
+  }
 }
 
 @media (max-width: 400px) {
@@ -870,6 +901,20 @@ th {
   .pagina-seguinte ion-icon {
     color: var(--golden-color);
     padding: 0 0 0 0.1em;
+  }
+  .news > ul {
+    width: 95%;
+    margin: auto;
+    font-size: 0.8em;
+  }
+  .news > ul > li {
+    margin-left: 1.5rem;
+  }
+  .news > ul > li > ul {
+    margin-left: 0.5rem;
+  }
+  .news > ul > li > ul > li > ul {
+    margin-left: 0.1rem;
   }
 }
 
