@@ -502,8 +502,8 @@ p {
   border-collapse: collapse;
 }
 
-.graduacao-tabela td, .graduacao-tabela
-th {
+.graduacao-tabela td,
+.graduacao-tabela th {
   border: 1px solid var(--golden-color-opaco);
   text-align: center;
   padding: 8px;
@@ -750,10 +750,8 @@ th {
   background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
     center;
   background-color: var(--secondary-color-opacity);
-  border-radius: 40px;
+  border-radius: 10px;
   box-shadow: 0 0 1em black;
-  min-width: 100px;
-  min-height: 100px;
 }
 
 .grid-mural > div > p {
@@ -781,17 +779,16 @@ th {
 
 .grid-mural table {
   display: flex;
-/*   align-items: center; */
   justify-content: center;
   margin: auto;
   width: 90%;
   border-collapse: collapse;
 }
 
-.grid-mural td, .grid-mural
-th {
+.grid-mural td,
+.grid-mural th {
   text-align: center;
-  padding: 3px;
+  padding: 3px 7px 3px 7px;
 }
 
 .grid-mural th {
