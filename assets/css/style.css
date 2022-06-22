@@ -493,7 +493,7 @@ p {
 
 /* ======== TABELAS ======== */
 
-table {
+.graduacao-tabela > table {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -502,14 +502,14 @@ table {
   border-collapse: collapse;
 }
 
-td,
+.graduacao-tabela td, .graduacao-tabela
 th {
   border: 1px solid var(--golden-color-opaco);
   text-align: center;
   padding: 8px;
 }
 
-th {
+.graduacao-tabela th {
   color: var(--golden-color);
 }
 
@@ -727,6 +727,75 @@ th {
   width: 55%;
   margin: auto;
   margin-top: 1em;
+}
+
+/* ======== GRID MURAL ======== */
+
+.grid-mural {
+  display: grid;
+  max-width: 95%;
+  justify-content: center;
+  margin: auto;
+  grid-template-columns: repeat(auto-fill, 250px);
+  gap: 20px;
+}
+
+.grid-mural > div {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  border: 1px solid var(--golden-color-opaco);
+  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
+    center;
+  background-color: var(--secondary-color-opacity);
+  border-radius: 40px;
+  box-shadow: 0 0 1em black;
+  min-width: 100px;
+  min-height: 100px;
+}
+
+.grid-mural > div > p {
+  text-indent: 4px;
+  display: flex;
+  justify-content: center;
+}
+
+.grid-mural > div > img {
+  max-width: 100px;
+  max-height: 100px;
+  border-radius: 50px;
+  border: solid 2px var(--golden-color);
+  margin-bottom: 10px;
+}
+
+/* .grid-mural > div > img:hover {
+  transform: scale(1.2);
+  transition: all 0.2s ease-in-out;
+} */
+
+.grid-mural h2 {
+  margin-top: 0;
+}
+
+.grid-mural table {
+  display: flex;
+/*   align-items: center; */
+  justify-content: center;
+  margin: auto;
+  width: 90%;
+  border-collapse: collapse;
+}
+
+.grid-mural td, .grid-mural
+th {
+  text-align: center;
+  padding: 3px;
+}
+
+.grid-mural th {
+  color: var(--golden-color);
 }
 
 /* ======== MEDIA QUERYS ======== */
