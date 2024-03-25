@@ -1,0 +1,6 @@
+{
+    "rewrites": [
+      { "source": "/pontos-de-honra", "destination": "/assets/html/progressao/pontos-de-honra.html" }
+    ]
+  }
+  
