@@ -1,5 +1,7 @@
 {
     "rewrites": [
+      { "source": "/home", "destination": "/index.html" },
+
       { "source": "/arqueiro", "destination": "/assets/html/classes/arqueiro.html" },
       { "source": "/barbaro", "destination": "/assets/html/classes/barbaro.html" },
       { "source": "/bonus-nivel-3", "destination": "/assets/html/classes/bonus-nivel-3.html" },
