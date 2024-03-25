@@ -3,7 +3,7 @@
   <section>
   <div class="header-top">
     <div class="header-logo">
-      <a id="logo-anchor" href="/index.html"
+      <a id="logo-anchor" href="/home"
         ><img
           id="logo-ds"
           src="/assets/img/logo-ds-landscape.png"
@@ -46,30 +46,30 @@
           <div class="menu-sub">
             <ul>
               <li>
-                <a href="/assets/html/sobre-nos/quem-somos.html">Quem Somos</a>
+                <a href="/quem-somos">Quem Somos</a>
               </li>
               <li>
-                <a href="/assets/html/sobre-nos/o-que-e-swordplay.html"
+                <a href="/o-que-e-swordplay"
                   >O que é Swordplay?</a
                 >
               </li>
               <li>
-                <a href="/assets/html/sobre-nos/como-participar.html"
+                <a href="/como-participar"
                   >Como Participar</a
                 >
               </li>
               <li>
-                <a href="/assets/html/sobre-nos/historia-do-ds.html"
+                <a href="/historia-do-ds"
                   >História do DS</a
                 >
               </li>
               <li>
-                <a href="/assets/html/sobre-nos/administracao.html"
+                <a href="/administracao"
                   >Administração</a
                 >
               </li>
               <li>
-                <a href="/assets/html/sobre-nos/doacoes.html">Doações</a>
+                <a href="/doacoes">Doações</a>
               </li>
             </ul>
           </div>
