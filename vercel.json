@@ -1,6 +1,49 @@
 {
     "rewrites": [
-      { "source": "/pontos-de-honra", "destination": "/assets/html/progressao/pontos-de-honra.html" }
+      { "source": "/arqueiro", "destination": "/assets/html/classes/arqueiro.html" },
+      { "source": "/barbaro", "destination": "/assets/html/classes/barbaro.html" },
+      { "source": "/bonus-nivel-3", "destination": "/assets/html/classes/bonus-nivel-3.html" },
+      { "source": "/cavaleiro", "destination": "/assets/html/classes/cavaleiro.html" },
+      { "source": "/como-funciona", "destination": "/assets/html/classes/como-funciona.html" },
+      { "source": "/espadachim", "destination": "/assets/html/classes/espadachim.html" },
+      { "source": "/guerreiro", "destination": "/assets/html/classes/guerreiro.html" },
+      { "source": "/hoplita", "destination": "/assets/html/classes/hoplita.html" },
+      { "source": "/lanceiro", "destination": "/assets/html/classes/lanceiro.html" },
+      { "source": "/mentor-de-classe", "destination": "/assets/html/classes/mentor-de-classe.html" },
+      { "source": "/resumo-das-classes", "destination": "/assets/html/classes/resumo-das-classes.html" },
+      { "source": "/sicario", "destination": "/assets/html/classes/sicario.html" },
+      { "source": "/templario", "destination": "/assets/html/classes/templario.html" },
+      { "source": "/viking", "destination": "/assets/html/classes/viking.html" },
+
+      { "source": "/armas-curtas", "destination": "/assets/html/equipamentos/armas-curtas.html" },
+      { "source": "/armas-de-arremesso", "destination": "/assets/html/equipamentos/armas-de-arremesso.html" },
+      { "source": "/armas-longas", "destination": "/assets/html/equipamentos/armas-longas.html" },
+      { "source": "/armas-medias", "destination": "/assets/html/equipamentos/armas-medias.html" },
+      { "source": "/escudos", "destination": "/assets/html/equipamentos/escudos.html" },
+      { "source": "/introducao", "destination": "/assets/html/equipamentos/introducao.html" },
+      { "source": "/longo-alcance", "destination": "/assets/html/equipamentos/longo-alcance.html" },
+      { "source": "/tabela-de-equipamentos", "destination": "/assets/html/equipamentos/tabela-de-equipamentos.html" },
+      { "source": "/vestimentas", "destination": "/assets/html/equipamentos/vestimentas.html" },
+      
+      { "source": "/conquistas", "destination": "/assets/html/progressao/conquistas.html" },
+      { "source": "/mural-de-membros", "destination": "/assets/html/progressao/mural-de-membros.html" },
+      { "source": "/nivel-geral", "destination": "/assets/html/progressao/nivel-geral.html" },
+      { "source": "/novato-x-veterano", "destination": "/assets/html/progressao/novato-x-veterano" },
+      { "source": "/pontos-de-honra", "destination": "/assets/html/progressao/pontos-de-honra.html" },
+
+      { "source": "/codigo-de-conduta", "destination": "/assets/html/regulamentos/codigo-de-conduta.html" },
+      { "source": "/organizacao-dos-treinos", "destination": "/assets/html/regulamentos/organizacao-dos-treinos.html" },
+      { "source": "/regras-de-combate", "destination": "/assets/html/regulamentos/regras-de-combate.html" },
+
+      { "source": "/administracao", "destination": "/assets/html/sobre-nos/administracao.html" },
+      { "source": "/como-participar", "destination": "/assets/html/sobre-nos/como-participar.html" },
+      { "source": "/doacoes", "destination": "/assets/html/sobre-nos/doacoes.html" },
+      { "source": "/historia-do-ds", "destination": "/assets/html/sobre-nos/historia-do-ds.html" },
+      { "source": "/o-que-e-swordplay", "destination": "/assets/html/sobre-nos/o-que-e-swordplay.html" },
+      { "source": "/quem-somos", "destination": "/assets/html/sobre-nos/quem-somos.html" },
+
+      { "source": "/modalidades", "destination": "/assets/html/modalidades.html" },
+      { "source": "/novidades", "destination": "/assets/html/novidades.html" }
     ]
   }
   
