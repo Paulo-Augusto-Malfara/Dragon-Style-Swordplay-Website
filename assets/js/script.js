@@ -159,7 +159,7 @@
                 >
               </li>
               <li>
-                <a href="/pontos-de-honra"
+                <a href="/assets/html/progressao/pontos-de-honra.html"
                   >Pontos de Honra</a
                 >
               </li>
