@@ -80,17 +80,17 @@
           <div class="menu-sub">
             <ul>
               <li>
-                <a href="/assets/html/regulamentos/organizacao-dos-treinos.html"
+                <a href="/organizacao-dos-treinos"
                   >Organização dos Treinos</a
                 >
               </li>
               <li>
-                <a href="/assets/html/regulamentos/codigo-de-conduta.html"
+                <a href="/codigo-de-conduta"
                   >Código de Conduta</a
                 >
               </li>
               <li>
-                <a href="/assets/html/regulamentos/regras-de-combate.html"
+                <a href="/regras-de-combate"
                   >Regras de Combate</a
                 >
               </li>
@@ -103,40 +103,40 @@
           <div class="menu-sub">
             <ul>
               <li>
-                <a href="/assets/html/equipamentos/introducao.html"
+                <a href="/introducao"
                   >Introdução</a
                 >
               </li>
               <li>
-                <a href="/assets/html/equipamentos/armas-curtas.html"
+                <a href="/armas-curtas"
                   >Armas Curtas</a
                 >
               </li>
               <li>
-                <a href="/assets/html/equipamentos/armas-medias.html"
+                <a href="/armas-medias"
                   >Armas Médias</a
                 >
               </li>
               <li>
-                <a href="/assets/html/equipamentos/armas-longas.html"
+                <a href="/armas-longas"
                   >Armas Longas</a
                 >
               </li>
               <li>
-                <a href="/assets/html/equipamentos/longo-alcance.html"
+                <a href="/longo-alcance"
                   >Longo Alcance</a
                 >
               </li>
               <li>
-                <a href="/assets/html/equipamentos/armas-de-arremesso.html"
+                <a href="/armas-de-arremesso"
                   >Armas de Arremesso</a
                 >
               </li>
               <li>
-                <a href="/assets/html/equipamentos/escudos.html">Escudos</a>
+                <a href="/escudos">Escudos</a>
               </li>
               <!--               <li>
-                <a href="/assets/html/equipamentos/vestimentas.html"
+                <a href="/vestimentas"
                   >Vestimentas</a
                 >
               </li> -->
@@ -149,22 +149,22 @@
           <div class="menu-sub">
             <ul>
               <li>
-                <a href="/assets/html/progressao/nivel-geral.html"
+                <a href="/nivel-geral"
                   >Nível Geral e Graduações</a
                 >
               </li>
               <li>
-                <a href="/assets/html/progressao/novato-x-veterano.html"
+                <a href="/novato-x-veterano"
                   >Novato x Veterano</a
                 >
               </li>
               <li>
-                <a href="/assets/html/progressao/pontos-de-honra.html"
+                <a href="/pontos-de-honra"
                   >Pontos de Honra</a
                 >
               </li>
               <!-- <li>
-                <a href="/assets/html/progressao/conquistas.html">Conquistas</a>
+                <a href="/conquistas">Conquistas</a>
               </li> -->
             </ul>
           </div>
@@ -174,63 +174,63 @@
           <div class="menu-sub">
             <ul>
               <li>
-                <a href="/assets/html/classes/como-funciona.html"
+                <a href="/como-funciona"
                   >Como Funciona</a
                 >
               </li>
               <li>
-                <a href="/assets/html/classes/resumo-das-classes.html"
+                <a href="/resumo-das-classes"
                   >Resumo das Classes</a
                 >
               </li>
               <!--               <li>
-                <a href="/assets/html/classes/bonus-nivel-3.html"
+                <a href="/bonus-nivel-3"
                   >Bônus de Nível 3</a
                 >
               </li>
               <li>
-                <a href="/assets/html/classes/mentor-de-classe.html"
+                <a href="/mentor-de-classe"
                   >Mentor de Classe</a
                 >
               </li> -->
               <li>
-                <a href="/assets/html/classes/arqueiro.html">Arqueiro</a>
+                <a href="/arqueiro">Arqueiro</a>
               </li>
               <li>
-                <a href="/assets/html/classes/barbaro.html">Bárbaro</a>
+                <a href="/barbaro">Bárbaro</a>
               </li>
               <li>
-                <a href="/assets/html/classes/cavaleiro.html">Cavaleiro</a>
+                <a href="/cavaleiro">Cavaleiro</a>
               </li>
               <li>
-                <a href="/assets/html/classes/espadachim.html">Espadachim</a>
+                <a href="/espadachim">Espadachim</a>
               </li>
               <li>
-                <a href="/assets/html/classes/guerreiro.html">Guerreiro</a>
+                <a href="/guerreiro">Guerreiro</a>
               </li>
               <li>
-                <a href="/assets/html/classes/hoplita.html">Hoplita</a>
+                <a href="/hoplita">Hoplita</a>
               </li>
               <li>
-                <a href="/assets/html/classes/lanceiro.html">Lanceiro</a>
+                <a href="/lanceiro">Lanceiro</a>
               </li>
               <li>
-                <a href="/assets/html/classes/sicario.html">Sicário</a>
+                <a href="/sicario">Sicário</a>
               </li>
               <li>
-                <a href="/assets/html/classes/templario.html">Templário</a>
+                <a href="/templario">Templário</a>
               </li>
               <li>
-                <a href="/assets/html/classes/viking.html">Viking</a>
+                <a href="/viking">Viking</a>
               </li>
             </ul>
           </div>
         </li>
         <li>
-          <a href="/assets/html/modalidades.html" class="menu-a">Modalidades</a>
+          <a href="/modalidades" class="menu-a">Modalidades</a>
         </li>
         <li>
-          <a href="/assets/html/novidades.html" class="menu-a">Novidades</a>
+          <a href="/novidades" class="menu-a">Novidades</a>
         </li>
       </ul>
     </div>
