@@ -437,6 +437,15 @@ p {
   box-shadow: 0 0 1em black;
 }
 
+.imagem-regras-de-combate {
+  display: flex;
+  margin: auto;
+  margin-top: 1em;
+  margin-bottom: 1em;
+  max-width: 30%;
+  box-shadow: none;
+}
+
 #pagina-anterior-e-seguinte {
   position: relative;
   display: flex;
