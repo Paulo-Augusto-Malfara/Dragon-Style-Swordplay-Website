@@ -3,36 +3,46 @@
     .then((response) => response.text())
     .then((data) => {
       document.getElementById("myHead").innerHTML = data;
+      initResponsiveNavigation();
+      initDinamicModalidades();
     });
 })();
 
 /* RESPONSIVE NAVIGATION MENU */
+function initResponsiveNavigation() {
+  const toggleButton = document.querySelector(".toggle-button");
+  const navbarLinks = document.querySelector(".menu-main");
 
-(function responsiveNavigationMenu() {
-  const toggleButton = document.getElementsByClassName("toggle-button")[0];
-  const navbarLinks = document.getElementsByClassName("menu-main")[0];
-  const toggleButtonActive =
-    document.getElementsByClassName("button-toggle")[0];
-  toggleButton.addEventListener("click", () => {
-    navbarLinks.classList.toggle("active");
-    toggleButtonActive.classList.toggle("active");
-  });
-})();
+  if (toggleButton) {
+    toggleButton.addEventListener("click", () => {
+      if (navbarLinks) navbarLinks.classList.toggle("active");
+      toggleButton.classList.toggle("active");
+    });
+  }
+}
 
-(function dinamicModalidades() {
-  document.addEventListener("click", (evento) => {
-    const el = evento.target;
-    const modalidadesConteudo = document.getElementsByClassName(
-      "modalidades-conteudo"
-    )[document.activeElement.classList.value - 1];
-    const modalidadesH2 =
-      document.getElementsByClassName("h2-bottom-border")[
-        document.activeElement.classList.value - 1
-      ];
-    if (el.classList.contains("modalidades-button")) {
-      modalidadesConteudo.classList.toggle("active-modalidades");
-      modalidadesH2.classList.toggle("active-modalidades");
-    }
-    console.log(document.activeElement.classList.value);
-  });
-})();
+/* DINAMIC MODALIDADES */
+function initDinamicModalidades() {
+    const modalidadesContainer = document.querySelector(".modalidades");
+    if (!modalidadesContainer) return;
+
+    modalidadesContainer.addEventListener("click", (event) => {
+        const button = event.target.closest(".modalidades-button");
+        if (!button) return;
+
+        event.preventDefault();
+
+        const modalidadesBox = button.closest(".modalidades-box");
+        if (!modalidadesBox) return;
+
+        const content = modalidadesBox.querySelector(".modalidades-conteudo");
+        const border = modalidadesBox.querySelector(".h2-bottom-border");
+
+        if (content) {
+            content.classList.toggle("active-modalidades");
+        }
+        if (border) {
+            border.classList.toggle("active-modalidades");
+        }
+    });
+}
