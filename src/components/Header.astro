@@ -1,6 +1,7 @@
 ---
 import NavMenu from "./NavMenu.astro";
 import Icon from "./Icon.astro";
+import AuthLink from "./auth/AuthLink.svelte";
 ---
 
 <section>
@@ -23,6 +24,7 @@ import Icon from "./Icon.astro";
         <a target="_blank" href="https://chat.whatsapp.com/J5KIqI5LsuBLqEecV5Fv34">
           <Icon name="whatsapp" class="header-icon" />
         </a>
+        <AuthLink client:idle />
       </div>
     </div>
   </div>

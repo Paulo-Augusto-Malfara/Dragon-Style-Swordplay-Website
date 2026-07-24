@@ -126,6 +126,31 @@ header {
   color: var(--golden-color);
 }
 
+.auth-link {
+  display: flex;
+  align-items: center;
+  gap: 0.3em;
+  color: var(--golden-color);
+  white-space: nowrap;
+}
+
+.auth-link span {
+  font-family: "Bree Serif", sans-serif;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.auth-link:hover {
+  opacity: 0.75;
+}
+
+@media (max-width: 480px) {
+  .auth-link span {
+    display: none;
+  }
+}
+
 .icon {
   font-size: 32px;
 }
@@ -1176,4 +1201,86 @@ p {
 
 .admin-error {
   color: #e57368;
+}
+
+/* ======== MEMBER DASHBOARD ======== */
+
+.dashboard-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 1em;
+}
+
+.dashboard-loading {
+  text-align: center;
+}
+
+.dashboard-empty {
+  text-align: center;
+  color: var(--text-secondary-color);
+}
+
+.dashboard-profile {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2em;
+  padding: 1.5em;
+  margin-bottom: 1.5em;
+  background: var(--secondary-color-opacity);
+  border: 1px solid var(--golden-color-opaco);
+  border-radius: 12px;
+  box-shadow: 0 0 1em black;
+}
+
+.dashboard-profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1em;
+}
+
+.dashboard-name {
+  font-size: 1.3em;
+  color: var(--text-primary-color);
+  text-shadow: 2px 2px black;
+}
+
+.dashboard-stats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1em;
+}
+
+.dashboard-stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  flex: 1 1 140px;
+  padding: 1em 1.2em;
+  background: var(--box-primary-color);
+  border: 1px solid var(--border-dark-color-2);
+  border-radius: 10px;
+}
+
+.dashboard-stat .label {
+  font-size: 0.75em;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--golden-color);
+}
+
+.dashboard-stat .value {
+  font-size: 1.8em;
+  font-weight: 700;
+  color: var(--text-primary-color);
+  text-shadow: 2px 2px black;
+}
+
+@media (max-width: 480px) {
+  .dashboard-profile-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
