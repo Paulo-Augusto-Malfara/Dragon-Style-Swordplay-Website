@@ -46,7 +46,7 @@ li {
 body {
   color: var(--text-primary-color);
   font-family: "Rubik", sans-serif;
-  background: url(/assets/img/background-definitivo.png) no-repeat center center
+  background: url(/assets/img/background-definitivo.webp) no-repeat center center
     fixed;
   background-size: cover;
 }
@@ -655,7 +655,7 @@ p {
   margin: auto;
   margin-bottom: 2.5rem;
   border: 1px solid var(--golden-color-opaco);
-  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
+  background: url(/assets/img/logo-classes/box-background-flip.webp) no-repeat
     center;
   background-size: cover;
   border-radius: 10px;
@@ -707,7 +707,7 @@ p {
   align-items: center;
   padding: 12px;
   border: 1px solid var(--golden-color-opaco);
-  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
+  background: url(/assets/img/logo-classes/box-background-flip.webp) no-repeat
     center;
   background-color: var(--secondary-color-opacity);
   border-radius: 40px;
@@ -775,7 +775,7 @@ p {
   align-items: center;
   padding: 12px;
   border: 2px solid var(--golden-color-opaco);
-  background: url(/assets/img/logo-classes/box-background-flip.jpg) no-repeat
+  background: url(/assets/img/logo-classes/box-background-flip.webp) no-repeat
     center;
   background-color: var(--secondary-color-opacity);
   border-radius: 10px;
