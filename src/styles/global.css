@@ -823,6 +823,21 @@ p {
   margin-bottom: 10px;
 }
 
+/* ponytail: initials placeholder for DB-backed members with no photo on file --
+   no Storage bucket/upload flow exists yet, real photos are a later addition */
+.mural-avatar {
+  width: 80px;
+  height: 80px;
+  align-items: center;
+  border-radius: 50%;
+  border: solid 2px var(--golden-color);
+  background: var(--box-primary-color);
+  color: var(--golden-color);
+  font-size: 2em;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
 /* .grid-mural > div > img:hover {
   transform: scale(1.2);
   transition: all 0.2s ease-in-out;

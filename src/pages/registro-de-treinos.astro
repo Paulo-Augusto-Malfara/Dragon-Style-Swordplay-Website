@@ -1,0 +1,52 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { supabasePublic } from "../lib/supabase-public";
+
+export const prerender = false;
+
+const { data: registros } = await supabasePublic
+  .from("v_registro_treinos")
+  .select("*")
+  .order("data_treino", { ascending: false })
+  .limit(100);
+---
+
+<PageLayout
+  title="Registro de Treinos"
+  prev={{ href: "/mural-de-membros", label: "Mural de Membros" }}
+  next={{ href: "/novato-x-veterano", label: "Novato x Veterano" }}
+>
+  <section>
+    <p>
+      Confira abaixo os últimos treinos registrados: quem participou, em qual
+      classe, e quem subiu de nível.
+    </p>
+    <br />
+  </section>
+  {(registros ?? []).length === 0 ? (
+    <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
+  ) : (
+    <div class="graduacao-tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nome</th>
+            <th>Classe</th>
+            <th>Subiu de Nível</th>
+          </tr>
+        </thead>
+        <tbody>
+          {(registros ?? []).map((r) => (
+            <tr>
+              <td>{new Date(r.data_treino).toLocaleDateString("pt-BR")}</td>
+              <td>{r.nome}</td>
+              <td>{r.nome_classe}</td>
+              <td>{r.subiu_nivel ? "🔺" : "-"}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )}
+</PageLayout>

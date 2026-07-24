@@ -7,7 +7,7 @@ const urls = [
   "/armas-curtas", "/armas-de-arremesso", "/armas-longas", "/armas-medias",
   "/escudos", "/introducao", "/longo-alcance", "/tabela-de-equipamentos", "/vestimentas",
   "/conquistas", "/mural-de-membros", "/nivel-geral", "/ranking-geral", "/ranking-por-classe",
-  "/novato-x-veterano", "/pontos-de-honra",
+  "/registro-de-treinos", "/novato-x-veterano", "/pontos-de-honra",
   "/codigo-de-conduta", "/organizacao-dos-treinos", "/regras-de-combate",
   "/administracao", "/como-participar", "/doacoes", "/historia-do-ds", "/o-que-e-swordplay", "/quem-somos",
   "/modalidades", "/novidades",
