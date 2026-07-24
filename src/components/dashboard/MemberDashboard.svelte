@@ -6,12 +6,20 @@
   let status = $state<Status>("checking");
   let errorMessage = $state("");
 
-  let nome = $state("");
+  let nomeOficial = $state("");
+  let apelido = $state<string | null>(null);
+  let editingApelido = $state(false);
+  let apelidoInput = $state("");
+  let savingApelido = $state(false);
+  let apelidoError = $state("");
+
   let nivelGeral = $state(0);
   let nomeFaixa = $state<string | null>(null);
   let phTotal = $state(0);
   let porClasse = $state<any[]>([]);
   let historico = $state<any[]>([]);
+
+  const displayName = $derived(apelido || nomeOficial);
 
   async function load() {
     const {
@@ -27,7 +35,7 @@
 
     const { data: membro } = await supabase
       .from("dMembros")
-      .select("id_membro, nome")
+      .select("id_membro, nome, apelido")
       .eq("auth_user_id", session.user.id)
       .single();
 
@@ -36,7 +44,9 @@
       return;
     }
 
-    nome = membro.nome;
+    nomeOficial = membro.nome;
+    apelido = membro.apelido;
+    apelidoInput = membro.apelido ?? "";
 
     const [geral, classes, historia] = await Promise.all([
       supabase.from("v_ranking_nivel_geral").select("*").eq("id_membro", membro.id_membro).single(),
@@ -64,6 +74,26 @@
     status = "ready";
   }
 
+  async function saveApelido(e: SubmitEvent) {
+    e.preventDefault();
+    savingApelido = true;
+    apelidoError = "";
+    const { error } = await supabase.rpc("set_meu_apelido", { novo_apelido: apelidoInput });
+    savingApelido = false;
+    if (error) {
+      apelidoError = error.message;
+      return;
+    }
+    apelido = apelidoInput.trim() || null;
+    editingApelido = false;
+  }
+
+  function cancelApelido() {
+    editingApelido = false;
+    apelidoInput = apelido ?? "";
+    apelidoError = "";
+  }
+
   async function logout() {
     await supabase.auth.signOut();
     window.location.reload();
@@ -86,9 +116,35 @@
   {:else}
     <div class="dashboard-profile">
       <div class="dashboard-profile-header">
-        <p class="dashboard-name">{nome}</p>
+        <p class="dashboard-name">{displayName}</p>
         <button class="btn btn-sm" onclick={logout}>sair</button>
       </div>
+      {#if apelido}
+        <p class="dashboard-official-name">Nome oficial: {nomeOficial}</p>
+      {/if}
+
+      {#if !editingApelido}
+        <button class="btn btn-sm dashboard-nickname-toggle" onclick={() => (editingApelido = true)}>
+          editar apelido
+        </button>
+      {:else}
+        <form class="dashboard-nickname-form" onsubmit={saveApelido}>
+          <input
+            type="text"
+            bind:value={apelidoInput}
+            maxlength="50"
+            placeholder="Deixe em branco para usar o nome oficial"
+          />
+          <button type="submit" class="btn btn-sm btn-primary" disabled={savingApelido}>
+            {savingApelido ? "salvando..." : "salvar"}
+          </button>
+          <button type="button" class="btn btn-sm" onclick={cancelApelido}>cancelar</button>
+        </form>
+        {#if apelidoError}
+          <p class="admin-error">{apelidoError}</p>
+        {/if}
+      {/if}
+
       <div class="dashboard-stats">
         <div class="dashboard-stat">
           <span class="label">Nível Geral</span>
