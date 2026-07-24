@@ -67,7 +67,7 @@
 {#if status === "loading"}
   <p>Carregando...</p>
 {:else}
-  <form onsubmit={save}>
+  <form class="admin-form" onsubmit={save}>
     <label>
       Slug
       <input type="text" bind:value={slug} required pattern="[a-z0-9-]+" />
@@ -96,33 +96,11 @@
       Regras específicas/Variações (um item por linha, opcional)
       <textarea bind:value={variations} rows="4"></textarea>
     </label>
-    <button type="submit" disabled={status === "saving"}>
+    <button type="submit" class="btn btn-primary" disabled={status === "saving"}>
       {status === "saving" ? "Salvando..." : "Salvar"}
     </button>
     {#if status === "error"}
-      <p class="error">{errorMessage}</p>
+      <p class="admin-error">{errorMessage}</p>
     {/if}
   </form>
 {/if}
-
-<style>
-  form {
-    display: flex;
-    flex-direction: column;
-    gap: 1em;
-    max-width: 700px;
-  }
-  label {
-    display: flex;
-    flex-direction: column;
-    gap: 0.3em;
-  }
-  input,
-  textarea {
-    padding: 0.5em;
-    font-family: inherit;
-  }
-  .error {
-    color: red;
-  }
-</style>
