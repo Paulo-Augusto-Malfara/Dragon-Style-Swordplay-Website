@@ -549,9 +549,11 @@ p {
 /* ======== TABELAS ======== */
 
 .graduacao-tabela > table {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  /* ponytail: was display:flex directly on <table>, which only ever "worked" by
+     accident on a table with no <thead>/<tbody> (bare <tr> children stayed in
+     document order). A real thead+tbody structure (required by Svelte's stricter
+     HTML validation) flexes them side by side instead of stacked -- broken table.
+     margin:auto + a width on the table itself is the correct way to center one. */
   margin: auto;
   width: 90%;
   border-collapse: collapse;
@@ -831,8 +833,9 @@ p {
 }
 
 .grid-mural table {
-  display: flex;
-  justify-content: center;
+  /* ponytail: same display:flex-on-<table> footgun as .graduacao-tabela --
+     fixed proactively even though this one isn't visibly broken today (no
+     thead/tbody here yet), see the note above .graduacao-tabela > table */
   margin: auto;
   width: 90%;
   border-collapse: collapse;
