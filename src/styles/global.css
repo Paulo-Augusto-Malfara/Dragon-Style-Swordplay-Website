@@ -1204,6 +1204,8 @@ p {
 
 .admin-error {
   color: #e57368;
+  text-indent: 0;
+  width: auto;
 }
 
 /* ======== MEMBER DASHBOARD ======== */
@@ -1216,10 +1218,14 @@ p {
 
 .dashboard-loading {
   text-align: center;
+  text-indent: 0;
+  width: auto;
 }
 
 .dashboard-empty {
   text-align: center;
+  text-indent: 0;
+  width: auto;
   color: var(--text-secondary-color);
 }
 
@@ -1245,15 +1251,19 @@ p {
 .dashboard-name {
   font-size: 1.6em;
   text-align: center;
+  text-indent: 0;
+  width: auto;
   color: var(--golden-color);
   text-shadow: 2px 2px black;
 }
 
 .dashboard-official-name {
   text-align: center;
+  text-indent: 0;
+  width: auto;
   font-size: 0.85em;
   color: var(--text-secondary-color);
-  margin-top: -0.8em;
+  margin: -0.8em auto 0;
 }
 
 .dashboard-nickname-toggle {
