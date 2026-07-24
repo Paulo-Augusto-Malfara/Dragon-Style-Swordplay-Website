@@ -1,20 +1,14 @@
 ---
-import { getEntry } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
 import Accordion from "../components/Accordion.astro";
+import { supabasePublic } from "../lib/supabase-public";
 
-const slugs = [
-  "apocalipse-zumbi",
-  "arena-gladiador",
-  "batalha-campal",
-  "em-busca-das-caveiras",
-  "captura-de-bandeira",
-  "conquista",
-  "defesa-de-castelo",
-  "fortaleza-do-dragao",
-  "jogos-vorazes",
-];
-const modalidades = await Promise.all(slugs.map((slug) => getEntry("modalidades", slug)));
+export const prerender = false;
+
+const { data: modalidades } = await supabasePublic
+  .from("modalidades")
+  .select("*")
+  .order("id");
 ---
 
 <PageLayout
@@ -44,7 +38,19 @@ const modalidades = await Promise.all(slugs.map((slug) => getEntry("modalidades"
   </section>
   <section>
     <div class="modalidades">
-      {modalidades.map((m) => <Accordion id={m.id} {...m.data} />)}
+      {
+        (modalidades ?? []).map((m) => (
+          <Accordion
+            id={m.slug}
+            title={m.title}
+            descricao={m.description}
+            objetivo={m.objective}
+            pontuacao={m.scoring_respawn}
+            requisitos={m.requirements}
+            variacoes={m.variations}
+          />
+        ))
+      }
     </div>
   </section>
 </PageLayout>

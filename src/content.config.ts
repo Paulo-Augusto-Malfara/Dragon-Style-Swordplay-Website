@@ -60,28 +60,9 @@ const progressaoInfo = defineCollection({
   schema: prosePage,
 });
 
-// ponytail: field names mirror the plan's future Supabase `modalidades` table
-// (slug/title/description/objective/scoring_respawn/requirements/variations)
-// so the Phase 3 DB migration is a straight column mapping, not a redesign
-const modalidades = defineCollection({
-  loader: glob({ pattern: "**/*.mdx", base: "./src/content/modalidades" }),
-  schema: z.object({
-    title: z.string(),
-    descricao: z.array(z.string()),
-    objetivo: z.array(z.string()),
-    pontuacao: z.array(z.string()),
-    requisitos: z.array(z.string()),
-    variacoes: z.array(z.string()).default([]),
-  }),
-});
-
-const novidades = defineCollection({
-  loader: glob({ pattern: "**/*.mdx", base: "./src/content/novidades" }),
-  schema: z.object({
-    title: z.string(),
-    date: z.string(),
-  }),
-});
+// modalidades and novidades moved to Supabase tables in Phase 3 (see
+// src/pages/modalidades.astro, src/pages/novidades.astro) -- no longer
+// static collections.
 
 export const collections = {
   classes,
@@ -89,6 +70,4 @@ export const collections = {
   regulamentos,
   sobreNos,
   progressaoInfo,
-  modalidades,
-  novidades,
 };

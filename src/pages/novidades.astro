@@ -1,11 +1,14 @@
 ---
-import { getCollection, render } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
+import { supabasePublic } from "../lib/supabase-public";
 
-const posts = (await getCollection("novidades")).sort(
-  (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()
-);
-const rendered = await Promise.all(posts.map((post) => render(post)));
+export const prerender = false;
+
+const { data: posts } = await supabasePublic
+  .from("posts")
+  .select("*")
+  .eq("is_published", true)
+  .order("published_at", { ascending: false });
 ---
 
 <PageLayout
@@ -14,14 +17,11 @@ const rendered = await Promise.all(posts.map((post) => render(post)));
   next={{ href: "/home", label: "Início" }}
 >
   {
-    posts.map((post, i) => {
-      const { Content } = rendered[i];
-      return (
-        <section class="news" id={post.data.date}>
-          <h3>{post.data.title}</h3>
-          <Content />
-        </section>
-      );
-    })
+    (posts ?? []).map((post) => (
+      <section class="news" id={post.slug}>
+        <h3>{post.title}</h3>
+        <Fragment set:html={post.body} />
+      </section>
+    ))
   }
 </PageLayout>
