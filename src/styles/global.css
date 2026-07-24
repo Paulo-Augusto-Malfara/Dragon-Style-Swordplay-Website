@@ -1,7 +1,20 @@
-@import url("https://fonts.googleapis.com/css2?family=Quintessential&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Rubik&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Bree+Serif&display=swap");
+/* ponytail: Quintessential/Noto Sans were imported but never referenced anywhere
+   in this stylesheet — dropped instead of self-hosting dead weight. Only the
+   latin subset is fetched below (covers pt-BR accented chars, U+0000-00FF). */
+@font-face {
+  font-family: "Rubik";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/rubik-latin-400.woff2") format("woff2");
+}
+@font-face {
+  font-family: "Bree Serif";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/bree-serif-latin-400.woff2") format("woff2");
+}
 
 :root {
   --primary-color: #121212;
