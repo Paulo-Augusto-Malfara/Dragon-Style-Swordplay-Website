@@ -11,10 +11,11 @@
 
   async function load() {
     loading = true;
-    const { data } = await supabase
+    const query = supabase
       .from(kind)
-      .select("id, slug, title" + (kind === "posts" ? ", is_published" : ""))
-      .order("id");
+      .select("id, slug, title" + (kind === "posts" ? ", is_published, created_at" : ""));
+    const { data } =
+      kind === "posts" ? await query.order("created_at", { ascending: false }) : await query.order("id");
     items = data ?? [];
     loading = false;
   }
