@@ -1,0 +1,140 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+
+interface Membro {
+  id: string;
+  nome: string;
+  img: string;
+  imgAlt: string;
+  nivelGeral: number;
+  ph: number;
+  classes: { nome: string; nivel: number; treinos: number }[];
+}
+
+const organizadores: Membro[] = [
+  {
+    id: "leandro",
+    nome: "Leandro Warick",
+    img: "/assets/img/mural-de-membros/leandro.png",
+    imgAlt: "Imagem Leandro",
+    nivelGeral: 4,
+    ph: 3,
+    classes: [{ nome: "Guerreiro", nivel: 3, treinos: 13 }],
+  },
+  {
+    id: "finegan",
+    nome: 'Felipe "Finegan"',
+    img: "/assets/img/mural-de-membros/finegan.png",
+    imgAlt: "Imagem Finegan",
+    nivelGeral: 4,
+    ph: 3,
+    classes: [{ nome: "Lanceiro", nivel: 3, treinos: 13 }],
+  },
+  {
+    id: "suissida",
+    nome: 'Roberto "Suissida"',
+    img: "/assets/img/mural-de-membros/suissida.png",
+    imgAlt: "Imagem Suissida",
+    nivelGeral: 4,
+    ph: 3,
+    classes: [{ nome: "Arqueiro", nivel: 3, treinos: 13 }],
+  },
+  {
+    id: "papito",
+    nome: 'Paulo "Papito"',
+    img: "/assets/img/mural-de-membros/papito.png",
+    imgAlt: "Imagem Papito",
+    nivelGeral: 4,
+    ph: 3,
+    classes: [
+      { nome: "Guerreiro", nivel: 3, treinos: 12 },
+      { nome: "Hoplita", nivel: 0, treinos: 1 },
+    ],
+  },
+];
+
+const membros: Membro[] = [
+  {
+    id: "will",
+    nome: 'William "Will"',
+    img: "/assets/img/mural-de-membros/will.png",
+    imgAlt: "Imagem Will",
+    nivelGeral: 4,
+    ph: 2,
+    classes: [{ nome: "Lanceiro", nivel: 3, treinos: 13 }],
+  },
+];
+---
+
+<PageLayout title="Mural de Membros">
+  <section>
+    <p>
+      No Mural de Membros é possível conferir todos os membros do Dragon
+      Style e seus respectivos níveis, classes que utiliza, pontos de honra
+      e treinos realizados.
+    </p>
+    <br />
+    <p>
+      Para participar do Mural de Membros é preciso primeiramente se tornar
+      veterano, então ganhará seu próprio card com suas informações.
+    </p>
+    <br />
+  </section>
+  <h2>Organizadores</h2>
+  <br />
+  <section class="grid-mural">
+    {
+      organizadores.map((m) => (
+        <div id={m.id}>
+          <h2>{m.nome}</h2>
+          <img src={m.img} alt={m.imgAlt} />
+          <p><strong class="gold-title">Nível Geral:</strong> {m.nivelGeral}</p>
+          <p><strong class="gold-title">PH's:</strong>{m.ph}</p>
+          <table>
+            <tr>
+              <th>Classe</th>
+              <th>Nível</th>
+              <th>Treinos</th>
+            </tr>
+            {m.classes.map((c) => (
+              <tr>
+                <td>{c.nome}</td>
+                <td>{c.nivel}</td>
+                <td>{c.treinos}</td>
+              </tr>
+            ))}
+          </table>
+        </div>
+      ))
+    }
+  </section>
+  <br />
+  <h2>Membros</h2>
+  <br />
+  <section class="grid-mural">
+    {
+      membros.map((m) => (
+        <div id={m.id}>
+          <h2>{m.nome}</h2>
+          <img src={m.img} alt={m.imgAlt} />
+          <p><strong class="gold-title">Nível Geral:</strong> {m.nivelGeral}</p>
+          <p><strong class="gold-title">PH's:</strong>{m.ph}</p>
+          <table>
+            <tr>
+              <th>Classe</th>
+              <th>Nível</th>
+              <th>Treinos</th>
+            </tr>
+            {m.classes.map((c) => (
+              <tr>
+                <td>{c.nome}</td>
+                <td>{c.nivel}</td>
+                <td>{c.treinos}</td>
+              </tr>
+            ))}
+          </table>
+        </div>
+      ))
+    }
+  </section>
+</PageLayout>
