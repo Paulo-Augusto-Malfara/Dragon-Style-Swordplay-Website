@@ -1224,6 +1224,7 @@ p {
 }
 
 .dashboard-profile {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 1.2em;
@@ -1237,14 +1238,19 @@ p {
 
 .dashboard-profile-header {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1em;
+  justify-content: center;
+}
+
+.dashboard-profile-header .btn {
+  position: absolute;
+  top: 1.5em;
+  right: 1.5em;
 }
 
 .dashboard-name {
-  font-size: 1.3em;
-  color: var(--text-primary-color);
+  font-size: 1.6em;
+  text-align: center;
+  color: var(--golden-color);
   text-shadow: 2px 2px black;
 }
 
@@ -1282,8 +1288,8 @@ p {
 }
 
 @media (max-width: 480px) {
-  .dashboard-profile-header {
-    flex-direction: column;
-    align-items: flex-start;
+  .dashboard-profile-header .btn {
+    top: 1em;
+    right: 1em;
   }
 }
