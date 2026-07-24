@@ -1,0 +1,13 @@
+---
+import { getEntry, render } from "astro:content";
+import PageLayout from "../layouts/PageLayout.astro";
+
+const entry = await getEntry("classes", "barbaro");
+const { Content } = await render(entry);
+---
+
+<PageLayout title={entry.data.title} prev={entry.data.prev} next={entry.data.next}>
+  <div class="classes-individual">
+    <Content />
+  </div>
+</PageLayout>
