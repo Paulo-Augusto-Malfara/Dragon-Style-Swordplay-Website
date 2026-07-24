@@ -1,0 +1,39 @@
+---
+interface Props {
+  id?: string;
+  title: string;
+  descricao: string[];
+  objetivo: string[];
+  pontuacao: string[];
+  requisitos: string[];
+  variacoes?: string[];
+}
+const { id, title, descricao, objetivo, pontuacao, requisitos, variacoes = [] } = Astro.props;
+---
+
+<details id={id} class="modalidades-box">
+  <summary><h2 class="modalidades-button">{title}</h2></summary>
+  <div class="h2-bottom-border"></div>
+  <div class="modalidades-conteudo">
+    <h3>Descrição</h3>
+    {descricao.map((p, i) => (
+      <>
+        <p>{p}</p>
+        {i < descricao.length - 1 && <br />}
+      </>
+    ))}
+    <h3>Objetivo/Condição de Vitória</h3>
+    {objetivo.map((p) => <p>{p}</p>)}
+    <h3>Sistema de Pontuação/Respawn</h3>
+    {pontuacao.map((p) => <p>{p}</p>)}
+    <h3>Requisitos/Armas Permitidas</h3>
+    {requisitos.map((p) => <p>{p}</p>)}
+    {variacoes.length > 0 && (
+      <>
+        <h3>Regras específicas/Variações</h3>
+        {variacoes.map((p) => <p>{p}</p>)}
+      </>
+    )}
+    <br />
+  </div>
+</details>

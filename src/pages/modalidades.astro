@@ -1,0 +1,50 @@
+---
+import { getEntry } from "astro:content";
+import PageLayout from "../layouts/PageLayout.astro";
+import Accordion from "../components/Accordion.astro";
+
+const slugs = [
+  "apocalipse-zumbi",
+  "arena-gladiador",
+  "batalha-campal",
+  "em-busca-das-caveiras",
+  "captura-de-bandeira",
+  "conquista",
+  "defesa-de-castelo",
+  "fortaleza-do-dragao",
+  "jogos-vorazes",
+];
+const modalidades = await Promise.all(slugs.map((slug) => getEntry("modalidades", slug)));
+---
+
+<PageLayout
+  title="modalidades"
+  prev={{ href: "/viking", label: "Viking" }}
+  next={{ href: "/novidades", label: "Novidades" }}
+>
+  <section>
+    <p>
+      As modalidades são jogos que buscam trazer uma maior dinâmica para os
+      combates. Alguns grupos chamam também de Jogos de Combate.
+    </p>
+    <br />
+    <p>
+      Cada modalidade costuma ter suas próprias regras para viabilizar o
+      tema ou proposta da mesma. Os membros frequentemente sugerem novas
+      modalidades e nós costumamos colocá-las em teste, eventualmente essas
+      modalidades acabam entrando em nossa lista.
+    </p>
+    <br />
+    <p>
+      Abaixo você pode conferir as modalidades que o Dragon Style costuma
+      utilizar em seus treinos, para acessar o conteúdo delas, basta clicar
+      no nome.
+    </p>
+    <br />
+  </section>
+  <section>
+    <div class="modalidades">
+      {modalidades.map((m) => <Accordion id={m.id} {...m.data} />)}
+    </div>
+  </section>
+</PageLayout>

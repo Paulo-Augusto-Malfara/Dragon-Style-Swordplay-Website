@@ -573,18 +573,16 @@ p {
   text-indent: 1em;
 }
 
-.modalidades-conteudo {
+/* ponytail: native <details>/<summary> handles show/hide, no JS toggle class needed */
+.modalidades-box summary {
+  cursor: pointer;
+  list-style: none;
+}
+.modalidades-box summary::-webkit-details-marker {
   display: none;
 }
 
-.h2-bottom-border.active-modalidades {
-  border-bottom: none;
-}
-
-.modalidades-conteudo.active-modalidades {
-  display: block;
-  visibility: visible;
-  transition: all 0.3s ease-in-out;
+.modalidades-conteudo {
   border-width: 0 0 1px 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(

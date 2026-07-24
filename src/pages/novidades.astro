@@ -1,0 +1,27 @@
+---
+import { getCollection, render } from "astro:content";
+import PageLayout from "../layouts/PageLayout.astro";
+
+const posts = (await getCollection("novidades")).sort(
+  (a, b) => new Date(b.data.date).valueOf() - new Date(a.data.date).valueOf()
+);
+const rendered = await Promise.all(posts.map((post) => render(post)));
+---
+
+<PageLayout
+  title="Novidades"
+  prev={{ href: "/modalidades", label: "Modalidades" }}
+  next={{ href: "/home", label: "Início" }}
+>
+  {
+    posts.map((post, i) => {
+      const { Content } = rendered[i];
+      return (
+        <section class="news" id={post.data.date}>
+          <h3>{post.data.title}</h3>
+          <Content />
+        </section>
+      );
+    })
+  }
+</PageLayout>
