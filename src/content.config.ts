@@ -39,4 +39,15 @@ const equipamentos = defineCollection({
   }),
 });
 
-export const collections = { classes, equipamentos };
+const prosePage = z.object({
+  title: z.string(),
+  prev: navLink,
+  next: navLink,
+});
+
+const regulamentos = defineCollection({
+  loader: glob({ pattern: "**/*.mdx", base: "./src/content/regulamentos" }),
+  schema: prosePage,
+});
+
+export const collections = { classes, equipamentos, regulamentos };
