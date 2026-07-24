@@ -1,0 +1,11 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import LoginForm from "../../components/admin/LoginForm.svelte";
+
+export const prerender = false;
+---
+
+<BaseLayout title="Login - Admin">
+  <h1>Acesso Administrativo</h1>
+  <LoginForm client:load />
+</BaseLayout>

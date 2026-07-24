@@ -1,0 +1,13 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import PostEditor from "../../../components/admin/PostEditor.svelte";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Admin - Novidade">
+  <h1>{id === "new" ? "Nova Novidade" : "Editar Novidade"}</h1>
+  <PostEditor id={id} client:load />
+</BaseLayout>

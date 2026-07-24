@@ -1,0 +1,19 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminList from "../../components/admin/AdminList.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+---
+
+<BaseLayout title="Admin">
+  <h1>Painel Administrativo</h1>
+  <p>Logado como {membro.nome}</p>
+
+  <h2>Novidades</h2>
+  <AdminList kind="posts" client:load />
+
+  <h2>Modalidades</h2>
+  <AdminList kind="modalidades" client:load />
+</BaseLayout>

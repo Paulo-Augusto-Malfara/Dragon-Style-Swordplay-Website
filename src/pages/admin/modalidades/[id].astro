@@ -1,0 +1,13 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import ModalidadeEditor from "../../../components/admin/ModalidadeEditor.svelte";
+
+export const prerender = false;
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Admin - Modalidade">
+  <h1>{id === "new" ? "Nova Modalidade" : "Editar Modalidade"}</h1>
+  <ModalidadeEditor id={id} client:load />
+</BaseLayout>
