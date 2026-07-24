@@ -21,6 +21,7 @@
 
   async function remove(id: number) {
     if (!confirm("Excluir este item?")) return;
+    if (!confirm("Essa ação não pode ser desfeita. Confirma a exclusão?")) return;
     await supabase.from(kind).delete().eq("id", id);
     await load();
   }
@@ -36,35 +37,21 @@
 {#if loading}
   <p>Carregando...</p>
 {:else}
-  <ul>
+  <ul class="admin-list">
     {#each items as item}
       <li>
         <span>{item.title}</span>
-        <a href={`/admin/${kind}/${item.id}`}>editar</a>
+        <a href={`/admin/${kind}/${item.id}`} class="btn btn-sm">editar</a>
         {#if kind === "posts"}
-          <button onclick={() => togglePublish(item)}>
+          <button class="btn btn-sm" onclick={() => togglePublish(item)}>
             {item.is_published ? "despublicar" : "publicar"}
           </button>
         {/if}
-        <button onclick={() => remove(item.id)}>excluir</button>
+        <button class="btn btn-sm btn-danger" onclick={() => remove(item.id)}>excluir</button>
       </li>
     {/each}
   </ul>
 {/if}
-<a href={`/admin/${kind}/new`}>+ novo</a>
-
-<style>
-  ul {
-    list-style: none;
-  }
-  li {
-    display: flex;
-    gap: 1em;
-    align-items: center;
-    padding: 0.5em 0;
-    border-bottom: 1px solid var(--border-dark-color);
-  }
-  li span {
-    flex: 1;
-  }
-</style>
+<div class="admin-list-actions">
+  <a href={`/admin/${kind}/new`} class="btn btn-primary">+ novo</a>
+</div>
