@@ -1,0 +1,69 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { supabasePublic } from "../lib/supabase-public";
+
+export const prerender = false;
+
+const { data } = await supabasePublic
+  .from("v_ranking_por_classe")
+  .select("*")
+  .order("treinos_por_classe", { ascending: false });
+
+const porClasse = new Map<string, { id_classe: number; rows: typeof data }>();
+for (const row of data ?? []) {
+  if (!porClasse.has(row.nome_classe)) {
+    porClasse.set(row.nome_classe, { id_classe: row.id_classe, rows: [] });
+  }
+  porClasse.get(row.nome_classe)!.rows!.push(row);
+}
+
+const classes = [...porClasse.entries()].sort(([, a], [, b]) => {
+  const aBasico = a.id_classe === 11;
+  const bBasico = b.id_classe === 11;
+  if (aBasico !== bBasico) return aBasico ? 1 : -1;
+  return a.id_classe - b.id_classe;
+});
+---
+
+<PageLayout
+  title="Ranking por Classe"
+  prev={{ href: "/ranking-geral", label: "Ranking Geral" }}
+  next={{ href: "/novato-x-veterano", label: "Novato x Veterano" }}
+>
+  <section>
+    <p>
+      Confira abaixo o ranking de cada classe, ordenado pelo número de
+      treinos registrados.
+    </p>
+    <br />
+  </section>
+  {
+    classes.map(([nomeClasse, { rows }]) => (
+      <>
+        <h2>{nomeClasse}</h2>
+        <div class="graduacao-tabela">
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nome</th>
+                <th>Nível</th>
+                <th>Treinos</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows!.map((m, i) => (
+                <tr>
+                  <td>{i + 1}</td>
+                  <td>{m.nome}</td>
+                  <td>{m.nivel_por_classe}</td>
+                  <td>{m.treinos_por_classe}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </>
+    ))
+  }
+</PageLayout>

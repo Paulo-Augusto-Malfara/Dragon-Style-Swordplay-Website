@@ -1,0 +1,49 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { supabasePublic } from "../lib/supabase-public";
+
+export const prerender = false;
+
+const { data: ranking } = await supabasePublic
+  .from("v_ranking_nivel_geral")
+  .select("*")
+  .order("nivel_geral", { ascending: false });
+---
+
+<PageLayout
+  title="Ranking Geral"
+  prev={{ href: "/nivel-geral", label: "Nível Geral" }}
+  next={{ href: "/ranking-por-classe", label: "Ranking por Classe" }}
+>
+  <section>
+    <p>
+      Confira abaixo o ranking geral de todos os membros veteranos do Dragon
+      Style, ordenado do maior para o menor Nível Geral.
+    </p>
+    <br />
+  </section>
+  <div class="graduacao-tabela">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome</th>
+          <th>Nível Geral</th>
+          <th>Faixa</th>
+          <th>Pontos de Honra</th>
+        </tr>
+      </thead>
+      <tbody>
+        {(ranking ?? []).map((m, i) => (
+          <tr>
+            <td>{i + 1}</td>
+            <td>{m.nome}</td>
+            <td>{m.nivel_geral}</td>
+            <td>{m.nome_faixa ?? "-"}</td>
+            <td>{m.ph_total}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </div>
+</PageLayout>
