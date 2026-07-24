@@ -7,22 +7,17 @@ export const prerender = false;
 const { data } = await supabasePublic
   .from("v_ranking_por_classe")
   .select("*")
+  .neq("id_classe", 11) // Básico is a veterano gate, not a rankable class
   .order("treinos_por_classe", { ascending: false });
 
-const porClasse = new Map<string, { id_classe: number; rows: typeof data }>();
+const porClasse = new Map<string, typeof data>();
 for (const row of data ?? []) {
-  if (!porClasse.has(row.nome_classe)) {
-    porClasse.set(row.nome_classe, { id_classe: row.id_classe, rows: [] });
-  }
-  porClasse.get(row.nome_classe)!.rows!.push(row);
+  if (!porClasse.has(row.nome_classe)) porClasse.set(row.nome_classe, []);
+  porClasse.get(row.nome_classe)!.push(row);
 }
 
-const classes = [...porClasse.entries()].sort(([, a], [, b]) => {
-  const aBasico = a.id_classe === 11;
-  const bBasico = b.id_classe === 11;
-  if (aBasico !== bBasico) return aBasico ? 1 : -1;
-  return a.id_classe - b.id_classe;
-});
+const classes = [...porClasse.entries()].sort(([a], [b]) => a.localeCompare(b));
+const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 ---
 
 <PageLayout
@@ -33,37 +28,41 @@ const classes = [...porClasse.entries()].sort(([, a], [, b]) => {
   <section>
     <p>
       Confira abaixo o ranking de cada classe, ordenado pelo número de
-      treinos registrados.
+      treinos registrados. Clique no nome de uma classe para abrir o
+      ranking dela.
     </p>
     <br />
   </section>
+  <nav class="ranking-quick-nav">
+    {classes.map(([nomeClasse]) => (
+      <a href={`#classe-${slug(nomeClasse)}`} class="btn btn-sm">{nomeClasse}</a>
+    ))}
+  </nav>
   {
-    classes.map(([nomeClasse, { rows }]) => (
-      <>
-        <h2>{nomeClasse}</h2>
-        <div class="graduacao-tabela">
-          <table>
-            <thead>
+    classes.map(([nomeClasse, rows]) => (
+      <details class="ranking-classe" id={`classe-${slug(nomeClasse)}`}>
+        <summary><h2>{nomeClasse}</h2></summary>
+        <table class="ranking-tabela">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th class="col-nome">Nome</th>
+              <th>Nível</th>
+              <th>Treinos</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows!.map((m, i) => (
               <tr>
-                <th>#</th>
-                <th>Nome</th>
-                <th>Nível</th>
-                <th>Treinos</th>
+                <td>{i + 1}</td>
+                <td class="col-nome">{m.nome}</td>
+                <td>{m.nivel_por_classe}</td>
+                <td>{m.treinos_por_classe}</td>
               </tr>
-            </thead>
-            <tbody>
-              {rows!.map((m, i) => (
-                <tr>
-                  <td>{i + 1}</td>
-                  <td>{m.nome}</td>
-                  <td>{m.nivel_por_classe}</td>
-                  <td>{m.treinos_por_classe}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </>
+            ))}
+          </tbody>
+        </table>
+      </details>
     ))
   }
 </PageLayout>

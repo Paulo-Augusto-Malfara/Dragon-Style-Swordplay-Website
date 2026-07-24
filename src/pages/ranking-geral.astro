@@ -17,33 +17,33 @@ const { data: ranking } = await supabasePublic
 >
   <section>
     <p>
-      Confira abaixo o ranking geral de todos os membros veteranos do Dragon
-      Style, ordenado do maior para o menor Nível Geral.
+      Confira abaixo o ranking geral de todos os membros do Dragon Style,
+      ordenado do maior para o menor Nível Geral.
     </p>
     <br />
   </section>
-  <div class="graduacao-tabela">
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Nome</th>
-          <th>Nível Geral</th>
-          <th>Faixa</th>
-          <th>Pontos de Honra</th>
-        </tr>
-      </thead>
-      <tbody>
-        {(ranking ?? []).map((m, i) => (
+  <table class="ranking-tabela">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th class="col-nome">Nome</th>
+        <th>Nível Geral</th>
+        <th>Faixa</th>
+        <th>Pontos de Honra</th>
+      </tr>
+    </thead>
+    <tbody>
+      {
+        (ranking ?? []).map((m, i) => (
           <tr>
             <td>{i + 1}</td>
-            <td>{m.nome}</td>
+            <td class="col-nome">{m.nome}</td>
             <td>{m.nivel_geral}</td>
             <td>{m.nome_faixa ?? "-"}</td>
             <td>{m.ph_total}</td>
           </tr>
-        ))}
-      </tbody>
-    </table>
-  </div>
+        ))
+      }
+    </tbody>
+  </table>
 </PageLayout>

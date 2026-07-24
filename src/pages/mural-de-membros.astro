@@ -7,12 +7,20 @@ export const prerender = false;
 const { data } = await supabasePublic
   .from("v_ranking_nivel_geral")
   .select("*")
+  .eq("status_ativo", true)
   .gte("nivel_geral", 1)
   .order("nivel_geral", { ascending: false });
 
 const veteranos = data ?? [];
-const organizadores = veteranos.filter((m) => m.is_organizador);
-const membros = veteranos.filter((m) => !m.is_organizador);
+const organizadores = veteranos.filter((m) => m.auth_level <= 2);
+const staff = veteranos.filter((m) => m.auth_level === 3);
+const membros = veteranos.filter((m) => m.auth_level === null || m.auth_level >= 4);
+
+const grupos = [
+  { titulo: "Organizadores", lista: organizadores },
+  { titulo: "Staff", lista: staff },
+  { titulo: "Membros", lista: membros },
+].filter((g) => g.lista.length > 0);
 ---
 
 <PageLayout
@@ -22,8 +30,9 @@ const membros = veteranos.filter((m) => !m.is_organizador);
 >
   <section>
     <p>
-      No Mural de Membros é possível conferir todos os membros veteranos do
-      Dragon Style e seus respectivos níveis, faixa e pontos de honra.
+      No Mural de Membros é possível conferir todos os membros ativos e
+      veteranos do Dragon Style e seus respectivos níveis, faixa e pontos
+      de honra.
     </p>
     <br />
     <p>
@@ -33,40 +42,26 @@ const membros = veteranos.filter((m) => !m.is_organizador);
     <br />
   </section>
 
-  {organizadores.length > 0 && (
-    <>
-      <h2>Organizadores</h2>
-      <br />
-      <section class="grid-mural">
-        {organizadores.map((m) => (
-          <div>
-            <p class="mural-avatar">{m.nome.charAt(0).toUpperCase()}</p>
-            <h2>{m.nome}</h2>
-            <p><strong class="gold-title">Nível Geral:</strong> {m.nivel_geral}</p>
-            <p><strong class="gold-title">Faixa:</strong> {m.nome_faixa ?? "-"}</p>
-            <p><strong class="gold-title">PH's:</strong> {m.ph_total}</p>
-          </div>
-        ))}
-      </section>
-      <br />
-    </>
-  )}
-
-  <h2>Membros</h2>
-  <br />
-  {membros.length === 0 ? (
+  {grupos.length === 0 ? (
     <p class="dashboard-empty">Nenhum membro veterano registrado ainda.</p>
   ) : (
-    <section class="grid-mural">
-      {membros.map((m) => (
-        <div>
-          <p class="mural-avatar">{m.nome.charAt(0).toUpperCase()}</p>
-          <h2>{m.nome}</h2>
-          <p><strong class="gold-title">Nível Geral:</strong> {m.nivel_geral}</p>
-          <p><strong class="gold-title">Faixa:</strong> {m.nome_faixa ?? "-"}</p>
-          <p><strong class="gold-title">PH's:</strong> {m.ph_total}</p>
-        </div>
-      ))}
-    </section>
+    grupos.map(({ titulo, lista }) => (
+      <>
+        <h2>{titulo}</h2>
+        <br />
+        <section class="grid-mural">
+          {lista.map((m) => (
+            <div>
+              <p class="mural-avatar">{m.nome.charAt(0).toUpperCase()}</p>
+              <h2>{m.nome}</h2>
+              <p><strong class="gold-title">Nível Geral:</strong> {m.nivel_geral}</p>
+              <p><strong class="gold-title">Faixa:</strong> {m.nome_faixa ?? "-"}</p>
+              <p><strong class="gold-title">PH's:</strong> {m.ph_total}</p>
+            </div>
+          ))}
+        </section>
+        <br />
+      </>
+    ))
   )}
 </PageLayout>

@@ -1223,6 +1223,68 @@ p {
   width: auto;
 }
 
+/* ======== RANKING TABLES ======== */
+
+/* ponytail: unlike .graduacao-tabela (width:90%, stretched -- fine for an
+   8-row belt table), ranking tables list many people and looked absurdly
+   wide stretched to 90% of the page. Sized to content instead, with a
+   shared name-column width (39 chars = longest nome in dMembros) so it
+   doesn't visibly jump between ranking-geral/por-classe/mural. */
+.ranking-tabela {
+  margin: 1em auto;
+  border-collapse: collapse;
+  max-width: 100%;
+}
+
+.ranking-tabela td,
+.ranking-tabela th {
+  border: 1px solid var(--golden-color-opaco);
+  text-align: center;
+  padding: 8px 16px;
+  white-space: nowrap;
+}
+
+.ranking-tabela th {
+  color: var(--golden-color);
+}
+
+.ranking-tabela .col-nome {
+  min-width: 40ch;
+  text-align: left;
+  white-space: normal;
+}
+
+.ranking-quick-nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.6em;
+  margin: 1em auto 2em;
+}
+
+.ranking-classe {
+  max-width: 900px;
+  margin: 0 auto 1.5em;
+}
+
+.ranking-classe > summary {
+  cursor: pointer;
+  list-style: none;
+}
+.ranking-classe > summary::-webkit-details-marker {
+  display: none;
+}
+
+@media (max-width: 480px) {
+  .ranking-tabela .col-nome {
+    min-width: 20ch;
+  }
+  .ranking-tabela td,
+  .ranking-tabela th {
+    padding: 6px 8px;
+  }
+}
+
 /* ======== MEMBER DASHBOARD ======== */
 
 .dashboard-container {
