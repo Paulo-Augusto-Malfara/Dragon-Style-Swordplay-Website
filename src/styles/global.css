@@ -1236,12 +1236,7 @@ p {
   box-shadow: 0 0 1em black;
 }
 
-.dashboard-profile-header {
-  display: flex;
-  justify-content: center;
-}
-
-.dashboard-profile-header .btn {
+.dashboard-logout {
   position: absolute;
   top: 1.5em;
   right: 1.5em;
@@ -1322,7 +1317,7 @@ p {
 }
 
 @media (max-width: 480px) {
-  .dashboard-profile-header .btn {
+  .dashboard-logout {
     top: 1em;
     right: 1em;
   }

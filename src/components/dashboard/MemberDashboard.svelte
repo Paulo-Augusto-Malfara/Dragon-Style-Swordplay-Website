@@ -115,10 +115,8 @@
     <p class="admin-error">{errorMessage}</p>
   {:else}
     <div class="dashboard-profile">
-      <div class="dashboard-profile-header">
-        <p class="dashboard-name">{displayName}</p>
-        <button class="btn btn-sm" onclick={logout}>sair</button>
-      </div>
+      <button class="btn btn-sm dashboard-logout" onclick={logout}>sair</button>
+      <p class="dashboard-name">{displayName}</p>
       {#if apelido}
         <p class="dashboard-official-name">Nome oficial: {nomeOficial}</p>
       {/if}
