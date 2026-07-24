@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { supabase } from "../../lib/supabase-browser";
-
   interface Props {
     redirectPath?: string;
   }
@@ -13,6 +11,11 @@
   async function submit(e: SubmitEvent) {
     e.preventDefault();
     status = "sending";
+    // ponytail: dynamic import, not a top-level one -- this component is used
+    // inside dashboard.astro, a fully static page. A static import would
+    // evaluate createBrowserClient() during Astro's SSR pass at build time,
+    // which crashes the whole build if the Supabase env vars aren't set then.
+    const { supabase } = await import("../../lib/supabase-browser");
     const callback = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectPath)}`;
     const { error } = await supabase.auth.signInWithOtp({
       email,

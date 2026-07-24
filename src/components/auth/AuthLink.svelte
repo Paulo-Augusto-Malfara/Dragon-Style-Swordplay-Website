@@ -1,9 +1,17 @@
 <script lang="ts">
-  import { supabase } from "../../lib/supabase-browser";
+  import { onMount } from "svelte";
 
   let label = $state("Login");
 
-  async function check() {
+  onMount(async () => {
+    // ponytail: Header.astro (and this island) render on every page, including
+    // the 40 pages that are prerendered at build time -- Astro SSRs a Svelte
+    // island once to produce that static HTML even for client:idle. Importing
+    // the Supabase client at module scope ran createBrowserClient() during
+    // that SSR pass too, which crashed the whole build if the Supabase env
+    // vars weren't set at build time. Deferring the import into onMount means
+    // this only ever runs in an actual browser, after hydration.
+    const { supabase } = await import("../../lib/supabase-browser");
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -15,9 +23,7 @@
       .eq("auth_user_id", session.user.id)
       .single();
     label = membro?.nome?.split(" ")[0] ?? "Minha Conta";
-  }
-
-  check();
+  });
 </script>
 
 <a href="/dashboard" class="auth-link">

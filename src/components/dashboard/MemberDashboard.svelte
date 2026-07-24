@@ -1,6 +1,16 @@
 <script lang="ts">
-  import { supabase } from "../../lib/supabase-browser";
+  import { onMount } from "svelte";
   import LoginForm from "../auth/LoginForm.svelte";
+
+  // ponytail: dynamic import, not a top-level one -- this component is used
+  // inside dashboard.astro, a fully static page. A static import evaluates
+  // createBrowserClient() during Astro's SSR pass at build time, which
+  // crashed the whole build when the Supabase env vars weren't set then.
+  let supabasePromise: Promise<any> | undefined;
+  function getSupabase() {
+    supabasePromise ??= import("../../lib/supabase-browser").then((m) => m.supabase);
+    return supabasePromise;
+  }
 
   type Status = "checking" | "unauthenticated" | "loading" | "ready" | "no-member" | "error";
   let status = $state<Status>("checking");
@@ -22,6 +32,7 @@
   const displayName = $derived(apelido || nomeOficial);
 
   async function load() {
+    const supabase = await getSupabase();
     const {
       data: { session },
     } = await supabase.auth.getSession();
@@ -78,6 +89,7 @@
     e.preventDefault();
     savingApelido = true;
     apelidoError = "";
+    const supabase = await getSupabase();
     const { error } = await supabase.rpc("set_meu_apelido", { novo_apelido: apelidoInput });
     savingApelido = false;
     if (error) {
@@ -95,11 +107,12 @@
   }
 
   async function logout() {
+    const supabase = await getSupabase();
     await supabase.auth.signOut();
     window.location.reload();
   }
 
-  load();
+  onMount(load);
 </script>
 
 <div class="dashboard-container">
