@@ -1,0 +1,31 @@
+---
+import NavMenu from "./NavMenu.astro";
+import Icon from "./Icon.astro";
+---
+
+<section>
+  <div class="header-top">
+    <div class="header-logo">
+      <a id="logo-anchor" href="/home">
+        <img
+          id="logo-ds"
+          src="/assets/img/logo-ds-landscape.png"
+          alt="Logo do Dragon Style Swordplay e Eventos"
+        />
+      </a>
+      <div id="header-icons-div">
+        <a target="_blank" href="https://www.facebook.com/groups/227828760657044">
+          <Icon name="facebook" class="header-icon" />
+        </a>
+        <a target="_blank" href="https://instagram.com/ds.swordplay?igshid=YmMyMTA2M2Y=">
+          <Icon name="instagram" class="header-icon" />
+        </a>
+        <a target="_blank" href="https://chat.whatsapp.com/J5KIqI5LsuBLqEecV5Fv34">
+          <Icon name="whatsapp" class="header-icon" />
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<NavMenu />

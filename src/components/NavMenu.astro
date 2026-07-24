@@ -1,0 +1,89 @@
+---
+const menu = [
+  {
+    label: "Sobre Nós",
+    items: [
+      { href: "/quem-somos", label: "Quem Somos" },
+      { href: "/o-que-e-swordplay", label: "O que é Swordplay?" },
+      { href: "/como-participar", label: "Como Participar" },
+      { href: "/historia-do-ds", label: "História do DS" },
+      { href: "/administracao", label: "Administração" },
+      { href: "/doacoes", label: "Doações" },
+    ],
+  },
+  {
+    label: "Regulamentos",
+    items: [
+      { href: "/organizacao-dos-treinos", label: "Organização dos Treinos" },
+      { href: "/codigo-de-conduta", label: "Código de Conduta" },
+      { href: "/regras-de-combate", label: "Regras de Combate" },
+    ],
+  },
+  {
+    label: "Equipamentos",
+    items: [
+      { href: "/introducao", label: "Introdução" },
+      { href: "/armas-curtas", label: "Armas Curtas" },
+      { href: "/armas-medias", label: "Armas Médias" },
+      { href: "/armas-longas", label: "Armas Longas" },
+      { href: "/longo-alcance", label: "Longo Alcance" },
+      { href: "/armas-de-arremesso", label: "Armas de Arremesso" },
+      { href: "/escudos", label: "Escudos" },
+    ],
+  },
+  {
+    label: "Progressão",
+    items: [
+      { href: "/nivel-geral", label: "Nível Geral e Graduações" },
+      { href: "/novato-x-veterano", label: "Novato x Veterano" },
+      { href: "/pontos-de-honra", label: "Pontos de Honra" },
+    ],
+  },
+  {
+    label: "Classes",
+    items: [
+      { href: "/como-funciona", label: "Como Funciona" },
+      { href: "/resumo-das-classes", label: "Resumo das Classes" },
+      { href: "/arqueiro", label: "Arqueiro" },
+      { href: "/barbaro", label: "Bárbaro" },
+      { href: "/cavaleiro", label: "Cavaleiro" },
+      { href: "/espadachim", label: "Espadachim" },
+      { href: "/guerreiro", label: "Guerreiro" },
+      { href: "/hoplita", label: "Hoplita" },
+      { href: "/lanceiro", label: "Lanceiro" },
+      { href: "/sicario", label: "Sicário" },
+      { href: "/templario", label: "Templário" },
+      { href: "/viking", label: "Viking" },
+    ],
+  },
+];
+---
+
+<section>
+  <nav class="nav">
+    <div class="container">
+      <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox" />
+      <label for="nav-toggle" class="toggle-button">MENU</label>
+      <ul class="menu-main">
+        {
+          menu.map((group) => (
+            <li>
+              <a class="menu-a">{group.label}</a>
+              <div class="menu-sub">
+                <ul>
+                  {group.items.map((item) => (
+                    <li>
+                      <a href={item.href}>{item.label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </li>
+          ))
+        }
+        <li><a href="/modalidades" class="menu-a">Modalidades</a></li>
+        <li><a href="/novidades" class="menu-a">Novidades</a></li>
+      </ul>
+    </div>
+  </nav>
+</section>

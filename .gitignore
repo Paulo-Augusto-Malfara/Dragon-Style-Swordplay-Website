@@ -91,6 +91,9 @@ dist
 # vuepress build output
 .vuepress/dist
 
+# Astro build cache
+.astro/
+
 # Serverless directories
 .serverless/
 

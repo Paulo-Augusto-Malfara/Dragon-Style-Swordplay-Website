@@ -113,7 +113,7 @@ header {
   color: var(--golden-color);
 }
 
-ion-icon {
+.icon {
   font-size: 32px;
 }
 
@@ -235,6 +235,13 @@ ion-icon {
 
 /* ======== RESPONSIVE NAVIGATION MENU ======== */
 
+/* ponytail: checkbox-hack replaces the click-listener JS — no JS needed for the mobile toggle */
+.nav-toggle-checkbox {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .toggle-button {
   font-family: "Bree Serif", sans-serif;
   color: white;
@@ -242,6 +249,7 @@ ion-icon {
   align-content: center;
   justify-content: center;
   display: none;
+  cursor: pointer;
 }
 
 @media (max-width: 860px) {
@@ -249,7 +257,7 @@ ion-icon {
     display: flex;
   }
 
-  .toggle-button.active {
+  .nav-toggle-checkbox:checked ~ .toggle-button {
     color: var(--golden-color);
   }
 
@@ -275,7 +283,7 @@ ion-icon {
     border-bottom: none;
   }
 
-  .menu-main.active {
+  .nav-toggle-checkbox:checked ~ .menu-main {
     display: flex;
   }
 
@@ -453,11 +461,11 @@ p {
   padding: 0.5em;
 }
 
-.pagina-anterior ion-icon {
+.pagina-anterior .icon {
   color: var(--golden-color);
   padding: 0 0.3em;
 }
-.pagina-seguinte ion-icon {
+.pagina-seguinte .icon {
   color: var(--golden-color);
   padding: 0 0 0 0.3em;
 }
@@ -860,7 +868,7 @@ p {
 }
 
 @media (max-width: 580px) {
-  ion-icon {
+  .icon {
     font-size: 16px;
   }
   #header-icons-div {
@@ -968,7 +976,7 @@ p {
     margin-right: 0.1em;
     gap: 0.7em;
   }
-  ion-icon {
+  .icon {
     font-size: 16px;
   }
   .toggle-button {
@@ -987,11 +995,11 @@ p {
   #pagina-anterior-e-seguinte a {
     font-size: 0.8em;
   }
-  .pagina-anterior ion-icon {
+  .pagina-anterior .icon {
     color: var(--golden-color);
     padding: 0 0.1em;
   }
-  .pagina-seguinte ion-icon {
+  .pagina-seguinte .icon {
     color: var(--golden-color);
     padding: 0 0 0 0.1em;
   }

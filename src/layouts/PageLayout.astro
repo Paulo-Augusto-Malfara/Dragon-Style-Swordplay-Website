@@ -1,0 +1,18 @@
+---
+import BaseLayout from "./BaseLayout.astro";
+import PageNav from "../components/PageNav.astro";
+
+interface Props {
+  title: string;
+  description?: string;
+  prev?: { href: string; label: string };
+  next?: { href: string; label: string };
+}
+const { title, description, prev, next } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <h1>{title}</h1>
+  <slot />
+  <PageNav prev={prev} next={next} />
+</BaseLayout>

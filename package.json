@@ -1,5 +1,15 @@
 {
+  "name": "dragon-style-swordplay-website",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
   "dependencies": {
-    "express": "^4.21.2"
+    "astro": "^7.1.3",
+    "@astrojs/svelte": "^9.0.1",
+    "@astrojs/sitemap": "^3.7.3",
+    "svelte": "^5.56.7"
   }
 }
