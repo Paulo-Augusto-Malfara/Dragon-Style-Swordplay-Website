@@ -1,0 +1,141 @@
+<script lang="ts">
+  import { supabase } from "../../lib/supabase-browser";
+  import LoginForm from "../auth/LoginForm.svelte";
+
+  type Status = "checking" | "unauthenticated" | "loading" | "ready" | "no-member" | "error";
+  let status = $state<Status>("checking");
+  let errorMessage = $state("");
+
+  let nome = $state("");
+  let nivelGeral = $state(0);
+  let nomeFaixa = $state<string | null>(null);
+  let phTotal = $state(0);
+  let porClasse = $state<any[]>([]);
+  let historico = $state<any[]>([]);
+
+  async function load() {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      status = "unauthenticated";
+      return;
+    }
+
+    status = "loading";
+
+    const { data: membro } = await supabase
+      .from("dMembros")
+      .select("id_membro, nome")
+      .eq("auth_user_id", session.user.id)
+      .single();
+
+    if (!membro) {
+      status = "no-member";
+      return;
+    }
+
+    nome = membro.nome;
+
+    const [geral, classes, historia] = await Promise.all([
+      supabase.from("v_ranking_nivel_geral").select("*").eq("id_membro", membro.id_membro).single(),
+      supabase.from("v_ranking_por_classe").select("*").eq("id_membro", membro.id_membro),
+      supabase.from("v_historico_presencas").select("*"),
+    ]);
+
+    if (geral.error) {
+      status = "error";
+      errorMessage = geral.error.message;
+      return;
+    }
+
+    nivelGeral = geral.data?.nivel_geral ?? 0;
+    nomeFaixa = geral.data?.nome_faixa ?? null;
+    phTotal = geral.data?.ph_total ?? 0;
+    porClasse = classes.data ?? [];
+    historico = historia.data ?? [];
+    status = "ready";
+  }
+
+  async function logout() {
+    await supabase.auth.signOut();
+    window.location.reload();
+  }
+
+  load();
+</script>
+
+{#if status === "checking" || status === "loading"}
+  <p>Carregando...</p>
+{:else if status === "unauthenticated"}
+  <LoginForm redirectPath="/dashboard" />
+{:else if status === "no-member"}
+  <p class="admin-error">
+    Seu email ainda não está vinculado a um cadastro de membro. Fale com um organizador.
+  </p>
+{:else if status === "error"}
+  <p class="admin-error">{errorMessage}</p>
+{:else}
+  <section>
+    <p><strong class="gold-title">Nome:</strong> {nome}</p>
+    <p><strong class="gold-title">Nível Geral:</strong> {nivelGeral}</p>
+    {#if nomeFaixa}
+      <p><strong class="gold-title">Faixa:</strong> {nomeFaixa}</p>
+    {/if}
+    <p><strong class="gold-title">Pontos de Honra:</strong> {phTotal}</p>
+    <button class="btn btn-sm" onclick={logout}>sair</button>
+  </section>
+
+  <h2>Níveis por Classe</h2>
+  {#if porClasse.length === 0}
+    <p>Nenhum treino registrado ainda.</p>
+  {:else}
+    <div class="graduacao-tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Classe</th>
+            <th>Nível</th>
+            <th>Treinos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each porClasse as c}
+            <tr>
+              <td>{c.nome_classe}</td>
+              <td>{c.nivel_por_classe}</td>
+              <td>{c.treinos_por_classe}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+  {/if}
+
+  <h2>Histórico de Presença</h2>
+  {#if historico.length === 0}
+    <p>Nenhuma presença registrada ainda.</p>
+  {:else}
+    <div class="graduacao-tabela">
+      <table>
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Classe</th>
+            <th>PH Ganho</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each historico as h}
+            <tr>
+              <td>{new Date(h.data_treino).toLocaleDateString("pt-BR")}</td>
+              <td>{h.nome_classe}</td>
+              <td>{h.ph_ganho_treino}</td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+  {/if}
+{/if}

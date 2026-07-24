@@ -1,6 +1,11 @@
 <script lang="ts">
   import { supabase } from "../../lib/supabase-browser";
 
+  interface Props {
+    redirectPath?: string;
+  }
+  const { redirectPath = "/" }: Props = $props();
+
   let email = $state("");
   let status = $state<"idle" | "sending" | "sent" | "error">("idle");
   let errorMessage = $state("");
@@ -8,9 +13,10 @@
   async function submit(e: SubmitEvent) {
     e.preventDefault();
     status = "sending";
+    const callback = `${window.location.origin}/auth/callback?next=${encodeURIComponent(redirectPath)}`;
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/admin/callback` },
+      options: { emailRedirectTo: callback },
     });
     if (error) {
       status = "error";

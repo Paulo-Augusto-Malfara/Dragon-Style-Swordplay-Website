@@ -2,7 +2,7 @@ import { defineMiddleware } from "astro:middleware";
 import { createSupabaseServerClient } from "./lib/supabase-server";
 import { getAdminMembro } from "./lib/auth";
 
-const PUBLIC_ADMIN_PATHS = ["/admin/login", "/admin/callback"];
+const PUBLIC_ADMIN_PATHS = ["/admin/login"];
 
 export const onRequest = defineMiddleware(async (context, next) => {
   const { pathname } = context.url;

@@ -1,0 +1,9 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+import MemberDashboard from "../components/dashboard/MemberDashboard.svelte";
+---
+
+<BaseLayout title="Minha Progressão">
+  <h1>Minha Progressão</h1>
+  <MemberDashboard client:idle />
+</BaseLayout>
