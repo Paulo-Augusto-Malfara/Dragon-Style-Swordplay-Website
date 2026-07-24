@@ -50,4 +50,9 @@ const regulamentos = defineCollection({
   schema: prosePage,
 });
 
-export const collections = { classes, equipamentos, regulamentos };
+const sobreNos = defineCollection({
+  loader: glob({ pattern: "**/*.mdx", base: "./src/content/sobre-nos" }),
+  schema: prosePage,
+});
+
+export const collections = { classes, equipamentos, regulamentos, sobreNos };
