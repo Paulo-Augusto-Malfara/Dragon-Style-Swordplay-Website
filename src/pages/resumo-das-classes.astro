@@ -1,0 +1,52 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+
+const classes = [
+  { slug: "arqueiro", label: "Arqueiro", img: "arqueiros", alt: "Imagem Arqueiro", desc: "Mestre no combate de longa distância, utiliza Arco e Flecha e também Balestra. Possui certa vantagem contra alvos que não tenham escudos, principalmente em modalidades em grupo. Tem acesso a uma arma corpo-a-corpo extra para se defender." },
+  { slug: "barbaro", label: "Bárbaro", img: "barbaros", alt: "Imagem Barbaro", desc: "Domina o uso de Machados e Martelos. Possui uma boa versatilidade, pois pode tanto utilizar uma arma em cada mão, quanto uma arma de duas mãos. É uma classe bem ofensiva." },
+  { slug: "cavaleiro", label: "Cavaleiro", img: "cavaleiros", alt: "Imagem Cavaleiro", desc: "Focado no uso de Espadas Longas de duas mãos. Possui um estilo balanceado entre ataque e defesa. Aumenta seu leque de combinações ao poder equipar um Escudo Pequeno no nível 3." },
+  { slug: "espadachim", label: "Espadachim", img: "espadachins", alt: "Imagem Espadachim", desc: "Perito em Espadas Médias. Assim como o Bárbaro, pode equipar 2 armas ou uma só com duas mãos. Pode também utilizar Clavas. É a classe que mais se assemelha aos Samurais." },
+  { slug: "guerreiro", label: "Guerreiro", img: "guerreiros", alt: "Imagem Guerreiro", desc: "Treinado na arte da Espada e Escudo. Bem balanceado em ofensividade e defesa. É recomendado para iniciantes começarem sua jornada no Swordplay, mas não deixa de ser poderoso nas mãos de combatentes experientes." },
+  { slug: "hoplita", label: "Hoplita", img: "hoplitas", alt: "Imagem Hoplita", desc: "Habilidoso na combinação de Lança e Escudo. Classe versátil, porém desafiadora pelo fato de utilizar a lança com somente uma mão. Tem acesso a uma Espada Curta no nível 3 para auxiliar no combate de curto alcance." },
+  { slug: "lanceiro", label: "Lanceiro", img: "lanceiros", alt: "Imagem Lanceiros", desc: "Versado no uso de Armas Longas de Haste, como Lanças e Alabardas. Possui um grande poder ofensivo e costuma ser ótima em batalhas em grupo. Ganha acesso a um Escudo Pequeno no nível 3 para auxiliar sua defesa." },
+  { slug: "sicario", label: "Sicário", img: "sicarios", alt: "Imagem Sicários", desc: "Especialista no combate de curto alcance, utiliza combinações de adagas e armas curtas. Tem acesso a Armas de Arremesso Extras para compensar sua falta de alcance. Classe efetiva nas mãos de combatentes com boa mobilidade." },
+  { slug: "templario", label: "Templário", img: "templarios", alt: "Imagem Templários", desc: "Proficiente no uso de Maça e Mangual. É a classe com acesso a escudo com o maior leque de combinações, podendo utilizar arma de duas mãos, uma arma em cada mão e também arma com escudo." },
+  { slug: "viking", label: "Viking", img: "vikings", alt: "Imagem Vikings", desc: "Especialista no uso de Machados e Martelos com Escudo. Por utilizar escudo costuma ter uma boa defesa, não deixando de lado também seu ataque. Assim como o Sicário, tem acesso a Armas de Arremesso Extras para auxiliar no combate." },
+];
+---
+
+<PageLayout
+  title="Resumo das Classes"
+  prev={{ href: "/como-funciona", label: "Sistema de Classes" }}
+  next={{ href: "/arqueiro", label: "Arqueiro" }}
+>
+  <section>
+    <p>
+      No Dragon Style temos 10 classes no total, e nesta aba você pode
+      conferir o resumo de cada uma.
+    </p>
+    <br />
+    <p>
+      Há um link em cada classe (clicando em "mais detalhes") que leva para a
+      página individual de cada classe. Lá é possível conferir com mais
+      detalhes as características, regras individuais e todas as combinações
+      de equipamentos possíveis.
+    </p>
+  </section>
+  <section>
+    <h2 class="h2-classes" id="classes-h2">Classes</h2>
+    <div class="grid-classes">
+      {
+        classes.map((c) => (
+          <div id={c.slug} class="grid-classes-item">
+            <h2>{c.label}</h2>
+            <img src={`/assets/img/logo-classes/classes-juntas/${c.img}.png`} alt={c.alt} />
+            <p>{c.desc}</p>
+            <a class="links-de-texto" href={`/${c.slug}`}>MAIS DETALHES</a>
+          </div>
+        ))
+      }
+    </div>
+  </section>
+  <br />
+</PageLayout>
