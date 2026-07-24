@@ -16,4 +16,27 @@ const classes = defineCollection({
   }),
 });
 
-export const collections = { classes };
+const arma = z.object({
+  id: z.string().optional(),
+  nome: z.string(),
+  img: z.string(),
+  imgAlt: z.string(),
+  comprimento: z.string(),
+  empunhadaCom: z.string(),
+  classes: z.string(),
+  construcao: z.array(z.string()),
+  descricao: z.array(z.string()),
+});
+
+const equipamentos = defineCollection({
+  loader: glob({ pattern: "**/*.mdx", base: "./src/content/equipamentos" }),
+  schema: z.object({
+    title: z.string(),
+    showGlossario: z.boolean().default(true),
+    prev: navLink,
+    next: navLink,
+    armas: z.array(arma).default([]),
+  }),
+});
+
+export const collections = { classes, equipamentos };
