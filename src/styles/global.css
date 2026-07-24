@@ -1230,6 +1230,16 @@ p {
    wide stretched to 90% of the page. Sized to content instead, with a
    shared name-column width (39 chars = longest nome in dMembros) so it
    doesn't visibly jump between ranking-geral/por-classe/mural. */
+/* ponytail: wraps every .ranking-tabela so a wide table scrolls inside
+   itself instead of overflowing the page horizontally -- an overflowing
+   table used to force the whole document wider than the viewport, which
+   on mobile left the header/nav background not covering the extra width
+   once the page was pinch-zoomed out. */
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
 .ranking-tabela {
   margin: 1em auto;
   border-collapse: collapse;
@@ -1262,17 +1272,29 @@ p {
   margin: 1em auto 2em;
 }
 
+/* ponytail: single-selection UI via :target instead of a JS toggle --
+   each section is hidden until the URL hash matches its id, and the
+   browser only ever matches one hash at a time, so clicking a class
+   button swaps which table shows without any client-side script. */
 .ranking-classe {
+  display: none;
   max-width: 900px;
   margin: 0 auto 1.5em;
+  scroll-margin-top: 1em;
 }
 
-.ranking-classe > summary {
-  cursor: pointer;
-  list-style: none;
+.ranking-classe:target {
+  display: block;
 }
-.ranking-classe > summary::-webkit-details-marker {
-  display: none;
+
+.ranking-hint {
+  text-align: center;
+  color: var(--text-secondary-color);
+}
+
+.level-up-arrow {
+  color: #4caf50;
+  margin-left: 0.2em;
 }
 
 @media (max-width: 480px) {

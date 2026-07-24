@@ -22,28 +22,30 @@ const { data: ranking } = await supabasePublic
     </p>
     <br />
   </section>
-  <table class="ranking-tabela">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th class="col-nome">Nome</th>
-        <th>Nível Geral</th>
-        <th>Faixa</th>
-        <th>Pontos de Honra</th>
-      </tr>
-    </thead>
-    <tbody>
-      {
-        (ranking ?? []).map((m, i) => (
-          <tr>
-            <td>{i + 1}</td>
-            <td class="col-nome">{m.nome}</td>
-            <td>{m.nivel_geral}</td>
-            <td>{m.nome_faixa ?? "-"}</td>
-            <td>{m.ph_total}</td>
-          </tr>
-        ))
-      }
-    </tbody>
-  </table>
+  <div class="table-scroll">
+    <table class="ranking-tabela">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th class="col-nome">Nome</th>
+          <th>Nível Geral</th>
+          <th>Faixa</th>
+          <th>Pontos de Honra</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          (ranking ?? []).map((m, i) => (
+            <tr>
+              <td>{i + 1}</td>
+              <td class="col-nome">{m.nome}</td>
+              <td>{m.nivel_geral}</td>
+              <td>{m.nome_faixa ?? "-"}</td>
+              <td>{m.ph_total}</td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+  </div>
 </PageLayout>

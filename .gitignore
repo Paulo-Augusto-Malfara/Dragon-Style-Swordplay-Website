@@ -110,3 +110,6 @@ dist
 
 # Supabase table backups (contain member PII, never commit)
 /backups/
+
+# Vercel build output / project link
+.vercel/

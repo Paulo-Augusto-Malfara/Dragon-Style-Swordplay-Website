@@ -7,19 +7,20 @@ export const prerender = false;
 const { data } = await supabasePublic
   .from("v_ranking_nivel_geral")
   .select("*")
-  .eq("status_ativo", true)
-  .gte("nivel_geral", 1)
   .order("nivel_geral", { ascending: false });
 
-const veteranos = data ?? [];
-const organizadores = veteranos.filter((m) => m.auth_level <= 2);
-const staff = veteranos.filter((m) => m.auth_level === 3);
-const membros = veteranos.filter((m) => m.auth_level === null || m.auth_level >= 4);
+const todos = data ?? [];
+const organizadores = todos.filter((m) => m.auth_level <= 2);
+const staff = todos.filter((m) => m.auth_level === 3);
+const membros = todos.filter((m) => m.auth_level === null || m.auth_level >= 4);
+const membrosAtivos = membros.filter((m) => m.status_ativo);
+const membrosInativos = membros.filter((m) => !m.status_ativo);
 
 const grupos = [
   { titulo: "Organizadores", lista: organizadores },
   { titulo: "Staff", lista: staff },
-  { titulo: "Membros", lista: membros },
+  { titulo: "Membros Ativos", lista: membrosAtivos },
+  { titulo: "Membros Inativos", lista: membrosInativos },
 ].filter((g) => g.lista.length > 0);
 ---
 
@@ -30,14 +31,9 @@ const grupos = [
 >
   <section>
     <p>
-      No Mural de Membros é possível conferir todos os membros ativos e
-      veteranos do Dragon Style e seus respectivos níveis, faixa e pontos
-      de honra.
-    </p>
-    <br />
-    <p>
-      Para participar do Mural de Membros é preciso primeiramente se tornar
-      veterano, então ganhará seu próprio card com suas informações.
+      No Mural de Membros é possível conferir todos os membros do Dragon
+      Style e seus respectivos níveis, faixa e pontos de honra, organizados
+      entre organizadores, staff, membros ativos e membros inativos.
     </p>
     <br />
   </section>

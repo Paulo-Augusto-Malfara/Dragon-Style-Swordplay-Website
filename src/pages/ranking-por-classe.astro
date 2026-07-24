@@ -27,9 +27,8 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
 >
   <section>
     <p>
-      Confira abaixo o ranking de cada classe, ordenado pelo número de
-      treinos registrados. Clique no nome de uma classe para abrir o
-      ranking dela.
+      Clique no nome de uma classe para ver o ranking dela, ordenado pelo
+      número de treinos registrados.
     </p>
     <br />
   </section>
@@ -38,31 +37,34 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
       <a href={`#classe-${slug(nomeClasse)}`} class="btn btn-sm">{nomeClasse}</a>
     ))}
   </nav>
+  <p class="ranking-hint">Selecione uma classe acima para ver o ranking dela.</p>
   {
     classes.map(([nomeClasse, rows]) => (
-      <details class="ranking-classe" id={`classe-${slug(nomeClasse)}`}>
-        <summary><h2>{nomeClasse}</h2></summary>
-        <table class="ranking-tabela">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th class="col-nome">Nome</th>
-              <th>Nível</th>
-              <th>Treinos</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows!.map((m, i) => (
+      <section class="ranking-classe" id={`classe-${slug(nomeClasse)}`}>
+        <h2>{nomeClasse}</h2>
+        <div class="table-scroll">
+          <table class="ranking-tabela">
+            <thead>
               <tr>
-                <td>{i + 1}</td>
-                <td class="col-nome">{m.nome}</td>
-                <td>{m.nivel_por_classe}</td>
-                <td>{m.treinos_por_classe}</td>
+                <th>#</th>
+                <th class="col-nome">Nome</th>
+                <th>Nível</th>
+                <th>Treinos</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </details>
+            </thead>
+            <tbody>
+              {rows!.map((m, i) => (
+                <tr>
+                  <td>{i + 1}</td>
+                  <td class="col-nome">{m.nome}</td>
+                  <td>{m.nivel_por_classe}</td>
+                  <td>{m.treinos_por_classe}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
     ))
   }
 </PageLayout>

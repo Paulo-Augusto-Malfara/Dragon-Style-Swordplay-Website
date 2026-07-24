@@ -16,9 +16,10 @@ interface Registro {
   data_treino: string;
   nome: string;
   nome_classe: string;
-  subiu_nivel: boolean;
-  nivel_anterior: number;
-  nivel_novo: number;
+  nivel_geral: number;
+  subiu_nivel_geral: boolean;
+  nivel_classe: number;
+  subiu_nivel_classe: boolean;
 }
 
 const porTreino = new Map<number, { data_treino: string; attendees: Registro[] }>();
@@ -46,35 +47,49 @@ const treinos = [...porTreino.entries()].sort((a, b) => b[1].data_treino.localeC
   {treinos.length === 0 ? (
     <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
   ) : (
-    <table class="ranking-tabela">
-      <thead>
-        <tr>
-          <th>Data</th>
-          <th>Nº Treino</th>
-          <th class="col-nome">Nome</th>
-          <th>Classe</th>
-          <th>Nível Antes</th>
-          <th>Nível Novo</th>
-        </tr>
-      </thead>
-      <tbody>
-        {treinos.map(([idTreino, { data_treino, attendees }]) =>
-          attendees.map((r, i) => (
-            <tr>
-              {i === 0 && (
-                <>
-                  <td rowspan={attendees.length}>{new Date(data_treino).toLocaleDateString("pt-BR")}</td>
-                  <td rowspan={attendees.length}>{idTreino}</td>
-                </>
-              )}
-              <td class="col-nome">{r.nome}</td>
-              <td>{r.nome_classe}</td>
-              <td>{r.nivel_anterior}</td>
-              <td>{r.subiu_nivel ? <strong class="gold-title">{r.nivel_novo} 🔺</strong> : r.nivel_novo}</td>
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="ranking-tabela">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nº Treino</th>
+            <th class="col-nome">Nome</th>
+            <th>Classe</th>
+            <th>Nível Geral</th>
+            <th>Nível Classe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {treinos.map(([idTreino, { data_treino, attendees }]) =>
+            attendees.map((r, i) => (
+              <tr>
+                {i === 0 && (
+                  <>
+                    <td rowspan={attendees.length}>{new Date(data_treino).toLocaleDateString("pt-BR")}</td>
+                    <td rowspan={attendees.length}>{idTreino}</td>
+                  </>
+                )}
+                <td class="col-nome">{r.nome}</td>
+                <td>{r.nome_classe}</td>
+                <td>
+                  {r.subiu_nivel_geral ? (
+                    <strong class="gold-title">{r.nivel_geral}<span class="level-up-arrow">▲</span></strong>
+                  ) : (
+                    r.nivel_geral
+                  )}
+                </td>
+                <td>
+                  {r.subiu_nivel_classe ? (
+                    <strong class="gold-title">{r.nivel_classe}<span class="level-up-arrow">▲</span></strong>
+                  ) : (
+                    r.nivel_classe
+                  )}
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
+    </div>
   )}
 </PageLayout>
