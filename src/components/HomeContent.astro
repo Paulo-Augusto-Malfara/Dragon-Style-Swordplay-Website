@@ -1,71 +1,189 @@
 ---
-import PageLayout from "../layouts/PageLayout.astro";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import Icon from "./Icon.astro";
+import { supabasePublic } from "../lib/supabase-public";
+
+// ponytail: hardcoded until existe uma tabela de agenda de treinos
+// (fAgendaTreinos) no Supabase — atualizar manualmente até lá.
+const proximoTreino = {
+  diaSemana: "Sáb",
+  dia: "02",
+  mes: "Ago",
+  horario: "14h00 – 17h00",
+  local: "São José do Rio Preto",
+};
+
+const { data: membrosData } = await supabasePublic
+  .from("v_ranking_nivel_geral")
+  .select("auth_level, status_ativo");
+const membrosAtivos = (membrosData ?? []).filter(
+  (m) => (m.auth_level === null || m.auth_level >= 4) && m.status_ativo
+).length;
+
+const { data: treinosData } = await supabasePublic
+  .from("v_registro_treinos")
+  .select("id_treino");
+const treinosRealizados = new Set((treinosData ?? []).map((t) => t.id_treino)).size;
+
+const classesPreview = [
+  {
+    slug: "guerreiro",
+    label: "Guerreiro",
+    img: "guerreiros",
+    desc: "Espada e escudo, bem balanceado entre ataque e defesa. Ideal pra quem tá começando.",
+  },
+  {
+    slug: "arqueiro",
+    label: "Arqueiro",
+    img: "arqueiros",
+    desc: "Mestre no combate à distância com arco e besta, com uma arma extra pra emergências.",
+  },
+  {
+    slug: "cavaleiro",
+    label: "Cavaleiro",
+    img: "cavaleiros",
+    desc: "Espada longa de duas mãos, com estilo equilibrado entre ataque e defesa.",
+  },
+  {
+    slug: "sicario",
+    label: "Sicário",
+    img: "sicarios",
+    desc: "Adagas e armas curtas, feito pra quem joga rápido e de perto.",
+  },
+];
 ---
 
-<PageLayout
+<BaseLayout
   title="Início"
-  prev={{ href: "/modalidades", label: "Modalidades" }}
-  next={{ href: "/quem-somos", label: "Quem Somos" }}
+  description="Site do grupo Dragon Style Swordplay e Eventos, em São José do Rio Preto."
 >
-  <section>
-    <p>
-      Este site tem como objetivo conter todas as informações sobre as regras e
-      condutas do Swordplay, bem como todas as informações específicas do grupo
-      Dragon Style Swordplay e Eventos.
-    </p>
-    <br />
-    <p>
-      Buscamos sempre melhorar nossos sistemas e tornar o Swordplay em nossa
-      cidade o mais seguro e divertido possível para os membros e participantes.
-    </p>
-    <br />
-    <p>
-      Temos várias sessões no site com bastante informação. É importante levar
-      em conta que é um site informativo, então possui algumas sessões com
-      textos longos para melhor entendimento, mas tentamos resumir o máximo
-      possível.
-    </p>
-    <br />
-    <p>
-      Na aba <strong class="gold-title">Sobre Nós</strong> você irá encontrar informações
-      sobre o nosso grupo e também sobre o Swordplay num geral. É uma sessão mais
-      curta e introdutória, ideal para iniciantes ou para quem quer saber mais sobre
-      nós.
-    </p>
-    <br />
-    <p>
-      A aba <strong class="gold-title">Regulamentos</strong> tem o objetivo de explicar
-      como organizamos nossos treinos, regras de combate e questões relacionadas
-      ao nosso código de conduta, ideal também para iniciantes ou para quem não
-      conhece o nosso grupo.
-    </p>
-    <br />
-    <p>
-      A aba de <strong class="gold-title">Equipamentos</strong> contém todos os
-      equipamentos permitidos em nosso grupo, bem como limites de tamanho, regras
-      de utilização e informações mais detalhadas. Os equipamentos estão organizados
-      por categoria de tamanho ou função. Estamos trabalhando também em uma sessão
-      que irá ensinar a forjar seus próprios equipamentos (ainda em desenvolvimento).
-    </p>
-    <br />
-    <p>
-      Na aba de <strong class="gold-title">Progressão</strong> você pode conferir
-      como funcionam nossos níveis e graduações, bem como pontuações e em breve
-      conquistas, conseguidas por participação e dedicação no grupo e no esporte.
-    </p>
-    <br />
-    <p>
-      A aba de <strong class="gold-title">Classes</strong> visa detalhar o sistema
-      que foi criado em nosso grupo para definir as combinações de armas, serve
-      também para incentivar os membros a subirem de nível e ganharem prestígio
-      e alguns bônus também.
-    </p>
-    <br />
-    <p>
-      Por fim, nossa aba de <strong class="gold-title">Modalidades</strong> contém
-      os jogos de combate que costumamos inserir em nossos treinos, cada modalidade
-      tem suas regras específicas e requisitos.
-    </p>
-    <br />
-  </section>
-</PageLayout>
+  <div class="landing-page">
+    <section class="hero hairline-bottom">
+      <div class="wrap">
+        <div class="hero-eyebrow">São José do Rio Preto</div>
+        <h1><span class="line">Onde <span class="gold-title">honra</span></span><span class="line">encontra <span class="gold-title">ação</span></span></h1>
+        <p class="lede">
+          Combate medieval com armas acolchoadas, comunidade de verdade e um
+          sistema de progressão completo pra chamar de seu.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="/como-participar">Quero Participar</a>
+          <a class="btn" href="#proximo-treino">Ver Próximo Treino</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="stats-band">
+      <div class="wrap">
+        <div class="stats-grid">
+          <div class="stat-tile">
+            <div class="value">{membrosAtivos}</div>
+            <div class="label">Membros Ativos</div>
+          </div>
+          <div class="stat-tile">
+            <div class="value">10</div>
+            <div class="label">Classes de Combate</div>
+          </div>
+          <div class="stat-tile">
+            <div class="value">+30</div>
+            <div class="label">Combinações de Equipamentos</div>
+          </div>
+          <div class="stat-tile">
+            <div class="value">9</div>
+            <div class="label">Modalidades</div>
+          </div>
+          <div class="stat-tile">
+            <div class="value">{treinosRealizados}</div>
+            <div class="label">Treinos Registrados</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-panel">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">O que é Swordplay</span>
+          <h2>Combate de verdade, sem o risco de verdade</h2>
+          <p>Réplicas acolchoadas, regras de honra e um esporte que trabalha o corpo inteiro.</p>
+        </div>
+        <div class="trio-grid">
+          <div class="trio-card">
+            <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 3.5L20.5 9.5M14.5 3.5L6 12L4 20L12 18L20.5 9.5M14.5 3.5L9 9M6 12L11.5 17.5"></path></svg>
+            <h3>Combate Seguro</h3>
+            <p>Espadas, lanças, machados e escudos acolchoados. Dá pra jogar sério, com contato, sem precisar de armadura corporal.</p>
+          </div>
+          <div class="trio-card">
+            <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l7 3v6c0 5-3.2 8-7 9-3.8-1-7-4-7-9V6l7-3z"></path><path d="M9 12l2 2 4-4"></path></svg>
+            <h3>Honra em Cada Golpe</h3>
+            <p>Não existe marcação automática de ponto. Quem foi atingido reconhece o toque — honestidade em combate é regra tanto quanto qualquer outra.</p>
+          </div>
+          <div class="trio-card">
+            <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a5 5 0 0 0-5 5c0 1.6.7 2.6 1.4 3.5.6.8 1.1 1.4 1.1 2.5v2a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-2c0-1.1.5-1.7 1.1-2.5C15.3 9.6 16 8.6 16 7a5 5 0 0 0-4-5z"></path><path d="M10 19h4M11 22h2"></path></svg>
+            <h3>Corpo, Mente e Reflexo</h3>
+            <p>Trabalha o corpo inteiro e agiliza os reflexos — e ainda obriga a pensar rápido quando o combate vira contra você.</p>
+          </div>
+        </div>
+        <a class="section-link" href="/o-que-e-swordplay">Entenda o Swordplay a fundo →</a>
+      </div>
+    </section>
+
+    <section class="landing-panel landing-panel-alt hairline-top hairline-bottom" id="proximo-treino">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Agenda</span>
+          <h2>Próximo Treino</h2>
+        </div>
+        <div class="treino-card">
+          <div class="treino-date">
+            <div class="dow">{proximoTreino.diaSemana}</div>
+            <div class="num">{proximoTreino.dia}</div>
+            <div class="mon">{proximoTreino.mes}</div>
+          </div>
+          <div class="treino-info">
+            <h3>Treino Semanal Aberto</h3>
+            <div class="treino-meta">
+              <span><Icon name="clock" />{proximoTreino.horario}</span>
+              <span><Icon name="location" />{proximoTreino.local}</span>
+            </div>
+          </div>
+          <a class="btn btn-primary" href="/como-participar">Confirmar Presença</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="landing-panel" id="classes">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Progressão</span>
+          <h2>Escolha sua Classe</h2>
+          <p>10 classes, mais de 30 combinações de equipamentos e estilos diferentes, lute como desejar.</p>
+        </div>
+        <div class="classes-grid">
+          {
+            classesPreview.map((c) => (
+              <a class="class-card" href={`/${c.slug}`}>
+                <div class="img-wrap">
+                  <img src={`/assets/img/logo-classes/classes-juntas/${c.img}.webp`} alt={c.label} />
+                </div>
+                <div class="body">
+                  <h3>{c.label}</h3>
+                  <p>{c.desc}</p>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+        <a class="section-link" href="/resumo-das-classes">Ver as 10 classes completas →</a>
+      </div>
+    </section>
+
+    <section class="cta-band hairline-top">
+      <div class="wrap">
+        <h2>Pronto pra empunhar <span class="gold-title">sua arma</span>?</h2>
+        <p>Junte-se aos treinos, escolha sua classe e comece sua jornada no Dragon Style.</p>
+        <a class="btn btn-primary" href="/como-participar">Quero Participar</a>
+      </div>
+    </section>
+  </div>
+</BaseLayout>
