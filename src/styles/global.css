@@ -1648,9 +1648,6 @@ footer {
 
 .landing-panel {
   padding: 4.5rem 0;
-}
-
-.landing-panel-alt {
   background: var(--secondary-color);
 }
 
@@ -1671,10 +1668,10 @@ footer {
 
 .section-head h2 {
   text-align: center;
+  text-wrap: balance;
   font-size: clamp(1.4rem, 3vw, 1.9rem);
   text-transform: uppercase;
   text-shadow: 2px 2px black;
-  color: var(--golden-color);
   margin: 0;
   padding: 0;
 }
@@ -1920,12 +1917,30 @@ footer {
 
 .cta-band h2 {
   text-align: center;
+  text-wrap: balance;
   font-size: clamp(1.5rem, 3.4vw, 2.3rem);
   text-transform: uppercase;
   text-shadow: 3px 3px black;
   max-width: 18ch;
   margin: 0 auto 0.9em;
   padding: 0;
+}
+
+.cta-socials {
+  display: flex;
+  justify-content: center;
+  gap: 1.4em;
+  margin-top: 2.2rem;
+}
+
+.cta-socials a {
+  color: var(--golden-color);
+  font-size: 22px;
+  opacity: 0.85;
+}
+
+.cta-socials a:hover {
+  opacity: 1;
 }
 
 .cta-band p {
