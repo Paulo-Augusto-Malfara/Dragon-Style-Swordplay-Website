@@ -514,6 +514,14 @@ p {
   box-shadow: 0 0 1em black;
 }
 
+.quem-somos-fotos {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  max-width: 70%;
+  margin: 1.5em auto;
+}
+
 .imagem-regras-de-combate {
   display: flex;
   margin: auto;
@@ -707,6 +715,73 @@ p {
     var(--secondary-color)
   );
   border-style: solid;
+}
+
+/* ======== ÍNDICE DE PILARES/SEÇÕES (páginas de texto corrido) ======== */
+
+.pillars-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 1rem;
+  margin: 1.5rem 0 2.5rem;
+}
+
+.pillar-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3em;
+  padding: 1.4rem 1rem;
+  color: var(--text-primary-color);
+  text-align: center;
+}
+
+.pillar-card .trio-icon {
+  width: 40px;
+  height: 40px;
+  margin-bottom: 0.4em;
+}
+
+.pillar-card span {
+  font-family: "Bree Serif", sans-serif;
+  text-transform: uppercase;
+  font-size: 0.9em;
+}
+
+.organizadores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.2rem;
+  margin: 1.5rem 0;
+}
+
+.organizador-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.4rem;
+}
+
+.organizador-card .mural-avatar {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.organizador-card h3 {
+  width: auto;
+  margin: 0 0 0.3em;
+  padding: 0;
+  text-align: left;
+  font-size: 1.05em;
+}
+
+.organizador-card p {
+  width: auto;
+  margin: 0;
+  text-indent: 0;
+  text-align: left;
+  font-size: 0.92em;
+  color: var(--text-secondary-color);
 }
 
 /* ======== CONTEÚDO EQUIPAMENTOS ======== */
@@ -1330,6 +1405,12 @@ p {
   color: var(--golden-color);
 }
 
+.ranking-tabela tbody tr:hover,
+.graduacao-tabela tbody tr:hover,
+.grid-mural tbody tr:hover {
+  background: var(--secondary-color-opacity);
+}
+
 .ranking-tabela .col-nome {
   min-width: 40ch;
   text-align: left;
@@ -1774,6 +1855,7 @@ footer {
   height: 54px;
   margin: 0 auto 1em;
   color: var(--golden-color);
+  filter: drop-shadow(2px 2px 0 black);
 }
 
 .trio-card h3 {
