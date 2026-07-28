@@ -25,6 +25,14 @@ const { data: treinosData } = await supabasePublic
   .select("id_treino");
 const treinosRealizados = (treinosData ?? []).reduce((max, t) => Math.max(max, t.id_treino), 0);
 
+const fundacao = new Date(2008, 11, 1);
+const hoje = new Date();
+let anosExistencia = hoje.getFullYear() - fundacao.getFullYear();
+const jaFezAniversarioEsseAno =
+  hoje.getMonth() > fundacao.getMonth() ||
+  (hoje.getMonth() === fundacao.getMonth() && hoje.getDate() >= fundacao.getDate());
+if (!jaFezAniversarioEsseAno) anosExistencia--;
+
 const galeriaPreview = [
   { img: "galeria-1", alt: "Membro em postura de combate durante treino ao ar livre" },
   { img: "galeria-2", alt: "Grupo treinando com bandeiras e armas acolchoadas no parque" },
@@ -106,6 +114,10 @@ const classesPreview = [
           <div class="stat-tile">
             <div class="value">{treinosRealizados}</div>
             <div class="label">Treinos Registrados</div>
+          </div>
+          <div class="stat-tile">
+            <div class="value">{anosExistencia}</div>
+            <div class="label">Anos de Existência</div>
           </div>
         </div>
       </div>
