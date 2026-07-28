@@ -25,6 +25,17 @@ const { data: treinosData } = await supabasePublic
   .select("id_treino");
 const treinosRealizados = new Set((treinosData ?? []).map((t) => t.id_treino)).size;
 
+const galeriaPreview = [
+  { img: "galeria-1", alt: "Membro em postura de combate durante treino ao ar livre" },
+  { img: "galeria-2", alt: "Grupo treinando com bandeiras e armas acolchoadas no parque" },
+  { img: "galeria-3", alt: "Duelo entre dois membros ao entardecer" },
+  { img: "galeria-4", alt: "Duelo de espadas acolchoadas em treino indoor" },
+  { img: "galeria-5", alt: "Grupo em combate simulado no gramado" },
+  { img: "galeria-6", alt: "Membro treinando golpes em alvo de madeira" },
+  { img: "galeria-7", alt: "Membro saltando durante exercício de combate" },
+  { img: "galeria-8", alt: "Duelo sob a tenda do evento" },
+];
+
 const classesPreview = [
   {
     slug: "guerreiro",
@@ -73,7 +84,7 @@ const classesPreview = [
       </div>
     </section>
 
-    <section class="stats-band">
+    <section class="stats-band hairline-bottom">
       <div class="wrap">
         <div class="stats-grid">
           <div class="stat-tile">
@@ -100,7 +111,7 @@ const classesPreview = [
       </div>
     </section>
 
-    <section class="landing-panel">
+    <section class="landing-panel landing-panel-dark">
       <div class="wrap">
         <div class="section-head">
           <span class="eyebrow">O que é Swordplay</span>
@@ -152,7 +163,7 @@ const classesPreview = [
       </div>
     </section>
 
-    <section class="landing-panel" id="classes">
+    <section class="landing-panel landing-panel-dark hairline-bottom" id="classes">
       <div class="wrap">
         <div class="section-head">
           <span class="eyebrow">Progressão</span>
@@ -178,9 +189,29 @@ const classesPreview = [
       </div>
     </section>
 
+    <section class="landing-panel" id="galeria">
+      <div class="wrap">
+        <div class="section-head">
+          <span class="eyebrow">Comunidade</span>
+          <h2>Nossos Treinos em Ação</h2>
+          <p>Um gostinho dos nossos encontros — combate de verdade, gente de verdade.</p>
+        </div>
+        <div class="galeria-grid">
+          {
+            galeriaPreview.map((g) => (
+              <div class="galeria-item">
+                <img src={`/assets/img/galeria/${g.img}.webp`} alt={g.alt} loading="lazy" />
+              </div>
+            ))
+          }
+        </div>
+        <a class="section-link" href="/galeria">Ver galeria completa →</a>
+      </div>
+    </section>
+
     <section class="cta-band hairline-top">
       <div class="wrap">
-        <h2>Pronto pra empunhar <span class="gold-title">sua arma?</span></h2>
+        <h2><span class="line">Pronto pra empunhar</span><span class="line gold-title">sua arma?</span></h2>
         <p>Junte-se aos treinos, escolha sua classe e comece sua jornada no Dragon Style.</p>
         <a class="btn btn-primary" href="/como-participar">Quero Participar</a>
         <div class="cta-socials">
