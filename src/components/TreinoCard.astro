@@ -38,8 +38,6 @@ const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
       <table class="ranking-tabela">
         <thead>
           <tr>
-            <th>Data</th>
-            <th>Nº Treino</th>
             <th class="col-nome">Nome</th>
             <th>Classe</th>
             <th>Nível Geral</th>
@@ -49,8 +47,6 @@ const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
         <tbody>
           {attendees.map((r) => (
             <tr>
-              <td>{dataFormatada}</td>
-              <td>{idTreino}</td>
               <td class="col-nome">{r.nome}</td>
               <td>{r.nome_classe}</td>
               <td>
