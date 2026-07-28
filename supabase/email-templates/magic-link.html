@@ -1,7 +1,7 @@
 <!--
-  Template de e-mail para login (Magic Link) do Dragon Style Swordplay.
+  Template de e-mail para login (código de verificação) do Dragon Style Swordplay.
   Colar em: Supabase Dashboard -> Authentication -> Email Templates -> Magic Link
-  Variavel usada pelo Supabase: {{ .ConfirmationURL }}
+  Variavel usada pelo Supabase: {{ .Token }} (código de 6 dígitos)
 -->
 <div style="margin:0; padding:0; background-color:#0a0a0a; width:100%;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#0a0a0a; padding:32px 16px;">
@@ -34,32 +34,20 @@
           <tr>
             <td align="center" style="padding:16px 32px 0 32px;">
               <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:15px; line-height:1.6; color:#e0e0e0;">
-                Clique no botão abaixo para entrar no seu painel de membro.
-                Este link é válido por um tempo limitado e só pode ser usado uma vez.
+                Use o código abaixo para entrar no seu painel de membro.
+                Ele é válido por um tempo limitado e só pode ser usado uma vez.
               </p>
             </td>
           </tr>
 
-          <!-- CTA Button -->
+          <!-- Code -->
           <tr>
             <td align="center" style="padding:28px 32px;">
-              <a
-                href="{{ .ConfirmationURL }}"
-                target="_blank"
-                style="display:inline-block; padding:14px 32px; background-color:#e8ac46; color:#121212; font-family:Arial,Helvetica,sans-serif; font-size:15px; font-weight:bold; text-decoration:none; border-radius:8px;"
+              <div
+                style="display:inline-block; padding:16px 32px; background-color:#1a2029; border:1px solid rgba(232,172,70,0.35); border-radius:8px; font-family:Arial,Helvetica,sans-serif; font-size:32px; font-weight:bold; letter-spacing:8px; color:#e8ac46;"
               >
-                Entrar agora
-              </a>
-            </td>
-          </tr>
-
-          <!-- Fallback link -->
-          <tr>
-            <td align="center" style="padding:0 32px 32px 32px;">
-              <p style="margin:0; font-family:Arial,Helvetica,sans-serif; font-size:12px; line-height:1.6; color:#8a8a8a;">
-                Se o botão não funcionar, copie e cole este link no navegador:<br />
-                <a href="{{ .ConfirmationURL }}" style="color:#e8ac46; word-break:break-all;">{{ .ConfirmationURL }}</a>
-              </p>
+                {{ .Token }}
+              </div>
             </td>
           </tr>
 
