@@ -735,6 +735,21 @@ p {
   transform: rotate(90deg);
 }
 
+.registro-treino-card[open] .modalidades-summary-text {
+  flex: 1;
+  align-items: center;
+  text-align: center;
+}
+
+.registro-treino-card[open] .modalidades-button {
+  justify-content: center;
+  text-align: center;
+}
+
+.registro-treino-card[open] .modalidade-tags {
+  justify-content: center;
+}
+
 .modalidades-conteudo {
   padding: 0 1.5rem 1.5rem;
   border-width: 1px 0 0 0;
