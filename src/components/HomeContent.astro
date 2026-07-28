@@ -23,7 +23,7 @@ const membrosAtivos = (membrosData ?? []).filter(
 const { data: treinosData } = await supabasePublic
   .from("v_registro_treinos")
   .select("id_treino");
-const treinosRealizados = new Set((treinosData ?? []).map((t) => t.id_treino)).size;
+const treinosRealizados = (treinosData ?? []).reduce((max, t) => Math.max(max, t.id_treino), 0);
 
 const galeriaPreview = [
   { img: "galeria-1", alt: "Membro em postura de combate durante treino ao ar livre" },
