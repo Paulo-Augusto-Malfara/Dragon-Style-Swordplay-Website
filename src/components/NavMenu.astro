@@ -66,9 +66,15 @@ const menu = [
 <section>
   <nav class="nav">
     <div class="container">
-      <input type="checkbox" id="nav-toggle" class="nav-toggle-checkbox" />
+      <input
+        type="checkbox"
+        id="nav-toggle"
+        class="nav-toggle-checkbox"
+        aria-controls="menu-main"
+        aria-expanded="false"
+      />
       <label for="nav-toggle" class="toggle-button">MENU</label>
-      <ul class="menu-main">
+      <ul class="menu-main" id="menu-main">
         {
           menu.map((group) => (
             <li>
@@ -91,3 +97,12 @@ const menu = [
     </div>
   </nav>
 </section>
+
+<script>
+  // ponytail: only syncs aria-expanded for screen readers - the checkbox still
+  // drives the show/hide via CSS, no behavior change for mouse/touch users
+  document.getElementById("nav-toggle")?.addEventListener("change", (e) => {
+    const checkbox = e.currentTarget as HTMLInputElement;
+    checkbox.setAttribute("aria-expanded", String(checkbox.checked));
+  });
+</script>
