@@ -43,6 +43,7 @@ const { data: modalidades } = await supabasePublic
           <Accordion
             id={m.slug}
             title={m.title}
+            tags={m.tags}
             descricao={m.description}
             objetivo={m.objective}
             pontuacao={m.scoring_respawn}

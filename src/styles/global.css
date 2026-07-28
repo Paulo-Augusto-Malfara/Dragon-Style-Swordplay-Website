@@ -691,6 +691,32 @@ p {
   display: none;
 }
 
+.modalidades-summary-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6em;
+  min-width: 0;
+}
+
+.modalidade-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4em;
+}
+
+.modalidade-tag {
+  display: inline-block;
+  padding: 0.25em 0.7em;
+  border-radius: 999px;
+  background: var(--golden-color-opaco);
+  color: var(--primary-color);
+  font-size: 0.68em;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
 .modalidades-chevron {
   flex-shrink: 0;
   font-size: 1.1em;

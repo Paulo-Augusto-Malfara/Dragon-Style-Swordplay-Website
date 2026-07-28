@@ -4,18 +4,26 @@ import Icon from "./Icon.astro";
 interface Props {
   id?: string;
   title: string;
+  tags?: string[];
   descricao: string[];
   objetivo: string[];
   pontuacao: string[];
   requisitos: string[];
   variacoes?: string[];
 }
-const { id, title, descricao, objetivo, pontuacao, requisitos, variacoes = [] } = Astro.props;
+const { id, title, tags = [], descricao, objetivo, pontuacao, requisitos, variacoes = [] } = Astro.props;
 ---
 
 <details id={id} class="modalidades-box card">
   <summary>
-    <h2 class="modalidades-button">{title}</h2>
+    <div class="modalidades-summary-text">
+      <h2 class="modalidades-button">{title}</h2>
+      {tags.length > 0 && (
+        <div class="modalidade-tags">
+          {tags.map((tag) => <span class="modalidade-tag">{tag}</span>)}
+        </div>
+      )}
+    </div>
     <Icon name="chevron-forward" class="modalidades-chevron" />
   </summary>
   <div class="modalidades-conteudo">
