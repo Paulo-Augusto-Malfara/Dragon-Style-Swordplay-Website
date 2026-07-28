@@ -37,7 +37,7 @@ const { data: modalidades } = await supabasePublic
     <br />
   </section>
   <section>
-    <div class="modalidades">
+    <div class="modalidades modalidades-grid">
       {
         (modalidades ?? []).map((m) => (
           <Accordion

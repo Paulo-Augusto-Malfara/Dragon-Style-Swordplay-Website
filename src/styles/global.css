@@ -27,6 +27,34 @@
   --text-secondary-color: #e1e1e1;
   --border-dark-color: #222222;
   --border-dark-color-2: #333333;
+  --hairline-gold: linear-gradient(
+    90deg,
+    rgba(184, 134, 45, 0),
+    #b8862d,
+    #ffdf91,
+    #b8862d,
+    rgba(184, 134, 45, 0)
+  );
+  --landing-card-bg: #1a2029;
+  /* cartão padrão compartilhado por seções fora da landing (ex: modalidades) */
+  --card-bg: var(--landing-card-bg);
+  --card-border: var(--golden-color-opaco);
+  --card-radius: 14px;
+  --card-shadow: 0 0 1em black;
+}
+
+/* ======== CARD (COMPONENTE COMPARTILHADO) ======== */
+
+.card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
 }
 
 * {
@@ -49,6 +77,9 @@ body {
   background: url(/assets/img/background-definitivo.webp) no-repeat center center
     fixed;
   background-size: cover;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
 }
 
 .short {
@@ -72,7 +103,6 @@ body {
 /* ======== HEADER ======== */
 
 header {
-  margin: auto;
   /*   overflow: hidden; */
   /*   border-bottom: linear; */
 }
@@ -361,6 +391,7 @@ header {
 
 main {
   padding: 10px;
+  flex: 1;
   /*   min-width: 100%;
   box-shadow: 0 0 1em black;
   background-color: var(--secondary-color-opacity); */
@@ -613,17 +644,59 @@ p {
   text-indent: 1em;
 }
 
+.modalidades-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.2rem;
+}
+
+/* uma modalidade aberta ocupa a linha toda, o resto do grid continua compacto */
+.modalidades-grid .modalidades-box[open] {
+  grid-column: 1 / -1;
+}
+
+.modalidades-box {
+  padding: 0;
+  overflow: hidden;
+}
+
+.modalidades-box h2 {
+  width: auto;
+  margin: 0;
+  padding: 0;
+  font-size: 1.1em;
+  text-align: left;
+  justify-content: flex-start;
+}
+
 /* ponytail: native <details>/<summary> handles show/hide, no JS toggle class needed */
 .modalidades-box summary {
   cursor: pointer;
   list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8em;
+  padding: 1.3rem 1.5rem;
 }
 .modalidades-box summary::-webkit-details-marker {
   display: none;
 }
 
+.modalidades-chevron {
+  flex-shrink: 0;
+  font-size: 1.1em;
+  color: var(--golden-color);
+  transition: transform 0.2s ease;
+}
+
+.modalidades-box[open] .modalidades-chevron {
+  transform: rotate(90deg);
+}
+
 .modalidades-conteudo {
-  border-width: 0 0 1px 0;
+  padding: 0 1.5rem 1.5rem;
+  border-width: 1px 0 0 0;
   border-image-slice: 1;
   border-image-source: linear-gradient(
     90deg,
@@ -634,7 +707,6 @@ p {
     var(--secondary-color)
   );
   border-style: solid;
-  border-radius: 20px;
 }
 
 /* ======== CONTEÚDO EQUIPAMENTOS ======== */
@@ -1535,18 +1607,6 @@ footer {
 }
 
 /* ======== LANDING (INÍCIO) ======== */
-
-:root {
-  --hairline-gold: linear-gradient(
-    90deg,
-    rgba(184, 134, 45, 0),
-    #b8862d,
-    #ffdf91,
-    #b8862d,
-    rgba(184, 134, 45, 0)
-  );
-  --landing-card-bg: #1a2029;
-}
 
 /* ponytail: main{padding:10px} is global; the landing needs edge-to-edge
    bands, so cancel it on this one wrapper instead of touching the shared rule. */
