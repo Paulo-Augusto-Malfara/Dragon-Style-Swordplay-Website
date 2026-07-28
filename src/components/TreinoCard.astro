@@ -1,0 +1,76 @@
+---
+import Icon from "./Icon.astro";
+
+interface Registro {
+  id_treino: number;
+  data_treino: string;
+  nome: string;
+  nome_classe: string;
+  nivel_geral: number;
+  subiu_nivel_geral: boolean;
+  nivel_classe: number;
+  subiu_nivel_classe: boolean;
+}
+
+interface Props {
+  idTreino: number;
+  dataTreino: string;
+  attendees: Registro[];
+}
+
+const { idTreino, dataTreino, attendees } = Astro.props;
+const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
+---
+
+<details class="modalidades-box card">
+  <summary>
+    <div class="modalidades-summary-text">
+      <h2 class="modalidades-button">Treino Nº {idTreino}</h2>
+      <div class="modalidade-tags">
+        <span class="modalidade-tag">{dataFormatada}</span>
+        <span class="modalidade-tag">{attendees.length} participante{attendees.length === 1 ? "" : "s"}</span>
+      </div>
+    </div>
+    <Icon name="chevron-forward" class="modalidades-chevron" />
+  </summary>
+  <div class="modalidades-conteudo">
+    <div class="table-scroll">
+      <table class="ranking-tabela">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Nº Treino</th>
+            <th class="col-nome">Nome</th>
+            <th>Classe</th>
+            <th>Nível Geral</th>
+            <th>Nível Classe</th>
+          </tr>
+        </thead>
+        <tbody>
+          {attendees.map((r) => (
+            <tr>
+              <td>{dataFormatada}</td>
+              <td>{idTreino}</td>
+              <td class="col-nome">{r.nome}</td>
+              <td>{r.nome_classe}</td>
+              <td>
+                {r.subiu_nivel_geral ? (
+                  <strong class="gold-title">{r.nivel_geral}<span class="level-up-arrow">▲</span></strong>
+                ) : (
+                  r.nivel_geral
+                )}
+              </td>
+              <td>
+                {r.subiu_nivel_classe ? (
+                  <strong class="gold-title">{r.nivel_classe}<span class="level-up-arrow">▲</span></strong>
+                ) : (
+                  r.nivel_classe
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</details>

@@ -663,6 +663,12 @@ p {
   grid-column: 1 / -1;
 }
 
+/* treinos variam muito de tamanho (lista de presença) e viram tabela ao
+   abrir, então cada card ocupa a linha toda, sem grid multi-coluna */
+.treinos-grid {
+  grid-template-columns: 1fr;
+}
+
 .modalidades-box {
   padding: 0;
   overflow: hidden;
@@ -670,6 +676,7 @@ p {
 
 .modalidades-box h2 {
   width: auto;
+  max-width: none;
   margin: 0;
   padding: 0;
   font-size: 1.1em;
@@ -1076,9 +1083,6 @@ p {
   .navbar-menu-item-a {
     font-size: 0.7em;
   }
-  .modalidades-box h2 {
-    max-width: 60%;
-  }
   .h2-bottom-border {
     max-width: 20%;
   }
@@ -1100,9 +1104,6 @@ p {
   }
   #header-icons-div {
     gap: 1em;
-  }
-  .modalidades-box h2 {
-    max-width: 80%;
   }
   .h2-bottom-border {
     max-width: 30%;
@@ -1208,9 +1209,6 @@ p {
   }
   .toggle-button {
     font-size: 0.7em;
-  }
-  .modalidades-box h2 {
-    max-width: 100%;
   }
   .arma-display > img {
     width: 280px;
