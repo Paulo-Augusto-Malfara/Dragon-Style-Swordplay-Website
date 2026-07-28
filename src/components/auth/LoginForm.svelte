@@ -83,16 +83,16 @@
   </form>
 {:else}
   <form class="admin-form" onsubmit={verifyCode}>
-    <p class="gold-title">Enviamos um código de 6 dígitos para {email}.</p>
+    <p class="gold-title">Enviamos um código de 8 dígitos para {email}.</p>
     <label>
       Código de verificação
       <input
         type="text"
         inputmode="numeric"
         autocomplete="one-time-code"
-        maxlength="6"
+        maxlength="8"
         bind:value={code}
-        placeholder="000000"
+        placeholder="00000000"
         required
       />
     </label>
