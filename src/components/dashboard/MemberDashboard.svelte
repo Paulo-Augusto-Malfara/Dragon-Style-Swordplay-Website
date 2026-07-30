@@ -134,8 +134,10 @@
     <p class="admin-error">
       Seu email ainda não está vinculado a um cadastro de membro. Fale com um organizador.
     </p>
+    <button class="btn btn-sm" onclick={logout}>Novo login</button>
   {:else if status === "error"}
     <p class="admin-error">{errorMessage}</p>
+    <button class="btn btn-sm" onclick={logout}>Novo login</button>
   {:else}
     <div class="dashboard-profile">
       <button class="btn btn-sm dashboard-logout" onclick={logout}>sair</button>
