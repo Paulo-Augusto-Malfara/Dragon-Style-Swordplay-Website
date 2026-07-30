@@ -37,7 +37,6 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
       <a href={`#classe-${slug(nomeClasse)}`} class="btn btn-sm">{nomeClasse}</a>
     ))}
   </nav>
-  <p class="ranking-hint">Selecione uma classe acima para ver o ranking dela.</p>
   {
     classes.map(([nomeClasse, rows]) => (
       <section class="ranking-classe" id={`classe-${slug(nomeClasse)}`}>
