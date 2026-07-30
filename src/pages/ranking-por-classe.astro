@@ -43,7 +43,7 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
       <section class="ranking-classe" id={`classe-${slug(nomeClasse)}`}>
         <h2>{nomeClasse}</h2>
         <div class="table-scroll">
-          <table class="ranking-tabela">
+          <table class="ranking-tabela ranking-tabela--classe">
             <thead>
               <tr>
                 <th class="col-rank">#</th>

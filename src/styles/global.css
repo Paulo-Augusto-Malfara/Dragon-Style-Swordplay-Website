@@ -1411,17 +1411,24 @@ p {
 
 /* ======== RANKING TABLES (LEADERBOARD) ======== */
 
-/* ponytail: <table>/<th>/<td> markup kept for accessibility, but every row
-   is flexed instead of drawn as bordered grid cells -- reads as a modern
-   leaderboard list instead of the boxed "financial table" look. */
+/* ponytail: <table>/<th>/<td> markup kept for accessibility, but table/
+   thead/tbody/tr collapse into a single CSS Grid (display:contents on the
+   row wrappers) instead of each row being its own flex box. That's what
+   makes header and value columns actually line up -- with independent
+   flex rows, a header cell's width could differ from the value cells
+   below it and everything drifted out of alignment. A single shared grid
+   also lets columns size themselves to their content (auto) instead of
+   being stretched into a "financial table" grid of borders. Each page
+   sets its own column count/widths via a --geral/--classe/--treino/
+   --graduacao modifier, since that can't be shared across tables with a
+   different number of columns. */
 .table-scroll {
   max-width: 100%;
   overflow-x: auto;
 }
 
 .ranking-tabela {
-  width: 100%;
-  max-width: 760px;
+  display: grid;
   margin: 1.4em auto;
   background: var(--primary-color);
   border: 1px solid var(--card-border);
@@ -1430,54 +1437,38 @@ p {
   overflow: hidden;
 }
 
-.ranking-tabela,
 .ranking-tabela thead,
 .ranking-tabela tbody,
 .ranking-tabela tr {
-  display: block;
-  width: 100%;
-}
-
-.ranking-tabela tr {
-  display: flex;
-  align-items: center;
-  gap: 0.6em;
-}
-
-.ranking-tabela thead tr {
-  padding: 0.85em 1.3em;
-  border-bottom: 1px solid var(--golden-color-opaco);
-}
-
-.ranking-tabela tbody tr {
-  padding: 0.65em 1.3em;
-  border-bottom: 1px solid rgba(232, 172, 70, 0.12);
-  transition: background 0.2s ease;
-}
-
-.ranking-tabela tbody tr:last-child {
-  border-bottom: none;
-}
-
-.ranking-tabela tbody tr:hover,
-.graduacao-tabela tbody tr:hover,
-.grid-mural tbody tr:hover {
-  background: var(--secondary-color-opacity);
+  display: contents;
 }
 
 .ranking-tabela th,
 .ranking-tabela td {
   display: flex;
   align-items: center;
-  flex: 1 1 0;
   min-width: 0;
-  border: none;
-  padding: 0;
+  padding: 0.65em 0.9em;
+  border-bottom: 1px solid rgba(232, 172, 70, 0.12);
   text-align: left;
   white-space: nowrap;
+  transition: background 0.2s ease;
 }
 
-.ranking-tabela th {
+.ranking-tabela th:first-child,
+.ranking-tabela td:first-child {
+  padding-left: 1.3em;
+}
+
+.ranking-tabela th:last-child,
+.ranking-tabela td:last-child {
+  padding-right: 1.3em;
+}
+
+.ranking-tabela thead th {
+  padding-top: 0.85em;
+  padding-bottom: 0.85em;
+  border-bottom: 1px solid var(--golden-color-opaco);
   color: var(--golden-color);
   font-size: 0.7em;
   text-transform: uppercase;
@@ -1485,32 +1476,84 @@ p {
   font-weight: 700;
 }
 
+.ranking-tabela tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.ranking-tabela tbody tr:hover td,
+.graduacao-tabela tbody tr:hover,
+.grid-mural tbody tr:hover {
+  background: var(--secondary-color-opacity);
+}
+
 .ranking-tabela td {
   color: var(--text-primary-color);
 }
 
 .ranking-tabela .col-rank {
-  flex: 0 0 38px;
   justify-content: center;
+  padding-right: 0.6em;
+}
+
+.ranking-tabela th.col-rank:first-child,
+.ranking-tabela td.col-rank:first-child {
+  padding-left: 0.6em;
 }
 
 .ranking-tabela .col-nome {
-  flex: 2.4 1 0;
   gap: 0.7em;
   white-space: normal;
 }
 
 .ranking-tabela .col-stat,
 .ranking-tabela .col-faixa {
-  flex: 0 0 auto;
-  min-width: 90px;
   justify-content: center;
   text-align: center;
+}
+
+/* larguras de coluna por página -- cada tabela define suas próprias faixas
+   (nº de colunas difere entre ranking geral, por classe, treinos e graduação) */
+.ranking-tabela--geral {
+  width: 100%;
+  max-width: 760px;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto auto;
+}
+
+.ranking-tabela--classe {
+  width: 100%;
+  max-width: 640px;
+  grid-template-columns: 64px minmax(0, 1fr) auto auto;
+}
+
+.ranking-tabela--treino {
+  width: 100%;
+  max-width: 700px;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+}
+
+/* ponytail: width:auto (not 100%) + no 1fr column lets this table shrink
+   to fit its 3 short columns instead of stretching across the page like
+   .graduacao-tabela's old width:90% did. */
+.ranking-tabela--graduacao {
+  width: auto;
+  max-width: 480px;
+  grid-template-columns: 64px minmax(0, 1fr) auto;
+}
+
+/* selo colorido da faixa na tabela de Graduações */
+.belt-swatch {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.3);
 }
 
 /* badge circular da posição (#) */
 .rank-badge {
   display: inline-flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 26px;
@@ -1593,12 +1636,23 @@ p {
   color: #1b5e20;
 }
 
+/* ponytail: sticky instead of scrolling away -- with the page previously
+   requiring a scroll back to top to switch classes, keeping this pinned
+   near the viewport top is a straightforward UX fix, no JS needed. */
 .ranking-quick-nav {
+  position: sticky;
+  top: 0.8em;
+  z-index: 5;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.6em;
+  gap: 0.5em;
   margin: 1em auto 2em;
+  padding: 0.6em 0.7em;
+  background: var(--primary-color);
+  border: 1px solid var(--card-border);
+  border-radius: 10px;
+  box-shadow: var(--card-shadow);
 }
 
 /* ponytail: single-selection UI via :target instead of a JS toggle --
@@ -1621,19 +1675,53 @@ p {
   color: var(--text-secondary-color);
 }
 
+.ranking-pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5em;
+  margin: 1.5em auto 2em;
+}
+
+.ranking-pagination .btn-sm {
+  min-width: 2.4em;
+  padding-left: 0.6em;
+  padding-right: 0.6em;
+}
+
 @media (max-width: 560px) {
+  /* telas estreitas trocam a grid (que exige colunas fixas) por um
+     empilhamento em flex, cada linha virando um mini-cartão com rótulos */
+  .ranking-tabela {
+    display: block;
+    width: 100%;
+  }
+
   .ranking-tabela thead {
     display: none;
   }
 
-  .ranking-tabela tbody tr {
+  .ranking-tabela tbody {
+    display: block;
+  }
+
+  .ranking-tabela tr {
+    display: flex;
     flex-wrap: wrap;
     row-gap: 0.5em;
+    align-items: center;
     padding: 0.9em 1em;
+    border-bottom: 1px solid rgba(232, 172, 70, 0.12);
+  }
+
+  .ranking-tabela tbody tr:last-child {
+    border-bottom: none;
   }
 
   .ranking-tabela td {
     flex: 0 0 auto;
+    padding: 0;
+    border-bottom: none;
   }
 
   .ranking-tabela .col-nome {
@@ -1655,6 +1743,11 @@ p {
     font-size: 0.72em;
     text-transform: uppercase;
     letter-spacing: 0.03em;
+  }
+
+  .ranking-quick-nav {
+    top: 0;
+    border-radius: 0 0 10px 10px;
   }
 }
 

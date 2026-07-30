@@ -8,6 +8,15 @@ const { data: ranking } = await supabasePublic
   .from("v_ranking_nivel_geral")
   .select("*")
   .order("nivel_geral", { ascending: false });
+
+const PAGE_SIZE = 25;
+const totalPaginas = Math.max(1, Math.ceil((ranking ?? []).length / PAGE_SIZE));
+const paginaPedida = Number(Astro.url.searchParams.get("page") ?? "1");
+const pagina = Number.isFinite(paginaPedida)
+  ? Math.min(Math.max(1, Math.trunc(paginaPedida)), totalPaginas)
+  : 1;
+const inicio = (pagina - 1) * PAGE_SIZE;
+const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
 ---
 
 <PageLayout
@@ -23,7 +32,7 @@ const { data: ranking } = await supabasePublic
     <br />
   </section>
   <div class="table-scroll">
-    <table class="ranking-tabela">
+    <table class="ranking-tabela ranking-tabela--geral">
       <thead>
         <tr>
           <th class="col-rank">#</th>
@@ -35,26 +44,48 @@ const { data: ranking } = await supabasePublic
       </thead>
       <tbody>
         {
-          (ranking ?? []).map((m, i) => (
-            <tr class={i < 3 ? `rank-row rank-${i + 1}` : "rank-row"}>
-              <td class="col-rank">
-                <span class="rank-badge">{i + 1}</span>
-              </td>
-              <td class="col-nome">
-                <span class="row-avatar">{m.nome.charAt(0).toUpperCase()}</span>
-                <span class="row-name">{m.nome}</span>
-              </td>
-              <td class="col-stat" data-label="Nível Geral">
-                <span class="stat-pill">{m.nivel_geral}</span>
-              </td>
-              <td class="col-faixa" data-label="Faixa">{m.nome_faixa ?? "-"}</td>
-              <td class="col-stat" data-label="Pontos de Honra">
-                <span class="stat-pill">{m.ph_total}</span>
-              </td>
-            </tr>
-          ))
+          paginaAtual.map((m, i) => {
+            const posicao = inicio + i + 1;
+            return (
+              <tr class={posicao <= 3 ? `rank-row rank-${posicao}` : "rank-row"}>
+                <td class="col-rank">
+                  <span class="rank-badge">{posicao}</span>
+                </td>
+                <td class="col-nome">
+                  <span class="row-avatar">{m.nome.charAt(0).toUpperCase()}</span>
+                  <span class="row-name">{m.nome}</span>
+                </td>
+                <td class="col-stat" data-label="Nível Geral">
+                  <span class="stat-pill">{m.nivel_geral}</span>
+                </td>
+                <td class="col-faixa" data-label="Faixa">{m.nome_faixa ?? "-"}</td>
+                <td class="col-stat" data-label="Pontos de Honra">
+                  <span class="stat-pill">{m.ph_total}</span>
+                </td>
+              </tr>
+            );
+          })
         }
       </tbody>
     </table>
   </div>
+  {totalPaginas > 1 && (
+    <nav class="ranking-pagination" aria-label="Páginas do ranking">
+      {pagina > 1 && (
+        <a class="btn btn-sm" href={`?page=${pagina - 1}`} rel="prev">‹</a>
+      )}
+      {Array.from({ length: totalPaginas }, (_, idx) => idx + 1).map((p) => (
+        <a
+          class={`btn btn-sm${p === pagina ? " btn-primary" : ""}`}
+          href={`?page=${p}`}
+          aria-current={p === pagina ? "page" : undefined}
+        >
+          {p}
+        </a>
+      ))}
+      {pagina < totalPaginas && (
+        <a class="btn btn-sm" href={`?page=${pagina + 1}`} rel="next">›</a>
+      )}
+    </nav>
+  )}
 </PageLayout>
