@@ -5,6 +5,7 @@ interface Registro {
   id_treino: number;
   data_treino: string;
   nome: string;
+  foto_url: string | null;
   nome_classe: string;
   nivel_geral: number;
   subiu_nivel_geral: boolean;
@@ -48,7 +49,9 @@ const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
           {attendees.map((r) => (
             <tr>
               <td class="col-nome">
-                <span class="row-avatar">{r.nome.charAt(0).toUpperCase()}</span>
+                <span class="row-avatar">
+                  {r.foto_url ? <img src={r.foto_url} alt="" /> : r.nome.charAt(0).toUpperCase()}
+                </span>
                 <span class="row-name">{r.nome}</span>
               </td>
               <td class="col-faixa">{r.nome_classe}</td>

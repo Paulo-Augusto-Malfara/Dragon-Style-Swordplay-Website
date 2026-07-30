@@ -48,7 +48,9 @@ const grupos = [
         <section class="grid-mural">
           {lista.map((m) => (
             <div>
-              <p class="mural-avatar">{m.nome.charAt(0).toUpperCase()}</p>
+              <p class="mural-avatar">
+                {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}
+              </p>
               <h2>{m.nome}</h2>
               <p><strong class="gold-title">Nível Geral:</strong> {m.nivel_geral}</p>
               <p><strong class="gold-title">Faixa:</strong> {m.nome_faixa ?? "-"}</p>

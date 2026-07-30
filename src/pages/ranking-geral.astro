@@ -52,7 +52,9 @@ const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
                   <span class="rank-badge">{posicao}</span>
                 </td>
                 <td class="col-nome">
-                  <span class="row-avatar">{m.nome.charAt(0).toUpperCase()}</span>
+                  <span class="row-avatar">
+                    {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}
+                  </span>
                   <span class="row-name">{m.nome}</span>
                 </td>
                 <td class="col-stat">

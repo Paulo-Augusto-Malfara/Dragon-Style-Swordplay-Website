@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import LoginForm from "../auth/LoginForm.svelte";
+  import AvatarUploader from "./AvatarUploader.svelte";
 
   // ponytail: dynamic import, not a top-level one -- this component is used
   // inside dashboard.astro, a fully static page. A static import evaluates
@@ -17,6 +18,7 @@
   let errorMessage = $state("");
 
   let nomeOficial = $state("");
+  let fotoUrl = $state<string | null>(null);
   let apelido = $state<string | null>(null);
   let editingApelido = $state(false);
   let apelidoInput = $state("");
@@ -47,7 +49,7 @@
 
       const { data: membro } = await supabase
         .from("dMembros")
-        .select("id_membro, nome, apelido")
+        .select("id_membro, nome, apelido, foto_url")
         .eq("auth_user_id", session.user.id)
         .single();
 
@@ -57,6 +59,7 @@
       }
 
       nomeOficial = membro.nome;
+      fotoUrl = membro.foto_url;
       apelido = membro.apelido;
       apelidoInput = membro.apelido ?? "";
 
@@ -136,6 +139,7 @@
   {:else}
     <div class="dashboard-profile">
       <button class="btn btn-sm dashboard-logout" onclick={logout}>sair</button>
+      <AvatarUploader {fotoUrl} nome={displayName} onUploaded={(url) => (fotoUrl = url)} />
       <p class="dashboard-name">{displayName}</p>
       {#if apelido}
         <p class="dashboard-official-name">Nome oficial: {nomeOficial}</p>

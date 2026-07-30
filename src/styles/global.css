@@ -1021,9 +1021,12 @@ p {
 /* ponytail: initials placeholder for DB-backed members with no photo on file --
    no Storage bucket/upload flow exists yet, real photos are a later addition */
 .mural-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
   width: 80px;
   height: 80px;
-  align-items: center;
   border-radius: 50%;
   border: solid 2px var(--golden-color);
   background: var(--box-primary-color);
@@ -1031,6 +1034,13 @@ p {
   font-size: 2em;
   font-weight: 700;
   margin-bottom: 10px;
+}
+
+.mural-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
 }
 
 /* .grid-mural > div > img:hover {
@@ -1596,6 +1606,7 @@ p {
   width: 30px;
   height: 30px;
   border-radius: 50%;
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1604,6 +1615,12 @@ p {
   color: var(--golden-color);
   font-weight: 700;
   font-size: 0.78em;
+}
+
+.row-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 .row-name {
@@ -1748,6 +1765,116 @@ p {
   width: auto;
   color: var(--golden-color);
   text-shadow: 2px 2px black;
+}
+
+/* ======== AVATAR UPLOADER ======== */
+
+.avatar-uploader {
+  display: flex;
+  justify-content: center;
+}
+
+.avatar-uploader-input {
+  display: none;
+}
+
+.avatar-uploader-preview {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--golden-color);
+  background: var(--box-primary-color);
+  color: var(--golden-color);
+  font-size: 2.2em;
+  font-weight: 700;
+  cursor: pointer;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.avatar-uploader-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
+.avatar-uploader-edit {
+  position: absolute;
+  inset: auto 0 0 0;
+  padding: 0.3em 0;
+  background: rgba(0, 0, 0, 0.65);
+  color: var(--text-primary-color);
+  font-size: 0.6rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.avatar-uploader-preview:hover .avatar-uploader-edit,
+.avatar-uploader-preview:focus-visible .avatar-uploader-edit {
+  opacity: 1;
+}
+
+.avatar-crop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1em;
+  background: rgba(0, 0, 0, 0.75);
+}
+
+.avatar-crop-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+  padding: 1.5em;
+  background: var(--primary-color);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.avatar-crop-viewport {
+  position: relative;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 2px solid var(--golden-color);
+  background: var(--box-primary-color);
+  touch-action: none;
+  cursor: grab;
+}
+
+.avatar-crop-viewport:active {
+  cursor: grabbing;
+}
+
+.avatar-crop-viewport img {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  max-width: none;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.avatar-crop-zoom {
+  width: 220px;
+}
+
+.avatar-crop-actions {
+  display: flex;
+  gap: 0.6em;
 }
 
 .dashboard-official-name {
