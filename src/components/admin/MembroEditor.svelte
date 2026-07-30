@@ -8,6 +8,7 @@
   const { id }: Props = $props();
 
   let nome = $state("");
+  let email = $state("");
   let statusAtivo = $state(true);
   let authLevel = $state(4);
   let oculto = $state(false);
@@ -20,7 +21,7 @@
   async function load() {
     const { data, error } = await supabase
       .from("dMembros")
-      .select("nome, status_ativo, auth_level, oculto, indicado_por")
+      .select("nome, email, status_ativo, auth_level, oculto, indicado_por")
       .eq("id_membro", id)
       .single();
     if (error) {
@@ -29,6 +30,7 @@
       return;
     }
     nome = data.nome;
+    email = data.email ?? "";
     statusAtivo = data.status_ativo;
     authLevel = data.auth_level;
     oculto = data.oculto;
@@ -46,6 +48,7 @@
       .from("dMembros")
       .update({
         nome,
+        email: email.trim() || null,
         status_ativo: statusAtivo,
         auth_level: authLevel,
         indicado_por: padrinho?.id_membro ?? null,
@@ -81,6 +84,11 @@
     <label>
       Nome
       <input type="text" bind:value={nome} required />
+    </label>
+
+    <label>
+      Email (usado pro login)
+      <input type="email" bind:value={email} placeholder="sem email vinculado" />
     </label>
 
     <label class="checkbox">
