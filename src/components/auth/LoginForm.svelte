@@ -40,6 +40,10 @@
   // for retryable fetch errors -- fall back to something readable instead.
   function readableMessage(raw: string | undefined): string {
     if (!raw || raw === "{}") return "Não foi possível completar agora. Tente novamente em instantes.";
+    const rateLimitMatch = raw.match(/after (\d+) seconds?/i);
+    if (rateLimitMatch) {
+      return `Por segurança, você só pode pedir um novo código em ${rateLimitMatch[1]} segundos.`;
+    }
     return raw;
   }
 
@@ -53,6 +57,20 @@
       // evaluate createBrowserClient() during Astro's SSR pass at build time,
       // which crashes the whole build if the Supabase env vars aren't set then.
       const { supabase } = await import("../../lib/supabase-browser");
+      const { data: existe, error: checkError } = await supabase.rpc("email_tem_cadastro", {
+        p_email: email,
+      });
+      if (checkError) {
+        status = "error";
+        errorMessage = readableMessage(checkError.message);
+        return;
+      }
+      if (!existe) {
+        status = "error";
+        errorMessage = "Esse email não está vinculado a um cadastro de membro. Fale com um organizador.";
+        return;
+      }
+
       const { error } = await supabase.auth.signInWithOtp({ email });
       if (error) {
         status = "error";

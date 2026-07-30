@@ -47,11 +47,23 @@
 
       status = "loading";
 
-      const { data: membro } = await supabase
+      let { data: membro } = await supabase
         .from("dMembros")
         .select("id_membro, nome, apelido, foto_url")
         .eq("auth_user_id", session.user.id)
         .single();
+
+      if (!membro) {
+        // Primeiro login com esse email (ou email vinculado ao cadastro depois
+        // de uma tentativa anterior): tenta vincular agora e recarrega uma vez.
+        await supabase.rpc("vincular_membro_por_email");
+        const retry = await supabase
+          .from("dMembros")
+          .select("id_membro, nome, apelido, foto_url")
+          .eq("auth_user_id", session.user.id)
+          .single();
+        membro = retry.data;
+      }
 
       if (!membro) {
         status = "no-member";
