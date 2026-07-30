@@ -15,6 +15,9 @@ declare namespace App {
       id_membro: number;
       nome: string;
       auth_level: number;
+      oculto: boolean;
+      isOrganizador: boolean;
+      isAdminSistema: boolean;
     };
   }
 }

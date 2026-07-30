@@ -1,0 +1,14 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AgendaList from "../../../components/admin/AgendaList.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+if (!membro.isOrganizador) return Astro.redirect("/admin");
+---
+
+<BaseLayout title="Admin - Agenda">
+  <h1>Agenda de Treinos</h1>
+  <AgendaList client:load />
+</BaseLayout>

@@ -1,0 +1,13 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import MembrosList from "../../../components/admin/MembrosList.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+---
+
+<BaseLayout title="Admin - Membros">
+  <h1>Membros</h1>
+  <MembrosList podeEditar={membro.isAdminSistema} client:load />
+</BaseLayout>

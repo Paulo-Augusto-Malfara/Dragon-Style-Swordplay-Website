@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AgendaEditor from "../../../components/admin/AgendaEditor.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+if (!membro.isOrganizador) return Astro.redirect("/admin");
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Admin - Agenda">
+  <h1>{id === "new" ? "Novo Agendamento" : "Editar Agendamento"}</h1>
+  <AgendaEditor id={id} meuIdMembro={membro.id_membro} client:load />
+</BaseLayout>

@@ -11,9 +11,23 @@ const { membro } = Astro.locals;
   <h1>Painel Administrativo</h1>
   <p>Logado como {membro.nome}</p>
 
-  <h2>Novidades</h2>
-  <AdminList kind="posts" client:load />
+  <div class="admin-list-actions">
+    <a href="/admin/membros" class="btn">Membros</a>
+    <a href="/admin/treinos" class="btn">Treinos</a>
+    <a href="/admin/eventos" class="btn">Eventos</a>
+    {membro.isOrganizador && <a href="/admin/agenda" class="btn">Agenda</a>}
+    {membro.isAdminSistema && <a href="/admin/doacoes" class="btn">Doações</a>}
+  </div>
 
-  <h2>Modalidades</h2>
-  <AdminList kind="modalidades" client:load />
+  {
+    membro.isOrganizador && (
+      <>
+        <h2>Novidades</h2>
+        <AdminList kind="posts" client:load />
+
+        <h2>Modalidades</h2>
+        <AdminList kind="modalidades" client:load />
+      </>
+    )
+  }
 </BaseLayout>

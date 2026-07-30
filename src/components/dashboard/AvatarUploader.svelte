@@ -3,8 +3,9 @@
     fotoUrl: string | null;
     nome: string;
     onUploaded: (url: string) => void;
+    savePhoto: (blob: Blob) => Promise<string>;
   }
-  let { fotoUrl, nome, onUploaded }: Props = $props();
+  let { fotoUrl, nome, onUploaded, savePhoto }: Props = $props();
 
   const VIEWPORT = 220; // px, área circular de recorte mostrada na tela
   const OUTPUT_SIZE = 512; // px, resolução final exportada (nítida até em telas retina)
@@ -140,26 +141,7 @@
         );
       });
 
-      const { supabase } = await import("../../lib/supabase-browser");
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error("Sessão expirada, faça login novamente.");
-
-      const path = `${user.id}/avatar.webp`;
-      const { error: uploadError } = await supabase.storage
-        .from("avatars")
-        .upload(path, blob, { upsert: true, contentType: "image/webp" });
-      if (uploadError) throw uploadError;
-
-      const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-      // cache-busting: mesmo path sempre (upsert), a query string muda a cada
-      // envio para o navegador não continuar mostrando a foto antiga em cache
-      const finalUrl = `${pub.publicUrl}?v=${Date.now()}`;
-
-      const { error: rpcError } = await supabase.rpc("set_minha_foto", { nova_foto_url: finalUrl });
-      if (rpcError) throw rpcError;
-
+      const finalUrl = await savePhoto(blob);
       onUploaded(finalUrl);
       cancelCrop();
     } catch (err) {

@@ -1,0 +1,14 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import EventoAtivo from "../../../components/admin/EventoAtivo.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Admin - Evento">
+  <h1>Evento #{id}</h1>
+  <EventoAtivo idEvento={Number(id)} souOrganizador={membro.isOrganizador} souAdminSistema={membro.isAdminSistema} client:load />
+</BaseLayout>

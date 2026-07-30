@@ -1,0 +1,57 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { supabasePublic } from "../lib/supabase-public";
+
+export const prerender = false;
+
+const { data } = await supabasePublic
+  .from("fAgendaTreinos")
+  .select("id_agenda, data_treino, horario_inicio, horario_termino, cidade, endereco, status")
+  .gte("data_treino", new Date().toISOString().slice(0, 10))
+  .eq("status", "agendado")
+  .order("data_treino")
+  .order("horario_inicio");
+
+const proximosTreinos = data ?? [];
+---
+
+<PageLayout title="Agenda de Treinos" prev={{ href: "/registro-de-treinos", label: "Registro de Treinos" }}>
+  <section>
+    <p>Confira abaixo os próximos treinos agendados do Dragon Style.</p>
+    <br />
+  </section>
+  {
+    proximosTreinos.length === 0 ? (
+      <p class="dashboard-empty">Nenhum treino agendado no momento.</p>
+    ) : (
+      <div class="table-scroll">
+        <table class="ranking-tabela ranking-tabela--agenda">
+          <thead>
+            <tr>
+              <th class="col-nome">Data</th>
+              <th class="col-stat">Horário</th>
+              <th class="col-nome">Local</th>
+            </tr>
+          </thead>
+          <tbody>
+            {proximosTreinos.map((t) => (
+              <tr>
+                <td class="col-nome">{new Date(t.data_treino + "T00:00:00").toLocaleDateString("pt-BR")}</td>
+                <td class="col-stat">
+                  <span class="stat-pill">
+                    {t.horario_inicio}
+                    {t.horario_termino ? ` - ${t.horario_termino}` : ""}
+                  </span>
+                </td>
+                <td class="col-nome">
+                  {t.cidade}
+                  {t.endereco ? ` — ${t.endereco}` : ""}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )
+  }
+</PageLayout>

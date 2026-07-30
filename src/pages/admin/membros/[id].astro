@@ -1,0 +1,16 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import MembroEditor from "../../../components/admin/MembroEditor.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+if (!membro.isAdminSistema) return Astro.redirect("/admin/membros");
+
+const { id } = Astro.params;
+---
+
+<BaseLayout title="Admin - Editar Membro">
+  <h1>Editar Membro</h1>
+  <MembroEditor id={id} client:load />
+</BaseLayout>

@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AbrirEvento from "../../../components/admin/AbrirEvento.svelte";
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+const supabase = createSupabaseServerClient(Astro.cookies, Astro.request);
+
+const { data: aberto } = await supabase
+  .from("fEventos")
+  .select("id_evento, nome_evento, cidade, status")
+  .eq("status", "aberto")
+  .maybeSingle();
+
+const { data: historico } = await supabase
+  .from("fEventos")
+  .select("id_evento, nome_evento, cidade, data_evento")
+  .eq("status", "fechado")
+  .order("data_evento", { ascending: false })
+  .limit(20);
+---
+
+<BaseLayout title="Admin - Eventos">
+  <h1>Eventos</h1>
+
+  {
+    aberto ? (
+      <div class="admin-form">
+        <p class="gold-title">
+          Evento em andamento: {aberto.nome_evento} ({aberto.cidade})
+        </p>
+        <a href={`/admin/eventos/${aberto.id_evento}`} class="btn btn-primary">
+          Ir para o evento
+        </a>
+      </div>
+    ) : membro.isOrganizador ? (
+      <AbrirEvento client:load />
+    ) : (
+      <p class="dashboard-empty">Nenhum evento aberto no momento. Aguarde um organizador abrir um evento.</p>
+    )
+  }
+
+  <h2>Histórico</h2>
+  {historico && historico.length > 0 ? (
+    <ul class="admin-list">
+      {historico.map((e) => (
+        <li>
+          <span>
+            {e.nome_evento} — {e.cidade} ({new Date(e.data_evento).toLocaleDateString("pt-BR")})
+          </span>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p class="dashboard-empty">Nenhum evento finalizado ainda.</p>
+  )}
+</BaseLayout>

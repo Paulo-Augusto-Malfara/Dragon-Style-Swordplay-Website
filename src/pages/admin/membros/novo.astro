@@ -1,0 +1,13 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import RecrutarMembro from "../../../components/admin/RecrutarMembro.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+---
+
+<BaseLayout title="Admin - Novo Membro">
+  <h1>Cadastrar Novo Membro</h1>
+  <RecrutarMembro meuIdMembro={membro.id_membro} client:load />
+</BaseLayout>

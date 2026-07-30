@@ -49,7 +49,7 @@
 
       let { data: membro } = await supabase
         .from("dMembros")
-        .select("id_membro, nome, apelido, foto_url")
+        .select("id_membro, nome, apelido, foto_url, oculto")
         .eq("auth_user_id", session.user.id)
         .single();
 
@@ -59,13 +59,13 @@
         await supabase.rpc("vincular_membro_por_email");
         const retry = await supabase
           .from("dMembros")
-          .select("id_membro, nome, apelido, foto_url")
+          .select("id_membro, nome, apelido, foto_url, oculto")
           .eq("auth_user_id", session.user.id)
           .single();
         membro = retry.data;
       }
 
-      if (!membro) {
+      if (!membro || membro.oculto) {
         status = "no-member";
         return;
       }
@@ -134,6 +134,30 @@
     window.location.reload();
   }
 
+  async function saveMinhaFoto(blob: Blob): Promise<string> {
+    const supabase = await getSupabase();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Sessão expirada, faça login novamente.");
+
+    const path = `${user.id}/avatar.webp`;
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(path, blob, { upsert: true, contentType: "image/webp" });
+    if (uploadError) throw uploadError;
+
+    const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+    // cache-busting: mesmo path sempre (upsert), a query string muda a cada
+    // envio para o navegador não continuar mostrando a foto antiga em cache
+    const finalUrl = `${pub.publicUrl}?v=${Date.now()}`;
+
+    const { error: rpcError } = await supabase.rpc("set_minha_foto", { nova_foto_url: finalUrl });
+    if (rpcError) throw rpcError;
+
+    return finalUrl;
+  }
+
   onMount(load);
 </script>
 
@@ -157,7 +181,7 @@
   {:else}
     <div class="dashboard-profile">
       <button class="btn btn-sm dashboard-logout" onclick={logout}>sair</button>
-      <AvatarUploader {fotoUrl} nome={displayName} onUploaded={(url) => (fotoUrl = url)} />
+      <AvatarUploader {fotoUrl} nome={displayName} onUploaded={(url) => (fotoUrl = url)} savePhoto={saveMinhaFoto} />
       <p class="dashboard-name">{displayName}</p>
       {#if apelido}
         <p class="dashboard-official-name">Nome oficial: {nomeOficial}</p>

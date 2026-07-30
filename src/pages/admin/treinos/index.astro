@@ -1,0 +1,57 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AbrirTreino from "../../../components/admin/AbrirTreino.svelte";
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+const supabase = createSupabaseServerClient(Astro.cookies, Astro.request);
+
+const { data: aberto } = await supabase
+  .from("fTreinos")
+  .select("id_treino, data_treino, status")
+  .in("status", ["aberto", "aguardando_data"])
+  .maybeSingle();
+
+const { data: historico } = await supabase
+  .from("fTreinos")
+  .select("id_treino, data_treino, status")
+  .eq("status", "finalizado")
+  .order("data_treino", { ascending: false })
+  .limit(20);
+---
+
+<BaseLayout title="Admin - Treinos">
+  <h1>Treinos</h1>
+
+  {
+    aberto ? (
+      <div class="admin-form">
+        <p class="gold-title">
+          Há um treino em andamento ({new Date(aberto.data_treino).toLocaleDateString("pt-BR")}).
+        </p>
+        <a href={`/admin/treinos/${aberto.id_treino}`} class="btn btn-primary">
+          Ir para o treino
+        </a>
+      </div>
+    ) : membro.isOrganizador ? (
+      <AbrirTreino client:load />
+    ) : (
+      <p class="dashboard-empty">Nenhum treino aberto no momento. Aguarde um organizador abrir um treino.</p>
+    )
+  }
+
+  <h2>Histórico</h2>
+  {historico && historico.length > 0 ? (
+    <ul class="admin-list">
+      {historico.map((t) => (
+        <li>
+          <span>{new Date(t.data_treino).toLocaleDateString("pt-BR")}</span>
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p class="dashboard-empty">Nenhum treino finalizado ainda.</p>
+  )}
+</BaseLayout>
