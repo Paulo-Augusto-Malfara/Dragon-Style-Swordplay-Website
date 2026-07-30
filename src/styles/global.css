@@ -1565,6 +1565,13 @@ p {
   grid-template-columns: minmax(100px, 1fr) auto auto;
 }
 
+.ranking-tabela--historico {
+  width: 100%;
+  min-width: 460px;
+  max-width: 640px;
+  grid-template-columns: 64px minmax(90px, 1fr) auto auto;
+}
+
 /* selo colorido da faixa na tabela de Graduações */
 .belt-swatch {
   display: inline-block;
@@ -1753,12 +1760,23 @@ p {
   display: flex;
   flex-direction: column;
   gap: 1.2em;
-  padding: 1.5em;
+  padding: 2em 1.5em 1.6em;
   margin-bottom: 1.5em;
-  background: var(--secondary-color-opacity);
+  background: var(--primary-color);
   border: 1px solid var(--golden-color-opaco);
-  border-radius: 12px;
-  box-shadow: 0 0 1em black;
+  border-radius: 14px;
+  box-shadow: 0 0 1.2em black;
+  overflow: hidden;
+}
+
+.dashboard-profile::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--hairline-gold);
 }
 
 .dashboard-logout {
@@ -1933,18 +1951,26 @@ p {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.3em;
+  gap: 0.35em;
   flex: 1 1 140px;
-  padding: 1em 1.2em;
-  background: var(--box-primary-color);
+  padding: 1.1em 1.2em;
+  background: var(--secondary-color);
   border: 1px solid var(--border-dark-color-2);
-  border-radius: 10px;
+  border-radius: 12px;
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-stat:hover {
+  transform: translateY(-3px);
+  border-color: var(--golden-color-opaco);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
 }
 
 .dashboard-stat .label {
-  font-size: 0.75em;
+  font-size: 0.72em;
+  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--golden-color);
 }
 
@@ -1953,6 +1979,7 @@ p {
   font-weight: 700;
   color: var(--text-primary-color);
   text-shadow: 2px 2px black;
+  font-variant-numeric: tabular-nums;
 }
 
 @media (max-width: 480px) {
