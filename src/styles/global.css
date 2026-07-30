@@ -1771,6 +1771,15 @@ p {
   width: auto;
 }
 
+.dashboard-status-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1em;
+  text-align: center;
+  margin-top: 1.5em;
+}
+
 .dashboard-empty {
   text-align: center;
   text-indent: 0;
