@@ -1557,19 +1557,19 @@ p {
 }
 
 /* tabelas pessoais do dashboard do membro (níveis por classe, histórico) --
-   sem coluna de posição/avatar, só um rótulo à esquerda e pills à direita */
+   sem coluna de posição/avatar, só um rótulo à esquerda e pills à direita.
+   Sem min-width: como classe/data são curtos, a tabela pode encolher livre
+   (grid+1fr) em vez de forçar rolagem horizontal desnecessária no celular. */
 .ranking-tabela--dashboard {
   width: 100%;
-  min-width: 380px;
   max-width: 640px;
-  grid-template-columns: minmax(100px, 1fr) auto auto;
+  grid-template-columns: minmax(80px, 1fr) auto auto;
 }
 
 .ranking-tabela--historico {
   width: 100%;
-  min-width: 460px;
   max-width: 640px;
-  grid-template-columns: 64px minmax(90px, 1fr) auto auto;
+  grid-template-columns: 64px minmax(70px, 1fr) auto auto;
 }
 
 /* selo colorido da faixa na tabela de Graduações */
@@ -1731,6 +1731,29 @@ p {
   .ranking-quick-nav {
     top: 0;
     border-radius: 0 0 10px 10px;
+  }
+
+  /* tabelas do dashboard (conteúdo curto) ficam mais compactas no celular
+     em vez de manter o respiro generoso das tabelas públicas de ranking */
+  .ranking-tabela--dashboard th,
+  .ranking-tabela--dashboard td,
+  .ranking-tabela--historico th,
+  .ranking-tabela--historico td {
+    padding: 0.55em 0.5em;
+  }
+
+  .ranking-tabela--dashboard th:first-child,
+  .ranking-tabela--dashboard td:first-child,
+  .ranking-tabela--historico th:first-child,
+  .ranking-tabela--historico td:first-child {
+    padding-left: 0.8em;
+  }
+
+  .ranking-tabela--dashboard th:last-child,
+  .ranking-tabela--dashboard td:last-child,
+  .ranking-tabela--historico th:last-child,
+  .ranking-tabela--historico td:last-child {
+    padding-right: 0.8em;
   }
 }
 

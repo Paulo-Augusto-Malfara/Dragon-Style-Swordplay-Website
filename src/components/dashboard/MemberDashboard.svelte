@@ -229,7 +229,13 @@
             {#each historico as h}
               <tr>
                 <td class="col-rank"><span class="rank-badge">{h.id_treino}</span></td>
-                <td class="col-nome">{new Date(h.data_treino).toLocaleDateString("pt-BR")}</td>
+                <td class="col-nome">
+                  {new Date(h.data_treino).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
+                </td>
                 <td class="col-faixa">{h.nome_classe}</td>
                 <td class="col-stat"><span class="stat-pill">{h.ph_ganho_treino}</span></td>
               </tr>
