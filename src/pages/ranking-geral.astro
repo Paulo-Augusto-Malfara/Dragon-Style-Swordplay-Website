@@ -55,11 +55,11 @@ const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
                   <span class="row-avatar">{m.nome.charAt(0).toUpperCase()}</span>
                   <span class="row-name">{m.nome}</span>
                 </td>
-                <td class="col-stat" data-label="Nível Geral">
+                <td class="col-stat">
                   <span class="stat-pill">{m.nivel_geral}</span>
                 </td>
-                <td class="col-faixa" data-label="Faixa">{m.nome_faixa ?? "-"}</td>
-                <td class="col-stat" data-label="Pontos de Honra">
+                <td class="col-faixa">{m.nome_faixa ?? "-"}</td>
+                <td class="col-stat">
                   <span class="stat-pill">{m.ph_total}</span>
                 </td>
               </tr>

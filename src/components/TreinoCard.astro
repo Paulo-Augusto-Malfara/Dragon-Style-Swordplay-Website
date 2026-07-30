@@ -51,14 +51,14 @@ const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
                 <span class="row-avatar">{r.nome.charAt(0).toUpperCase()}</span>
                 <span class="row-name">{r.nome}</span>
               </td>
-              <td class="col-faixa" data-label="Classe">{r.nome_classe}</td>
-              <td class="col-stat" data-label="Nível Geral">
+              <td class="col-faixa">{r.nome_classe}</td>
+              <td class="col-stat">
                 <span class={`stat-pill ${r.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
                   {r.nivel_geral}
                   {r.subiu_nivel_geral && <span class="level-up-arrow">▲</span>}
                 </span>
               </td>
-              <td class="col-stat" data-label="Nível Classe">
+              <td class="col-stat">
                 <span class={`stat-pill ${r.subiu_nivel_classe ? "stat-pill-up" : ""}`}>
                   {r.nivel_classe}
                   {r.subiu_nivel_classe && <span class="level-up-arrow">▲</span>}

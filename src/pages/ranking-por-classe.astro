@@ -61,10 +61,10 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
                     <span class="row-avatar">{m.nome.charAt(0).toUpperCase()}</span>
                     <span class="row-name">{m.nome}</span>
                   </td>
-                  <td class="col-stat" data-label="Nível">
+                  <td class="col-stat">
                     <span class="stat-pill">{m.nivel_por_classe}</span>
                   </td>
-                  <td class="col-stat" data-label="Treinos">
+                  <td class="col-stat">
                     <span class="stat-pill">{m.treinos_por_classe}</span>
                   </td>
                 </tr>

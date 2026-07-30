@@ -1502,7 +1502,6 @@ p {
 
 .ranking-tabela .col-nome {
   gap: 0.7em;
-  white-space: normal;
 }
 
 .ranking-tabela .col-stat,
@@ -1512,23 +1511,30 @@ p {
 }
 
 /* larguras de coluna por página -- cada tabela define suas próprias faixas
-   (nº de colunas difere entre ranking geral, por classe, treinos e graduação) */
+   (nº de colunas difere entre ranking geral, por classe, treinos e graduação).
+   min-width garante uma linha só por registro: em vez de quebrar em cartões
+   empilhados numa tela estreita, a tabela mantém a largura mínima e quem
+   estiver no mobile arrasta .table-scroll para o lado (nenhum dado some,
+   só o nome trunca com reticências quando o espaço aperta). */
 .ranking-tabela--geral {
   width: 100%;
+  min-width: 620px;
   max-width: 760px;
-  grid-template-columns: 64px minmax(0, 1fr) auto auto auto;
+  grid-template-columns: 64px minmax(120px, 1fr) auto auto auto;
 }
 
 .ranking-tabela--classe {
   width: 100%;
+  min-width: 460px;
   max-width: 640px;
-  grid-template-columns: 64px minmax(0, 1fr) auto auto;
+  grid-template-columns: 64px minmax(120px, 1fr) auto auto;
 }
 
 .ranking-tabela--treino {
   width: 100%;
+  min-width: 480px;
   max-width: 700px;
-  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  grid-template-columns: minmax(120px, 1fr) auto auto auto;
 }
 
 /* ponytail: width:auto (not 100%) + no 1fr column lets this table shrink
@@ -1537,7 +1543,7 @@ p {
 .ranking-tabela--graduacao {
   width: auto;
   max-width: 480px;
-  grid-template-columns: 64px minmax(0, 1fr) auto;
+  grid-template-columns: 64px minmax(120px, 1fr) auto;
 }
 
 /* selo colorido da faixa na tabela de Graduações */
@@ -1601,9 +1607,11 @@ p {
 }
 
 .row-name {
+  min-width: 0;
   font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* valores numéricos / faixa como badges, no lugar de células com borda */
@@ -1687,61 +1695,6 @@ p {
 }
 
 @media (max-width: 560px) {
-  /* telas estreitas trocam a grid (que exige colunas fixas) por um
-     empilhamento em flex, cada linha virando um mini-cartão com rótulos */
-  .ranking-tabela {
-    display: block;
-    width: 100%;
-  }
-
-  .ranking-tabela thead {
-    display: none;
-  }
-
-  .ranking-tabela tbody {
-    display: block;
-  }
-
-  .ranking-tabela tr {
-    display: flex;
-    flex-wrap: wrap;
-    row-gap: 0.5em;
-    align-items: center;
-    padding: 0.9em 1em;
-    border-bottom: 1px solid rgba(232, 172, 70, 0.12);
-  }
-
-  .ranking-tabela tbody tr:last-child {
-    border-bottom: none;
-  }
-
-  .ranking-tabela td {
-    flex: 0 0 auto;
-    padding: 0;
-    border-bottom: none;
-  }
-
-  .ranking-tabela .col-nome {
-    flex: 1 1 100%;
-  }
-
-  .ranking-tabela .col-stat,
-  .ranking-tabela .col-faixa {
-    justify-content: flex-start;
-    min-width: 0;
-  }
-
-  .ranking-tabela .col-stat::before,
-  .ranking-tabela .col-faixa::before {
-    content: attr(data-label) ":";
-    margin-right: 0.35em;
-    color: var(--text-secondary-color);
-    font-weight: 400;
-    font-size: 0.72em;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-  }
-
   .ranking-quick-nav {
     top: 0;
     border-radius: 0 0 10px 10px;
