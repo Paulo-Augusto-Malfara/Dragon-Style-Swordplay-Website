@@ -1556,6 +1556,15 @@ p {
   grid-template-columns: 64px minmax(120px, 1fr) auto;
 }
 
+/* tabelas pessoais do dashboard do membro (níveis por classe, histórico) --
+   sem coluna de posição/avatar, só um rótulo à esquerda e pills à direita */
+.ranking-tabela--dashboard {
+  width: 100%;
+  min-width: 380px;
+  max-width: 640px;
+  grid-template-columns: minmax(100px, 1fr) auto auto;
+}
+
 /* selo colorido da faixa na tabela de Graduações */
 .belt-swatch {
   display: inline-block;

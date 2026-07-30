@@ -189,21 +189,21 @@
     {#if porClasse.length === 0}
       <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
     {:else}
-      <div class="graduacao-tabela">
-        <table>
+      <div class="table-scroll">
+        <table class="ranking-tabela ranking-tabela--dashboard">
           <thead>
             <tr>
-              <th>Classe</th>
-              <th>Nível</th>
-              <th>Treinos</th>
+              <th class="col-nome">Classe</th>
+              <th class="col-stat">Nível</th>
+              <th class="col-stat">Treinos</th>
             </tr>
           </thead>
           <tbody>
             {#each porClasse as c}
               <tr>
-                <td>{c.nome_classe}</td>
-                <td>{c.nivel_por_classe}</td>
-                <td>{c.treinos_por_classe}</td>
+                <td class="col-nome">{c.nome_classe}</td>
+                <td class="col-stat"><span class="stat-pill">{c.nivel_por_classe}</span></td>
+                <td class="col-stat"><span class="stat-pill">{c.treinos_por_classe}</span></td>
               </tr>
             {/each}
           </tbody>
@@ -215,21 +215,21 @@
     {#if historico.length === 0}
       <p class="dashboard-empty">Nenhuma presença registrada ainda.</p>
     {:else}
-      <div class="graduacao-tabela">
-        <table>
+      <div class="table-scroll">
+        <table class="ranking-tabela ranking-tabela--dashboard">
           <thead>
             <tr>
-              <th>Data</th>
-              <th>Classe</th>
-              <th>PH Ganho</th>
+              <th class="col-nome">Data</th>
+              <th class="col-faixa">Classe</th>
+              <th class="col-stat">PH Ganho</th>
             </tr>
           </thead>
           <tbody>
             {#each historico as h}
               <tr>
-                <td>{new Date(h.data_treino).toLocaleDateString("pt-BR")}</td>
-                <td>{h.nome_classe}</td>
-                <td>{h.ph_ganho_treino}</td>
+                <td class="col-nome">{new Date(h.data_treino).toLocaleDateString("pt-BR")}</td>
+                <td class="col-faixa">{h.nome_classe}</td>
+                <td class="col-stat"><span class="stat-pill">{h.ph_ganho_treino}</span></td>
               </tr>
             {/each}
           </tbody>
