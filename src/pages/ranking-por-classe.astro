@@ -46,19 +46,28 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
           <table class="ranking-tabela">
             <thead>
               <tr>
-                <th>#</th>
+                <th class="col-rank">#</th>
                 <th class="col-nome">Nome</th>
-                <th>Nível</th>
-                <th>Treinos</th>
+                <th class="col-stat">Nível</th>
+                <th class="col-stat">Treinos</th>
               </tr>
             </thead>
             <tbody>
               {rows!.map((m, i) => (
-                <tr>
-                  <td>{i + 1}</td>
-                  <td class="col-nome">{m.nome}</td>
-                  <td>{m.nivel_por_classe}</td>
-                  <td>{m.treinos_por_classe}</td>
+                <tr class={i < 3 ? `rank-row rank-${i + 1}` : "rank-row"}>
+                  <td class="col-rank">
+                    <span class="rank-badge">{i + 1}</span>
+                  </td>
+                  <td class="col-nome">
+                    <span class="row-avatar">{m.nome.charAt(0).toUpperCase()}</span>
+                    <span class="row-name">{m.nome}</span>
+                  </td>
+                  <td class="col-stat" data-label="Nível">
+                    <span class="stat-pill">{m.nivel_por_classe}</span>
+                  </td>
+                  <td class="col-stat" data-label="Treinos">
+                    <span class="stat-pill">{m.treinos_por_classe}</span>
+                  </td>
                 </tr>
               ))}
             </tbody>

@@ -39,29 +39,30 @@ const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
         <thead>
           <tr>
             <th class="col-nome">Nome</th>
-            <th>Classe</th>
-            <th>Nível Geral</th>
-            <th>Nível Classe</th>
+            <th class="col-faixa">Classe</th>
+            <th class="col-stat">Nível Geral</th>
+            <th class="col-stat">Nível Classe</th>
           </tr>
         </thead>
         <tbody>
           {attendees.map((r) => (
             <tr>
-              <td class="col-nome">{r.nome}</td>
-              <td>{r.nome_classe}</td>
-              <td>
-                {r.subiu_nivel_geral ? (
-                  <strong class="gold-title">{r.nivel_geral}<span class="level-up-arrow">▲</span></strong>
-                ) : (
-                  r.nivel_geral
-                )}
+              <td class="col-nome">
+                <span class="row-avatar">{r.nome.charAt(0).toUpperCase()}</span>
+                <span class="row-name">{r.nome}</span>
               </td>
-              <td>
-                {r.subiu_nivel_classe ? (
-                  <strong class="gold-title">{r.nivel_classe}<span class="level-up-arrow">▲</span></strong>
-                ) : (
-                  r.nivel_classe
-                )}
+              <td class="col-faixa" data-label="Classe">{r.nome_classe}</td>
+              <td class="col-stat" data-label="Nível Geral">
+                <span class={`stat-pill ${r.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
+                  {r.nivel_geral}
+                  {r.subiu_nivel_geral && <span class="level-up-arrow">▲</span>}
+                </span>
+              </td>
+              <td class="col-stat" data-label="Nível Classe">
+                <span class={`stat-pill ${r.subiu_nivel_classe ? "stat-pill-up" : ""}`}>
+                  {r.nivel_classe}
+                  {r.subiu_nivel_classe && <span class="level-up-arrow">▲</span>}
+                </span>
               </td>
             </tr>
           ))}
