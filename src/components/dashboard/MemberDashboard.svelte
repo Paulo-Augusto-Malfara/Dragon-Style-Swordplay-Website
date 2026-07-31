@@ -25,6 +25,8 @@
   let savingApelido = $state(false);
   let apelidoError = $state("");
 
+  let ehStaffOuMais = $state(false);
+
   let nivelGeral = $state(0);
   let nomeFaixa = $state<string | null>(null);
   let phTotal = $state(0);
@@ -49,7 +51,7 @@
 
       let { data: membro } = await supabase
         .from("dMembros")
-        .select("id_membro, nome, apelido, foto_url, oculto")
+        .select("id_membro, nome, apelido, foto_url, oculto, auth_level")
         .eq("auth_user_id", session.user.id)
         .single();
 
@@ -59,7 +61,7 @@
         await supabase.rpc("vincular_membro_por_email");
         const retry = await supabase
           .from("dMembros")
-          .select("id_membro, nome, apelido, foto_url, oculto")
+          .select("id_membro, nome, apelido, foto_url, oculto, auth_level")
           .eq("auth_user_id", session.user.id)
           .single();
         membro = retry.data;
@@ -73,6 +75,7 @@
       nomeOficial = membro.nome;
       fotoUrl = membro.foto_url;
       apelido = membro.apelido;
+      ehStaffOuMais = membro.auth_level <= 3;
       apelidoInput = membro.apelido ?? "";
 
       const [geral, classes, historia] = await Promise.all([
@@ -180,6 +183,9 @@
     </div>
   {:else}
     <div class="dashboard-profile">
+      {#if ehStaffOuMais}
+        <a href="/admin" class="btn btn-sm dashboard-admin-link">painel administrativo</a>
+      {/if}
       <button class="btn btn-sm dashboard-logout" onclick={logout}>sair</button>
       <AvatarUploader {fotoUrl} nome={displayName} onUploaded={(url) => (fotoUrl = url)} savePhoto={saveMinhaFoto} />
       <p class="dashboard-name">{displayName}</p>

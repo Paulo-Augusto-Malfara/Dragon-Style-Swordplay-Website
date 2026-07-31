@@ -3,15 +3,34 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Icon from "./Icon.astro";
 import { supabasePublic } from "../lib/supabase-public";
 
-// ponytail: hardcoded until existe uma tabela de agenda de treinos
-// (fAgendaTreinos) no Supabase — atualizar manualmente até lá.
-const proximoTreino = {
-  diaSemana: "Sáb",
-  dia: "02",
-  mes: "Ago",
-  horario: "14h00 – 17h00",
-  local: "São José do Rio Preto",
-};
+const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace(".", "");
+
+const hojeBrasil = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+const { data: agendaData } = await supabasePublic
+  .from("fAgendaTreinos")
+  .select("data_treino, horario_inicio, horario_termino, local, link_maps")
+  .gte("data_treino", hojeBrasil)
+  .eq("status", "agendado")
+  .order("data_treino")
+  .order("horario_inicio")
+  .limit(1)
+  .maybeSingle();
+
+const proximoTreino = agendaData
+  ? (() => {
+      const d = new Date(agendaData.data_treino + "T00:00:00");
+      return {
+        diaSemana: capitalizar(d.toLocaleDateString("pt-BR", { weekday: "short" })),
+        dia: String(d.getDate()).padStart(2, "0"),
+        mes: capitalizar(d.toLocaleDateString("pt-BR", { month: "short" })),
+        horario: agendaData.horario_termino
+          ? `${agendaData.horario_inicio.slice(0, 5)} – ${agendaData.horario_termino.slice(0, 5)}`
+          : agendaData.horario_inicio.slice(0, 5),
+        local: agendaData.local,
+        linkMaps: agendaData.link_maps as string | null,
+      };
+    })()
+  : null;
 
 const { data: membrosData } = await supabasePublic
   .from("v_ranking_nivel_geral")
@@ -157,21 +176,37 @@ const classesPreview = [
           <span class="eyebrow">Agenda</span>
           <h2>Próximo Treino</h2>
         </div>
-        <div class="treino-card">
-          <div class="treino-date">
-            <div class="dow">{proximoTreino.diaSemana}</div>
-            <div class="num">{proximoTreino.dia}</div>
-            <div class="mon">{proximoTreino.mes}</div>
-          </div>
-          <div class="treino-info">
-            <h3>Treino Semanal Aberto</h3>
-            <div class="treino-meta">
-              <span><Icon name="clock" />{proximoTreino.horario}</span>
-              <span><Icon name="location" />{proximoTreino.local}</span>
+        {
+          proximoTreino ? (
+            <div class="treino-card">
+              <div class="treino-date">
+                <div class="dow">{proximoTreino.diaSemana}</div>
+                <div class="num">{proximoTreino.dia}</div>
+                <div class="mon">{proximoTreino.mes}</div>
+              </div>
+              <div class="treino-info">
+                <h3>Treino Semanal Aberto</h3>
+                <div class="treino-meta">
+                  <span><Icon name="clock" />{proximoTreino.horario}</span>
+                  <span>
+                    <Icon name="location" />
+                    {proximoTreino.linkMaps ? (
+                      <a href={proximoTreino.linkMaps} target="_blank" rel="noopener noreferrer" class="links-de-texto">
+                        {proximoTreino.local}
+                      </a>
+                    ) : (
+                      proximoTreino.local
+                    )}
+                  </span>
+                </div>
+              </div>
+              <a class="btn btn-primary" href="/como-participar">Confirmar Presença</a>
             </div>
-          </div>
-          <a class="btn btn-primary" href="/como-participar">Confirmar Presença</a>
-        </div>
+          ) : (
+            <p class="dashboard-empty">Nenhum treino agendado no momento.</p>
+          )
+        }
+        <a class="section-link" href="/agenda">Agenda dos próximos treinos →</a>
       </div>
     </section>
 

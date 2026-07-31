@@ -30,8 +30,10 @@
     {#each itens as item}
       <li>
         <span>
-          {new Date(item.data_treino + "T00:00:00").toLocaleDateString("pt-BR")} às {item.horario_inicio} — {item.cidade}
-          <small>({item.status})</small>
+          {new Date(item.data_treino + "T00:00:00").toLocaleDateString("pt-BR")} às {item.horario_inicio.slice(0, 5)} — {item.cidade}
+          <span class={`status-badge status-badge--${item.status}`}>
+            {item.status === "agendado" ? "Agendado" : "Cancelado"}
+          </span>
         </span>
         <a href={`/admin/agenda/${item.id_agenda}`} class="btn btn-sm">editar</a>
         <button class="btn btn-sm btn-danger" onclick={() => remove(item.id_agenda)}>excluir</button>

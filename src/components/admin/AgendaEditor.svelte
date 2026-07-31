@@ -16,14 +16,24 @@
     const hoje = new Date();
     const diasAteDomingo = (7 - hoje.getDay()) % 7 || 7;
     hoje.setDate(hoje.getDate() + diasAteDomingo);
-    return hoje.toISOString().slice(0, 10);
+    // ponytail: toISOString() converte pra UTC e pode pular um dia (ex: à
+    // noite no Brasil, UTC já é o dia seguinte) -- monta a string a partir
+    // dos componentes locais em vez disso.
+    const ano = hoje.getFullYear();
+    const mes = String(hoje.getMonth() + 1).padStart(2, "0");
+    const dia = String(hoje.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
   }
 
   let dataTreino = $state(isNew ? proximoDomingo() : "");
   let horarioInicio = $state("15:00");
   let horarioTermino = $state("18:00");
   let cidade = $state("São José do Rio Preto");
-  let endereco = $state("");
+  let local = $state("Praça do Vivendas");
+  let endereco = $state(
+    "R. Cap. Justino Moreira do Espírito Santo, 310-270 - Jardim Vivendas, São José do Rio Preto - SP, 15090-400"
+  );
+  let linkMaps = $state("https://maps.app.goo.gl/RYGZuBdCKouHrnBT8");
   let status = $state<"agendado" | "cancelado">("agendado");
   let statusReq = $state<"idle" | "loading" | "saving" | "saved" | "error">(isNew ? "idle" : "loading");
   let errorMessage = $state("");
@@ -39,7 +49,9 @@
     horarioInicio = data.horario_inicio;
     horarioTermino = data.horario_termino ?? "";
     cidade = data.cidade;
+    local = data.local;
     endereco = data.endereco ?? "";
+    linkMaps = data.link_maps ?? "";
     status = data.status;
     statusReq = "idle";
   }
@@ -52,7 +64,9 @@
       horario_inicio: horarioInicio,
       horario_termino: horarioTermino || null,
       cidade,
+      local,
       endereco: endereco || null,
+      link_maps: linkMaps || null,
       status,
     };
     const { error } = isNew
@@ -96,8 +110,16 @@
       <input type="text" bind:value={cidade} required />
     </label>
     <label>
+      Local
+      <input type="text" bind:value={local} required />
+    </label>
+    <label>
       Endereço (opcional)
       <input type="text" bind:value={endereco} />
+    </label>
+    <label>
+      Link do Google Maps (opcional)
+      <input type="url" bind:value={linkMaps} placeholder="https://maps.app.goo.gl/..." />
     </label>
     <label>
       Status
