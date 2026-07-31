@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Icon from "./Icon.astro";
+import ConfirmarPresenca from "./agenda/ConfirmarPresenca.svelte";
 import { supabasePublic } from "../lib/supabase-public";
 
 const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace(".", "");
@@ -8,7 +9,7 @@ const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replac
 const hojeBrasil = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 const { data: agendaData } = await supabasePublic
   .from("fAgendaTreinos")
-  .select("data_treino, horario_inicio, horario_termino, local, link_maps")
+  .select("id_agenda, data_treino, horario_inicio, horario_termino, local, link_maps")
   .gte("data_treino", hojeBrasil)
   .eq("status", "agendado")
   .order("data_treino")
@@ -28,9 +29,17 @@ const proximoTreino = agendaData
           : agendaData.horario_inicio.slice(0, 5),
         local: agendaData.local,
         linkMaps: agendaData.link_maps as string | null,
+        idAgenda: agendaData.id_agenda as number,
       };
     })()
   : null;
+
+const { count: contagemConfirmados } = proximoTreino
+  ? await supabasePublic
+      .from("fAgendaConfirmacoes")
+      .select("id_confirmacao", { count: "exact", head: true })
+      .eq("id_agenda", proximoTreino.idAgenda)
+  : { count: 0 };
 
 const { data: membrosData } = await supabasePublic
   .from("v_ranking_nivel_geral")
@@ -200,7 +209,11 @@ const classesPreview = [
                   </span>
                 </div>
               </div>
-              <a class="btn btn-primary" href="/como-participar">Confirmar Presença</a>
+              <ConfirmarPresenca
+                idAgenda={proximoTreino.idAgenda}
+                contagemInicial={contagemConfirmados ?? 0}
+                client:load
+              />
             </div>
           ) : (
             <p class="dashboard-empty">Nenhum treino agendado no momento.</p>

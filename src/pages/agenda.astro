@@ -1,6 +1,7 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
+import ConfirmarPresenca from "../components/agenda/ConfirmarPresenca.svelte";
 
 export const prerender = false;
 
@@ -17,6 +18,17 @@ const { data } = await supabasePublic
   .order("horario_inicio");
 
 const proximosTreinos = data ?? [];
+
+// Contagem inicial de confirmações por treino, pra não piscar "0" antes do
+// componente client-side carregar.
+const idsAgenda = proximosTreinos.map((t) => t.id_agenda);
+const { data: confirmacoes } = idsAgenda.length
+  ? await supabasePublic.from("fAgendaConfirmacoes").select("id_agenda").in("id_agenda", idsAgenda)
+  : { data: [] };
+const contagemPorAgenda = new Map<number, number>();
+for (const c of confirmacoes ?? []) {
+  contagemPorAgenda.set(c.id_agenda, (contagemPorAgenda.get(c.id_agenda) ?? 0) + 1);
+}
 
 // HH:MM:SS -> HH:MM (o campo time do Postgres sempre traz os segundos).
 const formatHora = (h: string) => h.slice(0, 5);
@@ -70,6 +82,14 @@ const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replac
               <a href={t.link_maps} target="_blank" rel="noopener noreferrer" class="btn btn-sm agenda-card-mapa">
                 Ver no mapa
               </a>
+            )}
+            {t.status === "agendado" && (
+              <ConfirmarPresenca
+                idAgenda={t.id_agenda}
+                contagemInicial={contagemPorAgenda.get(t.id_agenda) ?? 0}
+                mostrarLista={true}
+                client:load
+              />
             )}
           </article>
         ))}

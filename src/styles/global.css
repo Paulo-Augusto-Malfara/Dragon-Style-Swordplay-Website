@@ -1752,6 +1752,57 @@ p {
   border: 1px solid rgba(240, 119, 110, 0.35);
 }
 
+/* ======== CONFIRMAÇÃO DE PRESENÇA (agenda) ======== */
+
+.confirma-presenca {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6em;
+}
+
+.confirma-presenca-contagem {
+  margin: 0;
+  width: auto;
+  text-indent: 0;
+  font-weight: 700;
+  color: var(--golden-color);
+  font-variant-numeric: tabular-nums;
+}
+
+.confirma-presenca-lista {
+  width: 100%;
+  max-width: 360px;
+}
+
+.confirma-presenca-lista summary {
+  cursor: pointer;
+  color: var(--text-secondary-color);
+  font-size: 0.88em;
+  text-align: center;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.confirma-presenca-membros {
+  list-style: none;
+  margin: 0.6em 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.confirma-presenca-membros li {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  color: var(--text-primary-color);
+  font-size: 0.92em;
+}
+
 /* selo colorido da faixa na tabela de Graduações */
 .belt-swatch {
   display: inline-block;
