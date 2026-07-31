@@ -1357,6 +1357,11 @@ p {
   color: var(--golden-color);
 }
 
+.admin-form label.label-center {
+  align-items: center;
+  text-align: center;
+}
+
 .admin-form label.checkbox {
   flex-direction: row;
   align-items: center;
@@ -1475,6 +1480,17 @@ p {
 .admin-list li > span {
   flex: 1;
   min-width: 60%;
+  color: var(--text-primary-color);
+}
+
+/* variante centralizada (ex: histórico de treinos com bolinha + texto) */
+.admin-list li.historico-item {
+  justify-content: center;
+}
+
+.admin-list li.historico-item > span {
+  flex: none;
+  min-width: 0;
   color: var(--text-primary-color);
 }
 
@@ -1900,7 +1916,9 @@ p {
 /* badge circular da posição (#) */
 .rank-badge {
   display: inline-flex;
+  flex: none;
   flex-shrink: 0;
+  min-width: 0;
   align-items: center;
   justify-content: center;
   width: 26px;

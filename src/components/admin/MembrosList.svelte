@@ -35,7 +35,7 @@
   load();
 </script>
 
-<div class="membro-picker" style="max-width: 480px; margin-bottom: 1em;">
+<div class="membro-picker" style="max-width: 480px; margin: 0 auto 1em;">
   <input type="text" bind:value={termo} oninput={onInput} placeholder="Buscar membro pelo nome..." />
 </div>
 
