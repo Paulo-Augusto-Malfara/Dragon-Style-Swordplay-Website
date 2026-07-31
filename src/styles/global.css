@@ -1856,6 +1856,7 @@ p {
 .confirma-presenca-lista {
   width: 100%;
   max-width: 360px;
+  margin-bottom: 0.6em;
 }
 
 .confirma-presenca-lista summary {

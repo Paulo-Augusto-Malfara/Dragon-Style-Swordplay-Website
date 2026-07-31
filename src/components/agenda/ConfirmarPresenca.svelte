@@ -70,6 +70,7 @@
 
   async function confirmar() {
     if (!meuIdMembro) return;
+    if (!confirm("Confirmar sua presença neste treino?")) return;
     processando = true;
     erro = "";
     const { error } = await supabase.from("fAgendaConfirmacoes").insert({ id_agenda: idAgenda, id_membro: meuIdMembro });
@@ -85,6 +86,7 @@
 
   async function cancelar() {
     if (!meuIdMembro) return;
+    if (!confirm("Cancelar sua presença confirmada neste treino?")) return;
     processando = true;
     erro = "";
     const { error } = await supabase
