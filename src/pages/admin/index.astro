@@ -9,14 +9,16 @@ const { membro } = Astro.locals;
 
 <BaseLayout title="Admin">
   <h1>Painel Administrativo</h1>
-  <p>Logado como {membro.nome}</p>
 
-  <div class="admin-list-actions">
-    <a href="/admin/membros" class="btn">Membros</a>
-    <a href="/admin/treinos" class="btn">Treinos</a>
-    <a href="/admin/eventos" class="btn">Eventos</a>
-    {membro.isOrganizador && <a href="/admin/agenda" class="btn">Agenda</a>}
-    {membro.isAdminSistema && <a href="/admin/doacoes" class="btn">Doações</a>}
+  <div class="admin-hub">
+    <p class="admin-hub-greeting">Logado como <strong>{membro.nome}</strong></p>
+    <nav class="admin-nav">
+      <a href="/admin/membros" class="admin-nav-item">Membros</a>
+      <a href="/admin/treinos" class="admin-nav-item">Treinos</a>
+      <a href="/admin/eventos" class="admin-nav-item">Eventos</a>
+      {membro.isOrganizador && <a href="/admin/agenda" class="admin-nav-item">Agenda</a>}
+      {membro.isAdminSistema && <a href="/admin/doacoes" class="admin-nav-item">Doações</a>}
+    </nav>
   </div>
 
   {

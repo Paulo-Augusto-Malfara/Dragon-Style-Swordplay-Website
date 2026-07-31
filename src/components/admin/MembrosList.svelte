@@ -16,6 +16,7 @@
     let query = supabase
       .from("v_ranking_nivel_geral")
       .select("id_membro, nome, foto_url, nivel_geral, auth_level, status_ativo")
+      .order("status_ativo", { ascending: false })
       .order("nome")
       .limit(50);
     if (termo.trim().length >= 2) {
@@ -51,7 +52,12 @@
             {m.nome.charAt(0).toUpperCase()}
           {/if}
         </p>
-        <span>{m.nome} <small>(Nvl {m.nivel_geral})</small>{#if !m.status_ativo} <small>— inativo</small>{/if}</span>
+        <span>
+          {m.nome} <small>(Nvl {m.nivel_geral})</small>
+          {#if !m.status_ativo}
+            <span class="status-badge status-badge--inativo">Inativo</span>
+          {/if}
+        </span>
         {#if podeEditar}
           <a href={`/admin/membros/${m.id_membro}`} class="btn btn-sm">editar</a>
         {/if}
