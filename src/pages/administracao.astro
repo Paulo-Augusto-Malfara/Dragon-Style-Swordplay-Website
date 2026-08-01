@@ -1,13 +1,63 @@
 ---
 import { getEntry, render } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
+import { supabasePublic } from "../lib/supabase-public";
 
 const entry = await getEntry("sobreNos", "administracao");
 const { Content } = await render(entry);
+
+const organizadores = [
+  {
+    nome: "Felipe Augusto",
+    apelido: "Finegan",
+    bio: "Também conhecido como Finegan, foi co-fundador do grupo Dragon Style em 2009.",
+  },
+  {
+    nome: "Roberto Freitas",
+    apelido: "Suissida",
+    bio: "Também conhecido como Suissida, é um dos membros mais antigos do grupo, ao longo do tempo se especializou na forja, se tornando o ferreiro oficial do grupo.",
+  },
+  {
+    nome: "Paulo Augusto",
+    apelido: "Papito",
+    bio: "Também conhecido como Papito, pratica Swordplay desde 2008. Iniciou no Swordplay no clã Sociedade dos Dragões (Maceió/AL), se mudou para São José do Rio Preto em 2014 e passou então a participar dos treinos do Dragon Style. Entrou para a organização no retorno do Dragon Style em Dezembro de 2021.",
+  },
+];
+
+const { data: fotos } = await supabasePublic
+  .from("v_ranking_nivel_geral")
+  .select("nome, foto_url")
+  .in(
+    "nome",
+    organizadores.map((o) => o.apelido)
+  );
+
+const fotoPorApelido = Object.fromEntries(
+  (fotos ?? []).map((m) => [m.nome, m.foto_url])
+);
 ---
 
 <PageLayout title={entry.data.title} prev={entry.data.prev} next={entry.data.next}>
   <section>
     <Content />
+    <h2>Organizadores</h2>
+    <br />
+    <div class="organizadores-grid">
+      {organizadores.map((o) => (
+        <div class="organizador-card card">
+          <p class="mural-avatar">
+            {fotoPorApelido[o.apelido] ? (
+              <img src={fotoPorApelido[o.apelido]} alt="" />
+            ) : (
+              o.nome.charAt(0)
+            )}
+          </p>
+          <div>
+            <h3>{o.nome}</h3>
+            <p>{o.bio}</p>
+          </div>
+        </div>
+      ))}
+    </div>
   </section>
 </PageLayout>

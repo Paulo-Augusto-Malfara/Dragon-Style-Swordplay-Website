@@ -854,7 +854,7 @@ p {
   font-size: 1.05em;
 }
 
-.organizador-card p {
+.organizador-card > div > p {
   width: auto;
   margin: 0;
   text-indent: 0;
