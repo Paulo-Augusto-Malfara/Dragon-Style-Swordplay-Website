@@ -7,6 +7,7 @@ interface Participante {
   ph_ganho: number;
   nivel_geral: number;
   subiu_nivel_geral: boolean;
+  subida_nivel_geral: number;
 }
 
 interface Props {
@@ -60,7 +61,9 @@ const dataFormatada = new Date(dataEvento).toLocaleDateString("pt-BR");
                 <td class="col-stat">
                   <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
                     {p.nivel_geral}
-                    {p.subiu_nivel_geral && <span class="level-up-arrow">▲</span>}
+                    {p.subiu_nivel_geral && (
+                      <span class="level-up-arrow">{p.subida_nivel_geral > 1 ? `+${p.subida_nivel_geral}` : "▲"}</span>
+                    )}
                   </span>
                 </td>
               </tr>

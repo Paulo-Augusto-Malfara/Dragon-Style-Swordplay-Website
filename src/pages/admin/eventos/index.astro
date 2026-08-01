@@ -27,12 +27,12 @@ const { data: historico } = await supabase
 const idsEventos = (historico ?? []).map((e) => e.id_evento);
 const participantesPorEvento = new Map<
   number,
-  { nome: string; foto_url: string | null; ph_ganho: number; nivel_geral: number; subiu_nivel_geral: boolean }[]
+  { nome: string; foto_url: string | null; ph_ganho: number; nivel_geral: number; subiu_nivel_geral: boolean; subida_nivel_geral: number }[]
 >();
 if (idsEventos.length > 0) {
   const { data: registros } = await supabase
     .from("v_registro_eventos")
-    .select("id_evento, nome, foto_url, ph_ganho, nivel_geral, subiu_nivel_geral")
+    .select("id_evento, nome, foto_url, ph_ganho, nivel_geral, subiu_nivel_geral, subida_nivel_geral")
     .in("id_evento", idsEventos);
 
   for (const r of registros ?? []) {
@@ -43,6 +43,7 @@ if (idsEventos.length > 0) {
       ph_ganho: r.ph_ganho,
       nivel_geral: r.nivel_geral,
       subiu_nivel_geral: r.subiu_nivel_geral,
+      subida_nivel_geral: r.subida_nivel_geral,
     });
     participantesPorEvento.set(r.id_evento, lista);
   }

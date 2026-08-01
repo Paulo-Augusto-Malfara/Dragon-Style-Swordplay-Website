@@ -9,6 +9,7 @@ interface Registro {
   nome_classe: string;
   nivel_geral: number;
   subiu_nivel_geral: boolean;
+  subida_nivel_geral: number;
   nivel_classe: number;
   subiu_nivel_classe: boolean;
 }
@@ -58,7 +59,9 @@ const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
               <td class="col-stat">
                 <span class={`stat-pill ${r.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
                   {r.nivel_geral}
-                  {r.subiu_nivel_geral && <span class="level-up-arrow">▲</span>}
+                  {r.subiu_nivel_geral && (
+                    <span class="level-up-arrow">{r.subida_nivel_geral > 1 ? `+${r.subida_nivel_geral}` : "▲"}</span>
+                  )}
                 </span>
               </td>
               <td class="col-stat">
