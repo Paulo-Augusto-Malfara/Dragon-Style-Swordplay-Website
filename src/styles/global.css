@@ -493,6 +493,47 @@ p {
   color: var(--golden-color);
 }
 
+.pix-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  background: none;
+  border: none;
+  padding: 0;
+  font: inherit;
+  color: var(--text-primary-color);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pix-copy:hover,
+.pix-copy:focus-visible {
+  color: var(--golden-color);
+}
+
+.pix-copy-icon {
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.pix-copy .icon-check {
+  display: none;
+}
+
+.pix-copy.copied {
+  color: var(--golden-color);
+  text-decoration: none;
+}
+
+.pix-copy.copied .icon-copy {
+  display: none;
+}
+
+.pix-copy.copied .icon-check {
+  display: inline;
+}
+
 .main-img {
   display: flex;
   margin: auto;

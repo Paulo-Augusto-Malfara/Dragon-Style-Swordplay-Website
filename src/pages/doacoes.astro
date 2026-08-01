@@ -11,3 +11,15 @@ const { Content } = await render(entry);
     <Content />
   </section>
 </PageLayout>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".pix-copy").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const value = btn.dataset.copy;
+      if (!value) return;
+      await navigator.clipboard.writeText(value);
+      btn.classList.add("copied");
+      setTimeout(() => btn.classList.remove("copied"), 1500);
+    });
+  });
+</script>
