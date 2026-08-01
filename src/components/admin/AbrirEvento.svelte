@@ -41,6 +41,9 @@
       nome = pai.nome_evento;
       cidade = pai.cidade;
       numeroDia = Math.min(10, (pai.numero_dia ?? 1) + 1);
+      const dataPai = new Date(pai.data_evento + "T00:00:00");
+      const proximoDia = new Date(dataPai.getFullYear(), dataPai.getMonth(), dataPai.getDate() + 1);
+      data = `${proximoDia.getFullYear()}-${String(proximoDia.getMonth() + 1).padStart(2, "0")}-${String(proximoDia.getDate()).padStart(2, "0")}`;
     }
   }
 
@@ -76,7 +79,7 @@
         <option value="">Não — evento novo</option>
         {#each eventosRecentes as e}
           <option value={e.id_evento}>
-            {e.nome_evento} — {e.cidade} ({new Date(e.data_evento).toLocaleDateString("pt-BR")})
+            {e.nome_evento} — {e.cidade} ({new Date(e.data_evento + "T00:00:00").toLocaleDateString("pt-BR")})
           </option>
         {/each}
       </select>

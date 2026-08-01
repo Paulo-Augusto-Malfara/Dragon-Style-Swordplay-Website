@@ -21,7 +21,7 @@ interface Props {
 }
 
 const { idTreino, dataTreino, attendees } = Astro.props;
-const dataFormatada = new Date(dataTreino).toLocaleDateString("pt-BR");
+const dataFormatada = new Date(dataTreino + "T00:00:00").toLocaleDateString("pt-BR");
 ---
 
 <details class="modalidades-box card registro-treino-card">

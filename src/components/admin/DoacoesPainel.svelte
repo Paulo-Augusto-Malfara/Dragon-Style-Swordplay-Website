@@ -83,7 +83,7 @@
       <li>
         <span>
           {d.nome} — R$ {Number(d.valor).toFixed(2)}
-          <small>({new Date(d.data_doacao).toLocaleDateString("pt-BR")})</small>
+          <small>({new Date(d.data_doacao + "T00:00:00").toLocaleDateString("pt-BR")})</small>
         </span>
       </li>
     {/each}

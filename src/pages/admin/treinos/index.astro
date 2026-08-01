@@ -29,7 +29,7 @@ const { data: historico } = await supabase
     aberto ? (
       <div class="admin-form">
         <p class="gold-title">
-          Há um treino em andamento ({new Date(aberto.data_treino).toLocaleDateString("pt-BR")}).
+          Há um treino em andamento ({new Date(aberto.data_treino + "T00:00:00").toLocaleDateString("pt-BR")}).
         </p>
         <a href={`/admin/treinos/${aberto.id_treino}`} class="btn btn-primary">
           Ir para o treino
@@ -51,7 +51,7 @@ const { data: historico } = await supabase
           <li class="historico-item">
             <span class="rank-badge">{t.id_treino}</span>
             <span>
-              {new Date(t.data_treino).toLocaleDateString("pt-BR")} - {qtd} Combatente{qtd === 1 ? "" : "s"}
+              {new Date(t.data_treino + "T00:00:00").toLocaleDateString("pt-BR")} - {qtd} Combatente{qtd === 1 ? "" : "s"}
             </span>
           </li>
         );

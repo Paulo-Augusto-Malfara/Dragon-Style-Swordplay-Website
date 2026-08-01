@@ -203,7 +203,7 @@
             <tr>
               <td class="col-rank"><span class="rank-badge">{h.id_treino}</span></td>
               <td class="col-nome">
-                {new Date(h.data_treino).toLocaleDateString("pt-BR", {
+                {new Date(h.data_treino + "T00:00:00").toLocaleDateString("pt-BR", {
                   day: "2-digit",
                   month: "2-digit",
                   year: "2-digit",

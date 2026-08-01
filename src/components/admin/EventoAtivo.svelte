@@ -29,6 +29,7 @@
 
   let finalizando = $state(false);
   let resumo = $state<any | null>(null);
+  let participantesResumo = $state<any[]>([]);
   let erroFinalizar = $state("");
 
   async function carregarEvento() {
@@ -105,6 +106,11 @@
       return;
     }
     resumo = data;
+    const { data: registros } = await supabase
+      .from("v_registro_eventos")
+      .select("nome, foto_url, ph_ganho, nivel_geral, subiu_nivel_geral, subida_nivel_geral")
+      .eq("id_evento", idEvento);
+    participantesResumo = registros ?? [];
   }
 
   carregarEvento();
@@ -115,11 +121,42 @@
   <div class="admin-form">
     <p class="gold-title">🚩 Evento finalizado!</p>
     <p>{resumo.participantes.length} participante(s) — {resumo.total_ph} PH distribuídos.</p>
-    <ul>
-      {#each resumo.participantes as p}
-        <li>{p.nome} — +{p.ph} PH</li>
-      {/each}
-    </ul>
+    <div class="table-scroll">
+      <table class="ranking-tabela ranking-tabela--evento">
+        <thead>
+          <tr>
+            <th class="col-nome">Nome</th>
+            <th class="col-stat">PH Ganho</th>
+            <th class="col-stat">Nível Geral</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each participantesResumo as p}
+            <tr>
+              <td class="col-nome">
+                <span class="row-avatar">
+                  {#if p.foto_url}
+                    <img src={p.foto_url} alt="" />
+                  {:else}
+                    {p.nome.charAt(0).toUpperCase()}
+                  {/if}
+                </span>
+                <span class="row-name">{p.nome}</span>
+              </td>
+              <td class="col-stat"><span class="stat-pill">{p.ph_ganho}</span></td>
+              <td class="col-stat">
+                <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
+                  {p.nivel_geral}
+                  {#if p.subiu_nivel_geral}
+                    <span class="level-up-arrow">{"▲".repeat(p.subida_nivel_geral)}</span>
+                  {/if}
+                </span>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
     <a href="/admin/eventos" class="btn btn-primary">Voltar</a>
   </div>
 {:else}
