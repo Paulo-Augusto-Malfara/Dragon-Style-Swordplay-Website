@@ -518,6 +518,11 @@ p {
   box-shadow: 0 0 1em black;
 }
 
+.quem-somos-texto {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 .quem-somos-fotos {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
