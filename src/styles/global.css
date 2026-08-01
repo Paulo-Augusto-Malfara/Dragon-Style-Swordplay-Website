@@ -2933,6 +2933,7 @@ footer {
 .cta-band h2 .line {
   display: block;
   white-space: nowrap;
+  text-align: center;
 }
 
 @media (max-width: 340px) {
