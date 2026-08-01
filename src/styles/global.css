@@ -521,6 +521,10 @@ p {
   display: none;
 }
 
+.pix-copy .pix-copy-label-copied {
+  display: none;
+}
+
 .pix-copy.copied {
   color: var(--golden-color);
   text-decoration: none;
@@ -531,6 +535,14 @@ p {
 }
 
 .pix-copy.copied .icon-check {
+  display: inline;
+}
+
+.pix-copy.copied .pix-copy-label {
+  display: none;
+}
+
+.pix-copy.copied .pix-copy-label-copied {
   display: inline;
 }
 
@@ -2765,6 +2777,10 @@ footer {
 
 .section-link:hover {
   color: #ffdf91;
+}
+
+.section-link-inline {
+  margin-top: 1rem;
 }
 
 .treino-card {

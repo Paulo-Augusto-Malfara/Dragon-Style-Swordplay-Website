@@ -13,13 +13,34 @@ const { Content } = await render(entry);
 </PageLayout>
 
 <script>
+  async function copyText(text: string) {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(text);
+      return;
+    }
+    // ponytail: execCommand fallback for insecure contexts (e.g. LAN IP over http), deprecated but still works everywhere
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+    textarea.style.position = "fixed";
+    textarea.style.opacity = "0";
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+  }
+
   document.querySelectorAll<HTMLButtonElement>(".pix-copy").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const value = btn.dataset.copy;
       if (!value) return;
-      await navigator.clipboard.writeText(value);
-      btn.classList.add("copied");
-      setTimeout(() => btn.classList.remove("copied"), 1500);
+      try {
+        await copyText(value);
+        btn.classList.add("copied");
+        setTimeout(() => btn.classList.remove("copied"), 1500);
+      } catch {
+        // ignore: clipboard permission denied or unsupported
+      }
     });
   });
 </script>
