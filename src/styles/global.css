@@ -94,6 +94,11 @@ body {
 .medium-esp {
   color: rgb(184, 12, 184);
 }
+/* text-align:left aqui só é inofensivo enquanto .gold-title fica dentro de
+   outro elemento (ex: <span class="line">texto <span class="gold-title">X</span></span>).
+   Se .gold-title acumular com .line no MESMO span (display:block), o left
+   sobrepõe o center herdado do título pai — force text-align:center na regra
+   do .line correspondente (ver .cta-band h2 .line). */
 .gold-title {
   color: var(--golden-color);
   width: auto;
