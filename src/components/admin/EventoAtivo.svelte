@@ -25,9 +25,21 @@
   let presencas = $state<any[]>([]);
   let carregandoPresencas = $state(true);
 
+  let evento = $state<{ nome_evento: string; cidade: string; numero_dia: number } | null>(null);
+
   let finalizando = $state(false);
   let resumo = $state<any | null>(null);
   let erroFinalizar = $state("");
+
+  async function carregarEvento() {
+    const { data } = await supabase
+      .from("fEventos")
+      .select("nome_evento, cidade, numero_dia")
+      .eq("id_evento", idEvento)
+      .single();
+    if (!data) return;
+    evento = { nome_evento: data.nome_evento, cidade: data.cidade, numero_dia: data.numero_dia };
+  }
 
   async function carregarPresencas() {
     const { data: pres } = await supabase
@@ -95,6 +107,7 @@
     resumo = data;
   }
 
+  carregarEvento();
   carregarPresencas();
 </script>
 
@@ -111,6 +124,9 @@
   </div>
 {:else}
   <div class="admin-form">
+    {#if evento}
+      <p class="gold-title">{evento.nome_evento} — {evento.cidade} · Dia {evento.numero_dia}</p>
+    {/if}
     <p class="gold-title">Registrar presença</p>
 
     {#if membroSelecionado}

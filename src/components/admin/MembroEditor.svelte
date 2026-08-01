@@ -15,6 +15,9 @@
   let padrinho = $state<{ id_membro: number; nome: string } | null>(null);
   let trocandoPadrinho = $state(false);
 
+  let porClasse = $state<any[]>([]);
+  let historico = $state<any[]>([]);
+
   let status = $state<"loading" | "idle" | "saving" | "saved" | "error">("loading");
   let errorMessage = $state("");
 
@@ -38,6 +41,19 @@
       const { data: p } = await supabase.from("dMembros").select("id_membro, nome").eq("id_membro", data.indicado_por).single();
       padrinho = p;
     }
+
+    const [classes, historia] = await Promise.all([
+      supabase.from("v_ranking_por_classe").select("*").eq("id_membro", id),
+      supabase.from("v_historico_presencas").select("*").eq("id_membro", id).order("data_treino", { ascending: false }),
+    ]);
+    porClasse = (classes.data ?? []).sort((a, b) => {
+      const aBasico = a.id_classe === 11;
+      const bBasico = b.id_classe === 11;
+      if (aBasico !== bBasico) return aBasico ? 1 : -1;
+      return b.treinos_por_classe - a.treinos_por_classe;
+    });
+    historico = historia.data ?? [];
+
     status = "idle";
   }
 
@@ -140,5 +156,65 @@
     </div>
   {:else}
     <p class="admin-error">Este membro já está oculto (excluído).</p>
+  {/if}
+
+  <h2>Níveis por Classe</h2>
+  {#if porClasse.length === 0}
+    <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
+  {:else}
+    <div class="table-scroll">
+      <table class="ranking-tabela ranking-tabela--dashboard">
+        <thead>
+          <tr>
+            <th class="col-nome">Classe</th>
+            <th class="col-stat">Nível</th>
+            <th class="col-stat">Treinos</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each porClasse as c}
+            <tr>
+              <td class="col-nome">{c.nome_classe}</td>
+              <td class="col-stat"><span class="stat-pill">{c.nivel_por_classe}</span></td>
+              <td class="col-stat"><span class="stat-pill">{c.treinos_por_classe}</span></td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
+  {/if}
+
+  <h2>Histórico de Presença</h2>
+  {#if historico.length === 0}
+    <p class="dashboard-empty">Nenhuma presença registrada ainda.</p>
+  {:else}
+    <div class="table-scroll">
+      <table class="ranking-tabela ranking-tabela--historico">
+        <thead>
+          <tr>
+            <th class="col-rank">Nº Treino</th>
+            <th class="col-nome">Data</th>
+            <th class="col-faixa">Classe</th>
+            <th class="col-stat">PH Ganho</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each historico as h}
+            <tr>
+              <td class="col-rank"><span class="rank-badge">{h.id_treino}</span></td>
+              <td class="col-nome">
+                {new Date(h.data_treino).toLocaleDateString("pt-BR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "2-digit",
+                })}
+              </td>
+              <td class="col-faixa">{h.nome_classe}</td>
+              <td class="col-stat"><span class="stat-pill">{h.ph_ganho_treino}</span></td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   {/if}
 {/if}

@@ -14,13 +14,13 @@ interface Props {
 const { id, title, tags = [], descricao, objetivo, pontuacao, requisitos, variacoes = [] } = Astro.props;
 ---
 
-<details id={id} class="modalidades-box card">
+<details id={id} class="modalidades-box card modalidade-card">
   <summary>
     <div class="modalidades-summary-text">
       <h2 class="modalidades-button">{title}</h2>
       {tags.length > 0 && (
         <div class="modalidade-tags">
-          {tags.map((tag) => <span class="modalidade-tag">{tag}</span>)}
+          {tags.map((tag) => <span class="stat-pill">{tag}</span>)}
         </div>
       )}
     </div>

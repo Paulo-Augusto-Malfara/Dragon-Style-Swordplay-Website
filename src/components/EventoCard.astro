@@ -1,0 +1,73 @@
+---
+import Icon from "./Icon.astro";
+
+interface Participante {
+  nome: string;
+  foto_url: string | null;
+  ph_ganho: number;
+  nivel_geral: number;
+  subiu_nivel_geral: boolean;
+}
+
+interface Props {
+  nomeEvento: string;
+  cidade: string;
+  dataEvento: string;
+  numeroDia: number;
+  participantes: Participante[];
+}
+
+const { nomeEvento, cidade, dataEvento, numeroDia, participantes } = Astro.props;
+const dataFormatada = new Date(dataEvento).toLocaleDateString("pt-BR");
+---
+
+<details class="modalidades-box card registro-treino-card">
+  <summary>
+    <div class="modalidades-summary-text">
+      <h2 class="modalidades-button">{nomeEvento}</h2>
+      <div class="modalidade-tags">
+        <span class="stat-pill">{cidade}</span>
+        <span class="stat-pill">{dataFormatada}</span>
+        <span class="stat-pill">Dia {numeroDia}</span>
+        <span class="stat-pill">{participantes.length} participante{participantes.length === 1 ? "" : "s"}</span>
+      </div>
+    </div>
+    <Icon name="chevron-forward" class="modalidades-chevron" />
+  </summary>
+  <div class="modalidades-conteudo">
+    {participantes.length === 0 ? (
+      <p class="dashboard-empty">Nenhuma presença registrada.</p>
+    ) : (
+      <div class="table-scroll">
+        <table class="ranking-tabela ranking-tabela--evento">
+          <thead>
+            <tr>
+              <th class="col-nome">Nome</th>
+              <th class="col-stat">PH Ganho</th>
+              <th class="col-stat">Nível Geral</th>
+            </tr>
+          </thead>
+          <tbody>
+            {participantes.map((p) => (
+              <tr>
+                <td class="col-nome">
+                  <span class="row-avatar">
+                    {p.foto_url ? <img src={p.foto_url} alt="" /> : p.nome.charAt(0).toUpperCase()}
+                  </span>
+                  <span class="row-name">{p.nome}</span>
+                </td>
+                <td class="col-stat"><span class="stat-pill">{p.ph_ganho}</span></td>
+                <td class="col-stat">
+                  <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
+                    {p.nivel_geral}
+                    {p.subiu_nivel_geral && <span class="level-up-arrow">▲</span>}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    )}
+  </div>
+</details>

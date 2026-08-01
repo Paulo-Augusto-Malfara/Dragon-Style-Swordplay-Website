@@ -81,7 +81,11 @@
       const [geral, classes, historia] = await Promise.all([
         supabase.from("v_ranking_nivel_geral").select("*").eq("id_membro", membro.id_membro).single(),
         supabase.from("v_ranking_por_classe").select("*").eq("id_membro", membro.id_membro),
-        supabase.from("v_historico_presencas").select("*").order("data_treino", { ascending: false }),
+        supabase
+          .from("v_historico_presencas")
+          .select("*")
+          .eq("id_membro", membro.id_membro)
+          .order("data_treino", { ascending: false }),
       ]);
 
       if (geral.error) {

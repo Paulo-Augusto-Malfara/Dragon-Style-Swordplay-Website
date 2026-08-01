@@ -2,7 +2,18 @@
   "mcpServers": {
     "supabase": {
       "type": "http",
-      "url": "https://mcp.supabase.com/mcp?project_ref=gkfgoevpbqydcirtinkw&read_only=true"
+      "url": "https://mcp.supabase.com/mcp?project_ref=gkfgoevpbqydcirtinkw&read_only=false"
+    },
+    "higgsfield": {
+      "type": "http",
+      "url": "https://mcp.higgsfield.ai/mcp"
+    },
+    "n8n-mcp": {
+      "type": "http",
+      "url": "https://fluffyeagle-n8n.cloudfy.live/mcp-server/http",
+      "headers": {
+        "Authorization": "Bearer ${N8N_MCP_TOKEN}"
+      }
     }
   }
 }

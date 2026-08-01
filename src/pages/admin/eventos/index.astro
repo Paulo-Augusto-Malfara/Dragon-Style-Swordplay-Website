@@ -1,6 +1,7 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
 import AbrirEvento from "../../../components/admin/AbrirEvento.svelte";
+import EventoCard from "../../../components/EventoCard.astro";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
 
 export const prerender = false;
@@ -16,10 +17,36 @@ const { data: aberto } = await supabase
 
 const { data: historico } = await supabase
   .from("fEventos")
-  .select("id_evento, nome_evento, cidade, data_evento")
+  .select("id_evento, nome_evento, cidade, data_evento, numero_dia")
   .eq("status", "fechado")
   .order("data_evento", { ascending: false })
   .limit(20);
+
+// participantes de cada evento do histórico (com nível geral e se subiu),
+// pra mostrar dentro do card ao expandir
+const idsEventos = (historico ?? []).map((e) => e.id_evento);
+const participantesPorEvento = new Map<
+  number,
+  { nome: string; foto_url: string | null; ph_ganho: number; nivel_geral: number; subiu_nivel_geral: boolean }[]
+>();
+if (idsEventos.length > 0) {
+  const { data: registros } = await supabase
+    .from("v_registro_eventos")
+    .select("id_evento, nome, foto_url, ph_ganho, nivel_geral, subiu_nivel_geral")
+    .in("id_evento", idsEventos);
+
+  for (const r of registros ?? []) {
+    const lista = participantesPorEvento.get(r.id_evento) ?? [];
+    lista.push({
+      nome: r.nome,
+      foto_url: r.foto_url,
+      ph_ganho: r.ph_ganho,
+      nivel_geral: r.nivel_geral,
+      subiu_nivel_geral: r.subiu_nivel_geral,
+    });
+    participantesPorEvento.set(r.id_evento, lista);
+  }
+}
 ---
 
 <BaseLayout title="Admin - Eventos">
@@ -36,7 +63,7 @@ const { data: historico } = await supabase
         </a>
       </div>
     ) : membro.isOrganizador ? (
-      <AbrirEvento client:load />
+      <AbrirEvento eventosRecentes={historico ?? []} client:load />
     ) : (
       <p class="dashboard-empty">Nenhum evento aberto no momento. Aguarde um organizador abrir um evento.</p>
     )
@@ -44,15 +71,17 @@ const { data: historico } = await supabase
 
   <h2>Histórico</h2>
   {historico && historico.length > 0 ? (
-    <ul class="admin-list">
+    <div class="modalidades modalidades-grid treinos-grid">
       {historico.map((e) => (
-        <li>
-          <span>
-            {e.nome_evento} — {e.cidade} ({new Date(e.data_evento).toLocaleDateString("pt-BR")})
-          </span>
-        </li>
+        <EventoCard
+          nomeEvento={e.nome_evento}
+          cidade={e.cidade}
+          dataEvento={e.data_evento}
+          numeroDia={e.numero_dia}
+          participantes={participantesPorEvento.get(e.id_evento) ?? []}
+        />
       ))}
-    </ul>
+    </div>
   ) : (
     <p class="dashboard-empty">Nenhum evento finalizado ainda.</p>
   )}

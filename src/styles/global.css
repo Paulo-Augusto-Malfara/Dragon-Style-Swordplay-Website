@@ -711,19 +711,6 @@ p {
   gap: 0.4em;
 }
 
-.modalidade-tag {
-  display: inline-block;
-  padding: 0.25em 0.7em;
-  border-radius: 999px;
-  background: var(--golden-color-opaco);
-  color: var(--primary-color);
-  font-size: 0.68em;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  white-space: nowrap;
-}
-
 .modalidades-chevron {
   flex-shrink: 0;
   font-size: 1.1em;
@@ -748,6 +735,36 @@ p {
 
 .registro-treino-card[open] .modalidade-tags {
   justify-content: center;
+}
+
+/* seta tirada do fluxo do flex (absolute) para o título poder centralizar
+   no card inteiro, não só no espaço que sobra ao lado da seta */
+.modalidade-card summary {
+  position: relative;
+}
+
+.modalidade-card .modalidades-summary-text {
+  flex: 1;
+}
+
+.modalidade-card .modalidades-button {
+  justify-content: center;
+  text-align: center;
+}
+
+.modalidade-card[open] .modalidade-tags {
+  justify-content: center;
+}
+
+.modalidade-card .modalidades-chevron {
+  position: absolute;
+  top: 50%;
+  right: 1.5rem;
+  transform: translateY(-50%) rotate(90deg);
+}
+
+.modalidade-card[open] .modalidades-chevron {
+  transform: translateY(-50%) rotate(-90deg);
 }
 
 .modalidades-conteudo {
@@ -1717,6 +1734,13 @@ p {
   width: 100%;
   max-width: 640px;
   grid-template-columns: minmax(80px, 1fr) auto auto;
+}
+
+.ranking-tabela--evento {
+  width: 100%;
+  min-width: 380px;
+  max-width: 640px;
+  grid-template-columns: minmax(120px, 1fr) auto auto;
 }
 
 .ranking-tabela--historico {

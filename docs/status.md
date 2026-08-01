@@ -525,3 +525,29 @@ usuário retomar isso explicitamente.**
   dedicada). Se reaparecerem comandos `higgsfield` no PATH ou uma pasta
   `.agents/skills/higgsfield-*`, é porque uma sessão nova os
   reinstalou — não é resquício desta.
+
+## Plano de Unificação de Agenda de Treinos (2026-07-31, EM ESPERA)
+
+Plano aprovado pra ligar a Agenda de Treinos (`fAgendaTreinos` +
+`fAgendaConfirmacoes`, agendamento futuro com auto-confirmação do membro) ao
+Registro de Treino (`fTreinos` + `fPresencas`, o fluxo real do dia em
+`TreinoAtivo.svelte`) — hoje os dois sistemas não se falam. Achado-chave:
+`fAgendaTreinos.id_treino` já existe no schema como FK pra `fTreinos` mas
+está sempre `NULL` — o vínculo já estava previsto, só nunca foi ligado.
+
+Resumo da abordagem: `abrir_treino(p_data)` passa a linkar automaticamente
+a linha da Agenda que bate com a data (por `data_treino`, nunca por ID);
+`TreinoAtivo.svelte` ganha uma seção "Confirmados aguardando registro" que
+lista quem já confirmou na Agenda e ainda não tem presença registrada —
+staff clica, escolhe classe/torso/faixa (mesmo formulário de hoje) e
+confirma, sem precisar buscar o nome de novo. Continua sendo staff quem
+credita o PH, não é presença automática.
+
+**Em espera**: `fTreinos.id_treino` é `IDENTITY BY DEFAULT` (ordem de
+inserção, sem relação com a data) — o usuário ainda tem treinos antigos
+faltando (desde ~71, o próximo da Agenda seria ~90) e quer terminar esse
+backfill em ordem cronológica primeiro, já que o Nº do treino é um registro
+histórico importante pro grupo. Só implementar este plano depois que o
+usuário avisar que o backfill terminou. Plano completo salvo na memória do
+Claude Code (fora deste repo) como "Plano de Unificação de Agenda de
+Treinos" — chamar por esse nome quando for a hora.
