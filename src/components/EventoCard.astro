@@ -61,9 +61,7 @@ const dataFormatada = new Date(dataEvento).toLocaleDateString("pt-BR");
                 <td class="col-stat">
                   <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
                     {p.nivel_geral}
-                    {p.subiu_nivel_geral && (
-                      <span class="level-up-arrow">{p.subida_nivel_geral > 1 ? `+${p.subida_nivel_geral}` : "▲"}</span>
-                    )}
+                    {p.subiu_nivel_geral && <span class="level-up-arrow">{"▲".repeat(p.subida_nivel_geral)}</span>}
                   </span>
                 </td>
               </tr>
