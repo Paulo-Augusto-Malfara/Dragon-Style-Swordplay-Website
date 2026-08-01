@@ -5,10 +5,10 @@ import DoacoesPainel from "../../../components/admin/DoacoesPainel.svelte";
 export const prerender = false;
 
 const { membro } = Astro.locals;
-if (!membro.isAdminSistema) return Astro.redirect("/admin");
+if (!membro.isOrganizador) return Astro.redirect("/admin");
 ---
 
 <BaseLayout title="Admin - Doações">
   <h1>Doações</h1>
-  <DoacoesPainel client:load />
+  <DoacoesPainel client:load podeEditar={membro.isAdminSistema} />
 </BaseLayout>

@@ -96,6 +96,10 @@ body {
 }
 .gold-title {
   color: var(--golden-color);
+  width: auto;
+  margin: 0;
+  text-indent: 0;
+  text-align: left;
 }
 
 /* ======== SCROLL TO TOP ======== */
@@ -1747,6 +1751,18 @@ p {
   width: 100%;
   max-width: 640px;
   grid-template-columns: 64px minmax(70px, 1fr) auto auto;
+}
+
+/* painel de doações -- sem coluna de posição, com data/valor/total/ações */
+.ranking-tabela--doacoes {
+  width: 100%;
+  min-width: 560px;
+  max-width: 760px;
+  grid-template-columns: minmax(140px, 1fr) auto auto auto auto;
+}
+
+.ranking-tabela--doacoes .col-acoes {
+  gap: 0.5em;
 }
 
 /* ======== AGENDA DE TREINOS (cards, endereço pode ser longo) ======== */
