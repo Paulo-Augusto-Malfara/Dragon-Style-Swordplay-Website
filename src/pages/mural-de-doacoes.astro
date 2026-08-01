@@ -1,0 +1,97 @@
+---
+import PageLayout from "../layouts/PageLayout.astro";
+import { supabasePublic } from "../lib/supabase-public";
+
+export const prerender = false;
+
+const { data: doacoes } = await supabasePublic
+  .from("v_historico_doacoes")
+  .select("*")
+  .order("data_doacao", { ascending: false })
+  .order("id_doacao", { ascending: false });
+
+const PAGE_SIZE = 25;
+const totalPaginas = Math.max(1, Math.ceil((doacoes ?? []).length / PAGE_SIZE));
+const paginaPedida = Number(Astro.url.searchParams.get("page") ?? "1");
+const pagina = Number.isFinite(paginaPedida)
+  ? Math.min(Math.max(1, Math.trunc(paginaPedida)), totalPaginas)
+  : 1;
+const inicio = (pagina - 1) * PAGE_SIZE;
+const paginaAtual = (doacoes ?? []).slice(inicio, inicio + PAGE_SIZE);
+---
+
+<PageLayout
+  title="Mural de Doações"
+  prev={{ href: "/doacoes", label: "Doações" }}
+  next={{ href: "/organizacao-dos-treinos", label: "Organização dos Treinos" }}
+>
+  <section>
+    <p>
+      Confira abaixo o histórico de doações recebidas pelo Dragon Style,
+      registradas pelos organizadores.
+    </p>
+    <br />
+  </section>
+  {(doacoes ?? []).length === 0 ? (
+    <p class="dashboard-empty">Nenhuma doação registrada ainda.</p>
+  ) : (
+    <div class="table-scroll">
+      <table class="ranking-tabela ranking-tabela--doacoes-publico">
+        <thead>
+          <tr>
+            <th class="col-nome">Membro</th>
+            <th class="col-faixa">Data</th>
+            <th class="col-stat">Valor</th>
+            <th class="col-stat">Total doado</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            paginaAtual.map((d) => (
+              <tr>
+                <td class="col-nome">
+                  <span class="row-avatar">
+                    {d.foto_url ? <img src={d.foto_url} alt="" /> : d.nome.charAt(0).toUpperCase()}
+                  </span>
+                  <span class="row-name">{d.nome}</span>
+                </td>
+                <td class="col-faixa">
+                  {new Date(d.data_doacao + "T00:00:00").toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "2-digit",
+                  })}
+                </td>
+                <td class="col-stat">
+                  <span class="status-badge status-badge--agendado">R$ {Number(d.valor).toFixed(2)}</span>
+                </td>
+                <td class="col-stat">
+                  <span class="stat-pill">R$ {Number(d.total_doado).toFixed(2)}</span>
+                </td>
+              </tr>
+            ))
+          }
+        </tbody>
+      </table>
+    </div>
+  )}
+  {totalPaginas > 1 && (
+    <nav class="ranking-pagination" aria-label="Páginas do mural de doações">
+      {pagina > 1 && (
+        <a class="btn btn-sm" href={`?page=${pagina - 1}`} rel="prev">‹</a>
+      )}
+      {Array.from({ length: totalPaginas }, (_, idx) => idx + 1).map((p) => (
+        <a
+          class={`btn btn-sm${p === pagina ? " btn-primary" : ""}`}
+          href={`?page=${p}`}
+          aria-current={p === pagina ? "page" : undefined}
+        >
+          {p}
+        </a>
+      ))}
+      {pagina < totalPaginas && (
+        <a class="btn btn-sm" href={`?page=${pagina + 1}`} rel="next">›</a>
+      )}
+    </nav>
+  )}
+</PageLayout>

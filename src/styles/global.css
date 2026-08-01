@@ -1775,6 +1775,13 @@ p {
   gap: 0.5em;
 }
 
+.ranking-tabela--doacoes-publico {
+  width: 100%;
+  min-width: 460px;
+  max-width: 700px;
+  grid-template-columns: minmax(140px, 1fr) auto auto auto;
+}
+
 /* ======== AGENDA DE TREINOS (cards, endereço pode ser longo) ======== */
 
 .agenda-lista {
