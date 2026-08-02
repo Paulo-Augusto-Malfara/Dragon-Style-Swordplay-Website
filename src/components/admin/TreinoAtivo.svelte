@@ -143,11 +143,13 @@
     };
 
     const porNome = new Map(presencas.map((p) => [p.nome, p]));
-    resumoLinhas = dadosPresencas.map((r: any) => {
-      const base = porNome.get(r.nome);
-      const phBonus = base ? (bonusPorMembro.get(base.id_membro) ?? 0) : 0;
-      return { ...base, ...r, ph_total: (base?.ph_ganho_treino ?? 0) + phBonus };
-    });
+    resumoLinhas = dadosPresencas
+      .map((r: any) => {
+        const base = porNome.get(r.nome);
+        const phBonus = base ? (bonusPorMembro.get(base.id_membro) ?? 0) : 0;
+        return { ...base, ...r, ph_total: (base?.ph_ganho_treino ?? 0) + phBonus };
+      })
+      .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
     dataTreinoResumo = resumoLinhas[0]?.data_treino ?? null;
   }
 
