@@ -24,13 +24,29 @@
   let classesTodas = $state<{ id_classe: number; nome_classe: string }[]>([]);
   let classesDisponiveis = $state<{ id_classe: number; nome_classe: string }[]>([]);
 
-  let membroSelecionado = $state<{ id_membro: number; nome: string } | null>(null);
+  let membroSelecionado = $state<{ id_membro: number; nome: string; nivel_geral?: number } | null>(null);
   let criandoMembro = $state(false);
   let classeEscolhida = $state<number | null>(null);
   let torso = $state("nenhum");
   let usouFaixa = $state(false);
   let adicionando = $state(false);
   let erroAdicionar = $state("");
+  let nivelPorClasseMap = $state(new Map<number, { treinos_por_classe: number; nivel_por_classe: number }>());
+
+  function infoNivelClasse(idClasse: number) {
+    const r = nivelPorClasseMap.get(idClasse);
+    const treinos = r?.treinos_por_classe ?? 0;
+    const nivel = r?.nivel_por_classe ?? 0;
+    const proximoNivelTreinos = (nivel + 1) * 4;
+    const faltam = proximoNivelTreinos - treinos;
+    return { treinos, nivel, proximoNivelTreinos, faltam, vaiSubir: faltam === 1 };
+  }
+  let classeInfo = $derived(classeEscolhida !== null ? infoNivelClasse(classeEscolhida) : null);
+
+  function labelClasse(c: { id_classe: number; nome_classe: string }) {
+    const i = infoNivelClasse(c.id_classe);
+    return `${c.nome_classe} — Nível ${i.nivel} — ${i.treinos}/${i.proximoNivelTreinos}`;
+  }
 
   let presencas = $state<any[]>([]);
   let carregandoPresencas = $state(true);
@@ -79,13 +95,13 @@
   async function checarElegibilidade(idMembro: number) {
     const { data } = await supabase
       .from("v_ranking_por_classe")
-      .select("treinos_por_classe")
-      .eq("id_membro", idMembro)
-      .eq("id_classe", 11)
-      .maybeSingle();
-    const treinosBasico = data?.treinos_por_classe ?? 0;
-    classesDisponiveis =
+      .select("id_classe, treinos_por_classe, nivel_por_classe")
+      .eq("id_membro", idMembro);
+    nivelPorClasseMap = new Map((data ?? []).map((r) => [r.id_classe, r]));
+    const treinosBasico = nivelPorClasseMap.get(11)?.treinos_por_classe ?? 0;
+    const pool =
       treinosBasico < 4 ? classesTodas.filter((c) => c.id_classe === 11) : classesTodas.filter((c) => c.id_classe !== 11);
+    classesDisponiveis = [...pool].sort((a, b) => infoNivelClasse(a.id_classe).faltam - infoNivelClasse(b.id_classe).faltam);
     classeEscolhida = classesDisponiveis[0]?.id_classe ?? null;
   }
 
@@ -273,16 +289,36 @@
     <p class="gold-title card-titulo">Registrar presença</p>
 
     {#if membroSelecionado}
-      <p><strong>Membro:</strong> {membroSelecionado.nome} <button type="button" class="btn btn-sm" onclick={() => (membroSelecionado = null)}>trocar</button></p>
+      <p class="membro-atual"><strong>Membro:</strong> {membroSelecionado.nome} <button type="button" class="btn btn-sm" onclick={() => (membroSelecionado = null)}>trocar</button></p>
+      <p class="membro-atual"><span class="stat-pill">Nível Geral: {membroSelecionado.nivel_geral ?? 0}</span></p>
 
       <label>
         Classe
         <select bind:value={classeEscolhida}>
           {#each classesDisponiveis as c}
-            <option value={c.id_classe}>{c.nome_classe}</option>
+            <option value={c.id_classe}>{labelClasse(c)}</option>
           {/each}
         </select>
       </label>
+
+      {#if classeInfo}
+        <div class="nivel-progresso">
+          <div class="nivel-progresso-info">
+            <span class="stat-pill">Nível {classeInfo.nivel}</span>
+            <span>{classeInfo.treinos}/{classeInfo.proximoNivelTreinos} treinos</span>
+          </div>
+          <div class="nivel-progresso-barra">
+            <div class="nivel-progresso-fill" style={`width: ${((classeInfo.treinos % 4) / 4) * 100}%`}></div>
+          </div>
+          {#if classeInfo.vaiSubir}
+            <p class="nivel-progresso-aviso">
+              🎉 {classeEscolhida === 11
+                ? "Essa presença torna o membro veterano!"
+                : `Essa presença sobe a classe para o nível ${classeInfo.nivel + 1}!`}
+            </p>
+          {/if}
+        </div>
+      {/if}
 
       <label>
         Vestimenta (torso)
