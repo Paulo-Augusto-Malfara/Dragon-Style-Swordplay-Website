@@ -4,19 +4,53 @@ import { supabasePublic } from "../lib/supabase-public";
 
 export const prerender = false;
 
-const { data: ranking } = await supabasePublic
+const { data: rankingRaw } = await supabasePublic
   .from("v_ranking_nivel_geral")
-  .select("*")
-  .order("nivel_geral", { ascending: false });
+  .select("*");
+
+const { data: porClasse } = await supabasePublic
+  .from("v_ranking_por_classe")
+  .select("id_membro, id_classe, nivel_por_classe, treinos_por_classe");
+
+const nivelClassePorMembro = new Map<number, number>();
+const treinosPorMembro = new Map<number, number>();
+for (const row of porClasse ?? []) {
+  treinosPorMembro.set(
+    row.id_membro,
+    (treinosPorMembro.get(row.id_membro) ?? 0) + (row.treinos_por_classe ?? 0)
+  );
+  if (row.id_classe === 11) continue; // Básico é gate de veterano, não conta pro nível de classe
+  nivelClassePorMembro.set(
+    row.id_membro,
+    (nivelClassePorMembro.get(row.id_membro) ?? 0) + (row.nivel_por_classe ?? 0)
+  );
+}
+
+const ranking = (rankingRaw ?? []).map((m) => ({
+  ...m,
+  nivel_classe_total: nivelClassePorMembro.get(m.id_membro) ?? 0,
+  treinos_total: treinosPorMembro.get(m.id_membro) ?? 0,
+}));
+
+const SORTS = {
+  geral: { label: "Nível Geral", key: "nivel_geral" },
+  classe: { label: "Nível de Classe", key: "nivel_classe_total" },
+  honra: { label: "Pontos de Honra", key: "ph_total" },
+  treinos: { label: "Treinos", key: "treinos_total" },
+} as const;
+type SortKey = keyof typeof SORTS;
+const sortPedido = Astro.url.searchParams.get("sort") ?? "geral";
+const sort: SortKey = sortPedido in SORTS ? (sortPedido as SortKey) : "geral";
+ranking.sort((a, b) => b[SORTS[sort].key] - a[SORTS[sort].key]);
 
 const PAGE_SIZE = 25;
-const totalPaginas = Math.max(1, Math.ceil((ranking ?? []).length / PAGE_SIZE));
+const totalPaginas = Math.max(1, Math.ceil(ranking.length / PAGE_SIZE));
 const paginaPedida = Number(Astro.url.searchParams.get("page") ?? "1");
 const pagina = Number.isFinite(paginaPedida)
   ? Math.min(Math.max(1, Math.trunc(paginaPedida)), totalPaginas)
   : 1;
 const inicio = (pagina - 1) * PAGE_SIZE;
-const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
+const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
 ---
 
 <PageLayout
@@ -26,11 +60,22 @@ const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
 >
   <section>
     <p>
-      Confira abaixo o ranking geral de todos os membros do Dragon Style,
-      ordenado do maior para o menor Nível Geral.
+      Confira abaixo o ranking geral de todos os membros do Dragon Style.
+      Clique nos botões para mudar a forma de ordenar.
     </p>
     <br />
   </section>
+  <nav class="ranking-quick-nav" aria-label="Ordenar ranking">
+    {Object.entries(SORTS).map(([key, { label }]) => (
+      <a
+        class={`btn btn-sm${key === sort ? " btn-primary" : ""}`}
+        href={`?sort=${key}`}
+        aria-current={key === sort ? "page" : undefined}
+      >
+        {label}
+      </a>
+    ))}
+  </nav>
   <div class="table-scroll">
     <table class="ranking-tabela ranking-tabela--geral">
       <thead>
@@ -38,6 +83,8 @@ const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
           <th class="col-rank">#</th>
           <th class="col-nome">Nome</th>
           <th class="col-stat">Nível Geral</th>
+          <th class="col-stat">Nível de Classe</th>
+          <th class="col-stat">Treinos</th>
           <th class="col-faixa">Faixa</th>
           <th class="col-stat">Pontos de Honra</th>
         </tr>
@@ -60,6 +107,12 @@ const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
                 <td class="col-stat">
                   <span class="stat-pill">{m.nivel_geral}</span>
                 </td>
+                <td class="col-stat">
+                  <span class="stat-pill">{m.nivel_classe_total}</span>
+                </td>
+                <td class="col-stat">
+                  <span class="stat-pill">{m.treinos_total}</span>
+                </td>
                 <td class="col-faixa">{m.nome_faixa ?? "-"}</td>
                 <td class="col-stat">
                   <span class="stat-pill">{m.ph_total}</span>
@@ -74,19 +127,19 @@ const paginaAtual = (ranking ?? []).slice(inicio, inicio + PAGE_SIZE);
   {totalPaginas > 1 && (
     <nav class="ranking-pagination" aria-label="Páginas do ranking">
       {pagina > 1 && (
-        <a class="btn btn-sm" href={`?page=${pagina - 1}`} rel="prev">‹</a>
+        <a class="btn btn-sm" href={`?sort=${sort}&page=${pagina - 1}`} rel="prev">‹</a>
       )}
       {Array.from({ length: totalPaginas }, (_, idx) => idx + 1).map((p) => (
         <a
           class={`btn btn-sm${p === pagina ? " btn-primary" : ""}`}
-          href={`?page=${p}`}
+          href={`?sort=${sort}&page=${p}`}
           aria-current={p === pagina ? "page" : undefined}
         >
           {p}
         </a>
       ))}
       {pagina < totalPaginas && (
-        <a class="btn btn-sm" href={`?page=${pagina + 1}`} rel="next">›</a>
+        <a class="btn btn-sm" href={`?sort=${sort}&page=${pagina + 1}`} rel="next">›</a>
       )}
     </nav>
   )}
