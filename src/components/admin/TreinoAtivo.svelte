@@ -2,13 +2,15 @@
   import { onMount, onDestroy } from "svelte";
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
+  import RecrutarMembro from "./RecrutarMembro.svelte";
 
   interface Props {
     idTreino: number;
     souOrganizador: boolean;
     souAdminSistema: boolean;
+    meuIdMembro: number;
   }
-  const { idTreino, souOrganizador, souAdminSistema }: Props = $props();
+  const { idTreino, souOrganizador, souAdminSistema, meuIdMembro }: Props = $props();
 
   const TORSO_OPCOES = [
     { valor: "nenhum", label: "Nenhum" },
@@ -18,10 +20,12 @@
   ];
 
   let classesMap = new Map<number, string>();
+  let siglaMap = new Map<number, string>();
   let classesTodas = $state<{ id_classe: number; nome_classe: string }[]>([]);
   let classesDisponiveis = $state<{ id_classe: number; nome_classe: string }[]>([]);
 
   let membroSelecionado = $state<{ id_membro: number; nome: string } | null>(null);
+  let criandoMembro = $state(false);
   let classeEscolhida = $state<number | null>(null);
   let torso = $state("nenhum");
   let usouFaixa = $state(false);
@@ -38,30 +42,33 @@
   let channel: ReturnType<typeof supabase.channel> | null = null;
 
   async function carregarClasses() {
-    const { data } = await supabase.from("dClasses").select("id_classe, nome_classe").order("nome_classe");
+    const { data } = await supabase.from("dClasses").select("id_classe, nome_classe, sigla_classe").order("nome_classe");
     classesTodas = data ?? [];
     classesMap = new Map(classesTodas.map((c) => [c.id_classe, c.nome_classe]));
+    siglaMap = new Map(classesTodas.map((c) => [c.id_classe, c.sigla_classe]));
   }
 
   async function carregarPresencas() {
     const { data: pres } = await supabase
       .from("fPresencas")
-      .select("id_presenca, id_membro, id_classe, ph_ganho_treino")
+      .select("id_presenca, id_membro, id_classe, usou_camiseta, usou_tabardo, usou_faixa, ph_ganho_treino")
       .eq("id_treino", idTreino)
       .order("id_presenca");
 
     const linhas = pres ?? [];
     const ids = [...new Set(linhas.map((p) => p.id_membro))];
-    let nomes = new Map<number, string>();
+    let membrosMap = new Map<number, { nome: string; foto_url: string | null }>();
     if (ids.length > 0) {
-      const { data: membros } = await supabase.from("dMembros").select("id_membro, nome").in("id_membro", ids);
-      nomes = new Map((membros ?? []).map((m) => [m.id_membro, m.nome]));
+      const { data: membros } = await supabase.from("dMembros").select("id_membro, nome, foto_url").in("id_membro", ids);
+      membrosMap = new Map((membros ?? []).map((m) => [m.id_membro, m]));
     }
 
     presencas = linhas.map((p) => ({
       ...p,
-      nome: nomes.get(p.id_membro) ?? `#${p.id_membro}`,
-      nome_classe: classesMap.get(p.id_classe) ?? `#${p.id_classe}`,
+      nome: membrosMap.get(p.id_membro)?.nome ?? `#${p.id_membro}`,
+      foto_url: membrosMap.get(p.id_membro)?.foto_url ?? null,
+      sigla_classe: siglaMap.get(p.id_classe) ?? `#${p.id_classe}`,
+      vestimenta: p.usou_camiseta || p.usou_tabardo,
     }));
     carregandoPresencas = false;
   }
@@ -163,7 +170,7 @@
   </div>
 {:else}
   <div class="admin-form">
-    <p class="gold-title">Registrar presença</p>
+    <p class="gold-title card-titulo">Registrar presença</p>
 
     {#if membroSelecionado}
       <p><strong>Membro:</strong> {membroSelecionado.nome} <button type="button" class="btn btn-sm" onclick={() => (membroSelecionado = null)}>trocar</button></p>
@@ -197,8 +204,21 @@
       {#if erroAdicionar}
         <p class="admin-error">{erroAdicionar}</p>
       {/if}
+    {:else if criandoMembro}
+      <RecrutarMembro
+        {meuIdMembro}
+        onCreated={(m) => {
+          criandoMembro = false;
+          selecionarMembro(m);
+        }}
+        onCancelar={() => (criandoMembro = false)}
+      />
     {:else}
-      <MembroPicker placeholder="Buscar membro para registrar presença..." onSelect={selecionarMembro} />
+      <MembroPicker
+        placeholder="Buscar membro para registrar presença..."
+        onSelect={selecionarMembro}
+        onCriarNovo={() => (criandoMembro = true)}
+      />
     {/if}
   </div>
 
@@ -208,16 +228,53 @@
   {:else if presencas.length === 0}
     <p class="dashboard-empty">Nenhuma presença registrada ainda.</p>
   {:else}
-    <ul class="admin-list">
-      {#each presencas as p}
-        <li>
-          <span>{p.nome} — {p.nome_classe} <small>(+{p.ph_ganho_treino} PH)</small></span>
-          {#if souAdminSistema}
-            <button type="button" class="btn btn-sm btn-danger" onclick={() => removerPresenca(p.id_presenca)}>remover</button>
-          {/if}
-        </li>
-      {/each}
-    </ul>
+    <div class="table-scroll">
+      <table class="ranking-tabela ranking-tabela--presencas">
+        <thead>
+          <tr>
+            <th class="col-nome">Nome</th>
+            <th class="col-faixa">Classe</th>
+            <th class="col-stat">Vestimenta</th>
+            <th class="col-stat">Faixa</th>
+            <th class="col-stat">PH</th>
+            <th class="col-stat col-acoes">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each presencas as p}
+            <tr>
+              <td class="col-nome">
+                <span class="row-avatar">
+                  {#if p.foto_url}
+                    <img src={p.foto_url} alt="" />
+                  {:else}
+                    {p.nome.charAt(0).toUpperCase()}
+                  {/if}
+                </span>
+                <span class="row-name">{p.nome}</span>
+              </td>
+              <td class="col-faixa">{p.sigla_classe}</td>
+              <td class="col-stat">
+                <span class={`status-badge status-badge--${p.vestimenta ? "ativo" : "inativo"}`}>
+                  {p.vestimenta ? "Sim" : "Não"}
+                </span>
+              </td>
+              <td class="col-stat">
+                <span class={`status-badge status-badge--${p.usou_faixa ? "ativo" : "inativo"}`}>
+                  {p.usou_faixa ? "Sim" : "Não"}
+                </span>
+              </td>
+              <td class="col-stat"><span class="stat-pill">{p.ph_ganho_treino}</span></td>
+              <td class="col-stat col-acoes">
+                {#if souAdminSistema}
+                  <button type="button" class="btn btn-sm btn-danger" onclick={() => removerPresenca(p.id_presenca)}>remover</button>
+                {/if}
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
   {/if}
 
   {#if souOrganizador}

@@ -5,13 +5,16 @@
 
   interface Props {
     meuIdMembro: number;
+    onCreated?: (membro: { id_membro: number; nome: string }) => void;
+    onCancelar?: () => void;
   }
-  const { meuIdMembro }: Props = $props();
+  const { meuIdMembro, onCreated, onCancelar }: Props = $props();
 
   type Etapa = "nome" | "padrinho" | "revisao" | "foto" | "concluido";
   let etapa = $state<Etapa>("nome");
 
   let nome = $state("");
+  let email = $state("");
   let nomeErro = $state("");
   let checandoNome = $state(false);
 
@@ -26,8 +29,13 @@
 
   async function avancarDeNome() {
     const nomeAparado = nome.trim();
+    const emailAparado = email.trim();
     if (nomeAparado.length < 2) {
       nomeErro = "Digite um nome válido.";
+      return;
+    }
+    if (!emailAparado) {
+      nomeErro = "Digite um email — é o que a pessoa vai usar pra fazer login.";
       return;
     }
     checandoNome = true;
@@ -42,6 +50,7 @@
       return;
     }
     nome = nomeAparado;
+    email = emailAparado;
     etapa = "padrinho";
   }
 
@@ -62,6 +71,7 @@
       .from("dMembros")
       .insert({
         nome,
+        email,
         status_ativo: true,
         auth_level: 4,
         quem_criou: meuIdMembro,
@@ -99,35 +109,49 @@
   }
 
   function concluir() {
+    if (onCreated && idMembroCriado) {
+      onCreated({ id_membro: idMembroCriado, nome: nomeCriado });
+      return;
+    }
     window.location.href = "/admin/membros";
   }
 </script>
 
 <div class="recrutar-membro">
-  {#if etapa === "nome"}
-    <form class="admin-form" onsubmit={(e) => (e.preventDefault(), avancarDeNome())}>
-      <label>
-        Nome do novo membro
-        <input type="text" bind:value={nome} required autofocus />
-      </label>
-      <button type="submit" class="btn btn-primary" disabled={checandoNome}>
-        {checandoNome ? "Verificando..." : "Continuar"}
-      </button>
-      {#if nomeErro}
-        <p class="admin-error">{nomeErro}</p>
-      {/if}
-    </form>
-  {:else if etapa === "padrinho"}
-    <div class="admin-form">
+  <div class="admin-form">
+    {#if onCreated}
+      <p class="gold-title card-titulo">Registro de novo membro</p>
+    {/if}
+
+    {#if etapa === "nome"}
+      <form onsubmit={(e) => (e.preventDefault(), avancarDeNome())}>
+        <label>
+          Nome do novo membro
+          <input type="text" bind:value={nome} required autofocus />
+        </label>
+        <label>
+          Email (usado pro login)
+          <input type="email" bind:value={email} required />
+        </label>
+        <button type="submit" class="btn btn-primary" disabled={checandoNome}>
+          {checandoNome ? "Verificando..." : "Continuar"}
+        </button>
+        {#if onCancelar}
+          <button type="button" class="btn btn-sm" onclick={onCancelar} disabled={checandoNome}>Cancelar</button>
+        {/if}
+        {#if nomeErro}
+          <p class="admin-error">{nomeErro}</p>
+        {/if}
+      </form>
+    {:else if etapa === "padrinho"}
       <p class="gold-title">Alguém indicou {nome}? (opcional)</p>
       <MembroPicker placeholder="Buscar padrinho..." onSelect={escolherPadrinho} />
       <button type="button" class="btn btn-sm" onclick={pularPadrinho}>Sem padrinho / pular</button>
       <button type="button" class="btn btn-sm" onclick={() => (etapa = "nome")}>Voltar</button>
-    </div>
-  {:else if etapa === "revisao"}
-    <div class="admin-form">
+    {:else if etapa === "revisao"}
       <p class="gold-title">Revise antes de confirmar</p>
       <p><strong>Nome:</strong> {nome}</p>
+      <p><strong>Email:</strong> {email}</p>
       <p><strong>Padrinho:</strong> {padrinho?.nome ?? "Nenhum"}</p>
       <button type="button" class="btn btn-primary" onclick={confirmarCadastro} disabled={salvando}>
         {salvando ? "Cadastrando..." : "Confirmar cadastro"}
@@ -138,9 +162,7 @@
       {#if erroSalvar}
         <p class="admin-error">{erroSalvar}</p>
       {/if}
-    </div>
-  {:else if etapa === "foto"}
-    <div class="admin-form">
+    {:else if etapa === "foto"}
       <p class="gold-title">✅ {nomeCriado} foi cadastrado(a)! Quer adicionar uma foto agora?</p>
       <AvatarUploader
         {fotoUrl}
@@ -152,11 +174,11 @@
         savePhoto={saveFotoMembro}
       />
       <button type="button" class="btn btn-sm" onclick={concluir}>Pular / concluir sem foto</button>
-    </div>
-  {:else}
-    <div class="admin-form">
+    {:else}
       <p class="gold-title">✅ Cadastro concluído!</p>
-      <button type="button" class="btn btn-primary" onclick={concluir}>Voltar para a lista de membros</button>
-    </div>
-  {/if}
+      <button type="button" class="btn btn-primary" onclick={concluir}>
+        {onCreated ? "Continuar" : "Voltar para a lista de membros"}
+      </button>
+    {/if}
+  </div>
 </div>

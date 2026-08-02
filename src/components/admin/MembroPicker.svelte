@@ -10,8 +10,9 @@
     placeholder?: string;
     excludeId?: number;
     onSelect: (membro: Membro) => void;
+    onCriarNovo?: () => void;
   }
-  const { placeholder = "Buscar membro...", excludeId, onSelect }: Props = $props();
+  const { placeholder = "Buscar membro...", excludeId, onSelect, onCriarNovo }: Props = $props();
 
   let termo = $state("");
   let resultados = $state<Membro[]>([]);
@@ -66,6 +67,11 @@
             <button type="button" onclick={() => escolher(m)}>{m.nome}</button>
           </li>
         {/each}
+      {/if}
+      {#if onCriarNovo && !buscando}
+        <li class="membro-picker-criar">
+          <button type="button" onclick={onCriarNovo}>+ Cadastrar novo membro</button>
+        </li>
       {/if}
     </ul>
   {/if}

@@ -10,5 +10,11 @@ const { id } = Astro.params;
 
 <BaseLayout title="Admin - Treino">
   <h1>Treino #{id}</h1>
-  <TreinoAtivo idTreino={Number(id)} souOrganizador={membro.isOrganizador} souAdminSistema={membro.isAdminSistema} client:load />
+  <TreinoAtivo
+    idTreino={Number(id)}
+    souOrganizador={membro.isOrganizador}
+    souAdminSistema={membro.isAdminSistema}
+    meuIdMembro={membro.id_membro}
+    client:load
+  />
 </BaseLayout>

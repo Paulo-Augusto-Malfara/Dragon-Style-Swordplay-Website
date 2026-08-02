@@ -1433,6 +1433,19 @@ p {
   box-shadow: 0 0 1em black;
 }
 
+/* deixa o <form> de uma etapa (ex: RecrutarMembro) se comportar como se não
+   existisse no layout, pra seus filhos participarem do flex/gap do .admin-form
+   pai em vez de ficarem presos num box sem gap */
+.admin-form > form {
+  display: contents;
+}
+
+.gold-title.card-titulo {
+  text-align: center;
+  font-size: 1.15em;
+  font-family: "Bree Serif", sans-serif;
+}
+
 .admin-form label {
   display: flex;
   flex-direction: column;
@@ -1595,7 +1608,9 @@ p {
 
 .membro-picker {
   position: relative;
+  width: 100%;
   max-width: 420px;
+  margin: 0 auto;
 }
 
 .membro-picker input[type="text"] {
@@ -1656,6 +1671,11 @@ p {
   font-size: 0.9em;
 }
 
+.membro-picker-criar button {
+  color: var(--golden-color);
+  border-top: 1px solid var(--border-dark-color-2);
+}
+
 /* ======== RANKING TABLES (LEADERBOARD) ======== */
 
 /* ponytail: <table>/<th>/<td> markup kept for accessibility, but table/
@@ -1681,7 +1701,11 @@ p {
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
   box-shadow: var(--card-shadow);
-  overflow: hidden;
+  /* "clip" (não "hidden") arredonda os cantos sem virar um container de
+     scroll -- "hidden" sequestra o position:sticky das colunas .col-nome/
+     .col-rank, que passam a grudar na própria tabela (que desliza inteira
+     dentro de .table-scroll) em vez de grudar na área visível. */
+  overflow: clip;
 }
 
 .ranking-tabela thead,
@@ -1767,21 +1791,21 @@ p {
   width: 100%;
   min-width: 620px;
   max-width: 760px;
-  grid-template-columns: 64px minmax(120px, 1fr) auto auto auto;
+  grid-template-columns: 64px minmax(120px, 170px) auto auto auto;
 }
 
 .ranking-tabela--classe {
   width: 100%;
   min-width: 460px;
   max-width: 640px;
-  grid-template-columns: 64px minmax(120px, 1fr) auto auto;
+  grid-template-columns: 64px minmax(120px, 170px) auto auto;
 }
 
 .ranking-tabela--treino {
   width: 100%;
   min-width: 480px;
   max-width: 700px;
-  grid-template-columns: minmax(120px, 1fr) auto auto auto;
+  grid-template-columns: minmax(120px, 170px) auto auto auto;
 }
 
 /* ponytail: width:auto (not 100%) + no 1fr column lets this table shrink
@@ -1807,7 +1831,7 @@ p {
   width: 100%;
   min-width: 380px;
   max-width: 640px;
-  grid-template-columns: minmax(120px, 1fr) auto auto;
+  grid-template-columns: minmax(120px, 170px) auto auto;
 }
 
 .ranking-tabela--historico {
@@ -1821,7 +1845,7 @@ p {
   width: 100%;
   min-width: 560px;
   max-width: 760px;
-  grid-template-columns: minmax(140px, 1fr) auto auto auto auto;
+  grid-template-columns: minmax(140px, 170px) auto auto auto auto;
 }
 
 .ranking-tabela--doacoes .col-acoes {
@@ -1832,7 +1856,15 @@ p {
   width: 100%;
   min-width: 460px;
   max-width: 700px;
-  grid-template-columns: minmax(140px, 1fr) auto auto auto;
+  grid-template-columns: minmax(140px, 170px) auto auto auto;
+}
+
+/* presenças de um treino -- nome, classe (sigla), vestimenta, faixa, PH, ações */
+.ranking-tabela--presencas {
+  width: 100%;
+  min-width: 560px;
+  max-width: 780px;
+  grid-template-columns: minmax(120px, 170px) auto auto auto auto auto;
 }
 
 /* ======== AGENDA DE TREINOS (cards, endereço pode ser longo) ======== */
@@ -2086,7 +2118,6 @@ p {
   min-width: 0;
   font-weight: 600;
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
