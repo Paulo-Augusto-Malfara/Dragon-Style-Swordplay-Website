@@ -36,7 +36,10 @@
   let carregandoPresencas = $state(true);
 
   let finalizando = $state(false);
+  let statusTreino = $state<string | null>(null);
   let resumo = $state<any | null>(null);
+  let resumoLinhas = $state<any[]>([]);
+  let dataTreinoResumo = $state<string | null>(null);
   let erroFinalizar = $state("");
 
   let channel: ReturnType<typeof supabase.channel> | null = null;
@@ -123,6 +126,39 @@
     await carregarPresencas();
   }
 
+  async function montarResumo(dadosPresencas: any[], dadosBonus: any[]) {
+    let nomesBonus = new Map<number, string>();
+    if (dadosBonus.length > 0) {
+      const ids = [...new Set(dadosBonus.map((b: any) => b.id_membro))];
+      const { data: membrosBonus } = await supabase.from("dMembros").select("id_membro, nome").in("id_membro", ids);
+      nomesBonus = new Map((membrosBonus ?? []).map((m) => [m.id_membro, m.nome]));
+    }
+    const bonusPorMembro = new Map<number, number>();
+    for (const b of dadosBonus) {
+      bonusPorMembro.set(b.id_membro, (bonusPorMembro.get(b.id_membro) ?? 0) + Number(b.ph_ganho));
+    }
+
+    resumo = {
+      bonus_indicacao: dadosBonus.map((b: any) => ({ ...b, nome: nomesBonus.get(b.id_membro) ?? `#${b.id_membro}` })),
+    };
+
+    const porNome = new Map(presencas.map((p) => [p.nome, p]));
+    resumoLinhas = dadosPresencas.map((r: any) => {
+      const base = porNome.get(r.nome);
+      const phBonus = base ? (bonusPorMembro.get(base.id_membro) ?? 0) : 0;
+      return { ...base, ...r, ph_total: (base?.ph_ganho_treino ?? 0) + phBonus };
+    });
+    dataTreinoResumo = resumoLinhas[0]?.data_treino ?? null;
+  }
+
+  async function carregarResumoFinalizado() {
+    const [{ data: registros }, { data: bonusBruto }] = await Promise.all([
+      supabase.from("v_registro_treinos").select("*").eq("id_treino", idTreino),
+      supabase.from("fPH").select("*").eq("id_treino", idTreino).eq("id_regra_ph", 6),
+    ]);
+    await montarResumo(registros ?? [], bonusBruto ?? []);
+  }
+
   async function finalizarTreino() {
     if (!confirm("Finalizar este treino? Depois de finalizado não é possível registrar mais presenças.")) return;
     finalizando = true;
@@ -133,12 +169,19 @@
       erroFinalizar = error.message;
       return;
     }
-    resumo = data;
+    statusTreino = "finalizado";
+    await montarResumo(data.presencas ?? [], data.bonus_indicacao ?? []);
   }
 
   onMount(async () => {
     await carregarClasses();
     await carregarPresencas();
+    const { data: treino } = await supabase.from("fTreinos").select("status").eq("id_treino", idTreino).single();
+    statusTreino = treino?.status ?? "aberto";
+    if (statusTreino === "finalizado") {
+      await carregarResumoFinalizado();
+      return;
+    }
     channel = supabase
       .channel(`treino-${idTreino}`)
       .on(
@@ -154,18 +197,73 @@
   });
 </script>
 
-{#if resumo}
+{#if statusTreino === null}
+  <p>Carregando...</p>
+{:else if resumo}
   <div class="admin-form">
-    <p class="gold-title">🏁 Treino finalizado!</p>
+    <p class="gold-title card-titulo">🏁 Treino finalizado!</p>
+    <p>
+      Treino #{idTreino}{#if dataTreinoResumo} — {new Date(dataTreinoResumo + "T00:00:00").toLocaleDateString("pt-BR")}{/if}
+    </p>
     <p>{presencas.length} presença(s) registrada(s).</p>
     {#if resumo.bonus_indicacao?.length > 0}
       <p class="gold-title">Bônus de indicação:</p>
-      <ul>
+      <ul class="admin-list">
         {#each resumo.bonus_indicacao as b}
-          <li>+{b.ph_ganho} PH — {b.detalhes}</li>
+          <li><span>🏅 <strong>{b.nome}</strong> ganhou +{b.ph_ganho} PH — {b.detalhes}</span></li>
         {/each}
       </ul>
     {/if}
+    <div class="table-scroll">
+      <table class="ranking-tabela ranking-tabela--treino-resumo">
+        <thead>
+          <tr>
+            <th class="col-nome">Nome</th>
+            <th class="col-faixa">Classe</th>
+            <th class="col-stat">Vestimenta</th>
+            <th class="col-stat">Faixa</th>
+            <th class="col-stat">PH</th>
+            <th class="col-stat">Nível</th>
+          </tr>
+        </thead>
+        <tbody>
+          {#each resumoLinhas as p}
+            <tr>
+              <td class="col-nome">
+                <span class="row-avatar">
+                  {#if p.foto_url}
+                    <img src={p.foto_url} alt="" />
+                  {:else}
+                    {p.nome.charAt(0).toUpperCase()}
+                  {/if}
+                </span>
+                <span class="row-name">{p.nome}</span>
+              </td>
+              <td class="col-faixa">{p.sigla_classe}</td>
+              <td class="col-stat">
+                <span class={`status-badge status-badge--${p.vestimenta ? "ativo" : "inativo"}`}>
+                  {p.vestimenta ? "Sim" : "Não"}
+                </span>
+              </td>
+              <td class="col-stat">
+                <span class={`status-badge status-badge--${p.usou_faixa ? "ativo" : "inativo"}`}>
+                  {p.usou_faixa ? "Sim" : "Não"}
+                </span>
+              </td>
+              <td class="col-stat"><span class="stat-pill">{p.ph_total}</span></td>
+              <td class="col-stat">
+                <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
+                  {p.nivel_geral}
+                  {#if p.subiu_nivel_geral}
+                    <span class="level-up-arrow">{"▲".repeat(p.subida_nivel_geral)}</span>
+                  {/if}
+                </span>
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </div>
     <a href="/admin/treinos" class="btn btn-primary">Voltar</a>
   </div>
 {:else}

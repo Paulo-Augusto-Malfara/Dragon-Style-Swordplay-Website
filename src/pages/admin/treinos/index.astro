@@ -49,10 +49,12 @@ const { data: historico } = await supabase
         const qtd = t.fPresencas?.[0]?.count ?? 0;
         return (
           <li class="historico-item">
-            <span class="rank-badge">{t.id_treino}</span>
-            <span>
-              {new Date(t.data_treino + "T00:00:00").toLocaleDateString("pt-BR")} - {qtd} Combatente{qtd === 1 ? "" : "s"}
-            </span>
+            <a href={`/admin/treinos/${t.id_treino}`} class="historico-link">
+              <span class="rank-badge">{t.id_treino}</span>
+              <span>
+                {new Date(t.data_treino + "T00:00:00").toLocaleDateString("pt-BR")} - {qtd} Combatente{qtd === 1 ? "" : "s"}
+              </span>
+            </a>
           </li>
         );
       })}

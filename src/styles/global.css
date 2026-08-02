@@ -1591,6 +1591,17 @@ p {
   color: var(--text-primary-color);
 }
 
+.historico-link {
+  display: contents;
+  color: inherit;
+  text-decoration: none;
+}
+
+.admin-list li.historico-item:hover {
+  background: var(--secondary-color-opacity);
+  cursor: pointer;
+}
+
 .admin-list-actions {
   max-width: 700px;
   margin: 0 auto 2em;
@@ -1861,6 +1872,14 @@ p {
 
 /* presenças de um treino -- nome, classe (sigla), vestimenta, faixa, PH, ações */
 .ranking-tabela--presencas {
+  width: 100%;
+  min-width: 560px;
+  max-width: 780px;
+  grid-template-columns: minmax(120px, 170px) auto auto auto auto auto;
+}
+
+/* resumo de treino finalizado -- nome, classe (sigla), vestimenta, faixa, PH, nível */
+.ranking-tabela--treino-resumo {
   width: 100%;
   min-width: 560px;
   max-width: 780px;
