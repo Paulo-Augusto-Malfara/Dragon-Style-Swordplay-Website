@@ -1658,7 +1658,9 @@ p {
 }
 
 .membro-picker-results li button {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
   width: 100%;
   text-align: left;
   padding: 0.5em 0.9em;
@@ -1668,6 +1670,30 @@ p {
   cursor: pointer;
   font-family: inherit;
   font-size: 0.95em;
+}
+
+.membro-picker-nome {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.status-dot {
+  display: inline-block;
+  width: 0.55em;
+  height: 0.55em;
+  min-width: 0.55em;
+  border-radius: 50%;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.status-dot--ativo {
+  background: #4fd18b;
+}
+
+.status-dot--inativo {
+  background: #f0776e;
 }
 
 .membro-picker-results li button:hover,
