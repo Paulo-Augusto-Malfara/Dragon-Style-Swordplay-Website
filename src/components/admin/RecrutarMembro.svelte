@@ -34,8 +34,7 @@
       nomeErro = "Digite um nome válido.";
       return;
     }
-    if (!emailAparado) {
-      nomeErro = "Digite um email — é o que a pessoa vai usar pra fazer login.";
+    if (!emailAparado && !confirm("Sem email cadastrado, esse membro não vai conseguir fazer login no sistema. Continuar mesmo assim?")) {
       return;
     }
     checandoNome = true;
@@ -71,7 +70,7 @@
       .from("dMembros")
       .insert({
         nome,
-        email,
+        email: email || null,
         status_ativo: true,
         auth_level: 4,
         quem_criou: meuIdMembro,
@@ -131,7 +130,7 @@
         </label>
         <label>
           Email (usado pro login)
-          <input type="email" bind:value={email} required />
+          <input type="email" bind:value={email} />
         </label>
         <button type="submit" class="btn btn-primary" disabled={checandoNome}>
           {checandoNome ? "Verificando..." : "Continuar"}
