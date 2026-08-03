@@ -6,11 +6,10 @@
 
   interface Props {
     idTreino: number;
-    souOrganizador: boolean;
     souAdminSistema: boolean;
     meuIdMembro: number;
   }
-  const { idTreino, souOrganizador, souAdminSistema, meuIdMembro }: Props = $props();
+  const { idTreino, souAdminSistema, meuIdMembro }: Props = $props();
 
   const TORSO_OPCOES = [
     { valor: "nenhum", label: "Nenhum" },
@@ -57,6 +56,9 @@
   let resumoLinhas = $state<any[]>([]);
   let dataTreinoResumo = $state<string | null>(null);
   let erroFinalizar = $state("");
+  let reabrindo = $state(false);
+  let erroReabrir = $state("");
+  let excluindo = $state(false);
 
   let channel: ReturnType<typeof supabase.channel> | null = null;
 
@@ -191,6 +193,33 @@
     await montarResumo(data.presencas ?? [], data.bonus_indicacao ?? []);
   }
 
+  async function reabrirTreino() {
+    if (!confirm("Reabrir este treino para edição? Ele volta ao estado aberto até você finalizar de novo.")) return;
+    reabrindo = true;
+    erroReabrir = "";
+    const { error } = await supabase.rpc("reabrir_treino", { p_id_treino: idTreino });
+    reabrindo = false;
+    if (error) {
+      erroReabrir = error.message;
+      return;
+    }
+    statusTreino = "aberto";
+    resumo = null;
+    await carregarPresencas();
+  }
+
+  async function excluirTreino() {
+    if (!confirm("Excluir este treino permanentemente? Todas as presenças e o PH ganho nele serão apagados. Essa ação não pode ser desfeita.")) return;
+    excluindo = true;
+    const { error } = await supabase.rpc("excluir_treino", { p_id_treino: idTreino });
+    excluindo = false;
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    window.location.href = "/admin/treinos";
+  }
+
   onMount(async () => {
     await carregarClasses();
     await carregarPresencas();
@@ -282,6 +311,19 @@
         </tbody>
       </table>
     </div>
+    {#if souAdminSistema}
+      <div class="admin-list-actions">
+        <button type="button" class="btn" onclick={reabrirTreino} disabled={reabrindo}>
+          {reabrindo ? "Reabrindo..." : "Reabrir treino"}
+        </button>
+        <button type="button" class="btn btn-danger" onclick={excluirTreino} disabled={excluindo}>
+          {excluindo ? "Excluindo..." : "Excluir treino"}
+        </button>
+      </div>
+      {#if erroReabrir}
+        <p class="admin-error">{erroReabrir}</p>
+      {/if}
+    {/if}
     <a href="/admin/treinos" class="btn btn-primary">Voltar</a>
   </div>
 {:else}
@@ -413,7 +455,7 @@
     </div>
   {/if}
 
-  {#if souOrganizador}
+  {#if souAdminSistema}
     <div class="admin-list-actions">
       <button type="button" class="btn btn-danger" onclick={finalizarTreino} disabled={finalizando}>
         {finalizando ? "Finalizando..." : "Finalizar treino"}
