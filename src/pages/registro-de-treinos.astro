@@ -9,7 +9,6 @@ const { data: registros } = await supabasePublic
   .from("v_registro_treinos")
   .select("*")
   .order("data_treino", { ascending: false })
-  .order("nome")
   .limit(200);
 
 interface Registro {
@@ -31,6 +30,12 @@ for (const r of (registros ?? []) as Registro[]) {
     porTreino.set(r.id_treino, { data_treino: r.data_treino, attendees: [] });
   }
   porTreino.get(r.id_treino)!.attendees.push(r);
+}
+for (const grupo of porTreino.values()) {
+  grupo.attendees.sort((a, b) => {
+    if (a.subiu_nivel_geral !== b.subiu_nivel_geral) return a.subiu_nivel_geral ? -1 : 1;
+    return b.nivel_geral - a.nivel_geral;
+  });
 }
 const treinos = [...porTreino.entries()].sort((a, b) => b[1].data_treino.localeCompare(a[1].data_treino));
 ---
