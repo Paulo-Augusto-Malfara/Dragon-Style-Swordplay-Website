@@ -2,7 +2,6 @@
   import { onMount } from "svelte";
   import LoginForm from "../auth/LoginForm.svelte";
   import AvatarUploader from "./AvatarUploader.svelte";
-  import { corDaFaixa, ehFaixaEscura } from "../../lib/faixa";
 
   // ponytail: dynamic import, not a top-level one -- this component is used
   // inside dashboard.astro, a fully static page. A static import evaluates
@@ -187,11 +186,7 @@
       <button class="btn btn-sm" onclick={logout}>Novo login</button>
     </div>
   {:else}
-    <!-- sem faixa (novato), nenhuma classe entra e a moldura segue dourada -->
-    <div
-      class="dashboard-profile {ehFaixaEscura(nomeFaixa) ? 'faixa-borda--escura' : ''}"
-      style={corDaFaixa(nomeFaixa) ? `--faixa: ${corDaFaixa(nomeFaixa)}` : ""}
-    >
+    <div class="dashboard-profile">
       {#if ehStaffOuMais}
         <a href="/admin" class="btn btn-sm dashboard-admin-link">painel administrativo</a>
       {/if}

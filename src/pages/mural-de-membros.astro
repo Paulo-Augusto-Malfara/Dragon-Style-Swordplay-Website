@@ -1,7 +1,6 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
-import { corDaFaixa, ehFaixaEscura } from "../lib/faixa";
 
 export const prerender = false;
 
@@ -48,10 +47,7 @@ const grupos = [
         <br />
         <section class="grid-mural">
           {lista.map((m) => (
-            <div
-              class={ehFaixaEscura(m.nome_faixa) ? "faixa-borda--escura" : undefined}
-              style={corDaFaixa(m.nome_faixa) ? `--faixa: ${corDaFaixa(m.nome_faixa)}` : undefined}
-            >
+            <div>
               <p class="mural-avatar">
                 {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}
               </p>

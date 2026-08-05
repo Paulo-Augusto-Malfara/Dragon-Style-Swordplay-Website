@@ -1169,7 +1169,7 @@ p {
   justify-content: center;
   align-items: center;
   padding: 12px;
-  border: 2px solid var(--faixa, var(--golden-color-opaco));
+  border: 2px solid var(--golden-color-opaco);
   background: url(/assets/img/logo-classes/box-background-flip.webp) no-repeat
     center;
   background-color: var(--secondary-color-opacity);
@@ -2172,26 +2172,14 @@ p {
    corDaFaixa() em src/lib/faixa.ts), então uma classe só serve pras 8 faixas em
    vez de 8 modificadores. Quem não tem faixa não recebe --faixa e o elemento
    simplesmente não é renderizado.
-   Decorativo: o nome da faixa aparece em texto ao lado nos quatro lugares onde
-   isso é usado, então a cor nunca é o único portador da informação. */
+
+   Escopo: só as tabelas de ranking. A faixa já foi testada como moldura do card
+   (mural e dashboard) e foi revertida — com 173 cards lado a lado o mural virou
+   um mosaico colorido, e a moldura dourada é identidade do site, não sobra
+   pra gastar. Nas tabelas o traço funciona porque é pequeno, alinhado numa
+   coluna e economiza uma coluna de texto inteira. */
 .faixa-bar {
   background: var(--faixa);
-}
-
-/* A faixa como MOLDURA do card (mural, dashboard). Contra o fundo do card 7 das
-   8 faixas passam de 4:1 — bem melhor que a barra fina encostada na borda
-   dourada, onde Laranja (1.1:1), Verde (1.2:1) e Roxa (1.2:1) se fundiam com o
-   ouro e sumiam. A exceção é a preta, tratada logo abaixo.
-   Não existe classe .faixa-borda: as próprias regras do card usam
-   `var(--faixa, <ouro>)`, então quem tem faixa recebe a cor e quem não tem cai
-   no dourado de sempre. Uma classe à parte precisaria vencer a especificidade
-   de `.grid-mural > div` (0,1,1) e viraria uma briga de seletor à toa. */
-
-/* a faixa preta dá 1.2:1 contra o fundo do card: sozinha, a moldura sumiria.
-   O anel claro por fora é o que a torna visível — mesma ideia do anel do
-   .belt-swatch. */
-.faixa-borda--escura {
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35), var(--card-shadow);
 }
 
 /* texto que só o leitor de tela lê. Existe porque nas tabelas de ranking a
@@ -2494,7 +2482,7 @@ p {
   padding: 2em 1.5em 1.6em;
   margin-bottom: 1.5em;
   background: var(--primary-color);
-  border: 1px solid var(--faixa, var(--golden-color-opaco));
+  border: 1px solid var(--golden-color-opaco);
   border-radius: 14px;
   box-shadow: 0 0 1.2em black;
   overflow: hidden;
