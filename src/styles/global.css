@@ -47,14 +47,26 @@
   --card-bg: var(--landing-card-bg);
   --card-border: var(--golden-color-opaco);
   --card-radius: 14px;
-  /* ponytail: era `0 0 1em black`. Os dois primeiros valores são deslocamento
-     X e Y — ambos zero significa escuridão saindo igual pra todo lado, ou seja,
-     um halo, não uma sombra: o objeto não parece apoiado em nada. Com eixo Y a
-     luz passa a vir de cima e o card pousa na página.
-     O valor de repouso é discreto de propósito; quem separa um card clicável
-     dos demais é o --card-shadow-hover, que só aparece quando ele sobe. */
+  /* ======== ESCALA DE ELEVAÇÃO (3 níveis) ========
+     Antes existia uma sombra só, `0 0 1em black`, repetida em 18 elementos.
+     Os dois primeiros valores são deslocamento X e Y: ambos zero significa
+     escuridão saindo igual pra todo lado, ou seja, um halo, não uma sombra --
+     o objeto não parecia apoiado em nada. E, com todo mundo na mesma sombra,
+     uma foto, um card clicável e um formulário ficavam à mesma profundidade,
+     sem nada dizer o que era o quê.
+
+     Ao escolher pra um elemento novo:
+
+     PLANO      sem box-shadow. Agrupa outras coisas, não é um objeto em si:
+                .admin-form, .admin-hub, .ranking-tabela, e as fotos.
+     ELEVADO    --card-shadow. É um objeto sobre a página, geralmente
+                clicável: cards de classe, do mural, da galeria, .agenda-card.
+     DESTACADO  --card-shadow-alta. UM por tela, o elemento focal:
+                .dashboard-profile, .treino-card da landing, e o modal do
+                cortador de avatar. Também é a sombra de hover de quem sobe,
+                que é o mesmo nível de elevação, só que temporário. */
   --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-  --card-shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.55);
+  --card-shadow-alta: 0 10px 24px rgba(0, 0, 0, 0.55);
   /* corpo de texto: 15.2px no celular, 16px do tablet pra cima. Uma variável
      só porque o mesmo clamp se repete em p/.lista-comum/.news — o sistema de
      escala completo é assunto de outra etapa. */
@@ -104,7 +116,7 @@
    movimento parecer deslize, não elevação. */
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--card-shadow-alta);
 }
 
 * {
@@ -657,7 +669,6 @@ p {
   margin-bottom: 1em;
   max-width: 80%;
   border-radius: 20px;
-  box-shadow: 0 0 1em black;
 }
 
 .glossario-img {
@@ -667,7 +678,6 @@ p {
   margin-bottom: 1em;
   max-width: 80%;
   border-radius: 20px;
-  box-shadow: 0 0 1em black;
 }
 
 .imagem-feed {
@@ -677,7 +687,6 @@ p {
   margin-bottom: 1em;
   max-width: 70%;
   border-radius: 20px;
-  box-shadow: 0 0 1em black;
 }
 
 .quem-somos-texto {
@@ -1462,7 +1471,6 @@ p {
   background: var(--card-bg);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
 }
 
 .admin-hub-greeting {
@@ -1517,7 +1525,6 @@ p {
   background: var(--secondary-color-opacity);
   border: 1px solid var(--golden-color-opaco);
   border-radius: 12px;
-  box-shadow: 0 0 1em black;
 }
 
 /* deixa o <form> de uma etapa (ex: RecrutarMembro) se comportar como se não
@@ -1822,7 +1829,6 @@ p {
   background: var(--primary-color);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
   /* "clip" (não "hidden") arredonda os cantos sem virar um container de
      scroll -- "hidden" sequestra o position:sticky das colunas .col-nome/
      .col-rank, que passam a grudar na própria tabela (que desliza inteira
@@ -2496,7 +2502,7 @@ p {
   background: var(--primary-color);
   border: 1px solid var(--golden-color-opaco);
   border-radius: 14px;
-  box-shadow: 0 0 1.2em black;
+  box-shadow: var(--card-shadow-alta);
   overflow: hidden;
 }
 
@@ -2609,7 +2615,7 @@ p {
   background: var(--primary-color);
   border: 1px solid var(--card-border);
   border-radius: var(--card-radius);
-  box-shadow: var(--card-shadow);
+  box-shadow: var(--card-shadow-alta);
 }
 
 .avatar-crop-viewport {
@@ -2702,7 +2708,7 @@ p {
 .dashboard-stat:hover {
   transform: translateY(-3px);
   border-color: var(--golden-color-opaco);
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--card-shadow-alta);
 }
 
 .dashboard-stat .label {
@@ -2996,7 +3002,7 @@ footer {
 
 .trio-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--card-shadow-alta);
 }
 
 .trio-icon {
@@ -3051,7 +3057,7 @@ footer {
   border: 1px solid var(--golden-color-opaco);
   border-radius: 16px;
   padding: 2rem 2.2rem;
-  box-shadow: 0 0 1.4em black;
+  box-shadow: var(--card-shadow-alta);
 }
 
 .treino-date {
@@ -3147,7 +3153,7 @@ footer {
 
 .class-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--card-shadow-hover);
+  box-shadow: var(--card-shadow-alta);
 }
 
 .class-card .img-wrap {
