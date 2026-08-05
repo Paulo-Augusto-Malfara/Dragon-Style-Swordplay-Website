@@ -52,6 +52,33 @@
      só porque o mesmo clamp se repete em p/.lista-comum/.news — o sistema de
      escala completo é assunto de outra etapa. */
   --fs-body: clamp(0.95rem, 0.9rem + 0.25vw, 1rem);
+
+  /* ponytail: as 8 faixas de graduação e os 4 tamanhos de arma usavam palavras-
+     chave cruas do CSS (yellow, cyan, green, purple, red, magenta) espalhadas em
+     `style=` inline. Além de estarem fora da paleta, três delas eram ilegíveis
+     como texto sobre o fundo escuro: green (#008000) dava 2.2:1, purple
+     (#800080) 1.9:1 e o marrom rgb(114,33,33) 1.6:1 — abaixo do mínimo de 4.5:1.
+     Aqui cada cor vira variável já calibrada pro fundo, mantendo o tom
+     reconhecível: uma faixa verde continua lendo como verde, só que visível.
+     Curta/Média repetem o valor de Azul Claro/Amarela porque já eram
+     literalmente a mesma cor antes — são sistemas separados, com nomes
+     separados, que por ora coincidem. */
+  --faixa-branca: #f5f5f5;
+  --faixa-amarela: #f2d024;
+  --faixa-azul-claro: #5ec8e8;
+  --faixa-laranja: #f0972e;
+  --faixa-verde: #57c25a;
+  --faixa-marrom: #b0714e;
+  --faixa-roxa: #b57ae0;
+  /* a faixa preta é preta mesmo: quem a torna visível é o anel do .belt-swatch,
+     que é exatamente como uma faixa preta deve ler. O rótulo dela nunca foi
+     colorido, então continua no texto claro padrão. */
+  --faixa-preta: #0d0d10;
+
+  --arma-curta: #5ec8e8;
+  --arma-media: #f2d024;
+  --arma-longa: #ef7360;
+  --arma-media-esp: #d47ae0;
 }
 
 /* ======== CARD (COMPONENTE COMPARTILHADO) ======== */
@@ -133,17 +160,19 @@ body::before {
     no-repeat;
 }
 
+/* legenda de tamanho de arma nas páginas de classe: (C) Curta, (M) Média,
+   (L) Longa, (M. Esp.) Média Especial */
 .short {
-  color: cyan;
+  color: var(--arma-curta);
 }
 .medium {
-  color: yellow;
+  color: var(--arma-media);
 }
 .large {
-  color: red;
+  color: var(--arma-longa);
 }
 .medium-esp {
-  color: rgb(184, 12, 184);
+  color: var(--arma-media-esp);
 }
 /* text-align:left aqui só é inofensivo enquanto .gold-title fica dentro de
    outro elemento (ex: <span class="line">texto <span class="gold-title">X</span></span>).
@@ -2135,13 +2164,15 @@ p {
 }
 
 /* selo colorido da faixa na tabela de Graduações */
+/* ponytail: o anel subiu de 0.3 pra 0.45 de branco. Ele é o único contorno da
+   faixa preta contra o fundo escuro — a 0.3 o selo dela praticamente sumia. */
 .belt-swatch {
   display: inline-block;
   flex-shrink: 0;
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.45);
 }
 
 /* badge circular da posição (#) */
