@@ -27,3 +27,15 @@ export function corDaFaixa(nome: string | null | undefined): string | null {
   const variavel = CORES[(nome ?? "").trim().toLowerCase()];
   return variavel ? `var(${variavel})` : null;
 }
+
+/**
+ * A faixa preta é a única que não funciona como moldura: contra o fundo do card
+ * ela dá 1.2:1, ou seja, a borda simplesmente sumiria. Quem usa a faixa como
+ * borda marca o elemento com esta classe pra ganhar um anel claro por fora.
+ *
+ * Ninguém alcançou a faixa preta ainda (nível 50; o topo hoje é nível 20), mas
+ * o caso fica resolvido antes de aparecer em produção.
+ */
+export function ehFaixaEscura(nome: string | null | undefined): boolean {
+  return (nome ?? "").trim().toLowerCase() === "preta";
+}

@@ -72,8 +72,10 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
                       <span
                         class="faixa-bar faixa-bar--linha"
                         style={`--faixa: ${corDaFaixa(faixaPorMembro.get(m.id_membro))}`}
-                        aria-hidden="true"
-                      />
+                        title={`Faixa ${faixaPorMembro.get(m.id_membro)}`}
+                      >
+                        <span class="sr-only">Faixa {faixaPorMembro.get(m.id_membro)}</span>
+                      </span>
                     )}
                     <span class="row-avatar">
                       {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}

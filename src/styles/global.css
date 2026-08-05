@@ -1164,17 +1164,12 @@ p {
 }
 
 .grid-mural > div {
-  /* relative+clip ancoram a .faixa-bar--topo e fazem ela respeitar o
-     border-radius do card. "clip" e não "hidden" pra não criar um container de
-     scroll sem necessidade. */
-  position: relative;
-  overflow: clip;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 12px;
-  border: 2px solid var(--golden-color-opaco);
+  border: 2px solid var(--faixa, var(--golden-color-opaco));
   background: url(/assets/img/logo-classes/box-background-flip.webp) no-repeat
     center;
   background-color: var(--secondary-color-opacity);
@@ -1902,11 +1897,13 @@ p {
    empilhados numa tela estreita, a tabela mantém a largura mínima e quem
    estiver no mobile arrasta .table-scroll para o lado (nenhum dado some,
    só o nome trunca com reticências quando o espaço aperta). */
+/* 6 colunas: a de "Faixa" (texto) saiu, virou a barrinha colorida dentro da
+   célula do nome. min-width acompanhou a coluna a menos. */
 .ranking-tabela--geral {
   width: 100%;
-  min-width: 760px;
-  max-width: 960px;
-  grid-template-columns: 64px minmax(120px, 170px) auto auto auto auto auto;
+  min-width: 680px;
+  max-width: 900px;
+  grid-template-columns: 64px minmax(120px, 170px) auto auto auto auto;
 }
 
 .ranking-tabela--classe {
@@ -2181,13 +2178,35 @@ p {
   background: var(--faixa);
 }
 
-/* barra no topo de um card (mural de membros) */
-.faixa-bar--topo {
+/* A faixa como MOLDURA do card (mural, dashboard). Contra o fundo do card 7 das
+   8 faixas passam de 4:1 — bem melhor que a barra fina encostada na borda
+   dourada, onde Laranja (1.1:1), Verde (1.2:1) e Roxa (1.2:1) se fundiam com o
+   ouro e sumiam. A exceção é a preta, tratada logo abaixo.
+   Não existe classe .faixa-borda: as próprias regras do card usam
+   `var(--faixa, <ouro>)`, então quem tem faixa recebe a cor e quem não tem cai
+   no dourado de sempre. Uma classe à parte precisaria vencer a especificidade
+   de `.grid-mural > div` (0,1,1) e viraria uma briga de seletor à toa. */
+
+/* a faixa preta dá 1.2:1 contra o fundo do card: sozinha, a moldura sumiria.
+   O anel claro por fora é o que a torna visível — mesma ideia do anel do
+   .belt-swatch. */
+.faixa-borda--escura {
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35), var(--card-shadow);
+}
+
+/* texto que só o leitor de tela lê. Existe porque nas tabelas de ranking a
+   faixa é comunicada apenas pela cor da barrinha — sem isto, a informação
+   simplesmente não existiria pra quem não enxerga a cor. */
+.sr-only {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* traço vertical ao lado do nome numa linha de tabela (rankings).
@@ -2475,23 +2494,22 @@ p {
   padding: 2em 1.5em 1.6em;
   margin-bottom: 1.5em;
   background: var(--primary-color);
-  border: 1px solid var(--golden-color-opaco);
+  border: 1px solid var(--faixa, var(--golden-color-opaco));
   border-radius: 14px;
   box-shadow: 0 0 1.2em black;
   overflow: hidden;
 }
 
-/* o fio dourado do topo do perfil passa a ser a faixa do membro quando ele tem
-   uma. Sem faixa (novato), continua o fio dourado de antes — nenhum elemento
-   novo, só a cor do que já existia. */
+/* o fio dourado continua sendo o fio dourado: quem carrega a faixa agora é a
+   moldura do card (.faixa-borda), então tingir os dois seria redundante. */
 .dashboard-profile::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
-  background: var(--faixa, var(--hairline-gold));
+  height: 2px;
+  background: var(--hairline-gold);
 }
 
 .dashboard-logout {

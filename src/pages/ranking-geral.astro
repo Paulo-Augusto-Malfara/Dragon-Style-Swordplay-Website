@@ -86,7 +86,6 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
           <th class="col-stat">Nível Geral</th>
           <th class="col-stat">Nível de Classe</th>
           <th class="col-stat">Treinos</th>
-          <th class="col-faixa">Faixa</th>
           <th class="col-stat">Pontos de Honra</th>
         </tr>
       </thead>
@@ -104,8 +103,10 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
                     <span
                       class="faixa-bar faixa-bar--linha"
                       style={`--faixa: ${corDaFaixa(m.nome_faixa)}`}
-                      aria-hidden="true"
-                    />
+                      title={`Faixa ${m.nome_faixa}`}
+                    >
+                      <span class="sr-only">Faixa {m.nome_faixa}</span>
+                    </span>
                   )}
                   <span class="row-avatar">
                     {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}
@@ -121,7 +122,6 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
                 <td class="col-stat">
                   <span class="stat-pill">{m.treinos_total}</span>
                 </td>
-                <td class="col-faixa">{m.nome_faixa ?? "-"}</td>
                 <td class="col-stat">
                   <span class="stat-pill">{m.ph_total}</span>
                 </td>
