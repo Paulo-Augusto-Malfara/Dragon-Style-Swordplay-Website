@@ -413,7 +413,15 @@ main {
   background-color: var(--secondary-color-opacity); */
 }
 
+/* ponytail: h1/h2 herdavam Rubik (fonte do corpo) — os títulos eram o texto
+   do corpo em caixa alta e corpo maior, sem hierarquia de família. Bree Serif
+   já estava carregada (nav, botões, números), só não chegava nos títulos.
+   text-shadow fica nos h1/h2 (tipo grande, leitura de brasão) e sai dos
+   h3/h4: o fundo do site é um damasco navy uniforme e escuro, então a sombra
+   dura nunca fez trabalho de legibilidade — em texto pequeno só engrossava
+   a letra. */
 h1 {
+  font-family: "Bree Serif", serif;
   display: flex;
   justify-content: center;
   text-transform: uppercase;
@@ -438,6 +446,7 @@ h1 {
 }
 
 h2 {
+  font-family: "Bree Serif", serif;
   padding: 20px 0 20px 0;
   width: 90%;
   display: flex;
@@ -455,7 +464,6 @@ h3 {
   width: 90%;
   margin: auto;
   font-size: 1.2em;
-  text-shadow: 2px 2px black;
   color: var(--text-primary-color);
 }
 
@@ -464,7 +472,6 @@ h4 {
   width: 90%;
   margin: auto;
   font-size: 0.9em;
-  text-shadow: 2px 2px black;
   color: var(--text-primary-color);
 }
 
@@ -2886,7 +2893,6 @@ footer {
   text-align: center;
   margin-bottom: 0.6em;
   padding: 0;
-  text-shadow: 2px 2px black;
 }
 
 .trio-card p {
@@ -3135,8 +3141,14 @@ footer {
   text-align: center;
 }
 
-@media (max-width: 340px) {
-  .cta-band h2 .line {
+/* ponytail: `white-space: normal` não força quebra, só permite — então o limiar
+   subiu de 340px pra 400px por causa da Bree Serif (mais larga que a Rubik que
+   estava aqui antes) e o .hero h1 entrou junto, que tinha o mesmo nowrap sem
+   nenhuma válvula de escape. Sem isso o título estoura a lateral no celular
+   estreito em vez de quebrar. */
+@media (max-width: 400px) {
+  .cta-band h2 .line,
+  .hero h1 .line {
     white-space: normal;
   }
 }
