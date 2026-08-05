@@ -82,15 +82,55 @@ li {
   padding-left: 0;
 }
 
+/* ponytail: um anel de foco só, na paleta do site, no lugar do anel padrão do
+   navegador (azul, some no fundo escuro). Os três `outline: none` que existiam
+   nos inputs foram removidos em vez de compensados aqui: sozinha, a troca de
+   cor da borda é sutil demais pra sinalizar foco de teclado. :focus-visible
+   (não :focus) faz o anel aparecer pra quem navega por teclado sem poluir o
+   clique de mouse. */
+:focus-visible {
+  outline: 2px solid var(--golden-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* ponytail: bloco padrão de reduced-motion. Não havia nenhum — hover com
+   scale, transições e scroll suave rodavam mesmo pra quem pediu ao sistema
+   pra reduzir movimento. Neutraliza a duração, então o estado final continua
+   acontecendo, só sem o percurso animado. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   color: var(--text-primary-color);
   font-family: "Rubik", sans-serif;
-  background: url(/assets/img/background-definitivo.webp) no-repeat center center
-    fixed;
-  background-size: cover;
+  background-color: var(--secondary-color);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+}
+
+/* ponytail: o fundo era `background-attachment: fixed` no próprio body, que o
+   Safari do iOS não honra (renderiza torto) e o Android repinta a cada scroll.
+   Trocar por `scroll` não serve: com background-size:cover a imagem passaria a
+   cobrir a altura do documento inteiro, esticando muito numa página longa.
+   Uma camada fixa própria resolve nos dois sem gambiarra por sistema — e o
+   z-index negativo a mantém atrás do conteúdo, na frente da cor de fallback. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: url(/assets/img/background-definitivo.webp) center center / cover
+    no-repeat;
 }
 
 .short {
@@ -1498,7 +1538,6 @@ p {
 .admin-form input[type="time"]:focus,
 .admin-form select:focus,
 .admin-form textarea:focus {
-  outline: none;
   border-color: var(--golden-color);
 }
 
@@ -1642,7 +1681,6 @@ p {
 }
 
 .membro-picker input[type="text"]:focus {
-  outline: none;
   border-color: var(--golden-color);
 }
 
@@ -2547,7 +2585,6 @@ p {
 }
 
 .dashboard-nickname-form input:focus {
-  outline: none;
   border-color: var(--golden-color);
 }
 
