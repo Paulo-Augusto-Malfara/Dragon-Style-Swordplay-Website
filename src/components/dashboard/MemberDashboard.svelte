@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import LoginForm from "../auth/LoginForm.svelte";
   import AvatarUploader from "./AvatarUploader.svelte";
+  import { corDaFaixa } from "../../lib/faixa";
 
   // ponytail: dynamic import, not a top-level one -- this component is used
   // inside dashboard.astro, a fully static page. A static import evaluates
@@ -186,7 +187,9 @@
       <button class="btn btn-sm" onclick={logout}>Novo login</button>
     </div>
   {:else}
-    <div class="dashboard-profile">
+    <!-- sem faixa (novato), --faixa fica indefinida e o ::before cai no fio
+         dourado de sempre -- ver .dashboard-profile::before em global.css -->
+    <div class="dashboard-profile" style={corDaFaixa(nomeFaixa) ? `--faixa: ${corDaFaixa(nomeFaixa)}` : ""}>
       {#if ehStaffOuMais}
         <a href="/admin" class="btn btn-sm dashboard-admin-link">painel administrativo</a>
       {/if}

@@ -1164,6 +1164,11 @@ p {
 }
 
 .grid-mural > div {
+  /* relative+clip ancoram a .faixa-bar--topo e fazem ela respeitar o
+     border-radius do card. "clip" e não "hidden" pra não criar um container de
+     scroll sem necessidade. */
+  position: relative;
+  overflow: clip;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -2164,6 +2169,40 @@ p {
 }
 
 /* selo colorido da faixa na tabela de Graduações */
+/* ======== SELO DE FAIXA (assinatura visual) ======== */
+
+/* A cor entra por --faixa, definida inline por quem renderiza (o valor vem de
+   corDaFaixa() em src/lib/faixa.ts), então uma classe só serve pras 8 faixas em
+   vez de 8 modificadores. Quem não tem faixa não recebe --faixa e o elemento
+   simplesmente não é renderizado.
+   Decorativo: o nome da faixa aparece em texto ao lado nos quatro lugares onde
+   isso é usado, então a cor nunca é o único portador da informação. */
+.faixa-bar {
+  background: var(--faixa);
+}
+
+/* barra no topo de um card (mural de membros) */
+.faixa-bar--topo {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+}
+
+/* traço vertical ao lado do nome numa linha de tabela (rankings).
+   Fica DENTRO da célula .col-nome de propósito: as tabelas de ranking são um
+   CSS Grid com grid-template-columns fixo por variante, e uma coluna nova
+   obrigaria a mexer nas 10 variantes. */
+.faixa-bar--linha {
+  flex: none;
+  width: 3px;
+  min-width: 3px;
+  align-self: stretch;
+  min-height: 1.5em;
+  border-radius: 999px;
+}
+
 /* ponytail: o anel subiu de 0.3 pra 0.45 de branco. Ele é o único contorno da
    faixa preta contra o fundo escuro — a 0.3 o selo dela praticamente sumia. */
 .belt-swatch {
@@ -2442,14 +2481,17 @@ p {
   overflow: hidden;
 }
 
+/* o fio dourado do topo do perfil passa a ser a faixa do membro quando ele tem
+   uma. Sem faixa (novato), continua o fio dourado de antes — nenhum elemento
+   novo, só a cor do que já existia. */
 .dashboard-profile::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 2px;
-  background: var(--hairline-gold);
+  height: 3px;
+  background: var(--faixa, var(--hairline-gold));
 }
 
 .dashboard-logout {
