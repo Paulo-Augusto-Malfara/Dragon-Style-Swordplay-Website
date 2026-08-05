@@ -47,7 +47,14 @@
   --card-bg: var(--landing-card-bg);
   --card-border: var(--golden-color-opaco);
   --card-radius: 14px;
-  --card-shadow: 0 0 1em black;
+  /* ponytail: era `0 0 1em black`. Os dois primeiros valores são deslocamento
+     X e Y — ambos zero significa escuridão saindo igual pra todo lado, ou seja,
+     um halo, não uma sombra: o objeto não parece apoiado em nada. Com eixo Y a
+     luz passa a vir de cima e o card pousa na página.
+     O valor de repouso é discreto de propósito; quem separa um card clicável
+     dos demais é o --card-shadow-hover, que só aparece quando ele sobe. */
+  --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --card-shadow-hover: 0 10px 24px rgba(0, 0, 0, 0.55);
   /* corpo de texto: 15.2px no celular, 16px do tablet pra cima. Uma variável
      só porque o mesmo clamp se repete em p/.lista-comum/.news — o sistema de
      escala completo é assunto de outra etapa. */
@@ -91,8 +98,13 @@
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
+/* a transição de box-shadow já estava declarada acima, mas nenhuma sombra de
+   hover existia pra ela animar — a intenção original estava certa e ficou pela
+   metade. Sem isto o card sobe 4px e a sombra fica idêntica, o que faz o
+   movimento parecer deslize, não elevação. */
 .card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 * {
@@ -1056,7 +1068,7 @@ p {
     center;
   background-size: cover;
   border-radius: 10px;
-  box-shadow: 0 0 1em black;
+  box-shadow: var(--card-shadow);
 }
 
 .arma-display {
@@ -1106,7 +1118,7 @@ p {
     center;
   background-color: var(--secondary-color-opacity);
   border-radius: 40px;
-  box-shadow: 0 0 1em black;
+  box-shadow: var(--card-shadow);
   min-width: 100px;
   min-height: 100px;
 }
@@ -1174,7 +1186,7 @@ p {
     center;
   background-color: var(--secondary-color-opacity);
   border-radius: 10px;
-  box-shadow: 0 0 1em black;
+  box-shadow: var(--card-shadow);
 }
 
 .grid-mural > div > p {
@@ -2690,7 +2702,7 @@ p {
 .dashboard-stat:hover {
   transform: translateY(-3px);
   border-color: var(--golden-color-opaco);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .dashboard-stat .label {
@@ -2978,12 +2990,13 @@ footer {
   border-radius: 14px;
   padding: 2rem 1.6rem;
   text-align: center;
-  box-shadow: 0 0 1em black;
+  box-shadow: var(--card-shadow);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 
 .trio-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .trio-icon {
@@ -3128,12 +3141,13 @@ footer {
   border: 1px solid var(--golden-color-opaco);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 0 1em black;
+  box-shadow: var(--card-shadow);
   transition: transform 0.25s ease;
 }
 
 .class-card:hover {
   transform: translateY(-4px);
+  box-shadow: var(--card-shadow-hover);
 }
 
 .class-card .img-wrap {
@@ -3185,7 +3199,7 @@ footer {
   border-radius: 12px;
   overflow: hidden;
   border: 1px solid var(--golden-color-opaco);
-  box-shadow: 0 0 1em black;
+  box-shadow: var(--card-shadow);
 }
 
 .galeria-item img {
