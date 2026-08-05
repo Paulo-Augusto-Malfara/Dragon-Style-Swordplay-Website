@@ -1,0 +1,85 @@
+---
+// Card do próximo treino agendado.
+//
+// Virou componente quando ganhou o segundo dono: a landing e a página Como
+// Participar mostram o mesmo card, e a consulta, o fuso e a formatação de data
+// precisam ser os mesmos nos dois lugares -- duplicar isso é como o site passa
+// a dizer duas datas diferentes pro mesmo treino.
+import Icon from "./Icon.astro";
+import ConfirmarPresenca from "./agenda/ConfirmarPresenca.svelte";
+import { supabasePublic } from "../lib/supabase-public";
+
+const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace(".", "");
+
+// o servidor (Vercel) roda em UTC: calcular "hoje" já no fuso do Brasil evita
+// esconder o treino de hoje mais cedo do que deveria.
+const hojeBrasil = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+
+const { data: agendaData } = await supabasePublic
+  .from("fAgendaTreinos")
+  .select("id_agenda, data_treino, horario_inicio, horario_termino, local, link_maps")
+  .gte("data_treino", hojeBrasil)
+  .eq("status", "agendado")
+  .order("data_treino")
+  .order("horario_inicio")
+  .limit(1)
+  .maybeSingle();
+
+const proximoTreino = agendaData
+  ? (() => {
+      const d = new Date(agendaData.data_treino + "T00:00:00");
+      return {
+        diaSemana: capitalizar(d.toLocaleDateString("pt-BR", { weekday: "short" })),
+        dia: String(d.getDate()).padStart(2, "0"),
+        mes: capitalizar(d.toLocaleDateString("pt-BR", { month: "short" })),
+        horario: agendaData.horario_termino
+          ? `${agendaData.horario_inicio.slice(0, 5)} – ${agendaData.horario_termino.slice(0, 5)}`
+          : agendaData.horario_inicio.slice(0, 5),
+        local: agendaData.local,
+        linkMaps: agendaData.link_maps as string | null,
+        idAgenda: agendaData.id_agenda as number,
+      };
+    })()
+  : null;
+
+const { count: contagemConfirmados } = proximoTreino
+  ? await supabasePublic
+      .from("fAgendaConfirmacoes")
+      .select("id_confirmacao", { count: "exact", head: true })
+      .eq("id_agenda", proximoTreino.idAgenda)
+  : { count: 0 };
+---
+
+{
+  proximoTreino ? (
+    <div class="treino-card">
+      <div class="treino-date">
+        <div class="dow">{proximoTreino.diaSemana}</div>
+        <div class="num">{proximoTreino.dia}</div>
+        <div class="mon">{proximoTreino.mes}</div>
+      </div>
+      <div class="treino-info">
+        <h3>Treino Aberto</h3>
+        <div class="treino-meta">
+          <span>
+            <Icon name="clock" />
+            {proximoTreino.horario}
+          </span>
+          <span>
+            <Icon name="location" />
+            {proximoTreino.linkMaps ? (
+              <a href={proximoTreino.linkMaps} target="_blank" rel="noopener noreferrer" class="links-de-texto">
+                {proximoTreino.local}
+              </a>
+            ) : (
+              proximoTreino.local
+            )}
+          </span>
+        </div>
+      </div>
+      <ConfirmarPresenca idAgenda={proximoTreino.idAgenda} contagemInicial={contagemConfirmados ?? 0} client:load />
+    </div>
+  ) : (
+    <p class="dashboard-empty">Nenhum treino agendado no momento.</p>
+  )
+}

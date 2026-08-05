@@ -43,8 +43,12 @@
     rgba(184, 134, 45, 0)
   );
   --landing-card-bg: #1a2029;
-  /* cartão padrão compartilhado por seções fora da landing (ex: modalidades) */
-  --card-bg: var(--landing-card-bg);
+  /* Cartão fora da landing. Aqui o fundo é a textura damasco do body, que anda
+     muito perto de #1a2029 -- card e página quase se fundiam. Escurecer o card
+     em vez de clarear resolve sem inventar cor nova e sem mexer na landing, que
+     controla o próprio contraste pelo fundo do painel (ver .landing-page
+     abaixo, que devolve --card-bg pro tom claro lá dentro). */
+  --card-bg: var(--primary-color);
   --card-border: var(--golden-color-opaco);
   --card-radius: 14px;
   /* ======== ESCALA DE ELEVAÇÃO (3 níveis) ========
@@ -2848,6 +2852,12 @@ footer {
 .landing-page {
   margin: -10px;
   width: calc(100% + 20px);
+  /* Os cards da landing (.trio-card, .treino-card, .class-card) agora pedem
+     --card-bg como todo mundo, mas aqui dentro ele volta pro tom claro: na
+     landing o card se destaca contra o painel escuro (--primary-color), não
+     contra a textura. Sem isto, o trio dentro de .landing-panel-dark ficaria
+     preto sobre preto. Uma linha aqui em vez de um override por componente. */
+  --card-bg: var(--landing-card-bg);
 }
 
 .landing-page p,
@@ -3072,7 +3082,7 @@ footer {
 }
 
 .trio-card {
-  background: var(--landing-card-bg);
+  background: var(--card-bg);
   border: 1px solid var(--golden-color-opaco);
   border-radius: 14px;
   padding: 2rem 1.6rem;
@@ -3094,6 +3104,12 @@ footer {
   filter: drop-shadow(2px 2px 0 black);
 }
 
+/* ponytail: o `width: auto` e o `text-indent: 0` abaixo não fazem nada na
+   landing -- lá o bloco `.landing-page h3, p` já zera os dois. Existem porque o
+   trio ganhou um segundo dono fora da landing (Como Participar), onde as regras
+   base de `p`/`h3` (width 90%, margin auto, text-indent 1.5em) voltam a valer e
+   entortam o card. Corrigido aqui, no componente, em vez de repetir o reset em
+   cada página que usar o trio. */
 .trio-card h3 {
   color: var(--golden-color);
   font-size: 1.1rem;
@@ -3101,6 +3117,7 @@ footer {
   text-align: center;
   margin-bottom: 0.6em;
   padding: 0;
+  width: auto;
 }
 
 .trio-card p {
@@ -3108,6 +3125,8 @@ footer {
   font-size: 0.92rem;
   text-align: center;
   margin: 0;
+  width: auto;
+  text-indent: 0;
 }
 
 .section-link {
@@ -3134,7 +3153,7 @@ footer {
   gap: 2rem;
   max-width: 820px;
   margin: 0 auto;
-  background: var(--landing-card-bg);
+  background: var(--card-bg);
   border: 1px solid var(--golden-color-opaco);
   border-radius: 16px;
   padding: 2rem 2.2rem;
@@ -3224,7 +3243,7 @@ footer {
 
 .class-card {
   display: block;
-  background: var(--landing-card-bg);
+  background: var(--card-bg);
   border: 1px solid var(--golden-color-opaco);
   border-radius: 12px;
   overflow: hidden;
@@ -3384,4 +3403,51 @@ footer {
   max-width: 44ch;
   margin: 0 auto 1.8em;
   text-align: center;
+}
+
+/* ======== COMO PARTICIPAR ======== */
+
+.participar-lede {
+  text-indent: 0;
+  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
+  color: var(--text-primary-color);
+}
+
+/* O h2 base já traz padding de 20px em cima e embaixo. Numa página de seções
+   curtas em sequência isso soma com o margin do bloco e abre um buraco entre
+   cada título e o conteúdo que ele anuncia -- aqui os dois encolhem. */
+.participar-bloco {
+  margin-top: 1.2rem;
+}
+
+.participar-bloco > h2 {
+  padding: 0.4rem 0 0.6rem;
+}
+
+/* elevação ELEVADO, não DESTACADO: o foco da página é o card do próximo
+   treino, que já usa --card-shadow-alta. Um destacado por tela. */
+.participar-cta {
+  margin-top: 2.4rem;
+  padding: 2.4rem 1.6rem;
+  text-align: center;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+.participar-cta h2 {
+  width: auto;
+  padding: 0 0 0.5em;
+  margin-bottom: 0;
+  text-align: center;
+}
+
+.participar-cta p {
+  width: auto;
+  max-width: 52ch;
+  margin: 0 auto 1.8em;
+  text-indent: 0;
+  text-align: center;
+  color: var(--text-secondary-color);
 }

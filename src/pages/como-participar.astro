@@ -1,13 +1,102 @@
 ---
-import { getEntry, render } from "astro:content";
+// Esta página deixou de vir de src/content/sobre-nos/como-participar.mdx: ela é
+// o destino do botão "Quero Participar" da landing e precisava de dado vivo (o
+// próximo treino da agenda) e de estrutura, coisas que um .mdx de prosa não dá.
+// As outras cinco páginas de sobre-nos seguem no content collection.
 import PageLayout from "../layouts/PageLayout.astro";
+import ProximoTreino from "../components/ProximoTreino.astro";
 
-const entry = await getEntry("sobreNos", "como-participar");
-const { Content } = await render(entry);
+// ProximoTreino consulta o banco a cada visita.
+export const prerender = false;
+
+const WHATSAPP = "https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK";
 ---
 
-<PageLayout title={entry.data.title} prev={entry.data.prev} next={entry.data.next}>
+<PageLayout
+  title="Como Participar"
+  description="Como treinar com o Dragon Style Swordplay: próximo treino, o que levar e o que você precisa saber antes de vir."
+  prev={{ href: "/o-que-e-swordplay", label: "O que é Swordplay?" }}
+  next={{ href: "/historia-do-ds", label: "História do DS" }}
+>
   <section>
-    <Content />
+    <p class="participar-lede">
+      Você chega, pega uma arma emprestada e treina. Não tem mensalidade, não tem inscrição e não precisa saber nada
+      de combate. A primeira vez serve justamente pra descobrir se você gosta.
+    </p>
+  </section>
+
+  <section class="participar-bloco">
+    <h2>Próximo Treino</h2>
+    <ProximoTreino />
+    <a class="section-link section-link-inline" href="/agenda">Ver todos os treinos agendados →</a>
+  </section>
+
+  <section class="participar-bloco">
+    <h2>Antes de Vir, Só Isso</h2>
+    <div class="trio-grid">
+      <div class="trio-card">
+        <h3>Não Custa Nada</h3>
+        <p>
+          Os treinos são gratuitos. Sem mensalidade, sem taxa de inscrição e sem obrigação de comprar equipamento pra
+          começar.
+        </p>
+      </div>
+      <div class="trio-card">
+        <h3>O Equipamento é Nosso</h3>
+        <p>
+          Emprestamos armas e escudos acolchoados pra quem está chegando. São limitados e o grupo mantém a manutenção
+          em dia, então é só cuidar bem.
+        </p>
+      </div>
+      <div class="trio-card">
+        <h3>Você Escolhe o Ritmo</h3>
+        <p>
+          Dá pra assistir o primeiro treino inteiro antes de entrar, ou já pegar uma arma e treinar. Ninguém chega
+          sabendo, todo mundo começou assim.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="participar-bloco">
+    <h2>O Que Levar</h2>
+    <ul class="lista-comum">
+      <li>Roupa adequada pra prática de esporte ao ar livre;</li>
+      <li>Calçado fechado;</li>
+      <li>Garrafinha com água;</li>
+      <li>Protetor solar.</li>
+    </ul>
+    <p>
+      Como chegar, o ponto de ônibus mais próximo e o mapa da área da praça que usamos estão em{" "}
+      <a class="links-de-texto" href="/organizacao-dos-treinos">Organização dos Treinos</a>.
+    </p>
+  </section>
+
+  <section class="participar-bloco">
+    <h2>Depois, Sua Própria Arma</h2>
+    <p>
+      Conforme você evolui no grupo, incentivamos que monte seu próprio equipamento, forjando suas próprias armas ou
+      comprando de um ferreiro do grupo. Não tem prazo nem cobrança: é parte da jornada, não requisito de entrada.
+    </p>
+  </section>
+
+  <section class="participar-bloco">
+    <h2>O Que Você Precisa Saber</h2>
+    <ul class="lista-comum">
+      <li>Menores de 18 anos precisam de autorização dos pais ou responsáveis legais;</li>
+      <li>Menores de 12 anos participam com os pais ou responsáveis presentes no treino;</li>
+      <li>Não é permitido participar sob efeito de álcool ou outras drogas.</li>
+    </ul>
+  </section>
+
+  <section class="participar-cta">
+    <h2>Entre no Grupo</h2>
+    <p>
+      É no WhatsApp que combinamos tudo: treinos extras, torneios, eventos e qualquer mudança de data ou de local.
+      Entrar no grupo é o jeito mais rápido de saber quando é o próximo treino, e de avisar que você vai aparecer.
+    </p>
+    <a class="btn btn-primary" href={WHATSAPP} target="_blank" rel="noopener noreferrer">
+      Entrar no Grupo do WhatsApp
+    </a>
   </section>
 </PageLayout>

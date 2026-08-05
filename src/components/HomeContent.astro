@@ -1,46 +1,9 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
 import Icon from "./Icon.astro";
-import ConfirmarPresenca from "./agenda/ConfirmarPresenca.svelte";
+import ProximoTreino from "./ProximoTreino.astro";
 import { supabasePublic } from "../lib/supabase-public";
 import { FAIXAS } from "../lib/faixa";
-
-const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace(".", "");
-
-const hojeBrasil = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
-const { data: agendaData } = await supabasePublic
-  .from("fAgendaTreinos")
-  .select("id_agenda, data_treino, horario_inicio, horario_termino, local, link_maps")
-  .gte("data_treino", hojeBrasil)
-  .eq("status", "agendado")
-  .order("data_treino")
-  .order("horario_inicio")
-  .limit(1)
-  .maybeSingle();
-
-const proximoTreino = agendaData
-  ? (() => {
-      const d = new Date(agendaData.data_treino + "T00:00:00");
-      return {
-        diaSemana: capitalizar(d.toLocaleDateString("pt-BR", { weekday: "short" })),
-        dia: String(d.getDate()).padStart(2, "0"),
-        mes: capitalizar(d.toLocaleDateString("pt-BR", { month: "short" })),
-        horario: agendaData.horario_termino
-          ? `${agendaData.horario_inicio.slice(0, 5)} – ${agendaData.horario_termino.slice(0, 5)}`
-          : agendaData.horario_inicio.slice(0, 5),
-        local: agendaData.local,
-        linkMaps: agendaData.link_maps as string | null,
-        idAgenda: agendaData.id_agenda as number,
-      };
-    })()
-  : null;
-
-const { count: contagemConfirmados } = proximoTreino
-  ? await supabasePublic
-      .from("fAgendaConfirmacoes")
-      .select("id_confirmacao", { count: "exact", head: true })
-      .eq("id_agenda", proximoTreino.idAgenda)
-  : { count: 0 };
 
 const { data: membrosData } = await supabasePublic
   .from("v_ranking_nivel_geral")
@@ -172,12 +135,12 @@ const classesPreview = [
           <div class="trio-card">
             <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="6"></circle><polyline points="8.2 13.5 7 22 12 19.5 17 22 15.8 13.5"></polyline></svg>
             <h3>Honra em Cada Golpe</h3>
-            <p>Não existe marcação automática de ponto. Quem foi atingido reconhece o toque — honestidade em combate é regra tanto quanto qualquer outra.</p>
+            <p>Não existe marcação automática de ponto. Quem foi atingido reconhece o toque. Honestidade em combate é regra tanto quanto qualquer outra.</p>
           </div>
           <div class="trio-card">
             <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a5 5 0 0 0-5 5c0 1.6.7 2.6 1.4 3.5.6.8 1.1 1.4 1.1 2.5v2a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-2c0-1.1.5-1.7 1.1-2.5C15.3 9.6 16 8.6 16 7a5 5 0 0 0-4-5z"></path><path d="M10 19h4M11 22h2"></path></svg>
             <h3>Corpo, Mente e Reflexo</h3>
-            <p>Trabalha o corpo inteiro e agiliza os reflexos — e ainda obriga a pensar rápido quando o combate vira contra você.</p>
+            <p>Trabalha o corpo inteiro, agiliza os reflexos e ainda obriga a pensar rápido quando o combate vira contra você.</p>
           </div>
         </div>
         <a class="section-link" href="/o-que-e-swordplay">Entenda o Swordplay a fundo →</a>
@@ -190,40 +153,7 @@ const classesPreview = [
           <span class="eyebrow">Agenda</span>
           <h2>Próximo Treino</h2>
         </div>
-        {
-          proximoTreino ? (
-            <div class="treino-card">
-              <div class="treino-date">
-                <div class="dow">{proximoTreino.diaSemana}</div>
-                <div class="num">{proximoTreino.dia}</div>
-                <div class="mon">{proximoTreino.mes}</div>
-              </div>
-              <div class="treino-info">
-                <h3>Treino Semanal Aberto</h3>
-                <div class="treino-meta">
-                  <span><Icon name="clock" />{proximoTreino.horario}</span>
-                  <span>
-                    <Icon name="location" />
-                    {proximoTreino.linkMaps ? (
-                      <a href={proximoTreino.linkMaps} target="_blank" rel="noopener noreferrer" class="links-de-texto">
-                        {proximoTreino.local}
-                      </a>
-                    ) : (
-                      proximoTreino.local
-                    )}
-                  </span>
-                </div>
-              </div>
-              <ConfirmarPresenca
-                idAgenda={proximoTreino.idAgenda}
-                contagemInicial={contagemConfirmados ?? 0}
-                client:load
-              />
-            </div>
-          ) : (
-            <p class="dashboard-empty">Nenhum treino agendado no momento.</p>
-          )
-        }
+        <ProximoTreino />
         <a class="section-link" href="/agenda">Agenda dos próximos treinos →</a>
       </div>
     </section>
