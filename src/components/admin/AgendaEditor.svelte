@@ -95,7 +95,7 @@
       <input type="date" bind:value={dataTreino} required />
     </label>
     {#if naoEDomingo}
-      <p class="admin-error">⚠️ Essa data não é um domingo — os treinos costumam ser aos domingos, confira antes de salvar.</p>
+      <p class="admin-error">⚠️ Essa data não é um domingo. Os treinos costumam ser aos domingos, confira antes de salvar.</p>
     {/if}
     <label>
       Horário de início

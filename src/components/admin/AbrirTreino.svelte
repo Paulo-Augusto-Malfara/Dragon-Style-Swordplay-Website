@@ -41,7 +41,7 @@
     <input type="date" bind:value={data} />
   </label>
   {#if naoEDomingo}
-    <p class="admin-error">⚠️ Essa data não é um domingo — os treinos costumam ser aos domingos, confira antes de abrir.</p>
+    <p class="admin-error">⚠️ Essa data não é um domingo. Os treinos costumam ser aos domingos, confira antes de abrir.</p>
   {/if}
   <button type="button" class="btn btn-primary" onclick={abrir} disabled={abrindo}>
     {abrindo ? "Abrindo..." : "Abrir treino"}

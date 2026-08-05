@@ -139,7 +139,7 @@
       <a class="btn btn-primary" href="/como-participar">Confirmar Presença</a>
     {:else if jaConfirmado}
       <button type="button" class="btn btn-sm" onclick={cancelar} disabled={processando}>
-        {processando ? "Cancelando..." : "✓ Presença confirmada — cancelar"}
+        {processando ? "Cancelando..." : "✓ Presença confirmada (cancelar)"}
       </button>
     {:else}
       <button type="button" class="btn btn-primary" onclick={confirmar} disabled={processando}>
