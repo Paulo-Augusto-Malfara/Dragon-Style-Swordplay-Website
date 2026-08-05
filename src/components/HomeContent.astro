@@ -3,6 +3,7 @@ import BaseLayout from "../layouts/BaseLayout.astro";
 import Icon from "./Icon.astro";
 import ConfirmarPresenca from "./agenda/ConfirmarPresenca.svelte";
 import { supabasePublic } from "../lib/supabase-public";
+import { FAIXAS } from "../lib/faixa";
 
 const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace(".", "");
 
@@ -122,6 +123,18 @@ const classesPreview = [
 
     <section class="stats-band hairline-bottom">
       <div class="wrap">
+        <a class="graduacao" href="/nivel-geral">
+          <span class="graduacao-titulo">Graduação: da Branca à Preta</span>
+          <ol class="graduacao-barra">
+            {
+              FAIXAS.map((f) => (
+                <li class="graduacao-faixa" style={`--cor: ${f.cor}`}>
+                  <span class="graduacao-nome">{f.nome}</span>
+                </li>
+              ))
+            }
+          </ol>
+        </a>
         <div class="stats-grid">
           <div class="stat-tile">
             <div class="value">{membrosAtivos}</div>
@@ -130,14 +143,6 @@ const classesPreview = [
           <div class="stat-tile">
             <div class="value">10</div>
             <div class="label">Classes de Combate</div>
-          </div>
-          <div class="stat-tile">
-            <div class="value">+30</div>
-            <div class="label">Combinações de Equipamentos</div>
-          </div>
-          <div class="stat-tile">
-            <div class="value">9</div>
-            <div class="label">Modalidades</div>
           </div>
           <div class="stat-tile">
             <div class="value">{treinosRealizados}</div>

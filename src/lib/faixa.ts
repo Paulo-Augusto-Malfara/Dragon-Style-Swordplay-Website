@@ -27,3 +27,17 @@ export function corDaFaixa(nome: string | null | undefined): string | null {
   const variavel = CORES[(nome ?? "").trim().toLowerCase()];
   return variavel ? `var(${variavel})` : null;
 }
+
+/**
+ * Catálogo das 8 faixas na ordem da progressão, pra quem precisa desenhar a
+ * escala inteira (hoje só a faixa de graduação da landing).
+ *
+ * Deriva de CORES em vez de repetir a lista: uma segunda lista escrita à mão
+ * sairia de ordem no dia que uma faixa mudar. Continua valendo a regra do topo
+ * do arquivo — qual faixa um MEMBRO tem vem do banco, nunca daqui. Isto é o
+ * catálogo da escala, não o estado de ninguém.
+ */
+export const FAIXAS = Object.keys(CORES).map((nome) => ({
+  nome: nome.replace(/\b\p{L}/gu, (letra) => letra.toUpperCase()),
+  cor: `var(${CORES[nome]})`,
+}));
