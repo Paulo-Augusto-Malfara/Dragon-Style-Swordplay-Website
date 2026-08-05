@@ -1,12 +1,19 @@
 /* ponytail: Quintessential/Noto Sans were imported but never referenced anywhere
    in this stylesheet — dropped instead of self-hosting dead weight. Only the
    latin subset is fetched below (covers pt-BR accented chars, U+0000-00FF). */
+
+/* ponytail: Rubik é fonte variável — um arquivo (35KB) entrega 400..700 de
+   verdade. Antes só a instância estática 400 era baixada, então todo
+   `font-weight: 500/600/700` do site era negrito FALSO (o navegador engorda o
+   contorno sozinho, resultado borrado em texto pequeno). Três estáticas
+   (400+500+700) custariam ~57KB pra cobrir menos. Bree Serif continua estática:
+   a família só existe em peso 400. */
 @font-face {
   font-family: "Rubik";
   font-style: normal;
-  font-weight: 400;
+  font-weight: 400 700;
   font-display: swap;
-  src: url("/fonts/rubik-latin-400.woff2") format("woff2");
+  src: url("/fonts/rubik-latin-var.woff2") format("woff2");
 }
 @font-face {
   font-family: "Bree Serif";
