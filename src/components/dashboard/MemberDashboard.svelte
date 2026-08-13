@@ -75,11 +75,30 @@
       nome: proxima.nome_faixa,
       nivel: proxima.nivel_minimo,
       faltam: proxima.nivel_minimo - nivelGeral,
-      // Sem o piso a barra começaria cheia demais: quem está no nível 12 de 18
-      // andou 0 dos 6 níveis desta faixa, não 12 dos 18 da escala inteira.
-      pct: vao > 0 ? Math.round(((nivelGeral - piso) / vao) * 100) : 0,
+      // Um quadradinho por nível que falta, não uma barra contínua. Contínua
+      // fica vazia e parece que não carregou justamente quando a pessoa acaba
+      // de mudar de faixa (nível 18 de 18, zero por cento andado). Segmentada,
+      // o vão é visível mesmo com nada preenchido: dá pra contar sete casas.
+      total: vao,
+      andados: nivelGeral - piso,
     };
   });
+
+  /**
+   * Quantos treinos valem um nível de classe.
+   *
+   * Confere contra o `nivel_por_classe` que vem do banco antes de desenhar: se
+   * a regra mudar lá e este número ficar velho, os quadradinhos somem em vez de
+   * mostrar um progresso errado. Errar calado é pior do que não mostrar.
+   */
+  const TREINOS_POR_NIVEL = 4;
+
+  function progressoDaClasse(c: any) {
+    const treinos = c.treinos_por_classe ?? 0;
+    const nivel = c.nivel_por_classe ?? 0;
+    if (Math.floor(treinos / TREINOS_POR_NIVEL) !== nivel) return null;
+    return { andados: treinos % TREINOS_POR_NIVEL, total: TREINOS_POR_NIVEL };
+  }
 
   async function load() {
     try {
@@ -302,9 +321,11 @@
               : `faltam ${graduacao.faltam}`}
           </span>
         </div>
-        <div class="ficha-barra">
-          <div class="ficha-barra-preenche" style={`width:${graduacao.pct}%`}></div>
-        </div>
+        <ol class="ficha-casas" aria-label={`${graduacao.andados} de ${graduacao.total} níveis`}>
+          {#each { length: graduacao.total } as _, i}
+            <li class:cheia={i < graduacao.andados}></li>
+          {/each}
+        </ol>
       </section>
     {/if}
 
@@ -319,12 +340,23 @@
            porque cada linha é uma classe, não uma comparação entre elas. -->
       <ul class="ficha-classes">
         {#each porClasse as c}
+          {@const progresso = progressoDaClasse(c)}
           <li>
             <span class="ficha-classe-nome">{c.nome_classe}</span>
             <span class="ficha-classe-nivel">Nível {c.nivel_por_classe}</span>
             <span class="ficha-classe-treinos">
               {c.treinos_por_classe === 1 ? "1 treino" : `${c.treinos_por_classe} treinos`}
             </span>
+            {#if progresso}
+              <ol
+                class="ficha-casas ficha-casas--classe"
+                aria-label={`${progresso.andados} de ${progresso.total} treinos para o nível ${c.nivel_por_classe + 1}`}
+              >
+                {#each { length: progresso.total } as _, i}
+                  <li class:cheia={i < progresso.andados}></li>
+                {/each}
+              </ol>
+            {/if}
           </li>
         {/each}
       </ul>
@@ -538,27 +570,38 @@
     color: var(--ds-text-3);
   }
 
-  .ficha-barra {
-    height: 8px;
-    border-radius: 99px;
-    background: rgba(255, 255, 255, 0.09);
-    overflow: hidden;
+  /* Uma casa por passo que falta. As casas dividem a largura em partes iguais,
+     então serve tanto pro vão de 5 níveis quanto pro de 15 entre Roxa e Preta
+     sem ninguém precisar escolher um tamanho de quadradinho. */
+  .ficha-casas {
+    display: flex;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
   }
 
-  .ficha-barra-preenche {
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      var(--ds-gold-deep),
-      var(--ds-gold),
-      var(--ds-gold-light)
-    );
+  .ficha-casas > li {
+    flex: 1;
+    height: 9px;
+    border-radius: 3px;
+    border: 1px solid var(--ds-line-strong);
+    background: rgba(255, 255, 255, 0.04);
   }
 
-  @media (prefers-reduced-motion: no-preference) {
-    .ficha-barra-preenche {
-      transition: width 0.5s ease-out;
-    }
+  .ficha-casas > li.cheia {
+    border-color: var(--ds-gold);
+    background: var(--ds-gold);
+  }
+
+  .ficha-casas--classe {
+    grid-column: 1 / -1;
+    margin-top: 8px;
+    gap: 3px;
+  }
+
+  .ficha-casas--classe > li {
+    height: 6px;
   }
 
   /* ======== CLASSES E PRESENÇAS ======== */
