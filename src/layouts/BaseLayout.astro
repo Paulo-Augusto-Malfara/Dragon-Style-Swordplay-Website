@@ -29,11 +29,12 @@ const ogImageURL = new URL("/assets/img/og-image.webp", Astro.site);
     <link rel="shortcut icon" href="/assets/img/favIcon (2).ico" />
     <meta name="description" content={description} />
 
-    <!-- PWA. status-bar-style fica em "black" (e não "black-translucent") porque
-         o CSS ainda não trata safe-area-inset; translucent jogaria o conteúdo
-         pra debaixo do relógio no iPhone. Revisar na reestruturação visual. -->
+    <!-- PWA. O dock inferior já trata safe-area-inset-bottom, mas o topo não,
+         então status-bar-style segue em "black" (opaca): "black-translucent"
+         jogaria o cabeçalho pra debaixo do relógio no iPhone. Só vale trocar
+         quando o cabeçalho também respeitar safe-area-inset-top. -->
     <link rel="manifest" href="/manifest.webmanifest" />
-    <meta name="theme-color" content="#151f28" />
+    <meta name="theme-color" content="#0B1016" />
     <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />

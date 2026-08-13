@@ -12,9 +12,11 @@ import { mkdir } from "node:fs/promises";
 const SRC = "public/assets/img/logo-ds-emblema.png";
 const OUT = "public/pwa";
 
-// Fundo da própria arte original (#151f28), que é também o --secondary-color do
-// site. Mantém ícone, splash e página na mesma cor, sem emenda visível.
-const BG = { r: 21, g: 31, b: 40 };
+// Mesma cor da base do site (--ds-bg, #0b1016). Ícone, splash e página têm que
+// dividir o tom, senão aparece um quadrado de cor diferente atrás do ícone na
+// tela de abertura. Mudou aqui, mude também no manifest, no BaseLayout, no
+// offline.html e em test-icone-maskable.mjs.
+const BG = { r: 11, g: 16, b: 22 };
 
 // "any": o ícone aparece inteiro, só precisa não encostar na borda.
 const RESPIRO_ANY = 0.88;

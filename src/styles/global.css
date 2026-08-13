@@ -87,16 +87,25 @@
      do mesmo número: o próprio dock, o padding do body e o topo da gaveta. */
   --ds-dock-h: 58px;
 
-  --primary-color: #121212;
-  --secondary-color: #151f28;
-  --secondary-color-opacity: rgba(21, 31, 40, 0.85);
+  /* ======== AS VARIÁVEIS ANTIGAS, REAPONTADAS ========
+     Estas 7 são consumidas em ~53 regras espalhadas pelo arquivo. Em vez de
+     reescrever as 53, elas passam a apontar pros tokens novos: o site inteiro
+     troca de paleta, e desfazer é este mesmo bloco ao contrário.
+
+     O dourado não muda (#e8ac46 é o mesmo da marca e do design). O que muda é
+     a base, que era neutra e quente (#121212, #222, #333) e passa a ser fria e
+     mais escura, e os fios, que eram cinza sólido e viram branco translúcido --
+     fio translúcido acompanha o fundo em vez de brigar com ele. */
+  --primary-color: var(--ds-bg-alt);
+  --secondary-color: var(--ds-bg);
+  --secondary-color-opacity: rgba(11, 16, 22, 0.85);
   --golden-color: #e8ac46;
   --golden-color-opaco: rgba(232, 172, 70, 0.65);
-  --box-primary-color: #222222;
-  --text-primary-color: #e0e0e0;
-  --text-secondary-color: #e1e1e1;
-  --border-dark-color: #222222;
-  --border-dark-color-2: #333333;
+  --box-primary-color: var(--ds-surface-solid);
+  --text-primary-color: var(--ds-text-1);
+  --text-secondary-color: var(--ds-text-2);
+  --border-dark-color: var(--ds-line);
+  --border-dark-color-2: var(--ds-line-strong);
   --hairline-gold: linear-gradient(
     90deg,
     rgba(184, 134, 45, 0),
@@ -106,12 +115,11 @@
     rgba(184, 134, 45, 0)
   );
   --landing-card-bg: #1a2029;
-  /* Cartão fora da landing. Aqui o fundo é a textura damasco do body, que anda
-     muito perto de #1a2029 -- card e página quase se fundiam. Escurecer o card
-     em vez de clarear resolve sem inventar cor nova e sem mexer na landing, que
-     controla o próprio contraste pelo fundo do painel (ver .landing-page
-     abaixo, que devolve --card-bg pro tom claro lá dentro). */
-  --card-bg: var(--primary-color);
+  /* Cartão fora da landing. O raciocínio antigo era escurecer o card, porque o
+     fundo era a textura damasco e ela andava perto de #1a2029 -- os dois quase
+     se fundiam. Com a base nova (--ds-bg, bem mais escura) isso inverte: agora
+     o card sobe em relação à página, que é a direção certa de elevação. */
+  --card-bg: var(--ds-surface-solid);
   --card-border: var(--golden-color-opaco);
   --card-radius: 14px;
   /* ======== ESCALA DE ELEVAÇÃO (3 níveis) ========
@@ -242,11 +250,16 @@ body {
    cobrir a altura do documento inteiro, esticando muito numa página longa.
    Uma camada fixa própria resolve nos dois sem gambiarra por sistema — e o
    z-index negativo a mantém atrás do conteúdo, na frente da cor de fallback. */
+/* A textura vira grão, não foto. O design trabalha sobre um fundo chapado e usa
+   imagem só nos heros; a textura a plena força competia com o conteúdo e sujava
+   o contraste do texto. Em 0.14 ela ainda dá a matéria da marca. Subir pra 1
+   devolve o comportamento antigo; tirar a regra deixa o fundo chapado. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   z-index: -1;
+  opacity: 0.14;
   background: url(/assets/img/background-definitivo.webp) center center / cover
     no-repeat;
 }
@@ -607,7 +620,7 @@ header {
     position: fixed;
     inset: auto 0 0 0;
     z-index: 70;
-    background: rgba(21, 31, 40, 0.96);
+    background: rgba(11, 16, 22, 0.96);
     backdrop-filter: blur(14px);
     border-top: 1px solid var(--ds-line-strong);
     /* env() é o que mantém o dock acima da barra de gestos do iPhone. */
@@ -736,12 +749,20 @@ main {
 }
 
 /* ponytail: h1/h2 herdavam Rubik (fonte do corpo) — os títulos eram o texto
-   do corpo em caixa alta e corpo maior, sem hierarquia de família. Bree Serif
-   já estava carregada (nav, botões, números), só não chegava nos títulos.
-   text-shadow fica nos h1/h2 (tipo grande, leitura de brasão) e sai dos
-   h3/h4: o fundo do site é um damasco navy uniforme e escuro, então a sombra
-   dura nunca fez trabalho de legibilidade — em texto pequeno só engrossava
-   a letra. */
+   do corpo em caixa alta e corpo maior, sem hierarquia de família. Hoje a
+   família de título é --ds-font-display (Cinzel).
+
+   Sobre o text-shadow, isto REVERTE uma decisão anterior deste arquivo, que
+   mantinha a sombra dura nos h1/h2 como "leitura de brasão" e só a tirava dos
+   h3/h4. A regra agora é outra, e vale pro arquivo inteiro:
+
+     sombra só onde o texto está sobre imagem.
+
+   É o caso do .hero h1, único que sobrou (e com alpha, não preto chapado).
+   Sobre superfície lisa a sombra nunca fez trabalho de legibilidade, e com a
+   base nova (--ds-bg, e a textura em 0.14) faz menos ainda; um deslocamento
+   sólido sem desfoque só engrossa a letra, o que briga com as serifas finas do
+   Cinzel. Saíram 7 ocorrências em cards, números e cabeçalhos de seção. */
 h1 {
   /* Já é uppercase logo abaixo, que é justamente onde o Cinzel funciona: ele vem
      de capitulares romanas. Como é variável, o negrito padrão de h1 agora é peso
@@ -756,7 +777,6 @@ h1 {
   margin: auto;
   margin-bottom: 1em;
   padding: 30px 10px 10px 10px;
-  text-shadow: 3px 3px black;
   border-width: 0 0 1px;
   border-image-slice: 1;
   border-image-source: linear-gradient(
@@ -780,7 +800,6 @@ h2 {
   text-align: center;
   margin: auto;
   font-size: clamp(1.15rem, 0.95rem + 1vw, 1.4rem);
-  text-shadow: 2px 2px black;
   color: var(--golden-color);
   text-transform: uppercase;
 }
@@ -2289,7 +2308,6 @@ p {
   font-size: 1.8em;
   color: var(--golden-color);
   line-height: 1;
-  text-shadow: 2px 2px black;
 }
 
 .agenda-card-mes {
@@ -2765,7 +2783,6 @@ p {
   text-indent: 0;
   width: auto;
   color: var(--golden-color);
-  text-shadow: 2px 2px black;
 }
 
 /* ======== AVATAR UPLOADER ======== */
@@ -2952,7 +2969,6 @@ p {
   font-size: 1.8em;
   font-weight: 700;
   color: var(--text-primary-color);
-  text-shadow: 2px 2px black;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3246,7 +3262,6 @@ footer {
   font-family: "Bree Serif", sans-serif;
   font-size: clamp(1.6rem, 3vw, 2.2rem);
   color: var(--golden-color);
-  text-shadow: 2px 2px black;
   font-variant-numeric: tabular-nums;
 }
 
@@ -3287,7 +3302,6 @@ footer {
   text-wrap: balance;
   font-size: clamp(1.4rem, 3vw, 1.9rem);
   text-transform: uppercase;
-  text-shadow: 2px 2px black;
   color: var(--text-primary-color);
   margin: 0;
   padding: 0;
@@ -3404,7 +3418,6 @@ footer {
   font-size: 2.4rem;
   color: var(--golden-color);
   line-height: 1;
-  text-shadow: 2px 2px black;
 }
 
 .treino-date .mon {
@@ -3582,7 +3595,6 @@ footer {
   text-align: center;
   font-size: clamp(1.5rem, 3.4vw, 2.3rem);
   text-transform: uppercase;
-  text-shadow: 3px 3px black;
   color: var(--text-primary-color);
   margin: 0 auto 0.9em;
   padding: 0;

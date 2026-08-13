@@ -12,7 +12,7 @@ import assert from "node:assert/strict";
 import sharp from "sharp";
 
 // Mesmo fundo usado por gen-pwa-icons.mjs.
-const BG = [21, 31, 40];
+const BG = [11, 16, 22];
 const ARQUIVOS = ["public/pwa/maskable-192.png", "public/pwa/maskable-512.png"];
 
 for (const arquivo of ARQUIVOS) {
