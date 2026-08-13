@@ -71,6 +71,10 @@
   --ds-gold-dim: rgba(232, 172, 70, 0.55);
   --ds-gold-wash: rgba(232, 172, 70, 0.06);
   --ds-success: #5fa86b;
+  /* Vermelho da paleta, não o `red` do navegador. Ele estava solto em cinco
+     pontos dos regulamentos, gritando sobre o fundo escuro; este é o mesmo tom
+     que a borda de erro do admin já usava. */
+  --ds-danger: #c0392b;
 
   /* Tipografia.
 
@@ -758,6 +762,19 @@ main {
   margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
   padding-bottom: clamp(0.9rem, 2vw, 1.4rem);
   border-bottom: 1px solid var(--ds-line);
+}
+
+/* Qualquer alvo de âncora precisa parar ABAIXO do cabeçalho grudado, senão o
+   navegador rola até o topo do elemento e o cabeçalho cobre justamente o
+   título da seção que a pessoa pediu pra ver. Vale pro sumário de página, pros
+   links de modalidade e equipamento vindos da busca, e pra qualquer link com #
+   que venha a existir. Os 12px são respiro, não cálculo. */
+:target,
+.pagina h2[id],
+.pagina h3[id],
+.modalidades-box[id],
+.eq-item[id] {
+  scroll-margin-top: calc(var(--ds-header-h) + 12px);
 }
 
 /* Manual de bolso: no celular a abertura da página é custo, não conteúdo. O

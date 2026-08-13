@@ -1,0 +1,112 @@
+---
+import type { MarkdownHeading } from "astro";
+
+interface Props {
+  headings: MarkdownHeading[];
+  /** Abaixo disto não vale a pena: rolar até o fim custa menos que abrir a lista. */
+  minimo?: number;
+}
+
+const { headings, minimo = 3 } = Astro.props;
+
+// Só o primeiro nível de seção. Um sumário que lista sub-sub-título vira uma
+// segunda página em cima da página.
+const secoes = headings.filter((h) => h.depth === 2);
+const mostrar = secoes.length >= minimo;
+---
+
+{
+  mostrar && (
+    <details class="sumario">
+      <summary>
+        <span class="sumario-rotulo">Nesta página</span>
+        <span class="sumario-conta">{secoes.length} seções</span>
+      </summary>
+      <nav aria-label="Seções desta página">
+        <ol>
+          {secoes.map((s) => (
+            <li>
+              <a href={`#${s.slug}`}>{s.text}</a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    </details>
+  )
+}
+
+<style>
+  /* Fechado por padrão nas duas larguras. Num regulamento de 13 seções o
+     sumário aberto empurraria o primeiro parágrafo pra fora da tela do
+     celular, e quem já sabe o que veio ler não precisa dele. */
+  .sumario {
+    margin: 0 0 1.6em;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+  }
+
+  .sumario[open] {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .sumario summary {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 11px 15px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .sumario summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .sumario-rotulo {
+    font-family: var(--ds-font-display);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ds-gold-deep);
+  }
+
+  .sumario[open] .sumario-rotulo,
+  .sumario summary:hover .sumario-rotulo {
+    color: var(--ds-gold);
+  }
+
+  .sumario-conta {
+    margin-left: auto;
+    font-size: 0.74rem;
+    color: var(--ds-text-5);
+  }
+
+  .sumario ol {
+    margin: 0;
+    padding: 0 15px 12px;
+    list-style: none;
+  }
+
+  .sumario li {
+    border-top: 1px solid var(--ds-line);
+  }
+
+  /* Sem numeração própria: o regulamento dos treinos já numera as fases dele
+     ("1 - Organização e Aquecimento"), e um contador do sumário por cima disso
+     imprime o número duas vezes na mesma linha. Onde a ordem importa, ela já
+     está escrita no título. */
+  .sumario a {
+    display: block;
+    padding: 9px 0;
+    color: var(--ds-text-2);
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  .sumario a:hover,
+  .sumario a:focus-visible {
+    color: var(--ds-gold-light);
+  }
+</style>

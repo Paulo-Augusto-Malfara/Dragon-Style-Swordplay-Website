@@ -1,10 +1,11 @@
 ---
 import { getEntry, render } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
+import SumarioPagina from "../components/SumarioPagina.astro";
 import { supabasePublic } from "../lib/supabase-public";
 
 const entry = await getEntry("sobreNos", "administracao");
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 
 const organizadores = [
   {
@@ -38,6 +39,7 @@ const fotoPorApelido = Object.fromEntries(
 ---
 
 <PageLayout title={entry.data.title}>
+  <SumarioPagina {headings} />
   <section>
     <Content />
     <h2>Organizadores</h2>

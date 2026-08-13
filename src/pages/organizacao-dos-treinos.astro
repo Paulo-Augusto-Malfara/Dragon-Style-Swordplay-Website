@@ -1,10 +1,11 @@
 ---
 import { getEntry, render } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
+import SumarioPagina from "../components/SumarioPagina.astro";
 import CatalogoLinks from "../components/CatalogoLinks.astro";
 
 const entry = await getEntry("regulamentos", "organizacao-dos-treinos");
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
 
 // Esta página é a entrada "Regras" do menu, então precisa levar às outras três.
 const regras = [
@@ -27,6 +28,7 @@ const regras = [
 ---
 
 <PageLayout title={entry.data.title}>
+  <SumarioPagina {headings} />
   <section>
     <Content />
   </section>
