@@ -17,7 +17,7 @@ const classes = [
 ];
 
 const itens = [
-  { href: "/home", label: "Início", ativo: caminho === "/" || caminho === "/home" },
+  { href: "/", label: "Início", ativo: caminho === "/" },
   { label: "Índice", drawer: true },
   { href: "/resumo-das-classes", label: "Classes", ativo: classes.includes(caminho) },
   { href: "/agenda", label: "Agenda", ativo: caminho === "/agenda" },

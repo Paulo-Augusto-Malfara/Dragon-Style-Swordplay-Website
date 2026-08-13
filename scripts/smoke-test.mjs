@@ -1,6 +1,6 @@
 const base = "http://localhost:4321";
 const urls = [
-  "/", "/home",
+  "/",
   "/arqueiro", "/barbaro", "/bonus-nivel-3", "/cavaleiro", "/como-funciona",
   "/espadachim", "/guerreiro", "/hoplita", "/lanceiro", "/mentor-de-classe",
   "/resumo-das-classes", "/sicario", "/templario", "/viking",

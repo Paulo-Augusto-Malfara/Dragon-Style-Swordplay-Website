@@ -13,7 +13,7 @@ export const menu: GrupoNav[] = [
   {
     label: "Comece Aqui",
     items: [
-      { href: "/home", label: "Início" },
+      { href: "/", label: "Início" },
       { href: "/o-que-e-swordplay", label: "O que é Swordplay?" },
       { href: "/como-participar", label: "Como Participar" },
       { href: "/agenda", label: "Agenda de Treinos" },

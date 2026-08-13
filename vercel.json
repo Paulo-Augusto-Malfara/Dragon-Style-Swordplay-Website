@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
       "source": "/introducao",
       "destination": "/equipamentos",
       "permanent": true
