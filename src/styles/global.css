@@ -287,7 +287,6 @@ body::before {
   color: var(--golden-color);
   width: auto;
   margin: 0;
-  text-indent: 0;
   text-align: left;
 }
 
@@ -894,7 +893,6 @@ p {
   width: 90%;
   margin: auto;
   font-size: var(--fs-body);
-  text-indent: 1.5em;
   line-height: 1.6;
 }
 
@@ -1333,7 +1331,6 @@ p {
 .organizador-card > div > p {
   width: auto;
   margin: 0;
-  text-indent: 0;
   text-align: left;
   font-size: 0.92em;
   color: var(--text-secondary-color);
@@ -1421,10 +1418,6 @@ p {
   margin: auto;
   grid-template-columns: repeat(auto-fill, 250px);
   gap: 20px;
-}
-
-.grid-classes p {
-  text-indent: 0;
 }
 
 .grid-classes > div {
@@ -1540,7 +1533,6 @@ p {
   color: var(--golden-color);
   font-size: 2em;
   font-weight: 700;
-  text-indent: 0;
   text-align: center;
   line-height: 1;
 }
@@ -1754,7 +1746,6 @@ p {
 .admin-hub-greeting {
   margin: 0;
   width: auto;
-  text-indent: 0;
   text-align: center;
   color: var(--text-secondary-color);
 }
@@ -1984,7 +1975,6 @@ p {
 
 .admin-error {
   color: #e57368;
-  text-indent: 0;
   width: auto;
 }
 
@@ -2357,7 +2347,6 @@ p {
 .agenda-card-linha {
   margin: 0;
   width: auto;
-  text-indent: 0;
   text-align: left;
   color: var(--text-secondary-color);
 }
@@ -2420,7 +2409,6 @@ p {
 .confirma-presenca-contagem {
   margin: 0;
   width: auto;
-  text-indent: 0;
   font-weight: 700;
   color: var(--golden-color);
   font-variant-numeric: tabular-nums;
@@ -2611,7 +2599,6 @@ p {
 .membro-atual {
   width: auto;
   margin: 0;
-  text-indent: 0;
   text-align: left;
   display: flex;
   align-items: center;
@@ -2749,7 +2736,6 @@ p {
 
 .dashboard-loading {
   text-align: center;
-  text-indent: 0;
   width: auto;
 }
 
@@ -2764,7 +2750,6 @@ p {
 
 .dashboard-empty {
   text-align: center;
-  text-indent: 0;
   width: auto;
   color: var(--text-secondary-color);
 }
@@ -2810,7 +2795,6 @@ p {
 .dashboard-name {
   font-size: 1.6em;
   text-align: center;
-  text-indent: 0;
   width: auto;
   color: var(--golden-color);
 }
@@ -2928,7 +2912,6 @@ p {
 
 .dashboard-official-name {
   text-align: center;
-  text-indent: 0;
   width: auto;
   font-size: 0.85em;
   color: var(--text-secondary-color);
@@ -3048,7 +3031,6 @@ footer {
   color: var(--text-secondary-color);
   font-size: 0.84rem;
   max-width: 32ch;
-  text-indent: 0;
   text-align: left;
   width: auto;
   margin: 0.8em 0 0;
@@ -3135,7 +3117,6 @@ footer {
 .landing-page h1,
 .landing-page h2,
 .landing-page h3 {
-  text-indent: 0;
   width: auto;
   text-align: left;
 }
@@ -3373,12 +3354,11 @@ footer {
   filter: drop-shadow(2px 2px 0 black);
 }
 
-/* ponytail: o `width: auto` e o `text-indent: 0` abaixo não fazem nada na
-   landing -- lá o bloco `.landing-page h3, p` já zera os dois. Existem porque o
-   trio ganhou um segundo dono fora da landing (Como Participar), onde as regras
-   base de `p`/`h3` (width 90%, margin auto, text-indent 1.5em) voltam a valer e
-   entortam o card. Corrigido aqui, no componente, em vez de repetir o reset em
-   cada página que usar o trio. */
+/* ponytail: o `width: auto` abaixo existe porque o trio ganhou um segundo dono
+   fora da landing (Como Participar), onde a regra base de `p`/`h3` (width 90%,
+   margin auto) volta a valer e entorta o card. Corrigido aqui, no componente,
+   em vez de repetir o reset em cada página que usar o trio.
+   O `text-indent: 0` que acompanhava saiu junto com o recuo da base de `p`. */
 .trio-card h3 {
   color: var(--golden-color);
   font-size: 1.1rem;
@@ -3395,7 +3375,6 @@ footer {
   text-align: center;
   margin: 0;
   width: auto;
-  text-indent: 0;
 }
 
 .section-link {
@@ -3675,7 +3654,6 @@ footer {
 /* ======== COMO PARTICIPAR ======== */
 
 .participar-lede {
-  text-indent: 0;
   font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
   color: var(--text-primary-color);
 }
@@ -3714,7 +3692,6 @@ footer {
   width: auto;
   max-width: 52ch;
   margin: 0 auto 1.8em;
-  text-indent: 0;
   text-align: center;
   color: var(--text-secondary-color);
 }
