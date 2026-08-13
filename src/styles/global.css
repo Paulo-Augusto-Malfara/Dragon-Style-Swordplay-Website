@@ -767,6 +767,48 @@ main {
   background-color: var(--secondary-color-opacity); */
 }
 
+/* ======== CASCA DE PÁGINA (PageLayout) ======== */
+
+.pagina {
+  max-width: 1100px;
+  margin-inline: auto;
+  padding: clamp(1.2rem, 3.5vw, 2.6rem) clamp(0.5rem, 2.5vw, 2rem) 0;
+}
+
+.pagina-cab {
+  margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
+  padding-bottom: clamp(0.9rem, 2vw, 1.4rem);
+  border-bottom: 1px solid var(--ds-line);
+}
+
+/* Rótulo de seção. Aqui a caixa alta funciona, ao contrário do título: são duas
+   palavras que se lê como etiqueta, não como frase. */
+.eyebrow {
+  font-family: var(--ds-font-body);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ds-gold-deep);
+  margin: 0 0 0.7em;
+}
+
+.pagina-resumo {
+  font-size: clamp(1rem, 0.95rem + 0.35vw, 1.15rem);
+  line-height: 1.6;
+  color: var(--ds-text-3);
+  max-width: 58ch;
+  margin: 0;
+}
+
+/* Medida de linha. Linha longa demais faz o olho errar a volta e reler a mesma
+   linha; ~68 caracteres é a faixa em que isso para de acontecer. max-width só
+   limita, então não mexe em parágrafo que já é mais estreito nem em alinhamento
+   herdado de card. */
+.pagina p {
+  max-width: 68ch;
+}
+
 /* ponytail: h1/h2 herdavam Rubik (fonte do corpo) — os títulos eram o texto
    do corpo em caixa alta e corpo maior, sem hierarquia de família. Hoje a
    família de título é --ds-font-display (Cinzel).
@@ -782,45 +824,47 @@ main {
    base nova (--ds-bg, e a textura em 0.14) faz menos ainda; um deslocamento
    sólido sem desfoque só engrossa a letra, o que briga com as serifas finas do
    Cinzel. Saíram 7 ocorrências em cards, números e cabeçalhos de seção. */
+/* Título alinhado à esquerda e em caixa mista, que é a mudança que mais afasta
+   do visual antigo. Três motivos, nesta ordem:
+
+   1. Caixa alta é mais lenta de ler. Sem as ascendentes e descendentes o olho
+      perde a silhueta da palavra e passa a soletrar. Num manual que se consulta
+      em pé, no meio do treino, isso custa.
+   2. Centralizado, o começo de cada linha muda de lugar, então o olho procura
+      a margem a cada quebra. Alinhado, ele volta sempre pro mesmo ponto.
+   3. O filete dourado embaixo saiu porque o papel dele (dizer "aqui começa a
+      página") passou pro .eyebrow, que além de separar também informa em que
+      seção do manual você está.
+
+   O Cinzel continua fazendo o trabalho: ele tem caixa baixa, só é menos
+   convencional que a de uma serifada comum -- em tamanho de título, que é onde
+   ele vive, isso lê como caráter e não como estranheza. */
 h1 {
-  /* Já é uppercase logo abaixo, que é justamente onde o Cinzel funciona: ele vem
-     de capitulares romanas. Como é variável, o negrito padrão de h1 agora é peso
-     700 de verdade -- com o Bree Serif, que só tem 400, o navegador engordava o
-     contorno sozinho. */
   font-family: var(--ds-font-display);
-  display: flex;
-  justify-content: center;
-  text-transform: uppercase;
-  max-width: 90%;
-  font-size: clamp(1.5rem, 1.1rem + 2vw, 2rem);
-  margin: auto;
-  margin-bottom: 1em;
-  padding: 30px 10px 10px 10px;
-  border-width: 0 0 1px;
-  border-image-slice: 1;
-  border-image-source: linear-gradient(
-    90deg,
-    rgba(184, 134, 45, 0),
-    #b8862d,
-    #ffdf91,
-    #b8862d,
-    rgba(184, 134, 45, 0)
-  );
-  border-style: solid;
-  position: relative;
+  font-size: clamp(1.9rem, 1.3rem + 2.6vw, 2.9rem);
+  font-weight: 700;
+  line-height: 1.07;
+  letter-spacing: 0.01em;
+  color: var(--ds-text-1);
+  text-wrap: balance;
+  max-width: 20ch;
+  margin: 0 0 0.45em;
+  padding: 0;
 }
 
+/* h2 deixa de ser dourado. O dourado agora é do .eyebrow e dos acentos; se ele
+   marcasse também todo h2, a página inteira ficaria dourada e a cor pararia de
+   significar "olhe aqui". Hierarquia passa a ser tamanho e família, não cor. */
 h2 {
   font-family: var(--ds-font-display);
-  padding: 20px 0 20px 0;
-  width: 90%;
-  display: flex;
-  justify-content: center;
-  text-align: center;
-  margin: auto;
-  font-size: clamp(1.15rem, 0.95rem + 1vw, 1.4rem);
-  color: var(--golden-color);
-  text-transform: uppercase;
+  font-size: clamp(1.25rem, 1.05rem + 1vw, 1.65rem);
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--ds-text-1);
+  text-wrap: balance;
+  max-width: 30ch;
+  margin: 2.2em 0 0.7em;
+  padding: 0;
 }
 
 h3 {

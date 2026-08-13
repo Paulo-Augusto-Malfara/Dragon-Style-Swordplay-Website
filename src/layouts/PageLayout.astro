@@ -1,18 +1,31 @@
 ---
 import BaseLayout from "./BaseLayout.astro";
 import PageNav from "../components/PageNav.astro";
+import { grupoDe } from "../lib/navegacao";
 
 interface Props {
   title: string;
   description?: string;
+  /** Uma frase de abertura. Aparece maior que o corpo, logo abaixo do título. */
+  resumo?: string;
   prev?: { href: string; label: string };
   next?: { href: string; label: string };
 }
-const { title, description, prev, next } = Astro.props;
+const { title, description, resumo, prev, next } = Astro.props;
+
+// O rótulo diz em que seção do manual você está. Sai da mesma lista que monta o
+// menu, então nunca discorda dele.
+const grupo = grupoDe(Astro.url.pathname);
 ---
 
 <BaseLayout title={title} description={description}>
-  <h1>{title}</h1>
-  <slot />
-  <PageNav prev={prev} next={next} />
+  <div class="pagina">
+    <header class="pagina-cab">
+      {grupo && <p class="eyebrow">{grupo}</p>}
+      <h1>{title}</h1>
+      {resumo && <p class="pagina-resumo">{resumo}</p>}
+    </header>
+    <slot />
+    <PageNav prev={prev} next={next} />
+  </div>
 </BaseLayout>
