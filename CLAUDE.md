@@ -16,6 +16,19 @@ Rules:
 
 Don't open/screenshot the site with claude-in-chrome unprompted. The user runs `npm run dev` himself and watches localhost live (PC and phone) — he checks visual/UI changes on his own. Only use claude-in-chrome when: the user explicitly asks in that turn, a large/whole-feature review he requested calls for it, or there's a genuine need with no other way to verify — and even then, ask for authorization first (yes, even in auto mode) before opening the browser.
 
+## Supabase: qual projeto é o certo
+
+**O único project ref deste repositório é `gkfgoevpbqydcirtinkw`.** Antes de
+qualquer chamada MCP que aceite `project_id`, confira que é esse valor. Se a
+ferramenta pedir o projeto e você não tiver certeza de qual conta está ativa,
+rode `list_projects` e confirme o ref antes de seguir; nunca chute pelo nome.
+
+Existe um segundo conector Supabase carregado nesta máquina (nome com UUID)
+autenticado em **outra conta** (org `kpxqzchjykqqjqrfjwno`, projetos "Data
+Analysis Database" e "Ignis View Dev"). Nada deste site vive lá. Se só ele
+aparecer, ou se `gkfgoevpbqydcirtinkw` não estiver na lista, **pare e avise o
+usuário** em vez de operar no projeto que apareceu.
+
 ## Supabase MCP write policy
 
 The `supabase` MCP server in `.mcp.json` stays at `read_only=false` permanently — don't toggle it back to `true` after a migration, and don't ask the user to flip it before one. Instead, always ask an explicit, clear question in chat before running `apply_migration`, `execute_sql` for anything beyond a plain `SELECT`, or any other DB write — every single time, even in Auto Mode, even if the conversation already implied it. A yes covers only that one action. After any migration, run `get_advisors(type:"security")` and compare against the known baseline (5 intentional `SECURITY DEFINER` views, RPCs intentionally exposed to anon/authenticated by design, leaked password protection warning pre-existing) — flag only genuinely new items.
