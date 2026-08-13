@@ -20,10 +20,11 @@ const BG = { r: 21, g: 31, b: 40 };
 const RESPIRO_ANY = 0.88;
 // "maskable": o Android recorta em círculo/squircle e só garante os 80% centrais.
 // Valor medido, não chutado: scripts/test-icone-maskable.mjs calcula o raio do
-// pixel mais distante do centro e compara com esse círculo. A 0.68 o conteúdo
-// batia 103,6% do raio seguro, ou seja, as pontas da fita seriam cortadas.
-// 0.63 deixa ~4% de folga. Se o logo mudar, rode o teste de novo.
-const RESPIRO_MASK = 0.63;
+// pixel mais distante do centro e compara com esse círculo. Rode o teste sempre
+// que o logo mudar -- o valor certo depende do formato da arte. Com o brasão
+// inteiro (faixa em cima, fita embaixo) o teto era 0.63; com só o escudo, que é
+// mais compacto radialmente, 0.74 ainda deixa ~4% de folga.
+const RESPIRO_MASK = 0.74;
 
 await mkdir(OUT, { recursive: true });
 
