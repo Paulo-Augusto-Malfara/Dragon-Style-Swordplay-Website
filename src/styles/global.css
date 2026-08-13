@@ -295,9 +295,13 @@ body::before {
 
 /* ======== HEADER ======== */
 
+/* Grudado no topo. Antes ele rolava junto e levava embora ~90px de uma tela de
+   844px, quase 11% da altura gasta antes de qualquer conteúdo. z-index abaixo
+   do dock (70) e da gaveta (65) de propósito. */
 header {
-  /*   overflow: hidden; */
-  /*   border-bottom: linear; */
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .header-top {
@@ -314,18 +318,24 @@ header {
   border-style: solid;
 }
 
+/* O espaçamento é resolvido por gap e padding fluido, não por margem fixa.
+   Antes #logo-ds tinha margin-left:4em e #header-icons-div margin-right:6em, e
+   esses dois números precisavam ser resgatados em 5 breakpoints (900, 740, 580,
+   400 e 300px) só pra não colidirem. */
 .header-logo {
-  background-color: var(--secondary-color);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 1em;
+  gap: 1em;
+  padding: 0.7em clamp(0.6rem, 3vw, 1.6rem);
+  background: rgba(11, 16, 22, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ds-line);
 }
 
 #logo-anchor {
-  border-radius: 50px;
-  max-width: 90%;
-  margin-right: 1em;
+  display: flex;
+  min-width: 0;
 }
 
 .navbar-menu-item {
@@ -335,14 +345,23 @@ header {
 }
 
 #logo-ds {
-  margin-left: 4em;
+  height: clamp(38px, 8vw, 62px);
+  width: auto;
 }
 
 #header-icons-div {
   display: flex;
-  justify-content: flex-end;
-  gap: 3em;
-  margin-right: 6em;
+  align-items: center;
+  gap: clamp(0.9rem, 3vw, 2rem);
+}
+
+/* No celular ficam só o logo e o login. As três redes sociais saem porque já
+   estão no rodapé, e num cabeçalho grudado cada pixel de altura é cobrado em
+   toda página. Seletor de filho direto pra não atingir o ícone do AuthLink. */
+@media (max-width: 860px) {
+  #header-icons-div > a[target="_blank"] {
+    display: none;
+  }
 }
 
 .header-icon {
@@ -1520,13 +1539,6 @@ p {
 /* ======== MEDIA QUERYS ======== */
 
 @media (max-width: 900px) {
-  #logo-ds {
-    margin-left: 1em;
-  }
-  #header-icons-div {
-    margin-right: 1em;
-    gap: 2em;
-  }
   .classes-individual > img {
     width: 80%;
   }
@@ -1536,18 +1548,6 @@ p {
 }
 
 @media (max-width: 740px) {
-  .header-logo {
-    padding: 0.5em;
-    overflow: hidden;
-  }
-  #logo-ds {
-    margin-left: 0.5em;
-    max-width: 95%;
-  }
-  #header-icons-div {
-    margin-right: 0.5em;
-    gap: 1.5em;
-  }
   .navbar-menu-item-li:first-of-type {
     margin-left: 10px;
   }
@@ -1572,9 +1572,6 @@ p {
 @media (max-width: 580px) {
   .icon {
     font-size: 16px;
-  }
-  #header-icons-div {
-    gap: 1em;
   }
   .h2-bottom-border {
     max-width: 30%;
@@ -1653,14 +1650,6 @@ p {
 }
 
 @media (max-width: 400px) {
-  #logo-ds {
-    margin-left: 0.1em;
-    max-width: 95%;
-  }
-  #header-icons-div {
-    margin-right: 0.1em;
-    gap: 0.7em;
-  }
   .icon {
     font-size: 16px;
   }
@@ -1697,9 +1686,6 @@ p {
 }
 
 @media (max-width: 300px) {
-  #header-icons-div {
-    gap: 0.5em;
-  }
   .arma-display > img {
     width: 230px;
     height: 230px;
