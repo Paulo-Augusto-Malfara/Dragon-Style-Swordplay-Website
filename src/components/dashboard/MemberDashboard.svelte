@@ -32,8 +32,39 @@
   let phTotal = $state(0);
   let porClasse = $state<any[]>([]);
   let historico = $state<any[]>([]);
+  let faixas = $state<{ nome_faixa: string; nivel_minimo: number }[]>([]);
 
   const displayName = $derived(apelido || nomeOficial);
+
+  /**
+   * A próxima graduação e o quanto falta pra ela.
+   *
+   * Os limiares vêm de dFaixas, não de uma cópia aqui: a tabela é legível pelo
+   * cliente público e continua sendo a única fonte da verdade, que é a regra
+   * que src/lib/faixa.ts documenta. Na faixa Preta não há próxima, e aí o bloco
+   * inteiro sai da tela em vez de mostrar uma barra cheia sem destino.
+   */
+  const graduacao = $derived.by(() => {
+    const proxima = faixas
+      .filter((f) => f.nivel_minimo > nivelGeral)
+      .sort((a, b) => a.nivel_minimo - b.nivel_minimo)[0];
+    if (!proxima) return null;
+
+    const atual = faixas
+      .filter((f) => f.nivel_minimo <= nivelGeral)
+      .sort((a, b) => b.nivel_minimo - a.nivel_minimo)[0];
+    const piso = atual?.nivel_minimo ?? 0;
+    const vao = proxima.nivel_minimo - piso;
+
+    return {
+      nome: proxima.nome_faixa,
+      nivel: proxima.nivel_minimo,
+      faltam: proxima.nivel_minimo - nivelGeral,
+      // Sem o piso a barra começaria cheia demais: quem está no nível 12 de 18
+      // andou 0 dos 6 níveis desta faixa, não 12 dos 18 da escala inteira.
+      pct: vao > 0 ? Math.round(((nivelGeral - piso) / vao) * 100) : 0,
+    };
+  });
   // O total de treinos já estava na tela, espalhado por classe. Somado ele vira
   // o número que a pessoa realmente quer saber quando abre a ficha.
   const totalTreinos = $derived(historico.length);
@@ -81,7 +112,7 @@
       ehStaffOuMais = membro.auth_level <= 3;
       apelidoInput = membro.apelido ?? "";
 
-      const [geral, classes, historia] = await Promise.all([
+      const [geral, classes, historia, escala] = await Promise.all([
         supabase.from("v_ranking_nivel_geral").select("*").eq("id_membro", membro.id_membro).single(),
         supabase.from("v_ranking_por_classe").select("*").eq("id_membro", membro.id_membro),
         supabase
@@ -89,6 +120,7 @@
           .select("*")
           .eq("id_membro", membro.id_membro)
           .order("data_treino", { ascending: false }),
+        supabase.from("dFaixas").select("nome_faixa, nivel_minimo"),
       ]);
 
       if (geral.error) {
@@ -108,6 +140,9 @@
         return b.treinos_por_classe - a.treinos_por_classe;
       });
       historico = historia.data ?? [];
+      // A escala de faixas é enfeite informativo: se falhar, some a barra de
+      // progresso e o resto da ficha continua de pé.
+      faixas = escala.data ?? [];
       status = "ready";
     } catch (err) {
       // Anything unexpected (e.g. Supabase env vars missing at runtime) should
@@ -245,68 +280,69 @@
       {/if}
     </section>
 
-    <h2>Níveis por classe</h2>
+    {#if graduacao}
+      <section class="ficha-graduacao" aria-label="Progresso até a próxima graduação">
+        <div class="ficha-graduacao-topo">
+          <span>Próxima graduação: <strong>Faixa {graduacao.nome}</strong></span>
+          <span class="ficha-graduacao-falta">
+            nível {graduacao.nivel} · {graduacao.faltam === 1
+              ? "falta 1"
+              : `faltam ${graduacao.faltam}`}
+          </span>
+        </div>
+        <div class="ficha-barra">
+          <div class="ficha-barra-preenche" style={`width:${graduacao.pct}%`}></div>
+        </div>
+      </section>
+    {/if}
+
+    <h2>Minhas classes</h2>
     {#if porClasse.length === 0}
       <p class="ficha-aviso">
         Nenhum treino registrado ainda. Depois do seu primeiro treino a classe aparece aqui.
       </p>
     {:else}
-      <div class="table-scroll">
-        <table class="ranking-tabela ranking-tabela--dashboard">
-          <thead>
-            <tr>
-              <th class="col-nome">Classe</th>
-              <th class="col-stat">Nível</th>
-              <th class="col-stat">Treinos</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each porClasse as c}
-              <tr>
-                <td class="col-nome">{c.nome_classe}</td>
-                <td class="col-stat"><span class="stat-pill">{c.nivel_por_classe}</span></td>
-                <td class="col-stat"><span class="stat-pill">{c.treinos_por_classe}</span></td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <!-- Era tabela de três colunas. Vira grade de cartões porque a tabela
+           obrigava rolagem lateral no celular pra ler três números curtos, e
+           porque cada linha é uma classe, não uma comparação entre elas. -->
+      <ul class="ficha-classes">
+        {#each porClasse as c}
+          <li>
+            <span class="ficha-classe-nome">{c.nome_classe}</span>
+            <span class="ficha-classe-nivel">Nível {c.nivel_por_classe}</span>
+            <span class="ficha-classe-treinos">
+              {c.treinos_por_classe === 1 ? "1 treino" : `${c.treinos_por_classe} treinos`}
+            </span>
+          </li>
+        {/each}
+      </ul>
     {/if}
 
-    <h2>Histórico de presença</h2>
+    <h2>Últimas presenças</h2>
     {#if historico.length === 0}
       <p class="ficha-aviso">
         Nenhuma presença registrada ainda. Confirme presença na <a class="links-de-texto" href="/agenda">agenda</a>.
       </p>
     {:else}
-      <div class="table-scroll">
-        <table class="ranking-tabela ranking-tabela--historico">
-          <thead>
-            <tr>
-              <th class="col-rank">Nº Treino</th>
-              <th class="col-nome">Data</th>
-              <th class="col-faixa">Classe</th>
-              <th class="col-stat">PH Ganho</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each historico as h}
-              <tr>
-                <td class="col-rank"><span class="rank-badge">{h.id_treino}</span></td>
-                <td class="col-nome">
-                  {new Date(h.data_treino + "T00:00:00").toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "2-digit",
-                  })}
-                </td>
-                <td class="col-faixa">{h.nome_classe}</td>
-                <td class="col-stat"><span class="stat-pill">{h.ph_ganho_treino}</span></td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
+      <!-- Lista, não tabela: data, classe e ganho cabem numa linha só até em
+           tela estreita, e o número do treino virou detalhe secundário porque
+           ninguém procura presença por id. -->
+      <ol class="ficha-presencas">
+        {#each historico as h}
+          <li>
+            <span class="ficha-presenca-data">
+              {new Date(h.data_treino + "T00:00:00").toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              })}
+            </span>
+            <span class="ficha-presenca-classe">{h.nome_classe}</span>
+            <span class="ficha-presenca-ganho">
+              {h.ph_ganho_treino > 0 ? `+${h.ph_ganho_treino} PH` : "presença"}
+            </span>
+          </li>
+        {/each}
+      </ol>
     {/if}
 
     <h2>Conquistas</h2>
@@ -455,6 +491,144 @@
 
   .ficha-apelido input:focus {
     border-color: var(--ds-gold);
+  }
+
+  /* ======== PRÓXIMA GRADUAÇÃO ======== */
+
+  /* O único elemento dourado cheio da ficha. É de propósito: a pergunta que
+     traz a pessoa aqui é "quanto falta pra minha próxima faixa", e essa
+     resposta não pode disputar atenção com mais nada da página. */
+  .ficha-graduacao {
+    margin: 0.4em 0 0.8em;
+    padding: 16px 18px;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 14px;
+    background: var(--ds-gold-wash);
+  }
+
+  .ficha-graduacao-topo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 10px;
+    font-size: 0.88rem;
+  }
+
+  .ficha-graduacao-topo strong {
+    color: var(--ds-gold);
+    font-weight: 600;
+  }
+
+  .ficha-graduacao-falta {
+    font-size: 0.8rem;
+    color: var(--ds-text-3);
+  }
+
+  .ficha-barra {
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(255, 255, 255, 0.09);
+    overflow: hidden;
+  }
+
+  .ficha-barra-preenche {
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      var(--ds-gold-deep),
+      var(--ds-gold),
+      var(--ds-gold-light)
+    );
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ficha-barra-preenche {
+      transition: width 0.5s ease-out;
+    }
+  }
+
+  /* ======== CLASSES E PRESENÇAS ======== */
+
+  .ficha-classes,
+  .ficha-presencas {
+    margin: 0 0 0.4em;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ficha-classes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 10px;
+  }
+
+  .ficha-classes > li {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: 2px 10px;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 13px;
+    background: var(--ds-surface);
+  }
+
+  .ficha-classe-nome {
+    font-family: var(--ds-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .ficha-classe-nivel {
+    justify-self: end;
+    font-size: 0.78rem;
+    color: var(--ds-gold);
+  }
+
+  .ficha-classe-treinos {
+    grid-column: 1 / -1;
+    font-size: 0.76rem;
+    color: var(--ds-text-4);
+  }
+
+  .ficha-presencas {
+    border: 1px solid var(--ds-line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+
+  .ficha-presencas > li {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 16px;
+    background: var(--ds-surface);
+    font-size: 0.88rem;
+  }
+
+  .ficha-presencas > li + li {
+    border-top: 1px solid var(--ds-line);
+  }
+
+  .ficha-presenca-data {
+    flex: none;
+    width: 46px;
+    font-family: var(--ds-font-display);
+    font-size: 0.82rem;
+    color: var(--ds-gold);
+  }
+
+  .ficha-presenca-classe {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .ficha-presenca-ganho {
+    flex: none;
+    font-size: 0.78rem;
+    color: var(--ds-text-4);
   }
 
   @media (max-width: 420px) {

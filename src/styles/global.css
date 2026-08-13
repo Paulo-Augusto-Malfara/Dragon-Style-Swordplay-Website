@@ -87,8 +87,21 @@
      do mesmo número: o próprio dock, o padding do body e o topo da gaveta. */
   --ds-dock-h: 58px;
 
-  /* Altura do cabeçalho grudado. A lateral do desktop cola logo abaixo dele. */
-  --ds-header-h: 84px;
+  /* Altura do cabeçalho grudado. Tudo que cola abaixo dele (a lateral do
+     desktop, o filtro de equipamentos, o de modalidades, a barra de ordenar do
+     ranking) usa este valor como deslocamento.
+
+     É a MESMA conta que o cabeçalho faz, não um número copiado: era 84px fixo,
+     e no celular o cabeçalho mede 64px porque o logo entra no piso do clamp.
+     Os 20px de diferença abriam uma fresta em que o conteúdo aparecia POR CIMA
+     da barra grudada, e os cards do catálogo pareciam cortados ao meio. O termo
+     constante é o espaço do cabeçalho fora do logo: 1.4em de padding mais as
+     duas bordas de 1px.
+
+     Arredonda 1px pra BAIXO de propósito: sobrando, a barra grudada encosta
+     por baixo do cabeçalho e ninguém vê; faltando, abre fresta e o conteúdo
+     aparece por cima. Errar para o lado invisível. */
+  --ds-header-h: calc(clamp(38px, 8vw, 62px) + 24px);
 
   /* ======== AS VARIÁVEIS ANTIGAS, REAPONTADAS ========
      Estas 7 são consumidas em ~53 regras espalhadas pelo arquivo. Em vez de
@@ -770,6 +783,37 @@ main {
   margin-bottom: clamp(1.4rem, 3vw, 2.4rem);
   padding-bottom: clamp(0.9rem, 2vw, 1.4rem);
   border-bottom: 1px solid var(--ds-line);
+}
+
+/* Manual de bolso: no celular a abertura da página é custo, não conteúdo. O
+   título grande, o rótulo de seção e a frase de resumo somavam ~230px antes da
+   primeira informação útil numa tela de 860px de altura, ou seja, mais de um
+   quarto da tela gasto em cada página que a pessoa abre. Aqui tudo encolhe um
+   passo. No desktop, onde a altura sobra, a abertura continua inteira. */
+@media (max-width: 640px) {
+  .pagina {
+    padding-top: 1rem;
+  }
+
+  .pagina-cab {
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.75rem;
+  }
+
+  .pagina-cab h1 {
+    font-size: 1.65rem;
+    margin-bottom: 0.3em;
+  }
+
+  .eyebrow {
+    font-size: 0.66rem;
+    margin-bottom: 0.45em;
+  }
+
+  .pagina-resumo {
+    font-size: 0.95rem;
+    line-height: 1.5;
+  }
 }
 
 /* Rótulo de seção. Aqui a caixa alta funciona, ao contrário do título: são duas
@@ -2311,22 +2355,38 @@ p {
 /* ponytail: sticky instead of scrolling away -- with the page previously
    requiring a scroll back to top to switch classes, keeping this pinned
    near the viewport top is a straightforward UX fix, no JS needed. */
+/* Faixa que rola de lado, não caixa que quebra em duas linhas. Com quatro
+   critérios e a tela de um celular, a caixa centralizada gastava ~90px de
+   altura antes do primeiro colocado aparecer, numa página em que a única
+   coisa que importa é a lista. */
 .ranking-quick-nav {
   position: sticky;
-  top: 0.8em;
+  top: var(--ds-header-h);
   z-index: 5;
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
   gap: 0.5em;
-  width: fit-content;
-  max-width: 100%;
-  margin: 1em auto 2em;
-  padding: 0.6em 0.7em;
-  background: var(--primary-color);
-  border: 1px solid var(--card-border);
-  border-radius: 10px;
-  box-shadow: var(--card-shadow);
+  margin: 0 0 1.2em;
+  padding: 0.7em 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  background: var(--ds-bg);
+  border-bottom: 1px solid var(--ds-line);
+}
+
+.ranking-quick-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.ranking-quick-nav > * {
+  flex: none;
+}
+
+/* No desktop cabem todos sem rolar, e aí centralizar volta a fazer sentido. */
+@media (min-width: 861px) {
+  .ranking-quick-nav {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
 }
 
 /* ponytail: single-selection UI via :target instead of a JS toggle --

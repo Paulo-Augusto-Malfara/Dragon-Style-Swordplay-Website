@@ -1,7 +1,7 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
-import { corDaFaixa } from "../lib/faixa";
+import RankingLista from "../components/RankingLista.astro";
 
 export const prerender = false;
 
@@ -56,14 +56,9 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
 
 <PageLayout
   title="Ranking Geral"
+  description="O ranking de todos os membros do Dragon Style por nível geral, nível de classe, treinos e pontos de honra."
+  resumo="Todo mundo que treina, em ordem. Toque em um critério para reordenar a lista."
 >
-  <section>
-    <p>
-      Confira abaixo o ranking geral de todos os membros do Dragon Style.
-      Clique nos botões para mudar a forma de ordenar.
-    </p>
-    <br />
-  </section>
   <nav class="ranking-quick-nav" aria-label="Ordenar ranking">
     {Object.entries(SORTS).map(([key, { label }]) => (
       <a
@@ -75,61 +70,21 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
       </a>
     ))}
   </nav>
-  <div class="table-scroll">
-    <table class="ranking-tabela ranking-tabela--geral">
-      <thead>
-        <tr>
-          <th class="col-rank">#</th>
-          <th class="col-nome">Nome</th>
-          <th class="col-stat">Nível Geral</th>
-          <th class="col-stat">Nível de Classe</th>
-          <th class="col-stat">Treinos</th>
-          <th class="col-stat">Pontos de Honra</th>
-        </tr>
-      </thead>
-      <tbody>
-        {
-          paginaAtual.map((m, i) => {
-            const posicao = inicio + i + 1;
-            return (
-              <tr class={posicao <= 3 ? `rank-row rank-${posicao}` : "rank-row"}>
-                <td class="col-rank">
-                  <span class="rank-badge">{posicao}</span>
-                </td>
-                <td class="col-nome">
-                  {corDaFaixa(m.nome_faixa) && (
-                    <span
-                      class="faixa-bar faixa-bar--linha"
-                      style={`--faixa: ${corDaFaixa(m.nome_faixa)}`}
-                      title={`Faixa ${m.nome_faixa}`}
-                    >
-                      <span class="sr-only">Faixa {m.nome_faixa}</span>
-                    </span>
-                  )}
-                  <span class="row-avatar">
-                    {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}
-                  </span>
-                  <span class="row-name">{m.nome}</span>
-                </td>
-                <td class="col-stat">
-                  <span class="stat-pill">{m.nivel_geral}</span>
-                </td>
-                <td class="col-stat">
-                  <span class="stat-pill">{m.nivel_classe_total}</span>
-                </td>
-                <td class="col-stat">
-                  <span class="stat-pill">{m.treinos_total}</span>
-                </td>
-                <td class="col-stat">
-                  <span class="stat-pill">{m.ph_total}</span>
-                </td>
-              </tr>
-            );
-          })
-        }
-      </tbody>
-    </table>
-  </div>
+  <RankingLista
+    colunas={4}
+    itens={paginaAtual.map((m, i) => ({
+      posicao: inicio + i + 1,
+      nome: m.nome,
+      fotoUrl: m.foto_url,
+      nomeFaixa: m.nome_faixa,
+      metricas: [
+        { rotulo: "Geral", valor: m.nivel_geral },
+        { rotulo: "Classe", valor: m.nivel_classe_total },
+        { rotulo: "Treinos", valor: m.treinos_total },
+        { rotulo: "PH", valor: m.ph_total },
+      ],
+    }))}
+  />
   {totalPaginas > 1 && (
     <nav class="ranking-pagination" aria-label="Páginas do ranking">
       {pagina > 1 && (
