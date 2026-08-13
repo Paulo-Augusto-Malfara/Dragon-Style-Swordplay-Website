@@ -24,6 +24,50 @@
 }
 
 :root {
+  /* ======== TOKENS DA REESTRUTURAÇÃO VISUAL (Claude Design 2026) ========
+     Camada aditiva: nada aqui substitui as variáveis antigas logo abaixo, que
+     continuam valendo enquanto as páginas não forem migradas uma a uma.
+
+     A paleta da marca não mudou -- #E8AC46, #B8862D e #FFDF91 são exatamente os
+     mesmos do --golden-color e do --hairline-gold. O que o design traz de novo é
+     (a) uma base mais escura e fria, (b) uma escala de cinzas de 5 passos onde
+     antes só existia --text-primary-color, e (c) fios de borda em branco
+     translúcido, que acompanham o fundo em vez de brigar com ele como o #333 fixo. */
+
+  /* Superfícies, do fundo da página pro elemento mais elevado. */
+  --ds-bg: #0b1016;
+  --ds-bg-alt: #10161d;
+  --ds-surface: rgba(20, 29, 38, 0.6);
+  --ds-surface-solid: #141d26;
+  --ds-surface-raised: rgba(27, 39, 50, 0.9);
+
+  /* Texto, do mais forte pro mais apagado. Use --ds-text-3 pra legenda e
+     --ds-text-4 só pra apoio; abaixo disso o contraste cai de mais. */
+  --ds-text-1: #d5d9de;
+  --ds-text-2: #c9cfd5;
+  --ds-text-3: #94a0ab;
+  --ds-text-4: #7e8a95;
+  --ds-text-5: #6b7681;
+
+  /* Fios. Translúcidos de propósito: funcionam sobre qualquer superfície. */
+  --ds-line: rgba(255, 255, 255, 0.07);
+  --ds-line-strong: rgba(255, 255, 255, 0.14);
+
+  /* Marca. Apontam pras cores que já existiam, pra não criar uma segunda
+     fonte de verdade do dourado. */
+  --ds-gold: var(--golden-color);
+  --ds-gold-deep: #b8862d;
+  --ds-gold-light: #ffdf91;
+  --ds-gold-dim: rgba(232, 172, 70, 0.55);
+  --ds-gold-wash: rgba(232, 172, 70, 0.06);
+  --ds-success: #5fa86b;
+
+  /* Tipografia. O design pede Cinzel nos títulos, mas a CSP é font-src 'self'
+     e o arquivo ainda não foi hospedado -- por ora aponta pro Bree Serif que já
+     existe. Trocar aqui troca o site inteiro. */
+  --ds-font-display: "Bree Serif", serif;
+  --ds-font-body: "Rubik", system-ui, sans-serif;
+
   --primary-color: #121212;
   --secondary-color: #151f28;
   --secondary-color-opacity: rgba(21, 31, 40, 0.85);
