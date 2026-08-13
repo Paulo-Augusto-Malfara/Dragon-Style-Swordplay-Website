@@ -1,152 +1,169 @@
 ---
 title: "Armas Longas"
-prev: { href: "/armas-medias", label: "Armas Médias" }
-next: { href: "/longo-alcance", label: "Longo Alcance" }
-armas:
+ordem: 3
+resumo: "De 1,21m a 2m, quase sempre com as duas mãos."
+itens:
   - id: "espada-longa"
     nome: "Espada Longa"
     img: "/assets/img/equipamentos/espada-longa.webp"
-    imgAlt: "Imagem da Espada Longa"
-    comprimento: "121cm a 150cm"
-    empunhadaCom: "Duas mãos"
-    classes: "Classe que utiliza: Cavaleiro;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Entre 20 e 35cm;"
-      - "Área de contato: Restante do comprimento."
+    medida: "1,21m a 1,50m"
+    maos: "Duas mãos"
+    classes: ["Cavaleiro"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "Entre 20 e 35cm, para caberem as duas mãos"
+      - rotulo: "Área de contato"
+        valor: "O restante do comprimento"
     descricao:
-      - "Possui um tamanho que beneficia a utilização com duas mãos, costuma ter uma empunhadura mais longa que sua versão média para ter um bom encaixe das duas mãos. Apesar de ser mais pesada que uma espada média, consegue ser mais ágil (dependendo da habilidade do usuário) por conta do controle maior que se obtém com as duas mãos, apesar de exigir uma habilidade maior para efetuar os golpes de forma efetiva."
+      - "Mais pesada que a espada média, mas o controle das duas mãos compensa, e nas mãos certas ela chega a ser mais rápida. A curva de aprendizado é maior."
   - id: "espada-montante"
     nome: "Espada Montante"
     img: "/assets/img/equipamentos/espada-montante.webp"
-    imgAlt: "Imagem da Espada Montante"
-    comprimento: "151cm a 200cm"
-    empunhadaCom: "Duas mãos"
-    classes: "Classe que utiliza: Cavaleiro;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Entre 30 e 45cm. Pode ter duas empunhaduras, uma antes do guarda-mão e outra depois (como na foto);"
-      - "Área de contato: Restante do comprimento."
+    medida: "1,51m a 2m"
+    maos: "Duas mãos"
+    classes: ["Cavaleiro"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "Entre 30 e 45cm. Pode ter duas, uma antes e outra depois do guarda-mão"
+      - rotulo: "Área de contato"
+        valor: "O restante do comprimento"
+      - rotulo: "Outros nomes"
+        valor: "Zweihänder, greatsword, claymore"
     descricao:
-      - "Costuma ter uma empunhadura bem grande para poder ser manuseada com eficiência, possui movimentos mais lentos que a sua versão longa, mas que trazem mais peso no golpe (apesar de não poder aplicar força em excesso no Swordplay), seu alcance também é muito grande, podendo efetuar estocadas que atinjam um mesmo alvo que somente uma lança ou alabarda conseguiriam, porém, sendo um equipamento mais pesado e não tendo talvez a mesma precisão de uma lança ou alabarda. Exige uma grande habilidade de manuseio de seu usuário."
-      - "Curiosidade: Era bastante eficiente como forma de romper as formações dos regimentos de piqueiros, quebrando as piques primeiramente, e em seguida atacando os piqueiros. Esta estratégia também permitia a passagem da carga de cavalaria por dentro das fileiras inimigas. Também era usado para golpear cavaleiros montados ou abatê-los junto com a própria montaria, devido a sua longa lâmina."
-      - "Outros nomes: Zweihänder (Alemão), Greatsword (Inglês) ou ainda Claymore."
+      - "Golpes mais lentos que os da espada longa, com muito mais alcance. A estocada chega onde só lança e alabarda chegam, com menos precisão e mais peso."
+      - "Curiosidade: era a arma usada para romper formação de piqueiros. Quebrava as lanças primeiro e abria caminho para a cavalaria passar."
   - id: "lanca-curta"
     nome: "Lança Curta"
     img: "/assets/img/equipamentos/lanca-curta.webp"
-    imgAlt: "Imagem da Lança Curta"
-    comprimento: "121cm a 150cm"
-    empunhadaCom: "Uma ou duas mãos"
-    classes: "Classes que utilizam: Hoplita e Lanceiro;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: Entre 15 e 30cm."
+    medida: "1,21m a 1,50m"
+    maos: "Uma ou duas mãos"
+    classes: ["Hoplita", "Lanceiro"]
+    nota: "Hoplita só pode usar com uma mão"
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "Entre 15 e 30cm"
     descricao:
-      - "Apesar de ser uma Lança Curta, entra na categoria de Armas Longas por possuir no mínimo 121cm."
-      - "Para Hoplitas é obrigatório o uso com somente uma mão. Lanceiros podem usá-la com duas mãos."
+      - "Apesar do nome, entra nas longas porque tem no mínimo 1,21m."
   - id: "lanca-longa"
     nome: "Lança Longa"
     img: "/assets/img/equipamentos/lanca-longa.webp"
-    imgAlt: "Imagem da Lança Longa"
-    comprimento: "151cm a 200cm"
-    empunhadaCom: "Uma ou duas mãos"
-    classes: "Classes que utilizam: Hoplita (nível 3) e Lanceiro;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: Entre 20 e 45cm."
+    medida: "1,51m a 2m"
+    maos: "Uma ou duas mãos"
+    classes: ["Hoplita", "Lanceiro"]
+    nota: "Hoplita a partir do nível 3, e só com uma mão"
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "Entre 20 e 45cm"
     descricao:
-      - "A Lança é uma das armas mais antigas e efetivas criada pelo homem, possui um peso bem distribuído ao longo de seu comprimento, pois a lâmina da ponta não costuma ser pesada, é recomendado o uso com duas mãos devido ao seu tamanho e peso. Seu ponto forte é seu alcance, um bom usuário de Lança deve sempre manter distância de seus oponentes, tendo em vista que se o combate avançar para muito perto, o lanceiro acaba perdendo sua vantagem."
-      - "Para Hoplitas é obrigatório o uso com somente uma mão. Lanceiros podem usá-la com duas mãos."
+      - "Uma das armas mais antigas que existem, e ainda uma das mais eficientes. O peso é bem distribuído porque a ponta é leve."
+      - "Todo o jogo dela é distância. Se o combate encosta, o lanceiro perde a vantagem que tinha."
   - id: "alabarda"
     nome: "Alabarda"
     img: "/assets/img/equipamentos/alabarda2.webp"
-    imgAlt: "Imagem da Alabarda"
-    comprimento: "151cm a 200cm"
-    empunhadaCom: "Duas mãos"
-    classes: "Classe que utiliza: Lanceiro;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: A soma do comprimento da ponta de lança e da lâmina do machado não deve exceder 50cm e deve ser preferencialmente proporcional (exemplo: 20cm de ponta e 20cm de lâmina), mínimo de 20cm. A lâmina deve preferencialmente ter um lado maior e outro menor (como na foto) para diferenciar de um machado longo."
+    medida: "1,51m a 2m"
+    maos: "Duas mãos"
+    classes: ["Lanceiro"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "Ponta de lança e lâmina somando de 20 a 50cm, de preferência proporcionais entre si. A lâmina deve ter um lado maior que o outro, para não virar um machado longo"
     descricao:
-      - "A Alabarda é uma arma de haste longa que se assemelha bastante a mistura de lança com machado. Seu estilo de luta é parecido com o da Lança Longa, porém com a adição da lâmina de machado. Por ter a lâmina de machado, pode acabar tendo a área de contato mais pesada que uma lança."
-      - "Curiosidade: A Alabarda possuía uma poderosa eficácia e efeito especial no combate a oponentes montados ou usando armaduras. Algumas vezes a lâmina em forma de meia-lua convexa dava lugar a uma em forma de meia-lua, ou um \"V\", para encaixar melhor na perna do cavalo e derrubar o oponente. A alabarda também podia ser usada apoiando a extremidade contrária da haste no pé e apontando a peça pontiaguda de lança para o peito do cavalo, matando-o."
+      - "Lança e machado na mesma haste. Joga como lança longa, com a lâmina somando corte, e a ponta pesa mais que a de uma lança comum."
+      - "Curiosidade: era a resposta ao cavaleiro montado. A lâmina em meia-lua encaixava na perna do cavalo, ou a haste era apoiada no chão com a ponta voltada para o peito da montaria."
   - id: "sabre-duplo"
     nome: "Sabre Duplo"
     img: "/assets/img/equipamentos/sabre-duplo.webp"
-    imgAlt: "Imagem do Sabre Duplo"
-    comprimento: "150cm a 200cm"
-    empunhadaCom: "Duas mãos"
-    classes: "Classe que utiliza: Lanceiro;"
-    construcao:
-      - "Pomo: Não possui;"
-      - "Empunhadura: Toda parte do equipamento que não é a área de contato;"
-      - "Área de contato: Entre 20 e 45cm (lâmina dupla, uma em cada extremidade)."
+    medida: "1,50m a 2m"
+    maos: "Duas mãos"
+    classes: ["Lanceiro"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "Não tem"
+      - rotulo: "Empunhadura"
+        valor: "Toda a parte que não é área de contato"
+      - rotulo: "Área de contato"
+        valor: "Entre 20 e 45cm, uma lâmina em cada ponta"
     descricao:
-      - "É uma arma bem versátil, o estilo de luta é um pouco diferente da lança, pelo fato de poder golpear com ambas as extremidades da arma."
+      - "Lâmina nas duas extremidades, então o golpe pode voltar sem reposicionar as mãos. O estilo é bem diferente do da lança."
   - id: "machado-longo"
     nome: "Machado Longo"
     img: "/assets/img/equipamentos/machado-longo.webp"
-    imgAlt: "Imagem do Machado Longo"
-    comprimento: "121cm a 150cm"
-    empunhadaCom: "Duas mãos"
-    classes: "Classe que utiliza: Bárbaro;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: Lâmina de até 35cm de altura; largura a critério do forjador. Pode ter 2 lâminas."
+    medida: "1,21m a 1,50m"
+    maos: "Duas mãos"
+    classes: ["Bárbaro"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "Lâmina de até 35cm de altura, largura a critério do forjador. Pode ter duas lâminas"
     descricao:
-      - "Possui um centro gravitacional menos balanceado que espadas, clavas e adagas, pois o peso da lâmina fica concentrado na ponta. Costuma ser bem efetivo contra oponentes que usam escudo, pois mesmo que a haste acerte o escudo, a lâmina pode ainda acertar o oponente. É mais comum que tenha lâmina somente de um lado, porém pode ter lâmina dupla também."
-      - "Curiosidade: Uma das finalidades de sua utilização em combates ao longo da história humana foi para conseguir contornar a resistência das armaduras, tendo em vista que, ao passo em que as tecnologias de armas evoluiam, as armaduras também, de forma que espadas não conseguiam mais efetivamente ferir os oponentes. O Machado por sua vez conseguia contornar isso em alguns casos, pois seu peso estava bem concentrado na região da lâmina, facilitando um golpe corto-contundente que poderia perfurar e/ou amassar a armadura inimiga."
-  - id: "maça-longa"
+      - "O machado com alcance de arma longa. Continua passando por cima de escudo, agora de mais longe."
+  - id: "maca-longa"
     nome: "Maça Longa"
     img: "/assets/img/equipamentos/maça-longa.webp"
-    imgAlt: "Imagem da Maça Longa"
-    comprimento: "121cm a 150cm"
-    empunhadaCom: "Duas mãos"
-    classes: "Classe que utiliza: Templário;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: Até 40cm de altura; diâmetro a critério do forjador."
+    medida: "1,21m a 1,50m"
+    maos: "Duas mãos"
+    classes: ["Templário"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "Até 40cm de altura, diâmetro a critério do forjador"
     descricao:
-      - "Assim como o Machado, possui um centro gravitacional menos balanceado que espadas, clavas e adagas, pois o peso da área de contato fica concentrado na ponta."
-      - "Curiosidade: Assim como os machados, uma das finalidades de sua utilização em combates ao longo da história humana foi de conseguir contornar a resistência das armaduras, tendo em vista que, ao passo em que as tecnologias de armas evoluiam, as armaduras também, de forma que espadas não conseguiam mais efetivamente ferir os oponentes. Neste caso, a Maça conseguia amassar as armaduras por ter boa parte de seu peso concentrado na ponta."
+      - "A versão de impacto do machado longo, com a mesma inércia na ponta."
   - id: "martelo-longo"
     nome: "Martelo Longo"
     img: "/assets/img/equipamentos/martelo-longo.webp"
-    imgAlt: "Imagem do Martelo Longo"
-    comprimento: "121cm a 150cm"
-    empunhadaCom: "Duas mãos"
-    classes: "Classe que utiliza: Bárbaro;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: A critério do forjador."
+    medida: "1,21m a 1,50m"
+    maos: "Duas mãos"
+    classes: ["Bárbaro"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "A critério do forjador"
     descricao:
-      - "Assim como o Machado e a Maça, possui um centro gravitacional menos balanceado que espadas, clavas e adagas, pois o peso da área de contato fica concentrado na ponta."
-      - "Seu uso é bem semelhante ao da Maça."
+      - "Se comporta como a maça longa. Muda o formato da cabeça."
   - id: "mangual-longo"
     nome: "Mangual Longo"
     img: "/assets/img/equipamentos/mangual-longo.webp"
-    imgAlt: "Imagem do Mangual Longo"
-    comprimento: "121cm a 130cm"
-    empunhadaCom: "Uma ou duas mãos"
-    classes: "Classe que utiliza: Templário (nível 3);"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Entre 40 e 70cm;"
-      - "Corrente: Entre 30 e 50cm;"
-      - "Área de contato: Costuma ser uma bola, mas pode ter o formato de uma maça também, diâmetro a critério do forjador."
+    medida: "1,21m a 1,30m"
+    maos: "Uma ou duas mãos"
+    classes: ["Templário"]
+    nota: "A partir do nível 3"
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "Entre 40 e 70cm"
+      - rotulo: "Corrente"
+        valor: "Entre 30 e 50cm"
+      - rotulo: "Área de contato"
+        valor: "Em geral uma bola, mas pode ter formato de maça. Diâmetro a critério do forjador. Pode ter até três correntes"
     descricao:
-      - "Equipamento de haste bem versátil, exige um controle e experiência maior por parte do usuário, pois é uma arma com corrente. Costuma ser bastante efetiva contra escudos, pois um golpe lateral ainda pode acertar a parte de trás do oponente com uma certa facilidade;"
-      - "Pode ter uma, duas ou três áreas de contato com suas respectivas correntes."
+      - "O mangual médio com haste e corrente maiores. Exige ainda mais controle, e é ainda mais difícil de bloquear."
 ---
 
-<p>
-  Categoria de armas que variam entre 121cm e 2m de comprimento. Seu ponto
-  forte é seu alcance, costumam ser menos ágeis que as armas curtas e
-  médias. A maioria dessas armas costumam serem utilizadas com duas mãos.
-</p>
+Armas de 1,21m a 2m. O ponto forte é o alcance, e o preço é a agilidade: são
+mais lentas que as curtas e médias, e a maioria pede as duas mãos.

@@ -1,0 +1,645 @@
+---
+/**
+ * Catálogo de equipamentos.
+ *
+ * Substitui oito páginas: /introducao, as seis categorias e
+ * /tabela-de-equipamentos. As categorias eram texto corrido com os mesmos
+ * blocos repetidos arma por arma, e a tabela era uma segunda cópia dos mesmos
+ * dados, que já tinha divergido da primeira em alguns comprimentos.
+ *
+ * A regra de cada categoria não se perdeu: ela é o corpo do .mdx e aparece
+ * quando o filtro daquela categoria está ligado.
+ *
+ * O filtro por classe é a razão de tudo isso existir. A pergunta real de quem
+ * abre o site no treino é "sou Templário, o que eu posso usar?", e antes ela
+ * exigia abrir seis páginas e ler o campo "classes que utilizam" de trinta
+ * cards.
+ */
+import { getCollection, render } from "astro:content";
+import PageLayout from "../layouts/PageLayout.astro";
+
+const categorias = (await getCollection("equipamentos")).sort(
+  (a, b) => a.data.ordem - b.data.ordem,
+);
+
+const painels = await Promise.all(
+  categorias.map(async (c) => ({ ...c, Regra: (await render(c)).Content })),
+);
+
+const itens = categorias.flatMap((c) =>
+  c.data.itens.map((i) => ({ ...i, cat: c.id, catNome: c.data.title })),
+);
+
+const classes = [...new Set(itens.flatMap((i) => i.classes))].sort((a, b) =>
+  a.localeCompare(b, "pt-BR"),
+);
+
+// O filtro compara sem acento dos dois lados, senão "barbaro" não acha Bárbaro
+// e o teclado do celular vira um obstáculo em vez de um atalho.
+const chave = (s: string) =>
+  s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+---
+
+<PageLayout
+  title="Equipamentos"
+  description="Catálogo dos equipamentos do Dragon Style, com filtro por categoria, classe e empunhadura."
+  resumo="Todo o arsenal do grupo em um lugar só. Filtre pela sua classe para ver o que você pode levar para o treino."
+  prev={{ href: "/regras-de-combate", label: "Regras de Combate" }}
+  next={{ href: "/nivel-geral", label: "Nível Geral" }}
+>
+  <p class="eq-intro">
+    Todo equipamento do Swordplay é acolchoado, e é por isso que ninguém precisa
+    de proteção para jogar. As combinações permitidas vêm das <a
+      class="links-de-texto"
+      href="/resumo-das-classes">classes</a
+    >, e cada card abaixo diz quem usa o quê.
+  </p>
+
+  <section class="eq-filtros" aria-label="Filtrar equipamentos">
+    <input
+      type="search"
+      id="eq-busca"
+      class="eq-busca"
+      placeholder="Buscar equipamento ou classe"
+      aria-label="Buscar equipamento ou classe"
+    />
+
+    <div class="eq-chips" role="group" aria-label="Categoria">
+      <button type="button" class="eq-chip ativo" data-cat="">Todas</button>
+      {
+        categorias.map((c) => (
+          <button type="button" class="eq-chip" data-cat={c.id}>
+            {c.data.title}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="eq-selects">
+      <label>
+        Classe
+        <select id="eq-classe">
+          <option value="">Todas</option>
+          {classes.map((c) => <option value={chave(c)}>{c}</option>)}
+        </select>
+      </label>
+      <label>
+        Empunhadura
+        <select id="eq-maos">
+          <option value="">Qualquer</option>
+          <option value="uma">Uma mão</option>
+          <option value="duas">Duas mãos</option>
+        </select>
+      </label>
+    </div>
+  </section>
+
+  {
+    painels.map((c) => (
+      <details class="eq-regra" data-painel={c.id} hidden>
+        <summary>
+          <span class="eq-regra-tit">Regras: {c.data.title}</span>
+          <span class="eq-regra-res">{c.data.resumo}</span>
+        </summary>
+        <div class="eq-regra-corpo">
+          <c.Regra />
+        </div>
+      </details>
+    ))
+  }
+
+  <p class="eq-conta" aria-live="polite">
+    <span id="eq-n">{itens.length}</span> equipamentos
+    <button type="button" id="eq-limpar" hidden>limpar filtros</button>
+  </p>
+
+  <ul class="eq-grade" id="eq-grade">
+    {
+      itens.map((i) => (
+        <li
+          class="eq-item"
+          data-cat={i.cat}
+          data-maos={chave(i.maos)}
+          data-busca={chave([i.nome, i.catNome, ...i.classes].join(" "))}
+          data-classes={i.classes.map(chave).join(" ")}
+        >
+          <button type="button" class="eq-card" data-abre={i.id}>
+            <img src={i.img} alt={i.nome} loading="lazy" />
+            <span class="eq-cat">{i.catNome}</span>
+            <span class="eq-nome">{i.nome}</span>
+            <span class="eq-medida">{i.medida}</span>
+            <span class="eq-classes">{i.classes.join(", ") || "Todas as classes"}</span>
+            {i.selo && <span class="eq-selo">{i.selo}</span>}
+          </button>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="eq-vazio" id="eq-vazio" hidden>
+    Nenhum equipamento com esses filtros. Essa combinação de classe e categoria
+    não existe no manual.
+  </p>
+
+  {
+    itens.map((i) => (
+      <dialog id={`d-${i.id}`} class="eq-dialog">
+        <form method="dialog">
+          <button class="eq-fechar" aria-label="Fechar">
+            ✕
+          </button>
+        </form>
+        <img src={i.img} alt={i.nome} />
+        <p class="eyebrow">{i.catNome}</p>
+        <h2>{i.nome}</h2>
+        <p class="eq-quem">
+          {i.classes.join(", ") || "Todas as classes"}
+          {i.nota && <span class="eq-nota">{i.nota}</span>}
+        </p>
+        <dl class="eq-specs">
+          <div>
+            <dt>Medida</dt>
+            <dd>{i.medida}</dd>
+          </div>
+          <div>
+            <dt>Empunhadura</dt>
+            <dd>{i.maos}</dd>
+          </div>
+          {i.specs.map((s) => (
+            <div>
+              <dt>{s.rotulo}</dt>
+              <dd>{s.valor}</dd>
+            </div>
+          ))}
+        </dl>
+        {i.descricao.map((p) => (
+          <p>{p}</p>
+        ))}
+      </dialog>
+    ))
+  }
+
+  <details class="eq-regra eq-glossario">
+    <summary>
+      <span class="eq-regra-tit">Glossário</span>
+      <span class="eq-regra-res">As partes de uma arma, que aparecem em todo card.</span>
+    </summary>
+    <div class="eq-regra-corpo">
+      <ul class="lista-comum">
+        <li>
+          <strong>Pomo</strong>: a ponta antes da empunhadura. Serve de
+          contrapeso, e no Swordplay é principalmente o acolchoamento daquela
+          extremidade.
+        </li>
+        <li>
+          <strong>Empunhadura</strong>: o trecho entre o pomo e a área de
+          contato. É por onde se segura.
+        </li>
+        <li>
+          <strong>Área de contato</strong>: a parte que acerta o oponente. É
+          onde fica o acolchoamento principal.
+        </li>
+        <li>
+          <strong>Armas exóticas</strong>: o que não se encaixa em nenhuma
+          medida daqui. Apresente aos organizadores, que decidem se é viável e
+          em qual classe entra.
+        </li>
+      </ul>
+    </div>
+  </details>
+</PageLayout>
+
+<script>
+  const grade = document.getElementById("eq-grade")!;
+  const itens = [...grade.querySelectorAll<HTMLElement>(".eq-item")];
+  const busca = document.getElementById("eq-busca") as HTMLInputElement;
+  const selClasse = document.getElementById("eq-classe") as HTMLSelectElement;
+  const selMaos = document.getElementById("eq-maos") as HTMLSelectElement;
+  const conta = document.getElementById("eq-n")!;
+  const vazio = document.getElementById("eq-vazio")!;
+  const limpar = document.getElementById("eq-limpar") as HTMLButtonElement;
+  const chips = [...document.querySelectorAll<HTMLElement>(".eq-chip")];
+  const painels = [...document.querySelectorAll<HTMLElement>("[data-painel]")];
+
+  let cat = "";
+
+  const semAcento = (s: string) =>
+    s.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+
+  function aplicar() {
+    const termo = semAcento(busca.value.trim());
+    const classe = selClasse.value;
+    const maos = selMaos.value;
+    let n = 0;
+
+    for (const li of itens) {
+      // "Uma ou duas mãos" tem que casar com os dois filtros, por isso o
+      // includes em vez de igualdade.
+      const ok =
+        (!cat || li.dataset.cat === cat) &&
+        (!classe || li.dataset.classes!.split(" ").includes(classe)) &&
+        (!maos || li.dataset.maos!.includes(maos)) &&
+        (!termo || li.dataset.busca!.includes(termo));
+      li.hidden = !ok;
+      if (ok) n++;
+    }
+
+    conta.textContent = String(n);
+    vazio.hidden = n > 0;
+    const filtrando = !!(cat || classe || maos || termo);
+    limpar.hidden = !filtrando;
+    for (const p of painels) p.hidden = p.dataset.painel !== cat;
+  }
+
+  for (const chip of chips) {
+    chip.addEventListener("click", () => {
+      cat = chip.dataset.cat!;
+      for (const c of chips) c.classList.toggle("ativo", c === chip);
+      aplicar();
+    });
+  }
+
+  busca.addEventListener("input", aplicar);
+  selClasse.addEventListener("change", aplicar);
+  selMaos.addEventListener("change", aplicar);
+
+  limpar.addEventListener("click", () => {
+    cat = "";
+    busca.value = "";
+    selClasse.value = "";
+    selMaos.value = "";
+    for (const c of chips) c.classList.toggle("ativo", c.dataset.cat === "");
+    aplicar();
+  });
+
+  grade.addEventListener("click", (e) => {
+    const botao = (e.target as HTMLElement).closest<HTMLElement>("[data-abre]");
+    if (!botao) return;
+    const dlg = document.getElementById(`d-${botao.dataset.abre}`);
+    (dlg as HTMLDialogElement | null)?.showModal();
+  });
+</script>
+
+<style>
+  .eq-intro {
+    color: var(--ds-text-3);
+  }
+
+  /* ======== FILTROS ======== */
+
+  .eq-filtros {
+    position: sticky;
+    top: var(--ds-header-h);
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 22px 0 18px;
+    padding: 12px 0;
+    /* Gruda no topo enquanto a grade rola. Sem fundo opaco os cards passariam
+       por baixo e apareceriam entre os chips. */
+    background: var(--ds-bg);
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .eq-busca {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 999px;
+    background: var(--ds-surface-solid);
+    color: var(--ds-text-1);
+    font-family: inherit;
+    font-size: 0.95rem;
+  }
+
+  .eq-busca:focus-visible {
+    outline: none;
+    border-color: var(--ds-gold-dim);
+  }
+
+  .eq-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    /* Rola de lado no celular em vez de quebrar em três linhas de chip. */
+    scrollbar-width: none;
+    padding-bottom: 2px;
+  }
+
+  .eq-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .eq-chip {
+    flex: none;
+    padding: 7px 14px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ds-text-3);
+    font-family: inherit;
+    font-size: 0.84rem;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      background 0.15s;
+  }
+
+  .eq-chip:hover {
+    color: var(--ds-text-1);
+    border-color: var(--ds-gold-dim);
+  }
+
+  .eq-chip.ativo {
+    background: var(--ds-gold-wash);
+    border-color: var(--ds-gold-dim);
+    color: var(--ds-gold-light);
+  }
+
+  .eq-selects {
+    display: flex;
+    gap: 10px;
+  }
+
+  .eq-selects label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ds-text-4);
+  }
+
+  .eq-selects select {
+    padding: 8px 10px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 8px;
+    background: var(--ds-surface-solid);
+    color: var(--ds-text-1);
+    font-family: inherit;
+    font-size: 0.9rem;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+
+  .eq-conta {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin: 0 0 14px;
+    font-size: 0.84rem;
+    color: var(--ds-text-4);
+  }
+
+  .eq-conta #eq-n {
+    color: var(--ds-gold-light);
+    font-variant-numeric: tabular-nums;
+  }
+
+  #eq-limpar {
+    border: none;
+    background: none;
+    padding: 0;
+    color: var(--ds-text-3);
+    font-family: inherit;
+    font-size: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+  }
+
+  /* ======== REGRA DA CATEGORIA E GLOSSÁRIO ======== */
+
+  .eq-regra {
+    margin-bottom: 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface);
+  }
+
+  .eq-regra summary {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 12px 16px;
+    cursor: pointer;
+  }
+
+  .eq-regra-tit {
+    font-family: var(--ds-font-display);
+    color: var(--ds-gold-light);
+  }
+
+  .eq-regra-res {
+    font-size: 0.86rem;
+    color: var(--ds-text-3);
+  }
+
+  .eq-regra-corpo {
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--ds-line);
+    padding-top: 14px;
+  }
+
+  .eq-regra-corpo :global(p),
+  .eq-regra-corpo :global(li) {
+    font-size: 0.93rem;
+  }
+
+  .eq-regra-corpo :global(h2) {
+    font-size: 1.05rem;
+    margin-top: 18px;
+  }
+
+  .eq-regra-corpo :global(.glossario-img) {
+    max-width: 100%;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+
+  /* ======== GRADE ======== */
+
+  .eq-grade {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(158px, 1fr));
+    gap: 12px;
+  }
+
+  .eq-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 100%;
+    height: 100%;
+    padding: 12px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface-solid);
+    color: inherit;
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      transform 0.15s;
+  }
+
+  .eq-card:hover,
+  .eq-card:focus-visible {
+    border-color: var(--ds-gold-dim);
+    transform: translateY(-2px);
+  }
+
+  .eq-card img {
+    width: 100%;
+    height: 96px;
+    object-fit: contain;
+    margin-bottom: 6px;
+  }
+
+  .eq-cat {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ds-text-5);
+  }
+
+  .eq-nome {
+    font-family: var(--ds-font-display);
+    font-size: 1rem;
+    line-height: 1.25;
+    color: var(--ds-text-1);
+  }
+
+  .eq-medida {
+    font-size: 0.82rem;
+    color: var(--ds-gold);
+  }
+
+  .eq-classes {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    color: var(--ds-text-4);
+  }
+
+  /* Selo encosta no canto e encolhe com o próprio texto, nunca estica no card. */
+  .eq-selo {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--ds-gold-wash);
+    border: 1px solid var(--ds-gold-dim);
+    font-size: 0.66rem;
+    color: var(--ds-gold-light);
+  }
+
+  .eq-vazio {
+    padding: 24px 0;
+    color: var(--ds-text-4);
+  }
+
+  /* ======== DETALHE ======== */
+
+  .eq-dialog {
+    width: min(560px, calc(100vw - 24px));
+    max-height: 86vh;
+    padding: 20px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 14px;
+    background: var(--ds-bg-alt);
+    color: var(--ds-text-2);
+  }
+
+  .eq-dialog::backdrop {
+    background: rgba(4, 7, 10, 0.72);
+  }
+
+  .eq-fechar {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 50%;
+    background: var(--ds-surface-solid);
+    color: var(--ds-text-2);
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  .eq-dialog img {
+    width: 100%;
+    height: 150px;
+    object-fit: contain;
+    margin-bottom: 12px;
+  }
+
+  .eq-dialog h2 {
+    margin: 2px 0 8px;
+    font-size: 1.5rem;
+  }
+
+  .eq-quem {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    margin-bottom: 14px;
+    color: var(--ds-text-1);
+  }
+
+  .eq-quem .eq-nota {
+    font-size: 0.85rem;
+    color: var(--ds-gold);
+  }
+
+  .eq-specs {
+    margin: 0 0 16px;
+    border-top: 1px solid var(--ds-line);
+  }
+
+  .eq-specs > div {
+    display: grid;
+    grid-template-columns: 128px 1fr;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .eq-specs dt {
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ds-text-4);
+  }
+
+  .eq-specs dd {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .eq-dialog p {
+    font-size: 0.93rem;
+  }
+
+  @media (max-width: 520px) {
+    .eq-specs > div {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+</style>

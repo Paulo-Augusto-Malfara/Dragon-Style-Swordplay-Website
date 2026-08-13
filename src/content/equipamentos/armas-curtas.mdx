@@ -1,87 +1,92 @@
 ---
 title: "Armas Curtas"
-prev: { href: "/introducao", label: "Equipamentos" }
-next: { href: "/armas-medias", label: "Armas Médias" }
-armas:
+ordem: 1
+resumo: "De 30 a 65cm, sempre com uma mão só."
+itens:
   - id: "adaga"
     nome: "Adaga"
     img: "/assets/img/equipamentos/adaga.webp"
-    imgAlt: "Imagem da Adaga"
-    comprimento: "30 a 45cm"
-    empunhadaCom: "Uma mão"
-    classes: "Classe que utiliza: Sicário. Pode ser utilizada como arma extra de algumas classes também;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Suficiente para uma mão, entre 7 e 12cm em média;"
-      - "Área de contato: Restante do comprimento."
+    medida: "30 a 45cm"
+    maos: "Uma mão"
+    classes: ["Sicário"]
+    nota: "Arma extra de várias outras classes"
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "Entre 7 e 12cm"
+      - rotulo: "Área de contato"
+        valor: "O restante do comprimento"
     descricao:
-      - "Com dimensões bem pequenas, costuma ser muito leve, permitindo um grande controle e agilidade no manejo, porém com alcance curtíssimo."
+      - "A menor arma do catálogo. Muito leve, então dá controle e agilidade que nenhuma outra dá, ao custo de um alcance curtíssimo. Quem usa adaga precisa entrar."
   - id: "espada-curta"
     nome: "Espada Curta"
     img: "/assets/img/equipamentos/espada-curta.webp"
-    imgAlt: "Imagem da Espada Curta"
-    comprimento: "46 a 65cm"
-    empunhadaCom: "Uma mão"
-    classes: "Classes que utilizam: Espadachim, Guerreiro e Sicário. Pode ser utilizada como arma extra de algumas classes também;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Suficiente para uma mão, entre 7 e 12cm em média;"
-      - "Área de contato: Restante do comprimento."
+    medida: "46 a 65cm"
+    maos: "Uma mão"
+    classes: ["Espadachim", "Guerreiro", "Sicário"]
+    nota: "Arma extra de várias outras classes"
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "Entre 7 e 12cm"
+      - rotulo: "Área de contato"
+        valor: "O restante do comprimento"
+      - rotulo: "Variações exóticas"
+        valor: "Cimitarra curta, wakizashi"
     descricao:
-      - "Um pouco maior que as adagas, porém menor que as espadas médias, costuma ser bem balanceada entre peso e agilidade, porém com alcance curto."
+      - "Maior que a adaga e menor que a espada média. É o meio-termo entre peso e agilidade, com alcance ainda curto."
   - id: "machado-curto"
     nome: "Machado Curto"
     img: "/assets/img/equipamentos/machado-curto.webp"
-    imgAlt: "Imagem do Machado Curto"
-    comprimento: "46 a 65cm"
-    empunhadaCom: "Uma mão"
-    classes: "Classes que utilizam: Bárbaro e Viking;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: Lâmina de até 12cm de altura e até 12cm de largura. Pode ter 2 lâminas."
+    medida: "46 a 65cm"
+    maos: "Uma mão"
+    classes: ["Bárbaro", "Viking"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "Lâmina de até 12cm de altura e 12cm de largura. Pode ter duas lâminas"
     descricao:
-      - "Possui um centro gravitacional menos balanceado que espadas, clavas e adagas, pois o peso da lâmina fica concentrado na ponta. Costuma ser bem efetivo contra oponentes que usam escudo, pois mesmo que a haste acerte o escudo, a lâmina pode ainda acertar o oponente. É mais comum que tenha lâmina somente de um lado, porém pode ter lâmina dupla também."
-      - "Curiosidade: Uma das finalidades de sua utilização em combates ao longo da história humana foi para conseguir contornar a resistência das armaduras, tendo em vista que, ao passo em que as tecnologias de armas evoluiam, as armaduras também, de forma que espadas não conseguiam mais efetivamente ferir os oponentes. O Machado por sua vez conseguia contornar isso em alguns casos, pois seu peso estava bem concentrado na região da lâmina, facilitando um golpe corto-contundente que poderia perfurar e/ou amassar a armadura inimiga."
-  - id: "maça-curta"
+      - "O peso fica concentrado na ponta, então o centro de gravidade é menos equilibrado que o de uma espada. Funciona bem contra escudo: mesmo que a haste bata no escudo, a lâmina ainda pode alcançar o oponente."
+      - "Curiosidade: na história, machado e maça surgiram como resposta à armadura. Conforme a proteção evoluía, a espada deixava de ferir, e uma arma com o peso todo na ponta conseguia perfurar ou amassar o metal."
+  - id: "maca-curta"
     nome: "Maça Curta"
     img: "/assets/img/equipamentos/maça-curta.webp"
-    imgAlt: "Imagem da Maça Curta"
-    comprimento: "46 a 65cm"
-    empunhadaCom: "Uma mão"
-    classes: "Classe que utiliza: Templário;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: Até 15cm de altura; diâmetro a critério do forjador."
+    medida: "46 a 65cm"
+    maos: "Uma mão"
+    classes: ["Templário"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "Até 15cm de altura, diâmetro a critério do forjador"
     descricao:
-      - "Assim como o Machado, possui um centro gravitacional menos balanceado que espadas, clavas e adagas, pois o peso da área de contato fica concentrado na ponta."
-      - "Curiosidade: Assim como os machados, uma das finalidades de sua utilização em combates ao longo da história humana foi de conseguir contornar a resistência das armaduras, tendo em vista que, ao passo em que as tecnologias de armas evoluiam, as armaduras também, de forma que espadas não conseguiam mais efetivamente ferir os oponentes. Neste caso, a Maça conseguia amassar as armaduras por ter boa parte de seu peso concentrado na ponta."
+      - "Mesma lógica do machado, com a força concentrada na ponta em vez de distribuída pela lâmina. Golpeia por impacto, não por corte."
   - id: "martelo-curto"
     nome: "Martelo Curto"
     img: "/assets/img/equipamentos/martelo-curto.webp"
-    imgAlt: "Imagem do Martelo Curto"
-    comprimento: "46 a 65cm"
-    empunhadaCom: "Uma mão"
-    classes: "Classes que utilizam: Bárbaro e Viking;"
-    construcao:
-      - "Pomo: No mínimo 5cm;"
-      - "Empunhadura: Comprimento da haste (maior parte do equipamento);"
-      - "Área de contato: A critério do forjador."
+    medida: "46 a 65cm"
+    maos: "Uma mão"
+    classes: ["Bárbaro", "Viking"]
+    specs:
+      - rotulo: "Pomo"
+        valor: "No mínimo 5cm"
+      - rotulo: "Empunhadura"
+        valor: "O comprimento da haste, que é a maior parte da arma"
+      - rotulo: "Área de contato"
+        valor: "A critério do forjador"
     descricao:
-      - "Assim como o Machado e a Maça, possui um centro gravitacional menos balanceado que espadas, clavas e adagas, pois o peso da área de contato fica concentrado na ponta."
-      - "Seu uso é bem semelhante ao da Maça."
+      - "Se comporta praticamente como a maça curta. A escolha entre os dois costuma ser estética."
 ---
 
-<p>
-  Categoria de armas que variam entre 30 e 65cm de comprimento. Costumam ser
-  extremamente ágeis por conta de seu peso e tamanho reduzidos, possuem
-  também grande precisão e controle nos ataques. São utilizadas
-  exclusivamente com uma mão.
-</p>
-<br />
-<p>
-  São muito utilizadas também como arma extra de várias classes, para saber
-  mais, confira as páginas individuais de cada classe.
-</p>
-<br />
+Armas de 30 a 65cm, usadas exclusivamente com uma mão. São as mais ágeis do
+catálogo e as mais precisas, mas exigem chegar perto para acertar.
+
+Também são as armas extras mais comuns: várias classes carregam uma curta na
+mão livre. A página de cada classe diz quais.

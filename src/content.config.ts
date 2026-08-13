@@ -16,26 +16,47 @@ const classes = defineCollection({
   }),
 });
 
-const arma = z.object({
-  id: z.string().optional(),
+/**
+ * Um equipamento do catálogo.
+ *
+ * Os três primeiros campos depois da identidade são o que o filtro usa, e por
+ * isso são campos próprios em vez de texto solto: `maos` e `classes` eram frase
+ * corrida ("Classes que utilizam: Bárbaro e Viking;") e nesse formato não dava
+ * pra perguntar "o que eu, Templário, posso usar?", que é a pergunta que alguém
+ * faz de pé no treino.
+ *
+ * `specs` é lista genérica de rótulo e valor porque as categorias medem coisas
+ * diferentes: arma tem pomo e área de contato, escudo tem "como medir" e
+ * formatos, arco tem libragem e munição. Um schema fixo obrigaria a inventar
+ * campo vazio pra metade do catálogo.
+ */
+const equipamento = z.object({
+  id: z.string(),
   nome: z.string(),
   img: z.string(),
-  imgAlt: z.string(),
-  comprimento: z.string(),
-  empunhadaCom: z.string(),
-  classes: z.string(),
-  construcao: z.array(z.string()),
-  descricao: z.array(z.string()),
+  /** Comprimento, ou a regra de medida no caso dos escudos. Aparece no card. */
+  medida: z.string(),
+  maos: z.enum(["Uma mão", "Duas mãos", "Uma ou duas mãos"]),
+  classes: z.array(z.string()).default([]),
+  /** Ressalva curta de acesso, tipo "Extra das demais classes no nível 3". */
+  nota: z.string().optional(),
+  /** Selo dourado no card. Hoje só a Clava usa, como arma inicial. */
+  selo: z.string().optional(),
+  specs: z.array(z.object({ rotulo: z.string(), valor: z.string() })).default([]),
+  descricao: z.array(z.string()).default([]),
 });
 
 const equipamentos = defineCollection({
   loader: glob({ pattern: "**/*.mdx", base: "./src/content/equipamentos" }),
+  // O corpo do .mdx é a regra da categoria, que aparece quando o filtro dela
+  // está ligado. O frontmatter é o que vira card.
   schema: z.object({
     title: z.string(),
-    showGlossario: z.boolean().default(true),
-    prev: navLink,
-    next: navLink,
-    armas: z.array(arma).default([]),
+    /** Ordem dos chips de categoria: do mais curto pro mais longo, depois defesa. */
+    ordem: z.number(),
+    /** Uma frase. Aparece acima da regra da categoria. */
+    resumo: z.string(),
+    itens: z.array(equipamento).default([]),
   }),
 });
 
