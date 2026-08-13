@@ -17,4 +17,7 @@ export default defineConfig({
   // aqui: o adaptador da Vercel gera uma rota inválida quando `redirects` do
   // Astro convive com o vercel.json deste projeto.
   integrations: [svelte(), sitemap(), mdx()],
+  // Nenhum script embutido no HTML: todos viram arquivo, que a CSP já cobre
+  // com 'self'. Ver o comentário no topo de scripts/csp-hashes.mjs.
+  vite: { build: { assetsInlineLimit: 0 } },
 });
