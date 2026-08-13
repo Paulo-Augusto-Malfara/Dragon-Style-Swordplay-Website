@@ -37,6 +37,21 @@
   const displayName = $derived(apelido || nomeOficial);
 
   /**
+   * Total de treinos, somado por classe.
+   *
+   * Era `historico.length`, e isso mostrava 9 para quem o Ranking Geral mostrava
+   * 44: `v_historico_presencas` só tem as presenças registradas pelo sistema
+   * novo, enquanto o contador por classe carrega o histórico inteiro do grupo. A
+   * mesma pessoa via dois números para a mesma coisa em duas páginas. Agora sai
+   * da mesma fonte que o ranking usa, então os dois sempre concordam. O bloco
+   * "Últimas presenças" continua listando só o histórico detalhado, que é o que
+   * ele diz ser.
+   */
+  const totalTreinos = $derived(
+    porClasse.reduce((soma, c) => soma + (c.treinos_por_classe ?? 0), 0),
+  );
+
+  /**
    * A próxima graduação e o quanto falta pra ela.
    *
    * Os limiares vêm de dFaixas, não de uma cópia aqui: a tabela é legível pelo
@@ -65,9 +80,6 @@
       pct: vao > 0 ? Math.round(((nivelGeral - piso) / vao) * 100) : 0,
     };
   });
-  // O total de treinos já estava na tela, espalhado por classe. Somado ele vira
-  // o número que a pessoa realmente quer saber quando abre a ficha.
-  const totalTreinos = $derived(historico.length);
 
   async function load() {
     try {
