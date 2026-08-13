@@ -22,6 +22,16 @@
   font-display: swap;
   src: url("/fonts/bree-serif-latin-400.woff2") format("woff2");
 }
+/* Cinzel é variável (400..900) num arquivo de 26KB. Entra só em h1 e h2, via
+   --ds-font-display; rótulo de interface e número seguem em Bree Serif/Rubik,
+   porque é fonte de exibição e some em tamanho pequeno. */
+@font-face {
+  font-family: "Cinzel";
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+  src: url("/fonts/cinzel-latin-var.woff2") format("woff2");
+}
 
 :root {
   /* ======== TOKENS DA REESTRUTURAÇÃO VISUAL (Claude Design 2026) ========
@@ -62,10 +72,15 @@
   --ds-gold-wash: rgba(232, 172, 70, 0.06);
   --ds-success: #5fa86b;
 
-  /* Tipografia. O design pede Cinzel nos títulos, mas a CSP é font-src 'self'
-     e o arquivo ainda não foi hospedado -- por ora aponta pro Bree Serif que já
-     existe. Trocar aqui troca o site inteiro. */
-  --ds-font-display: "Bree Serif", serif;
+  /* Tipografia.
+
+     --ds-font-display é o único ponto de troca da fonte de título do site.
+     Pra voltar atrás depois, mude só esta linha:
+       Bree Serif (o que era antes) ...... "Bree Serif", serif
+       sem serifa, igual ao corpo ........ var(--ds-font-body)
+     O Bree Serif fica no fallback: se o Cinzel não carregar, cai nele em vez
+     de cair numa serifada qualquer do sistema. */
+  --ds-font-display: "Cinzel", "Bree Serif", serif;
   --ds-font-body: "Rubik", system-ui, sans-serif;
 
   --primary-color: #121212;
@@ -566,7 +581,11 @@ main {
    dura nunca fez trabalho de legibilidade — em texto pequeno só engrossava
    a letra. */
 h1 {
-  font-family: "Bree Serif", serif;
+  /* Já é uppercase logo abaixo, que é justamente onde o Cinzel funciona: ele vem
+     de capitulares romanas. Como é variável, o negrito padrão de h1 agora é peso
+     700 de verdade -- com o Bree Serif, que só tem 400, o navegador engordava o
+     contorno sozinho. */
+  font-family: var(--ds-font-display);
   display: flex;
   justify-content: center;
   text-transform: uppercase;
@@ -591,7 +610,7 @@ h1 {
 }
 
 h2 {
-  font-family: "Bree Serif", serif;
+  font-family: var(--ds-font-display);
   padding: 20px 0 20px 0;
   width: 90%;
   display: flex;
