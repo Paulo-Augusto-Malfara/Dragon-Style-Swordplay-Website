@@ -1,6 +1,48 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import ArmaCard from "../components/ArmaCard.astro";
+import CatalogoLinks from "../components/CatalogoLinks.astro";
+
+// Esta página é a entrada "Equipamentos" do menu. Antes ela tinha um único link
+// de saída (/como-funciona), e as seis categorias de arma só eram alcançadas
+// pela corrente prev/next, uma por vez.
+const categorias = [
+  {
+    href: "/armas-curtas",
+    label: "Armas Curtas",
+    desc: "Adagas e espadas curtas, para quem luta colado no adversário.",
+  },
+  {
+    href: "/armas-medias",
+    label: "Armas Médias",
+    desc: "Espadas médias, machados e clavas: o alcance mais comum nos treinos.",
+  },
+  {
+    href: "/armas-longas",
+    label: "Armas Longas",
+    desc: "Espadas longas, lanças e alabardas, empunhadas com as duas mãos.",
+  },
+  {
+    href: "/longo-alcance",
+    label: "Longo Alcance",
+    desc: "Arco e balestra, o arsenal do Arqueiro.",
+  },
+  {
+    href: "/armas-de-arremesso",
+    label: "Armas de Arremesso",
+    desc: "O que pode ser lançado, e as regras de quem lança.",
+  },
+  {
+    href: "/escudos",
+    label: "Escudos",
+    desc: "Do pequeno ao gigante, com as cavidades e empunhaduras de cada um.",
+  },
+  {
+    href: "/tabela-de-equipamentos",
+    label: "Tabela de Equipamentos",
+    desc: "Todas as medidas em uma tabela só, para consulta rápida.",
+  },
+];
 ---
 
 <PageLayout
@@ -44,6 +86,7 @@ import ArmaCard from "../components/ArmaCard.astro";
       </div>
     </div>
   </section>
+  <CatalogoLinks titulo="As categorias de equipamento" itens={categorias} />
   <section id="armas-exoticas">
     <h2 class="h2-equip">Armas Exóticas</h2>
     <div class="h2-bottom-border"></div>

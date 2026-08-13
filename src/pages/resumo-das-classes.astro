@@ -1,5 +1,27 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
+import CatalogoLinks from "../components/CatalogoLinks.astro";
+
+// Esta página é a entrada "Classes" do menu. A grade abaixo já levava às 10
+// classes; estas três explicam o sistema em volta delas e não tinham caminho
+// nenhum na navegação.
+const sistema = [
+  {
+    href: "/como-funciona",
+    label: "Como Funciona",
+    desc: "O que é uma classe, como se escolhe e como se troca.",
+  },
+  {
+    href: "/mentor-de-classe",
+    label: "Mentor de Classe",
+    desc: "Quem orienta cada classe e o que esperar de um mentor.",
+  },
+  {
+    href: "/bonus-nivel-3",
+    label: "Bônus de Nível 3",
+    desc: "O equipamento extra que cada classe libera ao chegar no nível 3.",
+  },
+];
 
 const classes = [
   { slug: "arqueiro", label: "Arqueiro", img: "arqueiros", alt: "Imagem Arqueiro", desc: "Mestre no combate de longa distância, utiliza Arco e Flecha e também Balestra. Possui certa vantagem contra alvos que não tenham escudos, principalmente em modalidades em grupo. Tem acesso a uma arma corpo-a-corpo extra para se defender." },
@@ -48,5 +70,6 @@ const classes = [
       }
     </div>
   </section>
+  <CatalogoLinks titulo="Sobre o sistema de classes" itens={sistema} />
   <br />
 </PageLayout>

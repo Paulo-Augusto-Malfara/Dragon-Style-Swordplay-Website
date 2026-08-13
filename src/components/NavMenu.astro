@@ -1,65 +1,58 @@
 ---
+/**
+ * IA de 2026: 4 grupos, 19 entradas. Antes eram 5 grupos e 39 itens, com as 10
+ * classes e as 6 categorias de arma listadas uma a uma no menu.
+ *
+ * Regra da estrutura: o menu leva a catálogos, e a página de detalhe é
+ * alcançada pelo catálogo, que é onde dá pra comparar uma com a outra. Por isso
+ * "Classes" aponta pro resumo (que já linkava as 10) e "Equipamentos" pra
+ * introdução (que passou a linkar as 6 categorias via CatalogoLinks).
+ *
+ * Doações, Mural de Doações e Administração saíram daqui pro rodapé
+ * institucional: são institucionais e não competem pela mesma atenção que
+ * ranking e mural.
+ *
+ * Conquistas e Vestimentas existem como rota mas o conteúdo ainda não é real,
+ * então continuam fora do menu de propósito.
+ */
 const menu = [
   {
-    label: "Sobre Nós",
+    label: "Comece Aqui",
     items: [
-      { href: "/quem-somos", label: "Quem Somos" },
+      { href: "/home", label: "Início" },
       { href: "/o-que-e-swordplay", label: "O que é Swordplay?" },
       { href: "/como-participar", label: "Como Participar" },
+      { href: "/agenda", label: "Agenda de Treinos" },
+      { href: "/quem-somos", label: "Quem Somos" },
       { href: "/historia-do-ds", label: "História do DS" },
-      { href: "/administracao", label: "Administração" },
-      { href: "/doacoes", label: "Doações" },
-      { href: "/mural-de-doacoes", label: "Mural de Doações" },
+      { href: "/galeria", label: "Galeria" },
     ],
   },
   {
-    label: "Regulamentos",
+    label: "Manual",
     items: [
-      { href: "/organizacao-dos-treinos", label: "Organização dos Treinos" },
-      { href: "/codigo-de-conduta", label: "Código de Conduta" },
-      { href: "/regras-de-combate", label: "Regras de Combate" },
+      { href: "/organizacao-dos-treinos", label: "Regras" },
+      { href: "/resumo-das-classes", label: "Classes" },
+      { href: "/introducao", label: "Equipamentos" },
+      { href: "/nivel-geral", label: "Progressão" },
+      { href: "/modalidades", label: "Modalidades" },
     ],
   },
   {
-    label: "Equipamentos",
+    label: "Comunidade",
     items: [
-      { href: "/introducao", label: "Introdução" },
-      { href: "/armas-curtas", label: "Armas Curtas" },
-      { href: "/armas-medias", label: "Armas Médias" },
-      { href: "/armas-longas", label: "Armas Longas" },
-      { href: "/longo-alcance", label: "Longo Alcance" },
-      { href: "/armas-de-arremesso", label: "Armas de Arremesso" },
-      { href: "/escudos", label: "Escudos" },
-    ],
-  },
-  {
-    label: "Progressão",
-    items: [
-      { href: "/nivel-geral", label: "Nível Geral e Graduações" },
+      { href: "/mural-de-membros", label: "Mural de Membros" },
       { href: "/ranking-geral", label: "Ranking Geral" },
       { href: "/ranking-por-classe", label: "Ranking por Classe" },
-      { href: "/novato-x-veterano", label: "Novato x Veterano" },
-      { href: "/pontos-de-honra", label: "Pontos de Honra" },
-      { href: "/mural-de-membros", label: "Mural de Membros" },
       { href: "/registro-de-treinos", label: "Registro de Treinos" },
-      { href: "/agenda", label: "Agenda de Treinos" },
+      { href: "/novidades", label: "Novidades" },
     ],
   },
   {
-    label: "Classes",
+    label: "Área do Membro",
     items: [
-      { href: "/como-funciona", label: "Como Funciona" },
-      { href: "/resumo-das-classes", label: "Resumo das Classes" },
-      { href: "/arqueiro", label: "Arqueiro" },
-      { href: "/barbaro", label: "Bárbaro" },
-      { href: "/cavaleiro", label: "Cavaleiro" },
-      { href: "/espadachim", label: "Espadachim" },
-      { href: "/guerreiro", label: "Guerreiro" },
-      { href: "/hoplita", label: "Hoplita" },
-      { href: "/lanceiro", label: "Lanceiro" },
-      { href: "/sicario", label: "Sicário" },
-      { href: "/templario", label: "Templário" },
-      { href: "/viking", label: "Viking" },
+      { href: "/dashboard", label: "Minha Ficha" },
+      { href: "/admin", label: "Painel Administrativo" },
     ],
   },
 ];
@@ -93,8 +86,6 @@ const menu = [
             </li>
           ))
         }
-        <li><a href="/modalidades" class="menu-a">Modalidades</a></li>
-        <li><a href="/novidades" class="menu-a">Novidades</a></li>
       </ul>
     </div>
   </nav>

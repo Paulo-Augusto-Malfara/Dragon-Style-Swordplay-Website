@@ -1,0 +1,74 @@
+---
+/**
+ * Grade de links pras páginas filhas de um catálogo.
+ *
+ * Existe por causa da IA nova: as páginas de detalhe saíram do menu, então o
+ * catálogo precisa ser o caminho até elas. Sem isso, chegar em /escudos passaria
+ * a exigir percorrer a corrente prev/next uma página por vez.
+ */
+interface Props {
+  titulo: string;
+  itens: { href: string; label: string; desc?: string }[];
+}
+const { titulo, itens } = Astro.props;
+---
+
+<section class="catalogo">
+  <h2>{titulo}</h2>
+  <ul>
+    {
+      itens.map((i) => (
+        <li>
+          <a href={i.href}>
+            <span class="cat-label">{i.label}</span>
+            {i.desc && <span class="cat-desc">{i.desc}</span>}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  .catalogo ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+    gap: 12px;
+  }
+
+  .catalogo a {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    height: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface);
+    text-decoration: none;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+  }
+
+  .catalogo a:hover,
+  .catalogo a:focus-visible {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
+  .cat-label {
+    font-family: var(--ds-font-display);
+    font-size: 1.02rem;
+    color: var(--ds-gold-light);
+  }
+
+  .cat-desc {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--ds-text-3);
+  }
+</style>

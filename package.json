@@ -5,7 +5,8 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "smoke-test": "node scripts/smoke-test.mjs"
+    "smoke-test": "node scripts/smoke-test.mjs",
+    "test": "node scripts/test-sw-scope.mjs && node scripts/test-icone-maskable.mjs && node scripts/test-alcance.mjs"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.3",

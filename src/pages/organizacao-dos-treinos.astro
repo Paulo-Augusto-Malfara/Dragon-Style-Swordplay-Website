@@ -1,13 +1,34 @@
 ---
 import { getEntry, render } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
+import CatalogoLinks from "../components/CatalogoLinks.astro";
 
 const entry = await getEntry("regulamentos", "organizacao-dos-treinos");
 const { Content } = await render(entry);
+
+// Esta página é a entrada "Regras" do menu, então precisa levar às outras três.
+const regras = [
+  {
+    href: "/regras-de-combate",
+    label: "Regras de Combate",
+    desc: "Como funciona o combate: golpes válidos, áreas do corpo e o que invalida um acerto.",
+  },
+  {
+    href: "/codigo-de-conduta",
+    label: "Código de Conduta",
+    desc: "O que se espera de quem treina, dentro e fora da arena.",
+  },
+  {
+    href: "/novato-x-veterano",
+    label: "Novato x Veterano",
+    desc: "As regras que mudam quando os dois lados têm experiência muito diferente.",
+  },
+];
 ---
 
 <PageLayout title={entry.data.title} prev={entry.data.prev} next={entry.data.next}>
   <section>
     <Content />
   </section>
+  <CatalogoLinks titulo="As outras regras" itens={regras} />
 </PageLayout>
