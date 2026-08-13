@@ -352,20 +352,80 @@ body > header {
 #header-icons-div {
   display: flex;
   align-items: center;
-  gap: clamp(0.9rem, 3vw, 2rem);
-}
-
-/* No celular ficam só o logo e o login. As três redes sociais saem porque já
-   estão no rodapé, e num cabeçalho grudado cada pixel de altura é cobrado em
-   toda página. Seletor de filho direto pra não atingir o ícone do AuthLink. */
-@media (max-width: 860px) {
-  #header-icons-div > a[target="_blank"] {
-    display: none;
-  }
+  flex: none;
 }
 
 .header-icon {
   color: var(--golden-color);
+}
+
+/* ======== BOTÃO QUE ABRE A BUSCA ======== */
+
+/* Parece um campo mas é um botão: o campo de verdade vive dentro do <dialog>,
+   e ter dois inputs no documento faria o navegador oferecer autocomplete no
+   errado. */
+.busca-abre {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--ds-text-4);
+  font-size: 0.82rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.busca-abre:hover,
+.busca-abre:focus-visible {
+  border-color: var(--ds-gold-dim);
+  color: var(--ds-text-2);
+}
+
+.busca-abre-lupa {
+  flex: none;
+  width: 11px;
+  height: 11px;
+  border: 1.5px solid var(--ds-gold);
+  border-radius: 50%;
+}
+
+.busca-abre-texto {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.busca-abre-atalho {
+  margin-left: auto;
+  flex: none;
+  padding: 2px 6px;
+  border: 1px solid var(--ds-line);
+  border-radius: 5px;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+  color: var(--ds-text-5);
+}
+
+/* Atalho de teclado não existe no celular. O rótulo longo fica, e o
+   text-overflow acima corta o que não couber. */
+@media (max-width: 860px) {
+  .busca-abre-atalho {
+    display: none;
+  }
+}
+
+@media (min-width: 861px) {
+  .busca-abre {
+    flex: none;
+    width: min(340px, 34vw);
+    margin-left: auto;
+  }
 }
 
 .auth-link {

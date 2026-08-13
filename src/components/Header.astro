@@ -1,30 +1,32 @@
 ---
-import Icon from "./Icon.astro";
 import AuthLink from "./auth/AuthLink.svelte";
+
+/**
+ * Logo, busca e entrada. As três redes sociais saíram daqui: já estavam no
+ * rodapé, e num cabeçalho grudado o espaço horizontal é o recurso mais caro do
+ * celular. Quem abre o site no treino quer buscar uma regra, não abrir o
+ * Instagram, então quem fica com o espaço é a busca.
+ */
 ---
 
-<section>
-  <div class="header-top">
-    <div class="header-logo">
-      <a id="logo-anchor" href="/home">
-        <img
-          id="logo-ds"
-          src="/assets/img/logo-ds-landscape.webp"
-          alt="Logo do Dragon Style Swordplay e Eventos"
-        />
-      </a>
-      <div id="header-icons-div">
-        <a target="_blank" href="https://www.facebook.com/groups/227828760657044">
-          <Icon name="facebook" class="header-icon" />
-        </a>
-        <a target="_blank" href="https://instagram.com/ds.swordplay?igshid=YmMyMTA2M2Y=">
-          <Icon name="instagram" class="header-icon" />
-        </a>
-        <a target="_blank" href="https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK">
-          <Icon name="whatsapp" class="header-icon" />
-        </a>
-        <AuthLink client:idle />
-      </div>
+<div class="header-top">
+  <div class="header-logo">
+    <a id="logo-anchor" href="/home">
+      <img
+        id="logo-ds"
+        src="/assets/img/logo-ds-landscape.webp"
+        alt="Logo do Dragon Style Swordplay e Eventos"
+      />
+    </a>
+
+    <button type="button" class="busca-abre" data-abre-busca>
+      <span class="busca-abre-lupa" aria-hidden="true"></span>
+      <span class="busca-abre-texto">Buscar regras, armas, classes…</span>
+      <span class="busca-abre-atalho" aria-hidden="true">Ctrl K</span>
+    </button>
+
+    <div id="header-icons-div">
+      <AuthLink client:idle />
     </div>
   </div>
-</section>
+</div>

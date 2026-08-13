@@ -1,55 +1,204 @@
 ---
+/**
+ * Catálogo de modalidades.
+ *
+ * O filtro é por quantas pessoas a modalidade exige porque essa é a pergunta
+ * real de quem está no campo: apareceram seis pessoas hoje, o que dá pra jogar?
+ * Antes era preciso abrir uma por uma e ler os requisitos até achar uma que
+ * coubesse.
+ */
 import PageLayout from "../layouts/PageLayout.astro";
 import Accordion from "../components/Accordion.astro";
 import { supabasePublic } from "../lib/supabase-public";
+import { minimoDeParticipantes } from "../lib/modalidades";
 
 export const prerender = false;
 
-const { data: modalidades } = await supabasePublic
+const { data } = await supabasePublic
   .from("modalidades")
   .select("*")
   .order("id");
+
+const modalidades = (data ?? []).map((m) => ({
+  ...m,
+  minimo: minimoDeParticipantes(m.requirements),
+}));
+
+// As faixas saem do próprio acervo, não de uma lista chutada: se um dia entrar
+// uma modalidade de 30 pessoas, a faixa "20+" continua correta sem ninguém
+// lembrar de vir aqui mexer.
+const faixas = [
+  { id: "", label: "Todas" },
+  { id: "ate5", label: "Até 5" },
+  { id: "10", label: "10+" },
+  { id: "15", label: "15+" },
+  { id: "20", label: "20+" },
+];
 ---
 
 <PageLayout
-  title="modalidades"
+  title="Modalidades"
+  description="Os jogos de combate do Dragon Style, filtrados por quantas pessoas cada um precisa."
+  resumo="Modalidades são os jogos que dão dinâmica ao combate. Filtre por quantas pessoas apareceram e veja o que dá para jogar hoje."
 >
-  <section>
-    <p>
-      As modalidades são jogos que buscam trazer uma maior dinâmica para os
-      combates. Alguns grupos chamam também de Jogos de Combate.
-    </p>
-    <br />
-    <p>
-      Cada modalidade costuma ter suas próprias regras para viabilizar o
-      tema ou proposta da mesma. Os membros frequentemente sugerem novas
-      modalidades e nós costumamos colocá-las em teste, eventualmente essas
-      modalidades acabam entrando em nossa lista.
-    </p>
-    <br />
-    <p>
-      Abaixo você pode conferir as modalidades que o Dragon Style costuma
-      utilizar em seus treinos, para acessar o conteúdo delas, basta clicar
-      no nome.
-    </p>
-    <br />
-  </section>
-  <section>
-    <div class="modalidades modalidades-grid">
+  <section class="mod-filtros" aria-label="Filtrar por número de participantes">
+    <p class="mod-filtros-rotulo">Quantos vieram hoje?</p>
+    <div class="mod-chips" role="group">
       {
-        (modalidades ?? []).map((m) => (
-          <Accordion
-            id={m.slug}
-            title={m.title}
-            tags={m.tags}
-            descricao={m.description}
-            objetivo={m.objective}
-            pontuacao={m.scoring_respawn}
-            requisitos={m.requirements}
-            variacoes={m.variations}
-          />
+        faixas.map((f) => (
+          <button
+            type="button"
+            class:list={["mod-chip", { ativo: f.id === "" }]}
+            data-faixa={f.id}
+          >
+            {f.label}
+          </button>
         ))
       }
     </div>
+    <p class="mod-conta" aria-live="polite" id="mod-conta">
+      {modalidades.length} modalidades
+    </p>
+  </section>
+
+  <section>
+    <div class="modalidades modalidades-grid" id="mod-grade">
+      {
+        modalidades.map((m) => (
+          <div class="mod-item" data-minimo={m.minimo}>
+            <Accordion
+              id={m.slug}
+              title={m.title}
+              tags={[...(m.minimo ? [`${m.minimo}+ pessoas`] : []), ...(m.tags ?? [])]}
+              descricao={m.description}
+              objetivo={m.objective}
+              pontuacao={m.scoring_respawn}
+              requisitos={m.requirements}
+              variacoes={m.variations}
+            />
+          </div>
+        ))
+      }
+    </div>
+    <p class="mod-vazio" id="mod-vazio" hidden>
+      Nenhuma modalidade para esse número. Toque em <strong>Todas</strong> para
+      ver o acervo inteiro.
+    </p>
   </section>
 </PageLayout>
+
+<style>
+  /* Gruda abaixo do cabeçalho: no celular a lista é longa e rolar de volta ao
+     topo pra trocar o filtro é o tipo de atrito que faz a pessoa desistir. */
+  .mod-filtros {
+    position: sticky;
+    top: var(--ds-header-h);
+    z-index: 3;
+    margin-bottom: 1.4em;
+    padding: 12px 0;
+    background: var(--ds-bg);
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .mod-filtros-rotulo {
+    margin: 0 0 10px;
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ds-text-4);
+  }
+
+  .mod-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: none;
+  }
+
+  .mod-chips::-webkit-scrollbar {
+    display: none;
+  }
+
+  .mod-chip {
+    flex: none;
+    min-height: 38px;
+    padding: 0 15px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 999px;
+    background: none;
+    color: var(--ds-text-2);
+    font-size: 0.84rem;
+    cursor: pointer;
+  }
+
+  .mod-chip:hover,
+  .mod-chip:focus-visible {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .mod-chip.ativo {
+    border-color: var(--ds-gold);
+    background: var(--ds-gold-wash);
+    color: var(--ds-gold-light);
+  }
+
+  .mod-conta {
+    margin: 10px 0 0;
+    font-size: 0.76rem;
+    color: var(--ds-text-5);
+  }
+
+  .mod-item[hidden] {
+    display: none;
+  }
+
+  .mod-vazio {
+    padding: 40px 0;
+    text-align: center;
+    color: var(--ds-text-4);
+  }
+</style>
+
+<script>
+  const grade = document.getElementById("mod-grade");
+  const conta = document.getElementById("mod-conta");
+  const vazio = document.getElementById("mod-vazio");
+  const chips = Array.from(
+    document.querySelectorAll<HTMLButtonElement>(".mod-chip"),
+  );
+
+  if (grade && conta && vazio && chips.length) {
+    const itens = Array.from(
+      grade.querySelectorAll<HTMLElement>(".mod-item"),
+    );
+
+    // "Até 5" é teto e o resto é piso, então a comparação inverte no primeiro
+    // caso. Um único mapa evita espalhar essa regra por três lugares.
+    const cabe = (minimo: number, faixa: string) => {
+      if (!faixa) return true;
+      if (faixa === "ate5") return minimo <= 5;
+      return minimo >= Number(faixa);
+    };
+
+    function filtrar(faixa: string) {
+      let visiveis = 0;
+      for (const item of itens) {
+        const minimo = Number(item.dataset.minimo ?? 0);
+        const mostra = cabe(minimo, faixa);
+        item.hidden = !mostra;
+        if (mostra) visiveis++;
+      }
+      conta!.textContent =
+        visiveis === 1 ? "1 modalidade" : `${visiveis} modalidades`;
+      vazio!.hidden = visiveis > 0;
+    }
+
+    for (const chip of chips) {
+      chip.addEventListener("click", () => {
+        for (const outro of chips) outro.classList.toggle("ativo", outro === chip);
+        filtrar(chip.dataset.faixa ?? "");
+      });
+    }
+  }
+</script>

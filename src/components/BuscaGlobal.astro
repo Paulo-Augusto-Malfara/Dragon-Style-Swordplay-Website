@@ -1,0 +1,286 @@
+---
+/**
+ * Busca global. Uma tela só que alcança página, classe, equipamento e
+ * modalidade, que é o que transforma o site em manual de bolso: no treino a
+ * pergunta é "quanto mede a espada longa?", e ninguém quer navegar três
+ * catálogos pra chegar lá.
+ *
+ * É um <dialog> de propósito. `showModal()` já traz Esc pra fechar, foco preso
+ * dentro do painel e ::backdrop, três coisas que teriam que ser reescritas à
+ * mão (e mal) num overlay de <div>.
+ *
+ * O índice não vem no HTML: ele é buscado de /busca.json na primeira abertura.
+ * Ver o comentário de src/pages/busca.json.ts para o porquê.
+ */
+---
+
+<dialog id="busca-dialog" class="busca" aria-label="Buscar no site">
+  <form method="dialog" class="busca-topo">
+    <span class="busca-lupa" aria-hidden="true"></span>
+    <input
+      type="search"
+      id="busca-campo"
+      class="busca-campo"
+      placeholder="Buscar regras, armas, classes…"
+      autocomplete="off"
+      enterkeyhint="go"
+      aria-controls="busca-resultados"
+    />
+    <button class="busca-fechar" value="cancel" aria-label="Fechar busca">Esc</button>
+  </form>
+  <div class="busca-corpo">
+    <ul id="busca-resultados" class="busca-resultados"></ul>
+    <p class="busca-vazio" hidden></p>
+  </div>
+</dialog>
+
+<style>
+  .busca {
+    width: min(640px, 100%);
+    max-height: min(70vh, 560px);
+    margin: clamp(12px, 8vh, 90px) auto auto;
+    padding: 0;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 16px;
+    background: var(--ds-surface-solid);
+    color: var(--ds-text-1);
+    overflow: hidden;
+  }
+
+  .busca[open] {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .busca::backdrop {
+    background: rgba(6, 9, 13, 0.82);
+    backdrop-filter: blur(6px);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .busca[open] {
+      animation: busca-sobe 0.2s ease-out;
+    }
+  }
+
+  @keyframes busca-sobe {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+  }
+
+  .busca-topo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  /* Lupa desenhada em CSS: um ícone só, e um <svg> a mais no HTML de toda
+     página do site custa mais que estas quatro linhas. */
+  .busca-lupa {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    border: 1.5px solid var(--ds-gold);
+    border-radius: 50%;
+  }
+
+  .busca-campo {
+    flex: 1;
+    min-width: 0;
+    padding: 6px 0;
+    border: 0;
+    outline: none;
+    background: none;
+    color: var(--ds-text-1);
+    /* 16px trava o zoom automático do Safari ao focar o campo no iPhone. */
+    font-size: 16px;
+  }
+
+  .busca-campo::-webkit-search-cancel-button {
+    display: none;
+  }
+
+  .busca-fechar {
+    flex: none;
+    padding: 4px 8px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 6px;
+    background: none;
+    color: var(--ds-text-5);
+    font-size: 11px;
+    cursor: pointer;
+  }
+
+  .busca-corpo {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 8px;
+    overscroll-behavior: contain;
+  }
+
+  .busca-resultados {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .busca-resultados a {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    color: var(--ds-text-1);
+    font-size: 0.92rem;
+  }
+
+  .busca-resultados a:hover,
+  .busca-resultados a:focus-visible,
+  .busca-resultados li[data-ativo] a {
+    background: rgba(232, 172, 70, 0.1);
+    color: var(--ds-gold-light);
+  }
+
+  .busca-grupo {
+    margin-left: auto;
+    flex: none;
+    font-family: var(--ds-font-display);
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ds-gold-deep);
+  }
+
+  .busca-vazio {
+    margin: 0;
+    padding: 26px 14px;
+    color: var(--ds-text-4);
+    font-size: 0.88rem;
+  }
+</style>
+
+<script>
+  type Entrada = { label: string; grupo: string; href: string };
+
+  const dialogo = document.getElementById("busca-dialog") as HTMLDialogElement | null;
+  const campo = document.getElementById("busca-campo") as HTMLInputElement | null;
+  const lista = document.getElementById("busca-resultados");
+  const vazio = document.querySelector<HTMLParagraphElement>(".busca-vazio");
+  if (dialogo && campo && lista && vazio) {
+    let indice: Entrada[] = [];
+    let visiveis: Entrada[] = [];
+    let ativo = 0;
+
+    // Sem acento e sem caixa: quem digita "espadachim" no celular raramente
+    // escreve "Sicário" com o acento certo, e errar por isso seria o fim da
+    // utilidade da busca.
+    const normalizar = (t: string) =>
+      t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+
+    async function carregar() {
+      if (indice.length) return;
+      try {
+        const resposta = await fetch("/busca.json");
+        indice = await resposta.json();
+      } catch {
+        // Rede ruim não pode deixar a busca travada num estado sem saída: o
+        // campo continua aberto e a mensagem diz o que houve.
+        indice = [];
+      }
+      desenhar();
+    }
+
+    function desenhar() {
+      const termo = normalizar(campo!.value.trim());
+      visiveis = termo
+        ? indice
+            .filter(
+              (e) =>
+                normalizar(e.label).includes(termo) ||
+                normalizar(e.grupo).includes(termo),
+            )
+            .slice(0, 12)
+        : indice.slice(0, 8);
+      ativo = 0;
+
+      lista!.replaceChildren(
+        ...visiveis.map((e, i) => {
+          const li = document.createElement("li");
+          if (i === 0) li.dataset.ativo = "";
+          const a = document.createElement("a");
+          a.href = e.href;
+          a.textContent = e.label;
+          const grupo = document.createElement("span");
+          grupo.className = "busca-grupo";
+          grupo.textContent = e.grupo;
+          a.append(grupo);
+          li.append(a);
+          return li;
+        }),
+      );
+
+      const semNada = visiveis.length === 0;
+      vazio!.hidden = !semNada;
+      if (semNada) {
+        vazio!.textContent = indice.length
+          ? `Nada encontrado para “${campo!.value.trim()}”.`
+          : "A busca não carregou. Verifique a conexão e tente de novo.";
+      }
+    }
+
+    function mover(passo: number) {
+      if (!visiveis.length) return;
+      const itens = lista!.querySelectorAll("li");
+      itens[ativo]?.removeAttribute("data-ativo");
+      ativo = (ativo + passo + visiveis.length) % visiveis.length;
+      itens[ativo]?.setAttribute("data-ativo", "");
+      itens[ativo]?.scrollIntoView({ block: "nearest" });
+    }
+
+    function abrir() {
+      if (dialogo!.open) return;
+      dialogo!.showModal();
+      campo!.value = "";
+      carregar();
+      desenhar();
+    }
+
+    document.querySelectorAll("[data-abre-busca]").forEach((botao) => {
+      botao.addEventListener("click", abrir);
+    });
+
+    campo.addEventListener("input", desenhar);
+
+    campo.addEventListener("keydown", (evento) => {
+      if (evento.key === "ArrowDown") {
+        evento.preventDefault();
+        mover(1);
+      } else if (evento.key === "ArrowUp") {
+        evento.preventDefault();
+        mover(-1);
+      } else if (evento.key === "Enter") {
+        evento.preventDefault();
+        const alvo = visiveis[ativo];
+        if (alvo) location.href = alvo.href;
+      }
+    });
+
+    document.addEventListener("keydown", (evento) => {
+      const atalho =
+        (evento.key === "k" && (evento.metaKey || evento.ctrlKey)) ||
+        (evento.key === "/" &&
+          !/^(INPUT|TEXTAREA|SELECT)$/.test(
+            (evento.target as HTMLElement)?.tagName ?? "",
+          ));
+      if (atalho) {
+        evento.preventDefault();
+        abrir();
+      }
+    });
+  }
+</script>
