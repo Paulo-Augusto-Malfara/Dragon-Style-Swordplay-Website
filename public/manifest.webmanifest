@@ -1,0 +1,27 @@
+{
+  "id": "/",
+  "name": "Dragon Style Swordplay e Eventos",
+  "short_name": "Dragon Style",
+  "description": "Manual, classes, equipamentos e agenda de treinos do grupo Dragon Style Swordplay e Eventos.",
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui"],
+  "orientation": "portrait",
+  "background_color": "#0B1016",
+  "theme_color": "#0B1016",
+  "categories": ["sports", "education"],
+  "icons": [
+    { "src": "/pwa/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/pwa/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/pwa/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Próximo treino", "short_name": "Agenda", "url": "/agenda" },
+    { "name": "Minha ficha", "short_name": "Ficha", "url": "/dashboard" },
+    { "name": "Classes", "short_name": "Classes", "url": "/resumo-das-classes" }
+  ]
+}

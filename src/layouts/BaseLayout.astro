@@ -20,6 +20,19 @@ const ogImageURL = new URL("/assets/img/og-image.webp", Astro.site);
     <link rel="canonical" href={canonicalURL} />
     <link rel="shortcut icon" href="/assets/img/favIcon (2).ico" />
     <meta name="description" content={description} />
+
+    <!-- PWA. status-bar-style fica em "black" (e não "black-translucent") porque
+         o CSS ainda não trata safe-area-inset; translucent jogaria o conteúdo
+         pra debaixo do relógio no iPhone. Revisar na reestruturação visual. -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#0B1016" />
+    <link rel="apple-touch-icon" href="/pwa/apple-touch-icon.png" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Dragon Style" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <script src="/sw-register.js" defer is:inline></script>
+
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonicalURL} />
     <meta property="og:title" content={title} />
