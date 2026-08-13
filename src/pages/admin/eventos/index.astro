@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import AbrirEvento from "../../../components/admin/AbrirEvento.svelte";
 import EventoCard from "../../../components/EventoCard.astro";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
@@ -50,19 +50,16 @@ if (idsEventos.length > 0) {
 }
 ---
 
-<BaseLayout title="Admin - Eventos">
-  <h1>Eventos</h1>
-
+<AdminShell title="Eventos" resumo="Só pode existir um evento aberto por vez.">
   {
     aberto ? (
-      <div class="admin-form">
-        <p class="gold-title">
-          Evento em andamento: {aberto.nome_evento} ({aberto.cidade})
-        </p>
-        <a href={`/admin/eventos/${aberto.id_evento}`} class="btn btn-primary">
-          Ir para o evento
-        </a>
-      </div>
+      <a class="evento-aberto" href={`/admin/eventos/${aberto.id_evento}`}>
+        <span class="ea-tipo">Evento em andamento</span>
+        <span class="ea-titulo">
+          {aberto.nome_evento}, {aberto.cidade}
+        </span>
+        <span class="ea-acao">Registrar participantes e fechar</span>
+      </a>
     ) : membro.isOrganizador ? (
       <AbrirEvento eventosRecentes={historico ?? []} client:load />
     ) : (
@@ -86,4 +83,37 @@ if (idsEventos.length > 0) {
   ) : (
     <p class="dashboard-empty">Nenhum evento finalizado ainda.</p>
   )}
-</BaseLayout>
+</AdminShell>
+
+<style>
+  /* Mesmo cartão de "precisa de atenção" do hub e da tela de treinos. */
+  .evento-aberto {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-bottom: 8px;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 10px;
+    background: var(--ds-gold-wash);
+    text-decoration: none;
+  }
+
+  .ea-tipo {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ds-gold);
+  }
+
+  .ea-titulo {
+    font-family: var(--ds-font-display);
+    font-size: 1.02rem;
+    color: var(--ds-gold-light);
+  }
+
+  .ea-acao {
+    font-size: 0.86rem;
+    color: var(--ds-text-3);
+  }
+</style>

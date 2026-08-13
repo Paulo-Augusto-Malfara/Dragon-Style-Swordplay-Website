@@ -1,0 +1,134 @@
+---
+/**
+ * Casca das páginas de admin.
+ *
+ * Existia um problema de navegação que nenhuma página resolvia sozinha: o menu
+ * lateral e o dock do celular são os públicos, com Classes e Equipamentos. Uma
+ * vez dentro do admin, pular de Treinos pra Membros exigia voltar pro hub
+ * primeiro, toda vez. Aqui a barra de seções do admin acompanha a pessoa.
+ *
+ * As páginas de admin também eram as únicas que ainda usavam BaseLayout direto,
+ * então não tinham nem medida de linha nem rótulo dizendo onde você está.
+ *
+ * A lista de seções vive aqui e não em cada página porque as permissões são as
+ * mesmas nas cinco, e duplicar a condição é como uma delas fica pra trás.
+ */
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+interface Props {
+  title: string;
+  /** Uma frase de contexto abaixo do título. */
+  resumo?: string;
+  /** Link de volta, pra quem está numa página de detalhe. */
+  voltar?: { href: string; label: string };
+}
+const { title, resumo, voltar } = Astro.props;
+
+const { membro } = Astro.locals;
+
+const secoes = [
+  { href: "/admin/membros", label: "Membros", ver: true },
+  { href: "/admin/treinos", label: "Treinos", ver: true },
+  { href: "/admin/eventos", label: "Eventos", ver: true },
+  { href: "/admin/agenda", label: "Agenda", ver: membro.isOrganizador },
+  { href: "/admin/doacoes", label: "Doações", ver: membro.isAdminSistema },
+].filter((s) => s.ver);
+
+// Marca a seção mesmo estando numa página filha, tipo /admin/treinos/12.
+const atual = Astro.url.pathname.replace(/\/$/, "");
+const naSecao = (href: string) => atual === href || atual.startsWith(href + "/");
+---
+
+<BaseLayout title={`Admin: ${title}`}>
+  <div class="pagina">
+    <nav class="admin-topo" aria-label="Seções do painel">
+      <a href="/admin" class="admin-marca" aria-current={atual === "/admin" ? "page" : undefined}>
+        Painel
+      </a>
+      <div class="admin-secoes">
+        {
+          secoes.map((s) => (
+            <a href={s.href} class="admin-secao" aria-current={naSecao(s.href) ? "page" : undefined}>
+              {s.label}
+            </a>
+          ))
+        }
+      </div>
+    </nav>
+
+    <header class="pagina-cab">
+      {voltar && <a class="admin-voltar" href={voltar.href}>Voltar para {voltar.label}</a>}
+      <h1>{title}</h1>
+      {resumo && <p class="pagina-resumo">{resumo}</p>}
+    </header>
+
+    <slot />
+  </div>
+</BaseLayout>
+
+<style>
+  .admin-topo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .admin-marca {
+    flex: none;
+    font-family: var(--ds-font-display);
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ds-gold);
+    text-decoration: none;
+  }
+
+  /* Rola de lado no celular. Com wrap, cinco seções viravam duas linhas e
+     empurravam o título pra fora da primeira tela. */
+  .admin-secoes {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .admin-secoes::-webkit-scrollbar {
+    display: none;
+  }
+
+  .admin-secao {
+    flex: none;
+    padding: 6px 12px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 999px;
+    font-size: 0.84rem;
+    white-space: nowrap;
+    color: var(--ds-text-3);
+    text-decoration: none;
+    transition:
+      color 0.15s,
+      border-color 0.15s,
+      background 0.15s;
+  }
+
+  .admin-secao:hover {
+    color: var(--ds-text-1);
+    border-color: var(--ds-gold-dim);
+  }
+
+  .admin-secao[aria-current="page"] {
+    background: var(--ds-gold-wash);
+    border-color: var(--ds-gold-dim);
+    color: var(--ds-gold-light);
+  }
+
+  .admin-voltar {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.84rem;
+    color: var(--ds-text-3);
+  }
+</style>

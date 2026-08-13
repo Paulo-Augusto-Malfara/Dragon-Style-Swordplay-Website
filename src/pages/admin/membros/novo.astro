@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import RecrutarMembro from "../../../components/admin/RecrutarMembro.svelte";
 
 export const prerender = false;
@@ -7,7 +7,6 @@ export const prerender = false;
 const { membro } = Astro.locals;
 ---
 
-<BaseLayout title="Admin - Novo Membro">
-  <h1>Cadastrar Novo Membro</h1>
+<AdminShell title="Cadastrar membro" voltar={{ href: "/admin/membros", label: "Membros" }}>
   <RecrutarMembro meuIdMembro={membro.id_membro} client:load />
-</BaseLayout>
+</AdminShell>

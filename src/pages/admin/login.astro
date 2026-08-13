@@ -3,9 +3,19 @@ import BaseLayout from "../../layouts/BaseLayout.astro";
 import LoginForm from "../../components/auth/LoginForm.svelte";
 
 export const prerender = false;
+
+// Esta é a única página do admin que não usa o AdminShell: aqui ainda não
+// existe `Astro.locals.membro`, que é de onde a casca tira as permissões pra
+// montar a barra de seções.
 ---
 
-<BaseLayout title="Login - Admin">
-  <h1>Acesso Administrativo</h1>
-  <LoginForm client:load redirectPath="/admin" />
+<BaseLayout title="Admin: acesso">
+  <div class="pagina">
+    <header class="pagina-cab">
+      <p class="eyebrow">Painel</p>
+      <h1>Acesso administrativo</h1>
+      <p class="pagina-resumo">Entre com o email vinculado ao seu cadastro de membro.</p>
+    </header>
+    <LoginForm client:load redirectPath="/admin" />
+  </div>
 </BaseLayout>

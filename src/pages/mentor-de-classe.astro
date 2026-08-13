@@ -2,54 +2,72 @@
 import PageLayout from "../layouts/PageLayout.astro";
 ---
 
-<PageLayout title="Mentor de Classe">
-  <section>
+<PageLayout
+  title="Mentor de Classe"
+  description="O título de Mentor no Dragon Style: quem pode ser, o que se espera e o que ele traz."
+  resumo="Quem chega ao nível 5 numa classe pode aceitar o título de Mentor dela. É um título, não um cargo, e é opcional."
+  prev={{ href: "/como-funciona", label: "Sistema de Classes" }}
+  next={{ href: "/resumo-das-classes", label: "Classes" }}
+>
+  <section class="mc-bloco">
+    <h2>Quem pode ser</h2>
+    <ul class="lista-comum">
+      <li>Membro veterano que atingiu o <strong class="gold-title">nível 5</strong> na classe;</li>
+      <li>
+        Não há limite de classes em que se pode ser Mentor. A única barreira é o
+        tempo, já que é preciso chegar ao nível 5 em cada uma;
+      </li>
+      <li>Não há limite de mentores ativos por classe, e aceitar o título é opcional.</li>
+    </ul>
+  </section>
+
+  <section class="mc-bloco">
+    <h2>O que se espera de um mentor</h2>
     <p>
-      O Mentor de Classe é um membro veterano que atingiu o nível 5 em
-      determinada classe e decidiu aceitar o título de Mentor. Não há limite
-      de classes em que você pode ser Mentor, a única limitação é o tempo,
-      pois terá que pegar nível 5 nas classes que quiser se tornar Mentor. Se
-      tornar mentor é totalmente opcional.
+      Ser mentor não é assumir um cargo, é conquistar um título. Mas o título vem
+      com uma expectativa: ajudar novatos e também veteranos que estejam
+      começando naquela classe. Não é obrigação, e é por isso que não se trata de
+      um cargo. O que o Dragon Style pede é simples: se der para ajudar, ajude.
     </p>
-    <br />
     <p>
-      Ser mentor não é assumir um cargo dentro do grupo, mas sim conquistar um
-      título, apesar deste título vir com algumas "obrigações", como por
-      exemplo o de ajudar novatos e até mesmo membros veteranos que sejam
-      novos na classe. Vale ressaltar que, não é obrigatório que o Mentor
-      auxilie novatos na classe, por isso que ser mentor não é um cargo. O que
-      nós do Dragon Style pedimos é que, se for possível ajudar, ajude.
-    </p>
-    <br />
-    <p>
-      Deve-se também respeitar caso um novato não aceitar ou não desejar a
-      ajuda de um Mentor, exceto se o mentor o estiver advertindo de posturas
-      e condutas indevidas como membro ou com determinada classe. De toda
-      forma, os organizadores têm a responsabilidade de explicar aos novos
-      mentores sobre as funções que o título traz e como um mentor deve
-      procurar agir.
-    </p>
-    <br />
-    <p>
-      Este título traz também reconhecimento de sua habilidade em determinada
-      classe dentro do grupo. Existe também uma vantagem que está associada
-      ao ensino e aprendizado, tendo em vista que, quando ensinamos algo,
-      também estamos aprendendo. Portanto, os mentores acabam acelerando o
-      processo de treinamento e masterização de sua classe, enquanto ajuda
-      outros membros a ficarem mais experientes, criando um ecossistema onde
-      todos se ajudam.
-    </p>
-    <br />
-    <p>
-      Os Mentores têm também seu nome gravado na página individual das
-      classes em que se tornou mentor.
-    </p>
-    <br />
-    <p>
-      Nos treinos, os mentores de cada classe serão indicados para membros
-      que demonstrarem interesse em uma classe específica em que são pouco
-      experientes, de forma que eles saibam quem procurar para pedir
-      conselhos e dicas.
+      Vale o outro lado também. Se o novato não quiser a ajuda, isso deve ser
+      respeitado. A exceção é quando o mentor está advertindo sobre postura ou
+      conduta indevida, com a classe ou como membro. Os organizadores têm a
+      responsabilidade de explicar tudo isso aos novos mentores.
     </p>
   </section>
+
+  <section class="mc-bloco">
+    <h2>O que o título traz</h2>
+    <ul class="lista-comum">
+      <li>Reconhecimento da sua habilidade naquela classe dentro do grupo;</li>
+      <li>
+        O nome gravado na página individual das classes em que se tornou mentor;
+      </li>
+      <li>
+        Nos treinos, o mentor é indicado a quem demonstra interesse na classe e
+        tem pouca experiência nela, então as pessoas sabem quem procurar;
+      </li>
+      <li>
+        Evolução própria. Quem ensina também aprende, e mentores acabam
+        acelerando o domínio da própria classe enquanto deixam o resto do grupo
+        mais experiente.
+      </li>
+    </ul>
+  </section>
 </PageLayout>
+
+<style>
+  .mc-bloco {
+    margin-bottom: 24px;
+  }
+
+  .mc-bloco h2 {
+    margin: 0 0 10px;
+    font-size: 1.15rem;
+  }
+
+  .mc-bloco > p {
+    margin-bottom: 0.8em;
+  }
+</style>

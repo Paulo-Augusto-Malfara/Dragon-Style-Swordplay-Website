@@ -34,6 +34,9 @@
   let historico = $state<any[]>([]);
 
   const displayName = $derived(apelido || nomeOficial);
+  // O total de treinos já estava na tela, espalhado por classe. Somado ele vira
+  // o número que a pessoa realmente quer saber quando abre a ficha.
+  const totalTreinos = $derived(historico.length);
 
   async function load() {
     try {
@@ -168,41 +171,63 @@
   onMount(load);
 </script>
 
-<div class="dashboard-container">
+<div class="ficha">
   {#if status === "checking" || status === "loading"}
-    <p class="dashboard-loading">Carregando...</p>
+    <p class="ficha-aviso">Carregando...</p>
   {:else if status === "unauthenticated"}
     <LoginForm redirectPath="/dashboard" />
   {:else if status === "no-member"}
-    <div class="dashboard-status-block">
+    <div class="ficha-bloco-status">
       <p class="admin-error">
         Seu email ainda não está vinculado a um cadastro de membro. Fale com um organizador.
       </p>
       <button class="btn btn-sm" onclick={logout}>Novo login</button>
     </div>
   {:else if status === "error"}
-    <div class="dashboard-status-block">
+    <div class="ficha-bloco-status">
       <p class="admin-error">{errorMessage}</p>
       <button class="btn btn-sm" onclick={logout}>Novo login</button>
     </div>
   {:else}
-    <div class="dashboard-profile">
-      {#if ehStaffOuMais}
-        <a href="/admin" class="btn btn-sm dashboard-admin-link">painel administrativo</a>
-      {/if}
-      <button class="btn btn-sm dashboard-logout" onclick={logout}>sair</button>
-      <AvatarUploader {fotoUrl} nome={displayName} onUploaded={(url) => (fotoUrl = url)} savePhoto={saveMinhaFoto} />
-      <p class="dashboard-name">{displayName}</p>
-      {#if apelido}
-        <p class="dashboard-official-name">Nome oficial: {nomeOficial}</p>
-      {/if}
+    <section class="ficha-perfil">
+      <div class="ficha-topo">
+        <AvatarUploader {fotoUrl} nome={displayName} onUploaded={(url) => (fotoUrl = url)} savePhoto={saveMinhaFoto} />
+        <div class="ficha-id">
+          <p class="ficha-nome">{displayName}</p>
+          {#if nomeFaixa}
+            <p><span class="ficha-faixa">{nomeFaixa}</span></p>
+          {/if}
+          {#if apelido}
+            <p class="ficha-oficial">Nome oficial: {nomeOficial}</p>
+          {/if}
+        </div>
+      </div>
+
+      <div class="ficha-stats">
+        <div class="ficha-stat">
+          <span class="label">Nível Geral</span>
+          <span class="value">{nivelGeral}</span>
+        </div>
+        <div class="ficha-stat">
+          <span class="label">Pontos de Honra</span>
+          <span class="value">{phTotal}</span>
+        </div>
+        <div class="ficha-stat">
+          <span class="label">Treinos</span>
+          <span class="value">{totalTreinos}</span>
+        </div>
+      </div>
 
       {#if !editingApelido}
-        <button class="btn btn-sm dashboard-nickname-toggle" onclick={() => (editingApelido = true)}>
-          editar apelido
-        </button>
+        <div class="ficha-acoes">
+          <button class="btn btn-sm" onclick={() => (editingApelido = true)}>editar apelido</button>
+          {#if ehStaffOuMais}
+            <a href="/admin" class="btn btn-sm">painel administrativo</a>
+          {/if}
+          <button class="btn btn-sm" onclick={logout}>sair</button>
+        </div>
       {:else}
-        <form class="dashboard-nickname-form" onsubmit={saveApelido}>
+        <form class="ficha-apelido" onsubmit={saveApelido}>
           <input
             type="text"
             bind:value={apelidoInput}
@@ -218,28 +243,13 @@
           <p class="admin-error">{apelidoError}</p>
         {/if}
       {/if}
+    </section>
 
-      <div class="dashboard-stats">
-        <div class="dashboard-stat">
-          <span class="label">Nível Geral</span>
-          <span class="value">{nivelGeral}</span>
-        </div>
-        {#if nomeFaixa}
-          <div class="dashboard-stat">
-            <span class="label">Faixa</span>
-            <span class="value">{nomeFaixa}</span>
-          </div>
-        {/if}
-        <div class="dashboard-stat">
-          <span class="label">Pontos de Honra</span>
-          <span class="value">{phTotal}</span>
-        </div>
-      </div>
-    </div>
-
-    <h2>Níveis por Classe</h2>
+    <h2>Níveis por classe</h2>
     {#if porClasse.length === 0}
-      <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
+      <p class="ficha-aviso">
+        Nenhum treino registrado ainda. Depois do seu primeiro treino a classe aparece aqui.
+      </p>
     {:else}
       <div class="table-scroll">
         <table class="ranking-tabela ranking-tabela--dashboard">
@@ -263,9 +273,11 @@
       </div>
     {/if}
 
-    <h2>Histórico de Presença</h2>
+    <h2>Histórico de presença</h2>
     {#if historico.length === 0}
-      <p class="dashboard-empty">Nenhuma presença registrada ainda.</p>
+      <p class="ficha-aviso">
+        Nenhuma presença registrada ainda. Confirme presença na <a class="links-de-texto" href="/agenda">agenda</a>.
+      </p>
     {:else}
       <div class="table-scroll">
         <table class="ranking-tabela ranking-tabela--historico">
@@ -296,5 +308,164 @@
         </table>
       </div>
     {/if}
+
+    <h2>Conquistas</h2>
+    <p class="ficha-aviso">
+      As conquistas ainda estão sendo montadas. Quando entrarem, elas aparecem aqui junto com o
+      que cada uma libera, como as flechas extras do Atirador de Elite.
+    </p>
   {/if}
 </div>
+
+<style>
+  /* Este bloco saiu do global.css. Era o único lugar do site que usava as
+     classes .dashboard-*, então elas viviam num arquivo global sem motivo. */
+
+  .ficha {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .ficha-aviso {
+    color: var(--ds-text-4);
+  }
+
+  .ficha-bloco-status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1em;
+    margin-top: 1.5em;
+    text-align: center;
+  }
+
+  .ficha-perfil {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    margin-bottom: 12px;
+    padding: 22px 20px 20px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 14px;
+    background: var(--ds-surface-solid);
+    box-shadow: var(--card-shadow-alta);
+    overflow: hidden;
+  }
+
+  .ficha-perfil::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 2px;
+    background: var(--hairline-gold);
+  }
+
+  /* Foto e identidade lado a lado. Antes tudo era centralizado numa coluna só,
+     com "sair" e "painel administrativo" flutuando nos cantos de cima, o que
+     no celular caía em cima da foto. */
+  .ficha-topo {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .ficha-id {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .ficha-nome {
+    font-family: var(--ds-font-display);
+    font-size: 1.5rem;
+    line-height: 1.15;
+    color: var(--ds-gold-light);
+  }
+
+  /* Encolhe com o próprio texto: em bloco ele esticaria pela largura do card. */
+  .ficha-faixa {
+    display: inline-block;
+    padding: 3px 10px;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 999px;
+    background: var(--ds-gold-wash);
+    font-size: 0.76rem;
+    color: var(--ds-gold-light);
+  }
+
+  .ficha-oficial {
+    font-size: 0.82rem;
+    color: var(--ds-text-4);
+  }
+
+  .ficha-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .ficha-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 12px 8px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-bg);
+  }
+
+  .ficha-stat .label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    text-align: center;
+    color: var(--ds-gold);
+  }
+
+  .ficha-stat .value {
+    font-size: 1.7rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-text-1);
+  }
+
+  .ficha-acoes,
+  .ficha-apelido {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 4px;
+    border-top: 1px solid var(--ds-line);
+  }
+
+  .ficha-apelido input {
+    flex: 1 1 200px;
+    padding: 0.5em 0.8em;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 6px;
+    background: var(--ds-bg);
+    color: var(--ds-text-1);
+    font-family: inherit;
+  }
+
+  .ficha-apelido input:focus {
+    border-color: var(--ds-gold);
+  }
+
+  @media (max-width: 420px) {
+    .ficha-topo {
+      flex-direction: column;
+      gap: 10px;
+      text-align: center;
+    }
+
+    .ficha-id {
+      align-items: center;
+    }
+  }
+</style>

@@ -2,29 +2,38 @@
 import PageLayout from "../layouts/PageLayout.astro";
 ---
 
-<PageLayout title="Bônus de Nível 3">
-  <section>
+<PageLayout
+  title="Bônus de Nível 3"
+  description="Por que cada classe do Dragon Style só libera parte do arsenal ao chegar no nível 3."
+  resumo="Ao chegar no nível 3, cada classe libera armas ou combinações novas. É prêmio pelo esforço e também um caminho de aprendizado."
+  prev={{ href: "/como-funciona", label: "Sistema de Classes" }}
+  next={{ href: "/resumo-das-classes", label: "Classes" }}
+>
+  <section class="bn-bloco">
     <p>
-      O bônus de nível 3 nas classes serve para tanto premiar o esforço dos
-      membros em determinadas combinações de equipamentos, quanto para
-      permitir uma progressão partindo de combinações mais simples e
-      liberando outras mais complexas.
+      O bônus de nível 3 tem duas funções. Ele premia o esforço de quem insistiu
+      numa classe, e organiza a progressão: você começa pelas combinações mais
+      simples e libera as mais complexas depois de já ter rodagem.
     </p>
-    <br />
     <p>
-      Dessa forma, o membro que atingir o nível 3 em cada classe, passa a
-      liberar o potencial completo daquela classe, podendo utilizar
-      combinações mais complexas e que exigem maior habilidade.
+      Quem chega ao nível 3 numa classe passa a ter o potencial completo dela em
+      mãos, incluindo o que exige mais habilidade.
     </p>
-    <br />
     <p>
-      Essa também é uma forma de fazer os membros se acostumarem com
-      determinadas combinações de equipamentos, para então partir para outras
-      mais complexas, exemplo: O Hoplita começa com lança curta e escudo, no
-      nível 3 passa a poder utilizar lanças longas. Ao longo dos 12 treinos
-      que ele treinou com a lança curta, ele teve tempo para se adaptar ao
-      estilo de combate de lança e escudo, tornando mais fácil a adaptação
-      com uma lança longa caso ele queira utilizar.
+      O Hoplita é o exemplo mais claro. Ele começa com lança curta e escudo, e
+      só no nível 3 ganha a lança longa. Nos 12 treinos até lá, já se acostumou
+      a lutar com lança em uma mão e escudo na outra, então a lança longa deixa
+      de ser um salto e vira o passo seguinte.
+    </p>
+    <p>
+      O que cada classe ganha no nível 3 está listado na página da própria
+      classe, em <a class="links-de-texto" href="/resumo-das-classes">Classes</a>.
     </p>
   </section>
 </PageLayout>
+
+<style>
+  .bn-bloco > p {
+    margin-bottom: 0.8em;
+  }
+</style>

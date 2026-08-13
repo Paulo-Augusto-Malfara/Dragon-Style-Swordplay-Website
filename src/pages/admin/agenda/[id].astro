@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import AgendaEditor from "../../../components/admin/AgendaEditor.svelte";
 
 export const prerender = false;
@@ -10,7 +10,9 @@ if (!membro.isOrganizador) return Astro.redirect("/admin");
 const { id } = Astro.params;
 ---
 
-<BaseLayout title="Admin - Agenda">
-  <h1>{id === "new" ? "Novo Agendamento" : "Editar Agendamento"}</h1>
+<AdminShell
+  title={id === "new" ? "Novo agendamento" : "Editar agendamento"}
+  voltar={{ href: "/admin/agenda", label: "Agenda" }}
+>
   <AgendaEditor id={id} meuIdMembro={membro.id_membro} client:load />
-</BaseLayout>
+</AdminShell>

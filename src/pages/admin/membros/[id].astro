@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import MembroEditor from "../../../components/admin/MembroEditor.svelte";
 
 export const prerender = false;
@@ -10,7 +10,6 @@ if (!membro.isAdminSistema) return Astro.redirect("/admin/membros");
 const { id } = Astro.params;
 ---
 
-<BaseLayout title="Admin - Editar Membro">
-  <h1>Editar Membro</h1>
+<AdminShell title="Editar membro" voltar={{ href: "/admin/membros", label: "Membros" }}>
   <MembroEditor id={id} client:load />
-</BaseLayout>
+</AdminShell>

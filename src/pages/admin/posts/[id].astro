@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import PostEditor from "../../../components/admin/PostEditor.svelte";
 
 export const prerender = false;
@@ -7,7 +7,9 @@ export const prerender = false;
 const { id } = Astro.params;
 ---
 
-<BaseLayout title="Admin - Novidade">
-  <h1>{id === "new" ? "Nova Novidade" : "Editar Novidade"}</h1>
+<AdminShell
+  title={id === "new" ? "Nova novidade" : "Editar novidade"}
+  voltar={{ href: "/admin", label: "o painel" }}
+>
   <PostEditor id={id} client:load />
-</BaseLayout>
+</AdminShell>

@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import AgendaList from "../../../components/admin/AgendaList.svelte";
 
 export const prerender = false;
@@ -8,7 +8,9 @@ const { membro } = Astro.locals;
 if (!membro.isOrganizador) return Astro.redirect("/admin");
 ---
 
-<BaseLayout title="Admin - Agenda">
-  <h1>Agenda de Treinos</h1>
+<AdminShell
+  title="Agenda de Treinos"
+  resumo="O grupo não tem dia fixo, então é aqui que os próximos treinos são marcados."
+>
   <AgendaList client:load />
-</BaseLayout>
+</AdminShell>

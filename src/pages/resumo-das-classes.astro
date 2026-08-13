@@ -1,75 +1,269 @@
 ---
+/**
+ * Catálogo das dez classes.
+ *
+ * Cada card carrega o que decide a escolha (armamento, alcance, dificuldade) em
+ * vez do parágrafo de apresentação que estava aqui antes, e esse dado sai do
+ * frontmatter, o mesmo que monta a ficha da página individual.
+ *
+ * O guia de escolha existe porque a pergunta de quem chega não é "o que é o
+ * Templário", é "quero escudo, qual classe eu pego?".
+ */
+import { getCollection } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
 import CatalogoLinks from "../components/CatalogoLinks.astro";
 
-// Esta página é a entrada "Classes" do menu. A grade abaixo já levava às 10
-// classes; estas três explicam o sistema em volta delas e não tinham caminho
-// nenhum na navegação.
+const classes = (await getCollection("classes")).sort((a, b) =>
+  a.data.title.localeCompare(b.data.title, "pt-BR"),
+);
+
+// O href sai da coleção, então renomear um arquivo nunca deixa link quebrado.
+const slugDe = Object.fromEntries(classes.map((c) => [c.data.title, c.id]));
+
+const guia = [
+  { querer: "Estou começando agora", nomes: ["Guerreiro", "Viking"] },
+  {
+    querer: "Quero escudo e linha de frente",
+    nomes: ["Guerreiro", "Viking", "Templário", "Hoplita"],
+  },
+  { querer: "Quero alcance no corpo a corpo", nomes: ["Lanceiro", "Cavaleiro", "Hoplita"] },
+  { querer: "Quero atacar de longe", nomes: ["Arqueiro"] },
+  {
+    querer: "Quero uma arma em cada mão",
+    nomes: ["Bárbaro", "Espadachim", "Sicário"],
+  },
+  { querer: "Quero vencer quem usa escudo", nomes: ["Bárbaro", "Templário"] },
+];
+
 const sistema = [
   {
     href: "/como-funciona",
-    label: "Como Funciona",
-    desc: "O que é uma classe, como se escolhe e como se troca.",
-  },
-  {
-    href: "/mentor-de-classe",
-    label: "Mentor de Classe",
-    desc: "Quem orienta cada classe e o que esperar de um mentor.",
+    label: "Sistema de Classes",
+    desc: "Como a classe sobe de nível e o que isso libera.",
   },
   {
     href: "/bonus-nivel-3",
     label: "Bônus de Nível 3",
-    desc: "O equipamento extra que cada classe libera ao chegar no nível 3.",
+    desc: "Por que cada classe guarda parte do arsenal para o nível 3.",
   },
-];
-
-const classes = [
-  { slug: "arqueiro", label: "Arqueiro", img: "arqueiros", alt: "Imagem Arqueiro", desc: "Mestre no combate de longa distância, utiliza Arco e Flecha e também Balestra. Possui certa vantagem contra alvos que não tenham escudos, principalmente em modalidades em grupo. Tem acesso a uma arma corpo-a-corpo extra para se defender." },
-  { slug: "barbaro", label: "Bárbaro", img: "barbaros", alt: "Imagem Barbaro", desc: "Domina o uso de Machados e Martelos. Possui uma boa versatilidade, pois pode tanto utilizar uma arma em cada mão, quanto uma arma de duas mãos. É uma classe bem ofensiva." },
-  { slug: "cavaleiro", label: "Cavaleiro", img: "cavaleiros", alt: "Imagem Cavaleiro", desc: "Focado no uso de Espadas Longas de duas mãos. Possui um estilo balanceado entre ataque e defesa. Aumenta seu leque de combinações ao poder equipar um Escudo Pequeno no nível 3." },
-  { slug: "espadachim", label: "Espadachim", img: "espadachins", alt: "Imagem Espadachim", desc: "Perito em Espadas Médias. Assim como o Bárbaro, pode equipar 2 armas ou uma só com duas mãos. Pode também utilizar Clavas. É a classe que mais se assemelha aos Samurais." },
-  { slug: "guerreiro", label: "Guerreiro", img: "guerreiros", alt: "Imagem Guerreiro", desc: "Treinado na arte da Espada e Escudo. Bem balanceado em ofensividade e defesa. É recomendado para iniciantes começarem sua jornada no Swordplay, mas não deixa de ser poderoso nas mãos de combatentes experientes." },
-  { slug: "hoplita", label: "Hoplita", img: "hoplitas", alt: "Imagem Hoplita", desc: "Habilidoso na combinação de Lança e Escudo. Classe versátil, porém desafiadora pelo fato de utilizar a lança com somente uma mão. Tem acesso a uma Espada Curta no nível 3 para auxiliar no combate de curto alcance." },
-  { slug: "lanceiro", label: "Lanceiro", img: "lanceiros", alt: "Imagem Lanceiros", desc: "Versado no uso de Armas Longas de Haste, como Lanças e Alabardas. Possui um grande poder ofensivo e costuma ser ótima em batalhas em grupo. Ganha acesso a um Escudo Pequeno no nível 3 para auxiliar sua defesa." },
-  { slug: "sicario", label: "Sicário", img: "sicarios", alt: "Imagem Sicários", desc: "Especialista no combate de curto alcance, utiliza combinações de adagas e armas curtas. Tem acesso a Armas de Arremesso Extras para compensar sua falta de alcance. Classe efetiva nas mãos de combatentes com boa mobilidade." },
-  { slug: "templario", label: "Templário", img: "templarios", alt: "Imagem Templários", desc: "Proficiente no uso de Maça e Mangual. É a classe com acesso a escudo com o maior leque de combinações, podendo utilizar arma de duas mãos, uma arma em cada mão e também arma com escudo." },
-  { slug: "viking", label: "Viking", img: "vikings", alt: "Imagem Vikings", desc: "Especialista no uso de Machados e Martelos com Escudo. Por utilizar escudo costuma ter uma boa defesa, não deixando de lado também seu ataque. Assim como o Sicário, tem acesso a Armas de Arremesso Extras para auxiliar no combate." },
+  {
+    href: "/mentor-de-classe",
+    label: "Mentor de Classe",
+    desc: "O título que vem no nível 5 e o que se espera de um mentor.",
+  },
 ];
 ---
 
 <PageLayout
-  title="Resumo das Classes"
+  title="Classes"
+  description="As 10 classes do Dragon Style, com armamento, alcance e dificuldade de cada uma."
+  resumo="São 10 classes, e a classe define quais armas você pode levar para o treino. Escolha uma para começar, trocar depois é livre."
   prev={{ href: "/como-funciona", label: "Sistema de Classes" }}
   next={{ href: "/arqueiro", label: "Arqueiro" }}
 >
-  <section>
-    <p>
-      No Dragon Style temos 10 classes no total, e nesta aba você pode
-      conferir o resumo de cada uma.
-    </p>
-    <br />
-    <p>
-      Há um link em cada classe (clicando em "mais detalhes") que leva para a
-      página individual de cada classe. Lá é possível conferir com mais
-      detalhes as características, regras individuais e todas as combinações
-      de equipamentos possíveis.
-    </p>
-  </section>
-  <section>
-    <h2 class="h2-classes" id="classes-h2">Classes</h2>
-    <div class="grid-classes">
+  <section class="cl-guia" aria-label="Guia de escolha">
+    <h2>Não sabe qual escolher?</h2>
+    <dl>
       {
-        classes.map((c) => (
-          <div id={c.slug} class="grid-classes-item">
-            <h2>{c.label}</h2>
-            <img src={`/assets/img/logo-classes/classes-juntas/${c.img}.webp`} alt={c.alt} />
-            <p>{c.desc}</p>
-            <a class="links-de-texto" href={`/${c.slug}`}>MAIS DETALHES</a>
+        guia.map((g) => (
+          <div>
+            <dt>{g.querer}</dt>
+            <dd>
+              {g.nomes.map((n, i) => (
+                <>
+                  {i > 0 && ", "}
+                  <a href={`/${slugDe[n]}`}>{n}</a>
+                </>
+              ))}
+            </dd>
           </div>
         ))
       }
-    </div>
+    </dl>
+    <p class="cl-guia-obs">
+      Nenhuma escolha é definitiva: você pode registrar treino com uma classe
+      hoje e outra na semana que vem, sem perder o que já acumulou.
+    </p>
   </section>
+
+  <h2 class="cl-titulo">As 10 classes</h2>
+
+  <ul class="cl-grade">
+    {
+      classes.map((c) => (
+        <li>
+          <a class="cl-card" href={`/${c.id}`}>
+            <img src={c.data.image} alt={c.data.imageAlt} loading="lazy" />
+            <span class="cl-nome">{c.data.title}</span>
+            <span class="cl-resumo">{c.data.resumo}</span>
+            <span class="cl-armas">{c.data.armamento}</span>
+            <span class="cl-meta">
+              Alcance {c.data.alcance.toLowerCase()} · Dificuldade{" "}
+              {c.data.dificuldade.toLowerCase()}
+            </span>
+            <span class="cl-mais">Ver classe completa</span>
+            {c.data.selo && <span class="cl-selo">{c.data.selo}</span>}
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
   <CatalogoLinks titulo="Sobre o sistema de classes" itens={sistema} />
-  <br />
 </PageLayout>
+
+<style>
+  /* ======== GUIA DE ESCOLHA ======== */
+
+  .cl-guia {
+    margin-bottom: 30px;
+    padding: 16px 18px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+  }
+
+  .cl-guia h2 {
+    margin: 0 0 12px;
+    font-size: 1.15rem;
+  }
+
+  .cl-guia dl {
+    margin: 0;
+  }
+
+  .cl-guia dl > div {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 8px 0;
+    border-top: 1px solid var(--ds-line);
+  }
+
+  .cl-guia dt {
+    font-size: 0.9rem;
+    color: var(--ds-text-3);
+  }
+
+  .cl-guia dd {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  /* Filho direto: `a` solto pegaria qualquer link aninhado mais fundo. */
+  .cl-guia dd > a {
+    color: var(--ds-gold-light);
+    text-decoration: none;
+    border-bottom: 1px solid var(--ds-gold-dim);
+  }
+
+  .cl-guia dd > a:hover {
+    color: var(--ds-gold);
+  }
+
+  .cl-guia-obs {
+    width: 100%;
+    margin: 14px 0 0;
+    font-size: 0.86rem;
+    color: var(--ds-text-4);
+  }
+
+  .cl-titulo {
+    margin: 0 0 14px;
+    font-size: 1.15rem;
+  }
+
+  /* ======== GRADE DE CLASSES ======== */
+
+  .cl-grade {
+    list-style: none;
+    margin: 0 0 30px;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+    gap: 12px;
+  }
+
+  .cl-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    height: 100%;
+    padding: 14px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface-solid);
+    text-decoration: none;
+    transition:
+      border-color 0.15s,
+      transform 0.15s;
+  }
+
+  .cl-card:hover,
+  .cl-card:focus-visible {
+    border-color: var(--ds-gold-dim);
+    transform: translateY(-2px);
+  }
+
+  .cl-card > img {
+    width: 100%;
+    height: 108px;
+    object-fit: contain;
+    margin-bottom: 6px;
+  }
+
+  .cl-nome {
+    font-family: var(--ds-font-display);
+    font-size: 1.1rem;
+    color: var(--ds-text-1);
+  }
+
+  .cl-resumo {
+    font-size: 0.86rem;
+    line-height: 1.45;
+    color: var(--ds-text-3);
+  }
+
+  .cl-armas {
+    font-size: 0.84rem;
+    line-height: 1.4;
+    color: var(--ds-gold);
+  }
+
+  .cl-meta {
+    font-size: 0.76rem;
+    color: var(--ds-text-4);
+  }
+
+  /* Empurrado para o rodapé do card, para que todos alinhem na mesma altura. */
+  .cl-mais {
+    margin-top: auto;
+    padding-top: 8px;
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ds-gold-light);
+  }
+
+  /* Encosta no canto e encolhe com o próprio texto, nunca estica no card. */
+  .cl-selo {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    padding: 3px 8px;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 999px;
+    background: var(--ds-gold-wash);
+    font-size: 0.66rem;
+    color: var(--ds-gold-light);
+  }
+
+  @media (max-width: 560px) {
+    .cl-guia dl > div {
+      grid-template-columns: 1fr;
+      gap: 2px;
+    }
+  }
+</style>

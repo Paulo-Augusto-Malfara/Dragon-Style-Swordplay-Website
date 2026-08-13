@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import DoacoesPainel from "../../../components/admin/DoacoesPainel.svelte";
 
 export const prerender = false;
@@ -8,7 +8,11 @@ const { membro } = Astro.locals;
 if (!membro.isOrganizador) return Astro.redirect("/admin");
 ---
 
-<BaseLayout title="Admin - Doações">
-  <h1>Doações</h1>
+<AdminShell
+  title="Doações"
+  resumo={membro.isAdminSistema
+    ? "Lançamento e conferência das doações do grupo."
+    : "Conferência das doações. Só admin do sistema pode lançar."}
+>
   <DoacoesPainel client:load podeEditar={membro.isAdminSistema} />
-</BaseLayout>
+</AdminShell>

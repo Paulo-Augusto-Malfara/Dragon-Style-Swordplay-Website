@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import TreinoAtivo from "../../../components/admin/TreinoAtivo.svelte";
 
 export const prerender = false;
@@ -8,12 +8,11 @@ const { membro } = Astro.locals;
 const { id } = Astro.params;
 ---
 
-<BaseLayout title="Admin - Treino">
-  <h1>Treino #{id}</h1>
+<AdminShell title={`Treino #${id}`} voltar={{ href: "/admin/treinos", label: "Treinos" }}>
   <TreinoAtivo
     idTreino={Number(id)}
     souAdminSistema={membro.isAdminSistema}
     meuIdMembro={membro.id_membro}
     client:load
   />
-</BaseLayout>
+</AdminShell>

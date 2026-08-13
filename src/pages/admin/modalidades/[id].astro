@@ -1,5 +1,5 @@
 ---
-import BaseLayout from "../../../layouts/BaseLayout.astro";
+import AdminShell from "../../../components/admin/AdminShell.astro";
 import ModalidadeEditor from "../../../components/admin/ModalidadeEditor.svelte";
 
 export const prerender = false;
@@ -7,7 +7,9 @@ export const prerender = false;
 const { id } = Astro.params;
 ---
 
-<BaseLayout title="Admin - Modalidade">
-  <h1>{id === "new" ? "Nova Modalidade" : "Editar Modalidade"}</h1>
+<AdminShell
+  title={id === "new" ? "Nova modalidade" : "Editar modalidade"}
+  voltar={{ href: "/admin", label: "o painel" }}
+>
   <ModalidadeEditor id={id} client:load />
-</BaseLayout>
+</AdminShell>

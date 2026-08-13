@@ -3,6 +3,18 @@ import { glob } from "astro/loaders";
 
 const navLink = z.object({ href: z.string(), label: z.string() });
 
+/**
+ * Uma classe do sistema.
+ *
+ * Os quatro campos depois da identidade existem porque o card de
+ * /resumo-das-classes precisa dos mesmos dados que o topo da página individual.
+ * Enquanto isso era prosa, o resumo do catálogo e a página divergiam sozinhos, e
+ * quem está escolhendo classe pela primeira vez tinha que ler dois parágrafos
+ * pra descobrir se a classe usa escudo.
+ *
+ * O corpo do .mdx continua sendo o regulamento: combinações de armas, bônus de
+ * nível 3 e regras individuais, na íntegra.
+ */
 const classes = defineCollection({
   loader: glob({ pattern: "**/*.mdx", base: "./src/content/classes" }),
   // ponytail: image left as a public/ path string for now, astro:assets optimization
@@ -11,6 +23,14 @@ const classes = defineCollection({
     title: z.string(),
     image: z.string(),
     imageAlt: z.string(),
+    /** Uma frase de identidade. Abre a página e aparece no card do catálogo. */
+    resumo: z.string(),
+    /** O armamento do jeito que se fala em voz alta no treino. */
+    armamento: z.string(),
+    alcance: z.enum(["Curto", "Curto e médio", "Médio", "Médio e longo", "Longo"]),
+    dificuldade: z.enum(["Fácil", "Média", "Alta"]),
+    /** Selo dourado no card. Hoje só o Guerreiro usa, como classe de entrada. */
+    selo: z.string().optional(),
     prev: navLink,
     next: navLink,
   }),

@@ -1,25 +1,93 @@
 ---
-import BaseLayout from "../../layouts/BaseLayout.astro";
+import AdminShell from "../../components/admin/AdminShell.astro";
 import AdminList from "../../components/admin/AdminList.svelte";
+import { createSupabaseServerClient } from "../../lib/supabase-server";
 
 export const prerender = false;
 
 const { membro } = Astro.locals;
+const supabase = createSupabaseServerClient(Astro.cookies, Astro.request);
+
+// O hub era uma lista de cinco links. O que faltava era justamente o que se
+// abre o painel pra saber: tem alguma coisa em aberto agora? Treino esquecido
+// aberto trava o registro de presença de todo mundo até alguém fechar.
+const [treino, evento] = await Promise.all([
+  supabase
+    .from("fTreinos")
+    .select("id_treino, data_treino, status")
+    .in("status", ["aberto", "aguardando_data"])
+    .maybeSingle(),
+  supabase
+    .from("fEventos")
+    .select("id_evento, nome_evento, cidade")
+    .eq("status", "aberto")
+    .maybeSingle(),
+]);
+
+const emAberto = [
+  treino.data && {
+    href: `/admin/treinos/${treino.data.id_treino}`,
+    tipo: "Treino",
+    titulo:
+      treino.data.status === "aguardando_data"
+        ? `Treino #${treino.data.id_treino}, aguardando data`
+        : `Treino de ${new Date(treino.data.data_treino + "T00:00:00").toLocaleDateString("pt-BR")}`,
+    acao: "Registrar presenças e fechar",
+  },
+  evento.data && {
+    href: `/admin/eventos/${evento.data.id_evento}`,
+    tipo: "Evento",
+    titulo: `${evento.data.nome_evento}, ${evento.data.cidade}`,
+    acao: "Registrar participantes e fechar",
+  },
+].filter(Boolean) as { href: string; tipo: string; titulo: string; acao: string }[];
+
+const atalhos = [
+  { href: "/admin/membros", label: "Membros", desc: "Cadastrar, editar e vincular login." },
+  { href: "/admin/treinos", label: "Treinos", desc: "Abrir treino, registrar presença, ver histórico." },
+  { href: "/admin/eventos", label: "Eventos", desc: "Abrir evento e lançar participação." },
+  ...(membro.isOrganizador
+    ? [{ href: "/admin/agenda", label: "Agenda", desc: "Marcar os próximos treinos." }]
+    : []),
+  ...(membro.isAdminSistema
+    ? [{ href: "/admin/doacoes", label: "Doações", desc: "Lançar e conferir as doações." }]
+    : []),
+];
 ---
 
-<BaseLayout title="Admin">
-  <h1>Painel Administrativo</h1>
+<AdminShell title="Painel Administrativo" resumo={`Logado como ${membro.nome}.`}>
+  {
+    emAberto.length > 0 && (
+      <section class="hub-aberto">
+        <h2>Precisa de atenção</h2>
+        <ul>
+          {emAberto.map((i) => (
+            <li>
+              <a href={i.href}>
+                <span class="hub-tipo">{i.tipo} em andamento</span>
+                <span class="hub-titulo">{i.titulo}</span>
+                <span class="hub-acao">{i.acao}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
 
-  <div class="admin-hub">
-    <p class="admin-hub-greeting">Logado como <strong>{membro.nome}</strong></p>
-    <nav class="admin-nav">
-      <a href="/admin/membros" class="admin-nav-item">Membros</a>
-      <a href="/admin/treinos" class="admin-nav-item">Treinos</a>
-      <a href="/admin/eventos" class="admin-nav-item">Eventos</a>
-      {membro.isOrganizador && <a href="/admin/agenda" class="admin-nav-item">Agenda</a>}
-      {membro.isAdminSistema && <a href="/admin/doacoes" class="admin-nav-item">Doações</a>}
-    </nav>
-  </div>
+  <h2>Seções</h2>
+  <ul class="hub-atalhos">
+    {
+      atalhos.map((a) => (
+        <li>
+          <a href={a.href}>
+            <span class="hub-label">{a.label}</span>
+            <span class="hub-desc">{a.desc}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
 
   {
     membro.isOrganizador && (
@@ -32,4 +100,70 @@ const { membro } = Astro.locals;
       </>
     )
   }
-</BaseLayout>
+</AdminShell>
+
+<style>
+  .hub-aberto ul,
+  .hub-atalhos {
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+  }
+
+  .hub-atalhos {
+    grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  }
+
+  .hub-aberto a,
+  .hub-atalhos a {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    height: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface);
+    text-decoration: none;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+  }
+
+  .hub-aberto a:hover,
+  .hub-aberto a:focus-visible,
+  .hub-atalhos a:hover,
+  .hub-atalhos a:focus-visible {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
+  /* O que está em aberto tem que puxar o olho antes das seções. */
+  .hub-aberto a {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
+  .hub-tipo {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ds-gold);
+  }
+
+  .hub-titulo,
+  .hub-label {
+    font-family: var(--ds-font-display);
+    font-size: 1.02rem;
+    color: var(--ds-gold-light);
+  }
+
+  .hub-acao,
+  .hub-desc {
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--ds-text-3);
+  }
+</style>

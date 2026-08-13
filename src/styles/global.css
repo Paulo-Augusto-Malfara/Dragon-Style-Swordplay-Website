@@ -140,7 +140,7 @@
      ELEVADO    --card-shadow. É um objeto sobre a página, geralmente
                 clicável: cards de classe, do mural, da galeria, .agenda-card.
      DESTACADO  --card-shadow-alta. UM por tela, o elemento focal:
-                .dashboard-profile, .treino-card da landing, e o modal do
+                .ficha-perfil, .treino-card da landing, e o modal do
                 cortador de avatar. Também é a sombra de hover de quem sobe,
                 que é o mesmo nível de elevação, só que temporário. */
   --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
@@ -340,12 +340,6 @@ header {
   min-width: 0;
 }
 
-.navbar-menu-item {
-  text-decoration: none;
-  color: var(--text-primary-color);
-  background-color: var(--primary-color);
-}
-
 #logo-ds {
   height: clamp(38px, 8vw, 62px);
   width: auto;
@@ -487,12 +481,6 @@ header {
   box-shadow: inset 2px 0 0 var(--ds-gold);
 }
 
-.menu-category {
-  color: var(--golden-color);
-  text-transform: uppercase;
-  font-size: 14px;
-}
-
 /* ---- lateral do desktop ---- */
 
 .shell {
@@ -516,6 +504,23 @@ header {
     overflow-y: auto;
     padding: 0.4em 0.7em 2.5em;
     border-right: 1px solid var(--ds-line);
+    /* A barra padrão do Chrome no Windows é clara e grossa, e virava o elemento
+       de maior contraste da lateral, competindo com os próprios links. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--ds-line-strong) transparent;
+  }
+
+  .lateral::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .lateral::-webkit-scrollbar-thumb {
+    border-radius: 3px;
+    background: var(--ds-line-strong);
+  }
+
+  .lateral::-webkit-scrollbar-track {
+    background: transparent;
   }
 
   .shell > main {
@@ -998,28 +1003,6 @@ p {
 
 /* ======== TABELAS ======== */
 
-.graduacao-tabela > table {
-  /* ponytail: was display:flex directly on <table>, which only ever "worked" by
-     accident on a table with no <thead>/<tbody> (bare <tr> children stayed in
-     document order). A real thead+tbody structure (required by Svelte's stricter
-     HTML validation) flexes them side by side instead of stacked -- broken table.
-     margin:auto + a width on the table itself is the correct way to center one. */
-  margin: auto;
-  width: 90%;
-  border-collapse: collapse;
-}
-
-.graduacao-tabela td,
-.graduacao-tabela th {
-  border: 1px solid var(--golden-color-opaco);
-  text-align: center;
-  padding: 8px;
-}
-
-.graduacao-tabela th {
-  color: var(--golden-color);
-}
-
 /* ======== CONTEÚDO INDEX ======== */
 
 /* ======== CONTEÚDO SOBRE NÓS ======== */
@@ -1258,71 +1241,7 @@ p {
 
 /* ======== CONTEÚDO CLASSES ======== */
 
-.grid-classes {
-  display: grid;
-  max-width: 95%;
-  justify-content: center;
-  margin: auto;
-  grid-template-columns: repeat(auto-fill, 250px);
-  gap: 20px;
-}
-
-.grid-classes > div {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-  border: 1px solid var(--golden-color-opaco);
-  background: url(/assets/img/logo-classes/box-background-flip.webp) no-repeat
-    center;
-  background-color: var(--secondary-color-opacity);
-  border-radius: 40px;
-  box-shadow: var(--card-shadow);
-  min-width: 100px;
-  min-height: 100px;
-}
-
-.grid-classes > div > img {
-  max-width: 250px;
-  max-height: 250px;
-  margin-bottom: 10px;
-}
-
-.grid-classes > div > img:hover {
-  transform: scale(1.2);
-  transition: all 0.2s ease-in-out;
-}
-
-.grid-classes h2 {
-  margin-top: 0;
-}
-
-.grid-classes > div > a {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-top: 0.5em;
-}
-
-.grid-classes > div > a > h3:hover {
-  color: var(--golden-color);
-}
-
 /* ======== CLASSES INDIVIDUAIS ======== */
-
-.classes-individual {
-  width: 95%;
-  margin: auto;
-}
-
-.classes-individual > img {
-  display: flex;
-  justify-content: center;
-  width: 55%;
-  margin: auto;
-  margin-top: 1em;
-}
 
 /* ======== GRID MURAL ======== */
 
@@ -1422,24 +1341,12 @@ p {
 /* ======== MEDIA QUERYS ======== */
 
 @media (max-width: 900px) {
-  .classes-individual > img {
-    width: 80%;
-  }
   .imagem-regras-de-combate {
     max-width: 70%;
   }
 }
 
 @media (max-width: 740px) {
-  .navbar-menu-item-li:first-of-type {
-    margin-left: 10px;
-  }
-  .navbar-menu-item-a {
-    font-size: 0.7em;
-  }
-  .classes-individual > img {
-    width: 85%;
-  }
   .modalidades h3 {
     display: flex;
     justify-content: center;
@@ -1449,9 +1356,6 @@ p {
 @media (max-width: 580px) {
   .icon {
     font-size: 16px;
-  }
-  .grid-classes > div > h3 {
-    font-size: 1.1em;
   }
   .imagem-feed {
     max-width: 80%;
@@ -1464,9 +1368,6 @@ p {
   }
   .lista-comum > li {
     margin-left: 1em;
-  }
-  .classes-individual > img {
-    width: 90%;
   }
   .news > h3 {
     width: 95%;
@@ -1493,9 +1394,6 @@ p {
   .toggle-button {
     font-size: 0.7em;
   }
-  .classes-individual > img {
-    width: 95%;
-  }
   #pagina-anterior-e-seguinte a {
     font-size: 0.8em;
   }
@@ -1520,60 +1418,6 @@ p {
 
 
 /* ======== ADMIN PANEL ======== */
-
-.admin-hub {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.2em;
-  max-width: 700px;
-  margin: 1.5em auto;
-  padding: 1.6em 1.5em;
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  border-radius: var(--card-radius);
-}
-
-.admin-hub-greeting {
-  margin: 0;
-  width: auto;
-  text-align: center;
-  color: var(--text-secondary-color);
-}
-
-.admin-hub-greeting strong {
-  color: var(--golden-color);
-}
-
-.admin-nav {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 0.8em;
-  width: 100%;
-}
-
-.admin-nav-item {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 0.8em 1em;
-  border-radius: 10px;
-  border: 1px solid var(--golden-color);
-  background: var(--box-primary-color);
-  color: var(--golden-color);
-  font-family: "Bree Serif", sans-serif;
-  font-size: 0.95em;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  transition: all 0.2s ease-in-out;
-}
-
-.admin-nav-item:hover {
-  background: var(--golden-color);
-  color: var(--primary-color);
-  box-shadow: 0 0 0.8em var(--golden-color-opaco);
-}
 
 .admin-form {
   display: flex;
@@ -2519,77 +2363,14 @@ p {
 
 /* ======== MEMBER DASHBOARD ======== */
 
-.dashboard-container {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 0 1em;
-}
-
-.dashboard-loading {
-  text-align: center;
-  width: auto;
-}
-
-.dashboard-status-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1em;
-  text-align: center;
-  margin-top: 1.5em;
-}
-
 .dashboard-empty {
   text-align: center;
   width: auto;
   color: var(--text-secondary-color);
 }
 
-.dashboard-profile {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 1.2em;
-  padding: 2em 1.5em 1.6em;
-  margin-bottom: 1.5em;
-  background: var(--primary-color);
-  border: 1px solid var(--golden-color-opaco);
-  border-radius: 14px;
-  box-shadow: var(--card-shadow-alta);
-  overflow: hidden;
-}
-
 /* o fio dourado continua sendo o fio dourado: quem carrega a faixa agora é a
    moldura do card (.faixa-borda), então tingir os dois seria redundante. */
-.dashboard-profile::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--hairline-gold);
-}
-
-.dashboard-logout {
-  position: absolute;
-  top: 1.5em;
-  right: 1.5em;
-}
-
-.dashboard-admin-link {
-  position: absolute;
-  top: 1.5em;
-  left: 1.5em;
-}
-
-.dashboard-name {
-  font-size: 1.6em;
-  text-align: center;
-  width: auto;
-  color: var(--golden-color);
-}
-
 /* ======== AVATAR UPLOADER ======== */
 
 .avatar-uploader {
@@ -2701,92 +2482,6 @@ p {
   gap: 0.6em;
 }
 
-.dashboard-official-name {
-  text-align: center;
-  width: auto;
-  font-size: 0.85em;
-  color: var(--text-secondary-color);
-  margin: -0.8em auto 0;
-}
-
-.dashboard-nickname-toggle {
-  align-self: center;
-}
-
-.dashboard-nickname-form {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  gap: 0.6em;
-}
-
-.dashboard-nickname-form input {
-  background: var(--box-primary-color);
-  border: 1px solid var(--border-dark-color-2);
-  border-radius: 6px;
-  color: var(--text-primary-color);
-  padding: 0.5em 0.8em;
-  font-family: inherit;
-  min-width: 220px;
-}
-
-.dashboard-nickname-form input:focus {
-  border-color: var(--golden-color);
-}
-
-.dashboard-stats {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 1em;
-}
-
-.dashboard-stat {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.35em;
-  flex: 1 1 140px;
-  padding: 1.1em 1.2em;
-  background: var(--secondary-color);
-  border: 1px solid var(--border-dark-color-2);
-  border-radius: 12px;
-  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.dashboard-stat:hover {
-  transform: translateY(-3px);
-  border-color: var(--golden-color-opaco);
-  box-shadow: var(--card-shadow-alta);
-}
-
-.dashboard-stat .label {
-  font-size: 0.72em;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--golden-color);
-}
-
-.dashboard-stat .value {
-  font-size: 1.8em;
-  font-weight: 700;
-  color: var(--text-primary-color);
-  font-variant-numeric: tabular-nums;
-}
-
-@media (max-width: 480px) {
-  .dashboard-logout {
-    top: 1em;
-    right: 1em;
-  }
-
-  .dashboard-admin-link {
-    top: 1em;
-    left: 1em;
-  }
-}
 
 /* ======== FOOTER ======== */
 
@@ -2796,11 +2491,6 @@ footer {
 
 .hairline-top {
   border-top: 1px solid;
-  border-image: var(--hairline-gold) 1;
-}
-
-.hairline-bottom {
-  border-bottom: 1px solid;
   border-image: var(--hairline-gold) 1;
 }
 
@@ -2893,44 +2583,11 @@ footer {
 
 /* ponytail: main{padding:10px} is global; the landing needs edge-to-edge
    bands, so cancel it on this one wrapper instead of touching the shared rule. */
-.landing-page {
-  margin: -10px;
-  width: calc(100% + 20px);
-  /* Os cards da landing (.trio-card, .treino-card, .class-card) agora pedem
-     --card-bg como todo mundo, mas aqui dentro ele volta pro tom claro: na
-     landing o card se destaca contra o painel escuro (--primary-color), não
-     contra a textura. Sem isto, o trio dentro de .landing-panel-dark ficaria
-     preto sobre preto. Uma linha aqui em vez de um override por componente. */
-  --card-bg: var(--landing-card-bg);
-}
-
-.landing-page p,
-.landing-page h1,
-.landing-page h2,
-.landing-page h3 {
-  width: auto;
-  text-align: left;
-}
-
-.landing-page .wrap {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 0 1.5rem;
-}
-
 .hero {
   background: linear-gradient(180deg, rgba(18, 18, 18, 0.55) 0%, rgba(18, 18, 18, 0.86) 72%, var(--primary-color) 100%),
     url(/assets/img/background-definitivo.webp) center/cover no-repeat;
   padding: 6.5rem 0 5rem;
   text-align: center;
-}
-
-.hero-eyebrow {
-  color: var(--golden-color);
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  margin-bottom: 1.2em;
 }
 
 .hero h1 {
@@ -2957,18 +2614,6 @@ footer {
   text-align: center;
 }
 
-.hero-ctas {
-  display: flex;
-  justify-content: center;
-  gap: 1em;
-  flex-wrap: wrap;
-}
-
-.stats-band {
-  background: var(--secondary-color);
-  padding: 2.6rem 0;
-}
-
 /* ======== FAIXA DE GRADUAÇÃO (LANDING) ========
    Substitui dois dos seis tiles "número grande + rótulo pequeno" que abriam o
    site. Os números que sobraram (membros, treinos, anos) são dados vivos e
@@ -2986,135 +2631,13 @@ footer {
   text-decoration: none;
 }
 
-.graduacao-titulo {
-  display: block;
-  text-align: center;
-  color: var(--golden-color);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  margin-bottom: 0.9em;
-}
-
-.graduacao:hover .graduacao-titulo {
-  color: #ffdf91;
-}
-
-.graduacao-barra {
-  display: flex;
-  gap: 4px;
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.graduacao-faixa {
-  flex: 1;
-  min-width: 0;
-  text-align: center;
-}
-
 /* o anel interno é o que faz a faixa preta (#0d0d10) existir contra o fundo
    #151f28 -- mesma decisão já tomada no .belt-swatch das tabelas. */
-.graduacao-faixa::before {
-  content: "";
-  display: block;
-  height: 12px;
-  border-radius: 3px;
-  background: var(--cor);
-  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.25);
-}
-
-.graduacao-nome {
-  display: block;
-  margin-top: 0.55em;
-  font-size: 0.68rem;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-secondary-color);
-}
-
 /* Abaixo de 640px oito rótulos não cabem lado a lado (~40px por faixa). Some
    visualmente, mas continua no acessível: quem lê por leitor de tela ainda
    ouve a ordem das faixas, e quem vê já tem "da Branca à Preta" no título.
    Mesma técnica do .sr-only, escrita aqui porque a classe não dá pra trocar
    dentro de media query. */
-@media (max-width: 640px) {
-  .graduacao-nome {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.2rem;
-}
-
-.stat-tile {
-  text-align: center;
-}
-
-.stat-tile .value {
-  font-family: "Bree Serif", sans-serif;
-  font-size: clamp(1.6rem, 3vw, 2.2rem);
-  color: var(--golden-color);
-  font-variant-numeric: tabular-nums;
-}
-
-.stat-tile .label {
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary-color);
-  margin-top: 0.3em;
-}
-
-.landing-panel {
-  padding: 4.5rem 0;
-  background: var(--secondary-color);
-}
-
-.landing-panel-dark {
-  background: var(--primary-color);
-}
-
-.section-head {
-  text-align: center;
-  max-width: 60ch;
-  margin: 0 auto 2.6rem;
-}
-
-.section-head .eyebrow {
-  display: inline-block;
-  color: var(--golden-color);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  letter-spacing: 0.18em;
-  margin-bottom: 0.8em;
-}
-
-.section-head h2 {
-  text-align: center;
-  text-wrap: balance;
-  font-size: clamp(1.4rem, 3vw, 1.9rem);
-  text-transform: uppercase;
-  color: var(--text-primary-color);
-  margin: 0;
-  padding: 0;
-}
-
-.section-head p {
-  color: var(--text-secondary-color);
-  margin: 0.8em auto 0;
-  text-align: center;
-  font-size: 0.98rem;
-}
 
 .trio-grid {
   display: grid;
@@ -3273,63 +2796,6 @@ footer {
   }
 }
 
-.classes-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.4rem;
-}
-
-.class-card {
-  display: block;
-  background: var(--card-bg);
-  border: 1px solid var(--golden-color-opaco);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--card-shadow);
-  transition: transform 0.25s ease;
-}
-
-.class-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--card-shadow-alta);
-}
-
-.class-card .img-wrap {
-  aspect-ratio: 1;
-  overflow: hidden;
-  background: var(--primary-color);
-}
-
-.class-card img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.35s ease;
-}
-
-.class-card:hover img {
-  transform: scale(1.08);
-}
-
-.class-card .body {
-  padding: 1.1rem 1.2rem 1.3rem;
-}
-
-.class-card h3 {
-  color: var(--golden-color);
-  font-size: 1rem;
-  text-transform: uppercase;
-  margin-bottom: 0.5em;
-  padding: 0;
-  text-align: left;
-}
-
-.class-card p {
-  color: var(--text-secondary-color);
-  font-size: 0.84rem;
-  margin: 0;
-}
-
 .galeria-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -3361,21 +2827,12 @@ footer {
   .trio-grid {
     grid-template-columns: 1fr;
   }
-  .classes-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
   .galeria-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 /* eram 6 tiles em 3 pontos de quebra (6/3/2); com 4 sobra um só: 4 ou 2. */
-@media (max-width: 900px) {
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 1.6rem;
-  }
-}
 
 /* ponytail: o CTA usava a MESMA background-definitivo.webp do .hero, com um
    gradiente quase igual por cima -- a página abria e fechava com a mesma
@@ -3383,29 +2840,6 @@ footer {
    foto sai e sobra um degradê que continua o --secondary-color da galeria
    acima e apaga no --primary-color, com um brilho dourado subindo de baixo
    atrás do botão. A imagem fica sendo exclusividade do hero. */
-.cta-band {
-  background: radial-gradient(ellipse 110% 90% at 50% 100%, rgba(232, 172, 70, 0.16) 0%, rgba(232, 172, 70, 0) 60%),
-    linear-gradient(180deg, var(--secondary-color) 0%, var(--primary-color) 100%);
-  padding: 5rem 0;
-  text-align: center;
-}
-
-.cta-band h2 {
-  display: block;
-  text-align: center;
-  font-size: clamp(1.5rem, 3.4vw, 2.3rem);
-  text-transform: uppercase;
-  color: var(--text-primary-color);
-  margin: 0 auto 0.9em;
-  padding: 0;
-}
-
-.cta-band h2 .line {
-  display: block;
-  white-space: nowrap;
-  text-align: center;
-}
-
 /* ponytail: `white-space: normal` não força quebra, só permite — então o limiar
    subiu de 340px pra 400px por causa da Bree Serif (mais larga que a Rubik que
    estava aqui antes) e o .hero h1 entrou junto, que tinha o mesmo nowrap sem
@@ -3416,30 +2850,6 @@ footer {
   .hero h1 .line {
     white-space: normal;
   }
-}
-
-.cta-socials {
-  display: flex;
-  justify-content: center;
-  gap: 1.4em;
-  margin-top: 2.2rem;
-}
-
-.cta-socials a {
-  color: var(--golden-color);
-  font-size: 22px;
-  opacity: 0.85;
-}
-
-.cta-socials a:hover {
-  opacity: 1;
-}
-
-.cta-band p {
-  color: var(--text-secondary-color);
-  max-width: 44ch;
-  margin: 0 auto 1.8em;
-  text-align: center;
 }
 
 /* ======== COMO PARTICIPAR ======== */

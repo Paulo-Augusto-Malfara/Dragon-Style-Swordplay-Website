@@ -43,11 +43,12 @@ export const menu: GrupoNav[] = [
     ],
   },
   {
+    // O painel administrativo saiu daqui em 2026-08-13. O menu é estático e
+    // igual pra todo mundo, então ele aparecia pros ~170 membros que não têm
+    // acesso, e clicar só levava a uma tela de login negado. O caminho agora é
+    // a ficha, que sabe quem está logado e só mostra o link pra quem é staff.
     label: "Área do Membro",
-    items: [
-      { href: "/dashboard", label: "Minha Ficha" },
-      { href: "/admin", label: "Painel Administrativo" },
-    ],
+    items: [{ href: "/dashboard", label: "Minha Ficha" }],
   },
 ];
 

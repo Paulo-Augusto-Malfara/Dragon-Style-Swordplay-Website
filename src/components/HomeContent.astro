@@ -1,226 +1,576 @@
 ---
+/**
+ * Home do site: a porta de entrada e o hub semanal, na mesma página.
+ *
+ * Ela atende dois públicos que não podem competir. Quem chega de fora precisa
+ * saber em segundos o que é Swordplay e como aparecer no primeiro treino. Quem
+ * já é do grupo abre o site pra ver uma coisa só, quando é o próximo treino, e
+ * por isso a agenda vem antes de qualquer texto institucional.
+ *
+ * Todo o CSS é escopado aqui. A home antiga dependia de um bloco grande de
+ * global.css, e qualquer ajuste de layout dela mexia em regras que outras
+ * páginas também usavam.
+ */
 import BaseLayout from "../layouts/BaseLayout.astro";
-import Icon from "./Icon.astro";
 import ProximoTreino from "./ProximoTreino.astro";
 import { supabasePublic } from "../lib/supabase-public";
 import { FAIXAS } from "../lib/faixa";
 
-const { data: membrosData } = await supabasePublic
-  .from("v_ranking_nivel_geral")
-  .select("auth_level, status_ativo");
-const membrosAtivos = (membrosData ?? []).filter(
-  (m) => (m.auth_level === null || m.auth_level >= 4) && m.status_ativo
-).length;
+const WHATSAPP = "https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK";
 
-const { data: treinosData } = await supabasePublic
-  .from("v_registro_treinos")
-  .select("id_treino");
-const treinosRealizados = (treinosData ?? []).reduce((max, t) => Math.max(max, t.id_treino), 0);
+// Cada consulta cai pra null por conta própria. A home é a página mais visitada
+// do site e não pode devolver erro 500 porque o banco demorou a responder: sem
+// dado, a seção some ou diz o que houve, e o resto da página continua de pé.
+const [membrosAtivos, treinosRegistrados, novidades] = await Promise.all([
+  supabasePublic
+    .from("v_ranking_nivel_geral")
+    .select("id_membro", { count: "exact", head: true })
+    .eq("status_ativo", true)
+    .or("auth_level.is.null,auth_level.gte.4")
+    .then((r) => r.count, () => null),
+  supabasePublic
+    .from("v_registro_treinos")
+    .select("id_treino")
+    .order("id_treino", { ascending: false })
+    .limit(1)
+    .maybeSingle()
+    .then((r) => r.data?.id_treino ?? null, () => null),
+  supabasePublic
+    .from("posts")
+    .select("slug, title, published_at")
+    .eq("is_published", true)
+    .order("published_at", { ascending: false })
+    .limit(3)
+    .then((r) => (r.error ? null : (r.data ?? [])), () => null),
+]);
 
-const fundacao = new Date(2008, 11, 1);
+// O grupo nasceu em dezembro de 2008, então o número só vira no fim do ano.
 const hoje = new Date();
-let anosExistencia = hoje.getFullYear() - fundacao.getFullYear();
-const jaFezAniversarioEsseAno =
-  hoje.getMonth() > fundacao.getMonth() ||
-  (hoje.getMonth() === fundacao.getMonth() && hoje.getDate() >= fundacao.getDate());
-if (!jaFezAniversarioEsseAno) anosExistencia--;
+const anosDeGrupo = hoje.getFullYear() - 2008 - (hoje.getMonth() < 11 ? 1 : 0);
 
-const galeriaPreview = [
-  { img: "galeria-1", alt: "Membro em postura de combate durante treino ao ar livre" },
-  { img: "galeria-2", alt: "Grupo treinando com bandeiras e armas acolchoadas no parque" },
-  { img: "galeria-3", alt: "Duelo entre dois membros ao entardecer" },
-  { img: "galeria-4", alt: "Duelo de espadas acolchoadas em treino indoor" },
-  { img: "galeria-5", alt: "Grupo em combate simulado no gramado" },
-  { img: "galeria-6", alt: "Membro treinando golpes em alvo de madeira" },
-  { img: "galeria-7", alt: "Membro saltando durante exercício de combate" },
-  { img: "galeria-8", alt: "Duelo sob a tenda do evento" },
+const numeros = [
+  membrosAtivos !== null && { valor: membrosAtivos, rotulo: "Membros ativos" },
+  treinosRegistrados !== null && { valor: treinosRegistrados, rotulo: "Treinos registrados" },
+  { valor: anosDeGrupo, rotulo: "Anos de grupo" },
+].filter(Boolean) as { valor: number; rotulo: string }[];
+
+const dataCurta = (iso: string | null) =>
+  iso
+    ? new Date(iso).toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        timeZone: "America/Sao_Paulo",
+      })
+    : null;
+
+const atalhos = [
+  { href: "/dashboard", titulo: "Minha Ficha", texto: "Seu nível, suas presenças e seus pontos de honra." },
+  { href: "/agenda", titulo: "Agenda", texto: "Data, horário e local dos próximos treinos." },
+  { href: "/equipamentos", titulo: "Equipamentos", texto: "O arsenal inteiro, com filtro pela sua classe." },
+  { href: "/resumo-das-classes", titulo: "Classes", texto: "As 10 classes e o que cada uma empunha." },
+  { href: "/nivel-geral", titulo: "Progressão", texto: "Como sobe o nível geral e como vem a faixa." },
+  { href: "/ranking-geral", titulo: "Ranking", texto: "Quem está na frente no grupo e em cada classe." },
 ];
 
-const classesPreview = [
-  {
-    slug: "guerreiro",
-    label: "Guerreiro",
-    img: "guerreiros",
-    desc: "Espada e escudo, bem balanceado entre ataque e defesa. Ideal pra quem tá começando.",
-  },
-  {
-    slug: "arqueiro",
-    label: "Arqueiro",
-    img: "arqueiros",
-    desc: "Mestre no combate à distância com arco e besta, com uma arma extra pra emergências.",
-  },
-  {
-    slug: "cavaleiro",
-    label: "Cavaleiro",
-    img: "cavaleiros",
-    desc: "Espada longa de duas mãos, com estilo equilibrado entre ataque e defesa.",
-  },
-  {
-    slug: "sicario",
-    label: "Sicário",
-    img: "sicarios",
-    desc: "Adagas e armas curtas, feito pra quem joga rápido e de perto.",
-  },
+const fotos = [
+  { img: "galeria-1", alt: "Membro em postura de combate durante treino ao ar livre" },
+  { img: "galeria-3", alt: "Duelo entre dois membros ao entardecer" },
+  { img: "galeria-5", alt: "Grupo em combate simulado no gramado" },
+  { img: "galeria-7", alt: "Membro saltando durante exercício de combate" },
 ];
 ---
 
 <BaseLayout
   title="Início"
-  description="Site do grupo Dragon Style Swordplay e Eventos, em São José do Rio Preto."
+  description="Dragon Style Swordplay e Eventos, combate medieval com armas acolchoadas em São José do Rio Preto. Próximo treino, como participar e o manual do grupo."
 >
-  <div class="landing-page">
-    <section class="hero hairline-bottom">
-      <div class="wrap">
-        <div class="hero-eyebrow">São José do Rio Preto</div>
-        <h1><span class="line">Onde <span class="gold-title">honra</span></span><span class="line">encontra <span class="gold-title">ação</span></span></h1>
-        <p class="lede">
-          Combate medieval com armas acolchoadas, comunidade de verdade e um
-          sistema de progressão completo pra chamar de seu.
+  <div class="home">
+    <section class="home-hero">
+      <div class="home-wrap">
+        <p class="home-hero-local">São José do Rio Preto</p>
+        <h1 class="home-hero-titulo">Combate medieval com armas acolchoadas</h1>
+        <p class="home-hero-lede">
+          O Dragon Style treina esgrima medieval esportiva desde 2008. As armas são acolchoadas e o contato é de
+          verdade, então dá pra jogar sério sem armadura e sem ninguém se machucar. Não existe juiz: quem leva o
+          toque reconhece o toque. Treinar com a gente é gratuito e a arma é emprestada.
         </p>
-        <div class="hero-ctas">
-          <a class="btn btn-primary" href="/como-participar">Quero Participar</a>
-          <a class="btn" href="#proximo-treino">Ver Próximo Treino</a>
+        <div class="home-ctas">
+          <a class="btn btn-primary" href="/como-participar">Quero treinar</a>
+          <a class="btn" href="/o-que-e-swordplay">O que é Swordplay?</a>
         </div>
       </div>
     </section>
 
-    <section class="stats-band hairline-bottom">
-      <div class="wrap">
-        <a class="graduacao" href="/nivel-geral">
-          <span class="graduacao-titulo">Graduação: da Branca à Preta</span>
-          <ol class="graduacao-barra">
-            {
-              FAIXAS.map((f) => (
-                <li class="graduacao-faixa" style={`--cor: ${f.cor}`}>
-                  <span class="graduacao-nome">{f.nome}</span>
-                </li>
-              ))
-            }
-          </ol>
-        </a>
-        <div class="stats-grid">
-          <div class="stat-tile">
-            <div class="value">{membrosAtivos}</div>
-            <div class="label">Membros Ativos</div>
-          </div>
-          <div class="stat-tile">
-            <div class="value">10</div>
-            <div class="label">Classes de Combate</div>
-          </div>
-          <div class="stat-tile">
-            <div class="value">{treinosRealizados}</div>
-            <div class="label">Treinos Registrados</div>
-          </div>
-          <div class="stat-tile">
-            <div class="value">{anosExistencia}</div>
-            <div class="label">Anos de Existência</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <section class="landing-panel landing-panel-dark">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">O que é Swordplay</span>
-          <h2>Combate de verdade, segurança total</h2>
-          <p>Réplicas acolchoadas, regras de honra e um esporte que trabalha o corpo inteiro.</p>
-        </div>
-        <div class="trio-grid">
-          <div class="trio-card">
-            <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3l7 3v6c0 5-3.2 8-7 9-3.8-1-7-4-7-9V6l7-3z"></path><path d="M9 12l2 2 4-4"></path></svg>
-            <h3>Combate Seguro</h3>
-            <p>Espadas, lanças, machados e escudos acolchoados. Dá pra jogar sério, com contato, sem precisar de armadura corporal.</p>
-          </div>
-          <div class="trio-card">
-            <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="6"></circle><polyline points="8.2 13.5 7 22 12 19.5 17 22 15.8 13.5"></polyline></svg>
-            <h3>Honra em Cada Golpe</h3>
-            <p>Não existe marcação automática de ponto. Quem foi atingido reconhece o toque. Honestidade em combate é regra tanto quanto qualquer outra.</p>
-          </div>
-          <div class="trio-card">
-            <svg class="trio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a5 5 0 0 0-5 5c0 1.6.7 2.6 1.4 3.5.6.8 1.1 1.4 1.1 2.5v2a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-2c0-1.1.5-1.7 1.1-2.5C15.3 9.6 16 8.6 16 7a5 5 0 0 0-4-5z"></path><path d="M10 19h4M11 22h2"></path></svg>
-            <h3>Corpo, Mente e Reflexo</h3>
-            <p>Trabalha o corpo inteiro, agiliza os reflexos e ainda obriga a pensar rápido quando o combate vira contra você.</p>
-          </div>
-        </div>
-        <a class="section-link" href="/o-que-e-swordplay">Entenda o Swordplay a fundo →</a>
-      </div>
-    </section>
-
-    <section class="landing-panel hairline-top hairline-bottom" id="proximo-treino">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Agenda</span>
-          <h2>Próximo Treino</h2>
-        </div>
+    <section class="home-secao home-secao-alt" id="proximo-treino">
+      <div class="home-wrap">
+        <p class="home-etiqueta">Agenda</p>
+        <h2 class="home-titulo">Próximo treino</h2>
+        <p class="home-nota">
+          O grupo não tem dia fixo. Cada treino é marcado na agenda, então confira aqui antes de sair de casa.
+        </p>
         <ProximoTreino />
-        <a class="section-link" href="/agenda">Agenda dos próximos treinos →</a>
+        <a class="home-link" href="/agenda">Ver todos os treinos agendados</a>
       </div>
     </section>
 
-    <section class="landing-panel landing-panel-dark hairline-bottom" id="classes">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Progressão</span>
-          <h2>Escolha sua Classe</h2>
-          <p>10 classes, mais de 30 combinações de equipamentos e estilos diferentes, lute como desejar.</p>
-        </div>
-        <div class="classes-grid">
+    <section class="home-secao">
+      <div class="home-wrap">
+        <p class="home-etiqueta">No dia a dia</p>
+        <h2 class="home-titulo">Atalhos</h2>
+        <ul class="home-atalhos">
           {
-            classesPreview.map((c) => (
-              <a class="class-card" href={`/${c.slug}`}>
-                <div class="img-wrap">
-                  <img src={`/assets/img/logo-classes/classes-juntas/${c.img}.webp`} alt={c.label} />
-                </div>
-                <div class="body">
-                  <h3>{c.label}</h3>
-                  <p>{c.desc}</p>
-                </div>
+            atalhos.map((a) => (
+              <li>
+                <a class="home-atalho" href={a.href}>
+                  <strong>{a.titulo}</strong>
+                  <span>{a.texto}</span>
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </section>
+
+    <section class="home-secao home-secao-alt">
+      <div class="home-wrap">
+        <p class="home-etiqueta">Primeira vez</p>
+        <h2 class="home-titulo">Como começar</h2>
+        <ol class="home-passos">
+          <li>
+            <strong>Veja quando é o próximo treino.</strong>
+            <span>Não existe dia fixo. A agenda diz a data, o horário e o local de cada encontro.</span>
+          </li>
+          <li>
+            <strong>Apareça com roupa de esporte, calçado fechado e água.</strong>
+            <span>Arma e escudo o grupo empresta. Não tem mensalidade, inscrição nem experiência exigida.</span>
+          </li>
+          <li>
+            <strong>Entre no grupo do WhatsApp.</strong>
+            <span>É lá que combinamos treino, torneio e qualquer mudança de última hora.</span>
+          </li>
+        </ol>
+        <div class="home-ctas">
+          <a class="btn btn-primary" href="/como-participar">Como participar</a>
+          <a class="btn" href={WHATSAPP} target="_blank" rel="noopener noreferrer">Grupo do WhatsApp</a>
+        </div>
+        <ul class="home-fotos">
+          {
+            fotos.map((f) => (
+              <li>
+                <img src={`/assets/img/galeria/${f.img}.webp`} alt={f.alt} loading="lazy" />
+              </li>
+            ))
+          }
+        </ul>
+        <a class="home-link" href="/galeria">Ver a galeria completa</a>
+      </div>
+    </section>
+
+    <section class="home-secao">
+      <div class="home-wrap">
+        <p class="home-etiqueta">Mural</p>
+        <h2 class="home-titulo">Novidades</h2>
+        {
+          novidades === null ? (
+            <p class="home-vazio">
+              Não deu pra carregar as novidades agora. Tente de novo em instantes ou abra a{" "}
+              <a class="links-de-texto" href="/novidades">
+                página de novidades
               </a>
-            ))
-          }
-        </div>
-        <a class="section-link" href="/resumo-das-classes">Ver as 10 classes completas →</a>
+              .
+            </p>
+          ) : novidades.length === 0 ? (
+            <p class="home-vazio">Nada publicado no mural por enquanto. Quando tiver, aparece aqui.</p>
+          ) : (
+            <ul class="home-novidades">
+              {novidades.map((n) => (
+                <li>
+                  <a class="home-novidade" href={`/novidades#${n.slug}`}>
+                    <strong>{n.title}</strong>
+                    {dataCurta(n.published_at) && <span>{dataCurta(n.published_at)}</span>}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )
+        }
+        <a class="home-link" href="/novidades">Ler todas as novidades</a>
       </div>
     </section>
 
-    <section class="landing-panel" id="galeria">
-      <div class="wrap">
-        <div class="section-head">
-          <span class="eyebrow">Comunidade</span>
-          <h2>Nossos Treinos em Ação</h2>
-          <p>Um gostinho dos nossos encontros, onde a honra guia o combate e a amizade constrói a comunidade.</p>
-        </div>
-        <div class="galeria-grid">
+    <section class="home-secao home-secao-alt">
+      <div class="home-wrap">
+        <p class="home-etiqueta">O grupo</p>
+        <h2 class="home-titulo">Onde você entra, e até onde dá pra ir</h2>
+        <ul class="home-numeros">
           {
-            galeriaPreview.map((g) => (
-              <div class="galeria-item">
-                <img src={`/assets/img/galeria/${g.img}.webp`} alt={g.alt} loading="lazy" />
-              </div>
+            numeros.map((n) => (
+              <li>
+                <strong>{n.valor}</strong>
+                <span>{n.rotulo}</span>
+              </li>
             ))
           }
-        </div>
-        <a class="section-link" href="/galeria">Ver galeria completa →</a>
-      </div>
-    </section>
-
-    <section class="cta-band hairline-top">
-      <div class="wrap">
-        <h2><span class="line">Pronto pra empunhar</span><span class="line gold-title">sua arma?</span></h2>
-        <p>Junte-se aos treinos, escolha sua classe e comece sua jornada no Dragon Style.</p>
-        <a class="btn btn-primary" href="/como-participar">Quero Participar</a>
-        <div class="cta-socials">
-          <a href="https://www.facebook.com/groups/227828760657044" target="_blank" aria-label="Facebook">
-            <Icon name="facebook" />
-          </a>
-          <a href="https://instagram.com/ds.swordplay?igshid=YmMyMTA2M2Y=" target="_blank" aria-label="Instagram">
-            <Icon name="instagram" />
-          </a>
-          <a href="https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK" target="_blank" aria-label="WhatsApp">
-            <Icon name="whatsapp" />
-          </a>
-        </div>
+        </ul>
+        <a class="home-graduacao" href="/nivel-geral">
+          {/* As cores saem de src/lib/faixa.ts, que é a única lista de faixas do
+              site. Os nomes ficam na legenda em vez de um rótulo por segmento:
+              oito rótulos não cabem na largura de um celular. */}
+          <ol class="home-faixas" aria-hidden="true">
+            {FAIXAS.map((f) => <li style={`--cor: ${f.cor}`} />)}
+          </ol>
+          <span class="home-faixas-legenda">Da faixa branca à preta, oito graus de graduação</span>
+        </a>
       </div>
     </section>
   </div>
 </BaseLayout>
+
+<style>
+  /* main tem padding: 10px no global, e as faixas da home vão de ponta a ponta.
+     Cancelar aqui evita mexer na regra que todas as outras páginas usam. */
+  .home {
+    margin: -10px;
+    width: calc(100% + 20px);
+  }
+
+  .home-wrap {
+    max-width: 1100px;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 2rem);
+  }
+
+  /* ======== HERO ======== */
+
+  .home-hero {
+    padding: clamp(2.6rem, 9vw, 5rem) 0 clamp(2.2rem, 7vw, 4rem);
+    border-bottom: 1px solid var(--ds-line);
+    background:
+      linear-gradient(180deg, rgba(11, 16, 22, 0.7) 0%, rgba(11, 16, 22, 0.88) 60%, var(--ds-bg) 100%),
+      url(/assets/img/background-definitivo.webp) center / cover no-repeat;
+  }
+
+  .home-hero-local {
+    margin: 0 0 0.9em;
+    width: auto;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ds-gold);
+  }
+
+  .home-hero-titulo {
+    max-width: 16ch;
+    margin: 0 0 0.5em;
+    /* Única sombra da página: aqui o texto está sobre foto. */
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.6);
+  }
+
+  .home-hero-lede {
+    max-width: 54ch;
+    width: auto;
+    margin: 0 0 1.8em;
+    font-size: clamp(1rem, 0.95rem + 0.4vw, 1.15rem);
+    line-height: 1.6;
+    color: var(--ds-text-2);
+  }
+
+  .home-ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7em;
+  }
+
+  /* ======== SEÇÕES ======== */
+
+  .home-secao {
+    padding: clamp(2.2rem, 7vw, 3.6rem) 0;
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .home-secao-alt {
+    background: var(--ds-bg-alt);
+  }
+
+  .home-etiqueta {
+    margin: 0 0 0.6em;
+    width: auto;
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ds-gold-deep);
+  }
+
+  .home-titulo {
+    max-width: 26ch;
+    margin: 0 0 0.6em;
+  }
+
+  .home-nota {
+    max-width: 60ch;
+    width: auto;
+    margin: 0 0 1.4em;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: var(--ds-text-3);
+  }
+
+  .home-link {
+    display: inline-block;
+    margin-top: 1.4em;
+    color: var(--ds-gold);
+    font-size: 0.9rem;
+    text-decoration: underline;
+  }
+
+  .home-link::after {
+    content: " →";
+    text-decoration: none;
+  }
+
+  .home-link:hover {
+    color: var(--ds-gold-light);
+  }
+
+  /* ProximoTreino é componente compartilhado e traz o próprio "nenhum treino
+     agendado" em .dashboard-empty. Aqui ele veste a mesma caixa dos outros
+     vazios da home, pra ausência de dado parecer resposta e não falha. */
+  .home-vazio,
+  .home-secao :global(.dashboard-empty) {
+    width: auto;
+    margin: 0;
+    padding: 1.1em 1.2em;
+    border: 1px dashed var(--ds-line-strong);
+    border-radius: 10px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    text-align: left;
+    color: var(--ds-text-3);
+  }
+
+  /* ======== ATALHOS ======== */
+
+  .home-atalhos,
+  .home-passos,
+  .home-novidades,
+  .home-numeros,
+  .home-fotos {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .home-atalhos {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  }
+
+  .home-atalho {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    height: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface-solid);
+    transition:
+      border-color 0.15s,
+      transform 0.15s;
+  }
+
+  .home-atalho:hover,
+  .home-atalho:focus-visible {
+    border-color: var(--ds-gold-dim);
+    transform: translateY(-2px);
+  }
+
+  .home-atalho > strong {
+    font-family: var(--ds-font-display);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--ds-gold-light);
+  }
+
+  .home-atalho > span {
+    font-size: 0.88rem;
+    line-height: 1.45;
+    color: var(--ds-text-3);
+  }
+
+  /* ======== PASSOS ======== */
+
+  .home-passos {
+    counter-reset: passo;
+    display: grid;
+    gap: 14px;
+    margin-bottom: 1.8em;
+  }
+
+  .home-passos > li {
+    counter-increment: passo;
+    display: grid;
+    grid-template-columns: 34px 1fr;
+    grid-template-rows: auto auto;
+    gap: 2px 14px;
+    align-items: baseline;
+  }
+
+  .home-passos > li::before {
+    content: counter(passo);
+    grid-row: 1 / span 2;
+    align-self: start;
+    width: 34px;
+    height: 34px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 50%;
+    background: var(--ds-gold-wash);
+    font-family: var(--ds-font-display);
+    font-size: 0.95rem;
+    color: var(--ds-gold-light);
+  }
+
+  .home-passos > li > strong {
+    font-weight: 500;
+    color: var(--ds-text-1);
+  }
+
+  .home-passos > li > span {
+    font-size: 0.92rem;
+    line-height: 1.55;
+    color: var(--ds-text-3);
+  }
+
+  /* ======== FOTOS ======== */
+
+  .home-fotos {
+    display: grid;
+    gap: 8px;
+    grid-template-columns: repeat(2, 1fr);
+    margin-top: 1.8em;
+  }
+
+  .home-fotos > li > img {
+    display: block;
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--ds-line);
+  }
+
+  /* ======== NOVIDADES ======== */
+
+  .home-novidades {
+    display: grid;
+    gap: 8px;
+  }
+
+  .home-novidade {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 14px;
+    padding: 12px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface);
+    transition: border-color 0.15s;
+  }
+
+  .home-novidade:hover,
+  .home-novidade:focus-visible {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .home-novidade > strong {
+    font-weight: 500;
+    color: var(--ds-text-1);
+  }
+
+  .home-novidade > span {
+    font-size: 0.8rem;
+    color: var(--ds-text-4);
+    white-space: nowrap;
+  }
+
+  /* ======== NÚMEROS E GRADUAÇÃO ======== */
+
+  .home-numeros {
+    display: grid;
+    gap: 10px;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+
+  .home-numeros > li {
+    padding: 14px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface-solid);
+  }
+
+  .home-numeros > li > strong {
+    display: block;
+    font-family: var(--ds-font-display);
+    font-size: clamp(1.7rem, 1.4rem + 1.4vw, 2.3rem);
+    line-height: 1.1;
+    color: var(--ds-gold);
+  }
+
+  .home-numeros > li > span {
+    font-size: 0.82rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ds-text-4);
+  }
+
+  .home-graduacao {
+    display: block;
+    margin-top: 1.6em;
+  }
+
+  .home-faixas {
+    display: flex;
+    gap: 4px;
+  }
+
+  .home-faixas > li {
+    flex: 1;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--cor);
+    /* A faixa preta é preta mesmo: quem a torna visível é o anel, e é assim
+       que uma faixa preta deve ler. */
+    box-shadow: inset 0 0 0 1px var(--ds-line-strong);
+  }
+
+  .home-faixas-legenda {
+    display: block;
+    margin-top: 0.7em;
+    font-size: 0.82rem;
+    color: var(--ds-text-4);
+    text-decoration: underline;
+  }
+
+  .home-graduacao:hover .home-faixas-legenda {
+    color: var(--ds-gold-light);
+  }
+
+  @media (min-width: 640px) {
+    .home-fotos {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .home-fotos > li > img {
+      height: 150px;
+    }
+  }
+</style>

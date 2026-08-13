@@ -1,9 +1,14 @@
 ---
-import BaseLayout from "../layouts/BaseLayout.astro";
+import PageLayout from "../layouts/PageLayout.astro";
 import MemberDashboard from "../components/dashboard/MemberDashboard.svelte";
+
+// O título era "Minha Progressão" aqui e "Minha Ficha" no menu. Ficou "Minha
+// Ficha" nos dois, que é como o pessoal chama.
 ---
 
-<BaseLayout title="Minha Progressão">
-  <h1>Minha Progressão</h1>
+<PageLayout
+  title="Minha Ficha"
+  description="Seu nível geral, seus níveis por classe e seu histórico de presença no Dragon Style."
+>
   <MemberDashboard client:idle />
-</BaseLayout>
+</PageLayout>
