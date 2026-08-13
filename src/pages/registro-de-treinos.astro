@@ -53,10 +53,18 @@ const treinos = [...porTreino.entries()].sort((a, b) => b[1].data_treino.localeC
   {treinos.length === 0 ? (
     <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
   ) : (
-    <div class="modalidades modalidades-grid treinos-grid">
+    <div class="tr-lista">
       {treinos.map(([idTreino, { data_treino, attendees }]) => (
         <TreinoCard idTreino={idTreino} dataTreino={data_treino} attendees={attendees} />
       ))}
     </div>
   )}
 </PageLayout>
+
+<style>
+  .tr-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+</style>

@@ -1,6 +1,4 @@
 ---
-import Icon from "./Icon.astro";
-
 interface Registro {
   id_treino: number;
   data_treino: string;
@@ -21,57 +19,217 @@ interface Props {
 }
 
 const { idTreino, dataTreino, attendees } = Astro.props;
-const dataFormatada = new Date(dataTreino + "T00:00:00").toLocaleDateString("pt-BR");
+const data = new Date(dataTreino + "T00:00:00");
+const dataCurta = data.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+const ano = data.getFullYear();
+const subiram = attendees.filter((r) => r.subiu_nivel_geral).length;
 ---
 
-<details class="modalidades-box card registro-treino-card">
+{/*
+  Linha fechada, não card. São 86 treinos: com o cartão de antes, cada um
+  gastava 118px de altura pra dizer três coisas, e chegar no treino de junho
+  exigia rolar meia dúzia de telas. Aqui a data vem primeiro, porque é por data
+  que alguém procura um treino, e o número fica de apoio.
+*/}
+<details class="tr-item">
   <summary>
-    <div class="modalidades-summary-text">
-      <h2 class="modalidades-button">Treino Nº {idTreino}</h2>
-      <div class="modalidade-tags">
-        <span class="stat-pill">{dataFormatada}</span>
-        <span class="stat-pill">{attendees.length} participante{attendees.length === 1 ? "" : "s"}</span>
-      </div>
-    </div>
-    <Icon name="chevron-forward" class="modalidades-chevron" />
+    <span class="tr-data">
+      <strong>{dataCurta}</strong>
+      <small>{ano}</small>
+    </span>
+    <span class="tr-id">Treino {idTreino}</span>
+    <span class="tr-conta">
+      {attendees.length}
+      {attendees.length === 1 ? " presente" : " presentes"}
+      {subiram > 0 && (
+        <span class="tr-subiu">{subiram === 1 ? "1 subiu" : `${subiram} subiram`}</span>
+      )}
+    </span>
   </summary>
-  <div class="modalidades-conteudo">
-    <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--treino">
-        <thead>
-          <tr>
-            <th class="col-nome">Nome</th>
-            <th class="col-faixa">Classe</th>
-            <th class="col-stat">Nível Geral</th>
-            <th class="col-stat">Nível Classe</th>
-          </tr>
-        </thead>
-        <tbody>
-          {attendees.map((r) => (
-            <tr>
-              <td class="col-nome">
-                <span class="row-avatar">
-                  {r.foto_url ? <img src={r.foto_url} alt="" /> : r.nome.charAt(0).toUpperCase()}
-                </span>
-                <span class="row-name">{r.nome}</span>
-              </td>
-              <td class="col-faixa">{r.nome_classe}</td>
-              <td class="col-stat">
-                <span class={`stat-pill ${r.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
-                  {r.nivel_geral}
-                  {r.subiu_nivel_geral && <span class="level-up-arrow">{"▲".repeat(r.subida_nivel_geral)}</span>}
-                </span>
-              </td>
-              <td class="col-stat">
-                <span class={`stat-pill ${r.subiu_nivel_classe ? "stat-pill-up" : ""}`}>
-                  {r.nivel_classe}
-                  {r.subiu_nivel_classe && <span class="level-up-arrow">▲</span>}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
+
+  {/*
+    Dentro, uma lista por pessoa em vez da tabela de 4 colunas. Quem abre um
+    treino quer ver quem estava e quem subiu, e no celular a tabela obrigava a
+    arrastar de lado pra chegar na coluna que responde isso.
+  */}
+  <ul class="tr-presentes">
+    {attendees.map((r) => (
+      <li>
+        <span class="tr-avatar">
+          {r.foto_url ? <img src={r.foto_url} alt="" loading="lazy" /> : r.nome.charAt(0).toUpperCase()}
+        </span>
+        <span class="tr-nome">
+          {r.nome}
+          <small>{r.nome_classe}</small>
+        </span>
+        <span class="tr-niveis">
+          <span class:list={["tr-nivel", r.subiu_nivel_geral && "subiu"]}>
+            {r.nivel_geral}
+            {r.subiu_nivel_geral && <span class="tr-seta">{"▲".repeat(r.subida_nivel_geral)}</span>}
+          </span>
+          <span class:list={["tr-nivel", "tr-nivel--classe", r.subiu_nivel_classe && "subiu"]}>
+            {r.nivel_classe}
+            {r.subiu_nivel_classe && <span class="tr-seta">▲</span>}
+          </span>
+        </span>
+      </li>
+    ))}
+  </ul>
 </details>
+
+<style>
+  .tr-item {
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+  }
+
+  .tr-item[open] {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .tr-item summary {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 14px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .tr-item summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .tr-item summary:hover .tr-id {
+    color: var(--ds-gold-light);
+  }
+
+  .tr-data {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    line-height: 1.1;
+  }
+
+  .tr-data strong {
+    font-family: var(--ds-font-display);
+    font-size: 0.98rem;
+    color: var(--ds-gold);
+  }
+
+  .tr-data small {
+    font-size: 0.62rem;
+    color: var(--ds-text-5);
+  }
+
+  .tr-id {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.9rem;
+    color: var(--ds-text-2);
+  }
+
+  .tr-conta {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.75rem;
+    color: var(--ds-text-4);
+  }
+
+  /* Quem subiu de nível é a única coisa que se comemora num treino, então é a
+     única coisa colorida da linha fechada. */
+  .tr-subiu {
+    padding: 2px 7px;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 999px;
+    background: var(--ds-gold-wash);
+    color: var(--ds-gold-light);
+    white-space: nowrap;
+  }
+
+  .tr-presentes {
+    margin: 0;
+    padding: 0 14px 12px;
+    list-style: none;
+  }
+
+  .tr-presentes > li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    border-top: 1px solid var(--ds-line);
+  }
+
+  .tr-avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid var(--ds-line-strong);
+    background: var(--ds-bg-alt);
+    overflow: hidden;
+    font-family: var(--ds-font-display);
+    font-size: 0.8rem;
+    color: var(--ds-text-3);
+  }
+
+  .tr-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .tr-nome {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    font-size: 0.88rem;
+    line-height: 1.25;
+  }
+
+  .tr-nome small {
+    font-size: 0.72rem;
+    color: var(--ds-text-4);
+  }
+
+  .tr-niveis {
+    flex: none;
+    display: flex;
+    gap: 6px;
+  }
+
+  .tr-nivel {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    min-width: 34px;
+    justify-content: center;
+    padding: 3px 8px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 999px;
+    font-size: 0.76rem;
+    color: var(--ds-text-2);
+  }
+
+  .tr-nivel--classe {
+    color: var(--ds-text-4);
+  }
+
+  .tr-nivel.subiu {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+    color: var(--ds-gold-light);
+  }
+
+  .tr-seta {
+    font-size: 0.6rem;
+  }
+</style>
