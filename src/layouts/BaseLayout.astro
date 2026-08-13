@@ -1,6 +1,7 @@
 ---
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
+import BottomNav from "../components/BottomNav.astro";
 import "../styles/global.css";
 
 interface Props {
@@ -16,7 +17,14 @@ const ogImageURL = new URL("/assets/img/og-image.webp", Astro.site);
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- viewport-fit=cover é obrigatório pro env(safe-area-inset-*) devolver
+         valor diferente de zero no iPhone; sem ele o dock inferior fica por
+         baixo da barra de gestos. O topo segue protegido porque a status bar
+         está em "black" (opaca), não "black-translucent". -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
     <link rel="canonical" href={canonicalURL} />
     <link rel="shortcut icon" href="/assets/img/favIcon (2).ico" />
     <meta name="description" content={description} />
@@ -54,5 +62,6 @@ const ogImageURL = new URL("/assets/img/og-image.webp", Astro.site);
     <footer>
       <Footer />
     </footer>
+    <BottomNav />
   </body>
 </html>

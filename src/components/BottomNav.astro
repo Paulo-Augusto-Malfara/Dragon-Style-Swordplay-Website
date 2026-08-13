@@ -1,0 +1,56 @@
+---
+/**
+ * Barra fixa inferior, só no celular. Segue o dock do Claude Design: ponto de
+ * status + rótulo, sem ícone.
+ *
+ * "Índice" é um <label for="nav-toggle">, não um botão: ele aciona o mesmo
+ * checkbox que o NavMenu já usa pra abrir/fechar. Um <label> alcança o input
+ * por id de qualquer lugar do documento, então não precisa de JS nem de um
+ * segundo mecanismo de abertura pra manter em sincronia.
+ */
+const caminho = Astro.url.pathname.replace(/\/$/, "") || "/";
+
+const classes = [
+  "/resumo-das-classes", "/como-funciona", "/arqueiro", "/barbaro",
+  "/cavaleiro", "/espadachim", "/guerreiro", "/hoplita", "/lanceiro",
+  "/sicario", "/templario", "/viking", "/mentor-de-classe", "/bonus-nivel-3",
+];
+
+const itens = [
+  { href: "/home", label: "Início", ativo: caminho === "/" || caminho === "/home" },
+  { label: "Índice", drawer: true },
+  { href: "/resumo-das-classes", label: "Classes", ativo: classes.includes(caminho) },
+  { href: "/agenda", label: "Agenda", ativo: caminho === "/agenda" },
+  {
+    href: "/dashboard",
+    label: "Perfil",
+    ativo: caminho === "/dashboard" || caminho.startsWith("/admin"),
+  },
+];
+---
+
+{/* Fecha a gaveta ao tocar fora. É outro <label> pro mesmo checkbox, então
+    desmarca sem JS. aria-hidden porque o dock já expõe o controle. */}
+<label for="nav-toggle" class="dock-backdrop" aria-hidden="true"></label>
+
+<nav class="dock" aria-label="Navegação principal">
+  {
+    itens.map((i) =>
+      i.drawer ? (
+        <label for="nav-toggle" class="dock-item dock-indice">
+          <span class="dock-ponto" aria-hidden="true" />
+          <span>{i.label}</span>
+        </label>
+      ) : (
+        <a
+          href={i.href}
+          class="dock-item"
+          aria-current={i.ativo ? "page" : undefined}
+        >
+          <span class="dock-ponto" aria-hidden="true" />
+          <span>{i.label}</span>
+        </a>
+      ),
+    )
+  }
+</nav>

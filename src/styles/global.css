@@ -83,6 +83,10 @@
   --ds-font-display: "Cinzel", "Bree Serif", serif;
   --ds-font-body: "Rubik", system-ui, sans-serif;
 
+  /* Altura do dock inferior do celular. Fica aqui porque três lugares dependem
+     do mesmo número: o próprio dock, o padding do body e o topo da gaveta. */
+  --ds-dock-h: 58px;
+
   --primary-color: #121212;
   --secondary-color: #151f28;
   --secondary-color-opacity: rgba(21, 31, 40, 0.85);
@@ -560,6 +564,164 @@ header {
     left: 120px;
     visibility: visible;
     transition: all 0.3s ease-in-out;
+  }
+}
+
+/* ======== APP SHELL: DOCK INFERIOR E GAVETA (celular) ========
+
+   Some no desktop, onde a nav horizontal continua valendo.
+
+   No celular substitui o botão "MENU". O ganho não é estético: os submenus
+   abriam por `.nav li:hover`, e hover não existe em toque -- dependiam de um
+   primeiro toque acidental, e a 420px o item tinha 120px com o submenu em
+   left:115px. Dentro da gaveta o submenu fica sempre aberto, empilhado.
+
+   Tudo sem JS: "Índice" e o fundo clicável são <label for="nav-toggle">,
+   apontando pro checkbox que o NavMenu já tinha. */
+
+.dock,
+.dock-backdrop {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  /* A barra antiga fica só como container do checkbox e da gaveta. Sem padding
+     nem borda ela não deixa uma faixa vazia onde ficava o "MENU". */
+  .nav {
+    padding: 0;
+    border-width: 0;
+    background: transparent;
+  }
+
+  .toggle-button {
+    display: none;
+  }
+
+  /* Espaço pro conteúdo não terminar embaixo do dock. */
+  body {
+    padding-bottom: calc(var(--ds-dock-h) + env(safe-area-inset-bottom));
+  }
+
+  .dock {
+    display: flex;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 70;
+    background: rgba(21, 31, 40, 0.96);
+    backdrop-filter: blur(14px);
+    border-top: 1px solid var(--ds-line-strong);
+    /* env() é o que mantém o dock acima da barra de gestos do iPhone. */
+    padding: 4px 4px calc(4px + env(safe-area-inset-bottom));
+  }
+
+  .dock-item {
+    flex: 1;
+    min-width: 0;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    border-radius: 12px;
+    font-family: var(--ds-font-body);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    color: var(--ds-text-4);
+    text-decoration: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .dock-ponto {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: transparent;
+  }
+
+  .dock-item[aria-current="page"] {
+    color: var(--ds-gold-light);
+  }
+
+  .dock-item[aria-current="page"] .dock-ponto {
+    background: var(--ds-gold);
+  }
+
+  .dock-item:focus-visible {
+    outline: 2px solid var(--ds-gold);
+    outline-offset: -2px;
+  }
+
+  /* O checkbox não é irmão do dock, então o seletor precisa subir até o body. */
+  body:has(.nav-toggle-checkbox:checked) .dock-indice {
+    color: var(--ds-gold-light);
+  }
+
+  body:has(.nav-toggle-checkbox:checked) .dock-indice .dock-ponto {
+    background: var(--ds-gold);
+  }
+
+  body:has(.nav-toggle-checkbox:checked) .dock-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 60;
+    background: rgba(11, 16, 22, 0.55);
+  }
+
+  /* ---- a gaveta ---- */
+
+  .nav-toggle-checkbox:checked ~ .menu-main {
+    display: flex;
+    position: fixed;
+    inset: auto 0 calc(var(--ds-dock-h) + env(safe-area-inset-bottom)) 0;
+    z-index: 65;
+    max-height: 66dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    margin: 0;
+    padding: 6px 0 14px;
+    background: var(--ds-surface-solid);
+    border-top: 1px solid var(--ds-line-strong);
+  }
+
+  .nav-toggle-checkbox:checked ~ .menu-main > li {
+    width: 100%;
+    line-height: normal;
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .nav-toggle-checkbox:checked ~ .menu-main .menu-a {
+    font-family: var(--ds-font-body);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    color: var(--ds-gold-deep);
+    padding: 14px 18px 4px;
+  }
+
+  /* position:static já anula o top/left do flyout, inclusive o !important. */
+  .nav-toggle-checkbox:checked ~ .menu-main .menu-sub {
+    position: static;
+    visibility: visible;
+    min-width: 0;
+    padding: 0 0 8px;
+    background: transparent;
+    border-radius: 0;
+  }
+
+  .nav-toggle-checkbox:checked ~ .menu-main .menu-sub ul {
+    text-align: left;
+  }
+
+  .nav-toggle-checkbox:checked ~ .menu-main .menu-sub li {
+    border-bottom: 0;
+  }
+
+  .nav-toggle-checkbox:checked ~ .menu-main .menu-sub a {
+    color: var(--ds-text-2);
+    font-size: 15px;
+    padding: 10px 18px;
   }
 }
 
