@@ -50,6 +50,20 @@ export const menu: GrupoNav[] = [
     label: "Área do Membro",
     items: [{ href: "/dashboard", label: "Minha Ficha" }],
   },
+  {
+    // Estas três moraram só no rodapé desde 2026-08-13, pela razão certa: são
+    // institucionais e não devem disputar atenção com ranking e mural. Só que
+    // o rodapé deixou de existir no celular (não faz sentido num app), e sem
+    // ele as três ficavam inalcançáveis por quem usa o site pelo telefone.
+    // Voltam pro índice, mas no último grupo, que preserva a intenção original
+    // sem custar o acesso.
+    label: "Institucional",
+    items: [
+      { href: "/administracao", label: "Administração" },
+      { href: "/doacoes", label: "Doações" },
+      { href: "/mural-de-doacoes", label: "Mural de Doações" },
+    ],
+  },
 ];
 
 /**

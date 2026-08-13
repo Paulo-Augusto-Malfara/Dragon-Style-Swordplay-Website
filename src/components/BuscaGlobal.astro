@@ -34,7 +34,16 @@
   </div>
 </dialog>
 
-<style>
+{/*
+  is:global é obrigatório aqui, não preferência. O Astro escopa estilo
+  carimbando um atributo nos elementos do TEMPLATE, e as linhas de resultado
+  nascem de document.createElement em tempo de execução, sem carimbo nenhum.
+  Escopado, `.busca-resultados a` virava `.busca-resultados a[data-astro-...]`
+  e não pegava em nenhum resultado: a lista aparecia com link azul do
+  navegador e o nome do grupo colado no rótulo. Os nomes de classe são todos
+  .busca-* justamente para o global não colidir com nada.
+*/}
+<style is:global>
   .busca {
     width: min(640px, 100%);
     max-height: min(70vh, 560px);

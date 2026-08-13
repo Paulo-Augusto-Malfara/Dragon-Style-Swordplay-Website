@@ -591,6 +591,15 @@ body > header {
   .menu-main {
     display: none;
   }
+
+  /* Rodapé de site não existe em app. Ali embaixo já tem o dock, que é a
+     navegação de verdade no celular, e um rodapé de 5 colunas depois dele é
+     uma segunda navegação competindo com a primeira. Os três links que só
+     moravam aqui (Administração, Doações, Mural de Doações) foram pro último
+     grupo do índice antes desta regra existir, senão sumiriam do celular. */
+  body > footer {
+    display: none;
+  }
 }
 
 
