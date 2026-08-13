@@ -16,6 +16,8 @@
  * então continuam fora do menu de propósito.
  */
 import { menu } from "../lib/navegacao";
+
+const atual = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
 
 <section>
@@ -38,7 +40,12 @@ import { menu } from "../lib/navegacao";
                 <ul>
                   {group.items.map((item) => (
                     <li>
-                      <a href={item.href}>{item.label}</a>
+                      <a
+                        href={item.href}
+                        aria-current={item.href === atual ? "page" : undefined}
+                      >
+                        {item.label}
+                      </a>
                     </li>
                   ))}
                 </ul>

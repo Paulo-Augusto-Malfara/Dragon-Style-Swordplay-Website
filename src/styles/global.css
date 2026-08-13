@@ -87,6 +87,9 @@
      do mesmo número: o próprio dock, o padding do body e o topo da gaveta. */
   --ds-dock-h: 58px;
 
+  /* Altura do cabeçalho grudado. A lateral do desktop cola logo abaixo dele. */
+  --ds-header-h: 84px;
+
   /* ======== AS VARIÁVEIS ANTIGAS, REAPONTADAS ========
      Estas 7 são consumidas em ~53 regras espalhadas pelo arquivo. Em vez de
      reescrever as 53, elas passam a apontar pros tokens novos: o site inteiro
@@ -396,7 +399,16 @@ header {
   font-size: 32px;
 }
 
-/* ======== NAVIGATION MENU ======== */
+/* ======== NAVEGAÇÃO ========
+
+   Uma estrutura só pras duas larguras, como no design: os 4 grupos sempre
+   abertos e empilhados. No desktop isso é a lateral fixa; no celular, a mesma
+   lista vira a gaveta que o dock abre (bloco APP SHELL, abaixo).
+
+   O menu por :hover deixou de existir em qualquer largura. Ele era a origem do
+   problema no toque, e sustentá-lo obrigava a manter uma segunda árvore de
+   estilos (flyout absoluto, left: 195px, resgatado a cada breakpoint) que
+   agora sai inteira. */
 
 .container {
   max-width: 100%;
@@ -404,115 +416,9 @@ header {
 }
 
 .nav {
-  font-family: "Bree Serif", sans-serif !important;
-  padding: 10px;
-  border-width: 1px 0;
-  border-image-slice: 1;
-  border-image-source: linear-gradient(
-    90deg,
-    rgba(184, 134, 45, 0),
-    #b8862d,
-    #ffdf91,
-    #b8862d,
-    rgba(184, 134, 45, 0)
-  );
-  border-style: solid;
+  font-family: var(--ds-font-body);
   position: relative;
-  background: var(--primary-color);
 }
-
-.nav ul {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  position: relative;
-  text-align: center;
-}
-
-.nav li {
-  display: inline-block;
-  border-right: 2px solid var(--border-dark-color-2);
-  line-height: 2px;
-}
-
-.nav li:last-of-type {
-  border-right: none;
-}
-
-.menu-a {
-  color: white;
-  text-transform: uppercase;
-  display: block;
-  padding: 0.6em;
-  cursor: pointer;
-  font-size: 1em;
-  /*   border: 1px solid red; */
-}
-
-.nav li:hover .menu-a {
-  color: var(--golden-color);
-}
-
-.menu-sub {
-  position: absolute;
-  top: 15px;
-  background: var(--primary-color);
-  min-width: 150px;
-  visibility: hidden;
-  color: white;
-  padding: 1em;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  z-index: 99;
-}
-
-.menu-sub ul {
-  text-align: center;
-}
-
-.nav li:hover .menu-sub {
-  visibility: visible;
-  top: 20px;
-  transition: all 0.3s ease-in-out;
-}
-
-.menu-sub li {
-  display: block;
-  border-right: none;
-  border-bottom: 2px solid var(--border-dark-color);
-}
-
-.menu-sub li:last-of-type {
-  border-bottom: none;
-}
-
-.menu-sub a {
-  font-size: 14px;
-  color: white;
-  text-decoration: none;
-  display: flex;
-  text-align: left;
-  padding: 0.7em;
-}
-
-.menu-sub a:hover {
-  color: var(--golden-color);
-  text-decoration: underline;
-}
-
-.menu-category {
-  color: var(--golden-color);
-  text-transform: uppercase;
-  float: left;
-  font-size: 14px;
-  box-shadow: none;
-}
-
-.menu-category:first-of-type {
-  margin-top: 0;
-}
-
-/* ======== RESPONSIVE NAVIGATION MENU ======== */
 
 /* ponytail: checkbox-hack replaces the click-listener JS — no JS needed for the mobile toggle */
 .nav-toggle-checkbox {
@@ -521,82 +427,111 @@ header {
   pointer-events: none;
 }
 
+/* Quem abre a gaveta é o "Índice" do dock. Este label continua no DOM porque é
+   o alvo do `for`, mas não precisa aparecer. */
 .toggle-button {
-  font-family: "Bree Serif", sans-serif;
-  color: white;
-  margin: auto;
-  align-content: center;
-  justify-content: center;
   display: none;
-  cursor: pointer;
 }
 
-@media (max-width: 860px) {
-  .toggle-button {
+.menu-main {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.15em;
+}
+
+.menu-main > li {
+  display: block;
+}
+
+/* Rótulo do grupo, na mesma linguagem do .eyebrow das páginas: o leitor
+   reconhece "Manual" no menu e no topo da página como a mesma coisa. */
+.menu-a {
+  display: block;
+  font-family: var(--ds-font-body);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--ds-gold-deep);
+  padding: 1.5em 0.9em 0.5em;
+}
+
+.menu-sub ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-sub a {
+  display: block;
+  padding: 0.55em 0.9em;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  line-height: 1.35;
+  color: var(--ds-text-2);
+  text-decoration: none;
+}
+
+.menu-sub a:hover,
+.menu-sub a:focus-visible {
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
+}
+
+.menu-sub a[aria-current="page"] {
+  color: var(--ds-gold-light);
+  background: var(--ds-gold-wash);
+  box-shadow: inset 2px 0 0 var(--ds-gold);
+}
+
+.menu-category {
+  color: var(--golden-color);
+  text-transform: uppercase;
+  font-size: 14px;
+}
+
+/* ---- lateral do desktop ---- */
+
+.shell {
+  display: block;
+}
+
+@media (min-width: 861px) {
+  .shell {
     display: flex;
-  }
-
-  .nav-toggle-checkbox:checked ~ .toggle-button {
-    color: var(--golden-color);
-  }
-
-  .menu-main {
-    position: relative;
-    width: 100%;
-    display: none;
-    flex-direction: column;
     align-items: flex-start;
-    font-size: 14px;
+    max-width: 1400px;
+    margin-inline: auto;
   }
 
-  .menu-main > li {
-    width: 200px;
-    padding-right: 0;
-    border-right: none;
-    text-align: left;
-    justify-content: left;
-    border-bottom: 2px solid var(--border-dark-color);
+  .lateral {
+    position: sticky;
+    top: var(--ds-header-h);
+    flex: none;
+    width: 258px;
+    max-height: calc(100dvh - var(--ds-header-h));
+    overflow-y: auto;
+    padding: 0.4em 0.7em 2.5em;
+    border-right: 1px solid var(--ds-line);
   }
 
-  .menu-main > li:last-of-type {
-    border-bottom: none;
-  }
-
-  .nav-toggle-checkbox:checked ~ .menu-main {
-    display: flex;
-  }
-
-  .menu-a {
-    padding: 0.7rem 1rem;
-  }
-
-  .menu-sub {
-    top: 0px !important;
-    left: 195px;
-  }
-
-  .nav li:hover .menu-sub {
-    left: 200px;
-    visibility: visible;
-    transition: all 0.3s ease-in-out;
+  .shell > main {
+    flex: 1;
+    /* sem isto o main não encolhe e uma tabela larga empurra a lateral */
+    min-width: 0;
   }
 }
 
-@media (max-width: 420px) {
-  .menu-main > li {
-    width: 120px;
-  }
-
-  .menu-sub {
-    left: 115px;
-  }
-
-  .nav li:hover .menu-sub {
-    left: 120px;
-    visibility: visible;
-    transition: all 0.3s ease-in-out;
+/* No celular a lista fica escondida até o dock abrir a gaveta. */
+@media (max-width: 860px) {
+  .menu-main {
+    display: none;
   }
 }
+
 
 /* ======== APP SHELL: DOCK INFERIOR E GAVETA (celular) ========
 
@@ -616,18 +551,6 @@ header {
 }
 
 @media (max-width: 860px) {
-  /* A barra antiga fica só como container do checkbox e da gaveta. Sem padding
-     nem borda ela não deixa uma faixa vazia onde ficava o "MENU". */
-  .nav {
-    padding: 0;
-    border-width: 0;
-    background: transparent;
-  }
-
-  .toggle-button {
-    display: none;
-  }
-
   /* Espaço pro conteúdo não terminar embaixo do dock. */
   body {
     padding-bottom: calc(var(--ds-dock-h) + env(safe-area-inset-bottom));
