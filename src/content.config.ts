@@ -1,7 +1,6 @@
 import { defineCollection, z } from "astro:content";
 import { glob } from "astro/loaders";
 
-const navLink = z.object({ href: z.string(), label: z.string() });
 
 /**
  * Uma classe do sistema.
@@ -31,8 +30,6 @@ const classes = defineCollection({
     dificuldade: z.enum(["Fácil", "Média", "Alta"]),
     /** Selo dourado no card. Hoje só o Guerreiro usa, como classe de entrada. */
     selo: z.string().optional(),
-    prev: navLink,
-    next: navLink,
   }),
 });
 
@@ -82,8 +79,6 @@ const equipamentos = defineCollection({
 
 const prosePage = z.object({
   title: z.string(),
-  prev: navLink,
-  next: navLink,
 });
 
 const regulamentos = defineCollection({

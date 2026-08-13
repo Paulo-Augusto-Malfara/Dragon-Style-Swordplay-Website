@@ -299,8 +299,12 @@ body::before {
 
 /* Grudado no topo. Antes ele rolava junto e levava embora ~90px de uma tela de
    844px, quase 11% da altura gasta antes de qualquer conteúdo. z-index abaixo
-   do dock (70) e da gaveta (65) de propósito. */
-header {
+   do dock (70) e da gaveta (65) de propósito.
+
+   Filho direto de propósito: `header` puro também pegava o <header
+   class="pagina-cab"> do título de cada página, que virava um segundo elemento
+   grudado em top:0 e subia por cima da barra do site enquanto a página rolava. */
+body > header {
   position: sticky;
   top: 0;
   z-index: 50;
@@ -948,32 +952,6 @@ p {
   box-shadow: none;
 }
 
-#pagina-anterior-e-seguinte {
-  position: relative;
-  display: flex;
-  justify-content: space-between;
-  padding: 0.5em;
-}
-
-.pagina-anterior .icon {
-  color: var(--golden-color);
-  padding: 0 0.3em;
-}
-.pagina-seguinte .icon {
-  color: var(--golden-color);
-  padding: 0 0 0 0.3em;
-}
-
-.pagina-anterior,
-.pagina-seguinte {
-  display: flex;
-  align-items: center;
-}
-
-.primeira-pagina-anterior {
-  visibility: hidden;
-}
-
 /* ======== NOVIDADES ======== */
 
 .news > h3 {
@@ -1393,17 +1371,6 @@ p {
   }
   .toggle-button {
     font-size: 0.7em;
-  }
-  #pagina-anterior-e-seguinte a {
-    font-size: 0.8em;
-  }
-  .pagina-anterior .icon {
-    color: var(--golden-color);
-    padding: 0 0.1em;
-  }
-  .pagina-seguinte .icon {
-    color: var(--golden-color);
-    padding: 0 0 0 0.1em;
   }
   .news > ul > li {
     margin-left: 1.7rem;

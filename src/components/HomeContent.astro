@@ -14,7 +14,6 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProximoTreino from "./ProximoTreino.astro";
 import { supabasePublic } from "../lib/supabase-public";
-import { FAIXAS } from "../lib/faixa";
 
 const WHATSAPP = "https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK";
 
@@ -214,15 +213,6 @@ const fotos = [
             ))
           }
         </ul>
-        <a class="home-graduacao" href="/nivel-geral">
-          {/* As cores saem de src/lib/faixa.ts, que é a única lista de faixas do
-              site. Os nomes ficam na legenda em vez de um rótulo por segmento:
-              oito rótulos não cabem na largura de um celular. */}
-          <ol class="home-faixas" aria-hidden="true">
-            {FAIXAS.map((f) => <li style={`--cor: ${f.cor}`} />)}
-          </ol>
-          <span class="home-faixas-legenda">Da faixa branca à preta, oito graus de graduação</span>
-        </a>
       </div>
     </section>
   </div>
@@ -530,38 +520,6 @@ const fotos = [
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--ds-text-4);
-  }
-
-  .home-graduacao {
-    display: block;
-    margin-top: 1.6em;
-  }
-
-  .home-faixas {
-    display: flex;
-    gap: 4px;
-  }
-
-  .home-faixas > li {
-    flex: 1;
-    height: 10px;
-    border-radius: 3px;
-    background: var(--cor);
-    /* A faixa preta é preta mesmo: quem a torna visível é o anel, e é assim
-       que uma faixa preta deve ler. */
-    box-shadow: inset 0 0 0 1px var(--ds-line-strong);
-  }
-
-  .home-faixas-legenda {
-    display: block;
-    margin-top: 0.7em;
-    font-size: 0.82rem;
-    color: var(--ds-text-4);
-    text-decoration: underline;
-  }
-
-  .home-graduacao:hover .home-faixas-legenda {
-    color: var(--ds-gold-light);
   }
 
   @media (min-width: 640px) {
