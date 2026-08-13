@@ -1,53 +1,51 @@
 /**
- * Gera os ícones do PWA a partir do logo quadrado.
+ * Gera os ícones do PWA a partir do emblema.
  * Rode com `node scripts/gen-pwa-icons.mjs` sempre que o logo mudar.
  *
- * "any"      -> o logo como está (ele já vem com fundo próprio).
- * "maskable" -> o emblema recortado e reduzido pra caber na zona segura do
- *               Android (círculo central de 80%), senão as bordas são cortadas.
+ * O mestre é transparente e já vem recortado no conteúdo (sem moldura vazia),
+ * porque quem decide o respiro é este script, não o arquivo: "any" e "maskable"
+ * precisam de margens bem diferentes.
  */
 import sharp from "sharp";
 import { mkdir } from "node:fs/promises";
 
-const SRC = "public/assets/img/logo-quadrada-ds-site.webp";
+const SRC = "public/assets/img/logo-ds-emblema.png";
 const OUT = "public/pwa";
 
-// Fundo do próprio logo, medido nos cantos. Mantém os dois ícones na mesma família.
-const BG = { r: 18, g: 41, b: 68 };
-// Um quadrado inscrito na zona segura de 80% daria 56%. 62% arredonda pra cima
-// porque o emblema não preenche os cantos do próprio bounding box.
-const SAFE = 0.62;
+// Fundo da própria arte original (#151f28), que é também o --secondary-color do
+// site. Mantém ícone, splash e página na mesma cor, sem emenda visível.
+const BG = { r: 21, g: 31, b: 40 };
+
+// "any": o ícone aparece inteiro, só precisa não encostar na borda.
+const RESPIRO_ANY = 0.88;
+// "maskable": o Android recorta em círculo/squircle e só garante os 80% centrais.
+// Valor medido, não chutado: scripts/test-icone-maskable.mjs calcula o raio do
+// pixel mais distante do centro e compara com esse círculo. A 0.68 o conteúdo
+// batia 103,6% do raio seguro, ou seja, as pontas da fita seriam cortadas.
+// 0.63 deixa ~4% de folga. Se o logo mudar, rode o teste de novo.
+const RESPIRO_MASK = 0.63;
 
 await mkdir(OUT, { recursive: true });
 
-const png = (buf) => sharp(buf).png({ compressionLevel: 9 });
-
-// --- purpose: any + apple-touch-icon ---
-for (const size of [192, 512, 180]) {
-  const name = size === 180 ? "apple-touch-icon.png" : `icon-${size}.png`;
-  await png(await sharp(SRC).resize(size, size, { fit: "cover" }).toBuffer()).toFile(
-    `${OUT}/${name}`,
-  );
-  console.log(`${OUT}/${name}`);
-}
-
-// --- purpose: maskable ---
-// trim() recorta a moldura de fundo uniforme, sobrando só o emblema.
-const emblema = await sharp(SRC).trim({ threshold: 12 }).toBuffer();
-
-for (const size of [192, 512]) {
-  const inner = Math.round(size * SAFE);
-  const conteudo = await sharp(emblema)
-    .resize(inner, inner, { fit: "inside" })
+async function icone(tamanho, respiro, arquivo) {
+  const interno = Math.round(tamanho * respiro);
+  const arte = await sharp(SRC)
+    .resize(interno, interno, {
+      fit: "inside",
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
     .toBuffer();
 
-  await png(
-    await sharp({
-      create: { width: size, height: size, channels: 3, background: BG },
-    })
-      .composite([{ input: conteudo, gravity: "center" }])
-      .png()
-      .toBuffer(),
-  ).toFile(`${OUT}/maskable-${size}.png`);
-  console.log(`${OUT}/maskable-${size}.png`);
+  await sharp({
+    create: { width: tamanho, height: tamanho, channels: 3, background: BG },
+  })
+    .composite([{ input: arte, gravity: "center" }])
+    .png({ compressionLevel: 9 })
+    .toFile(`${OUT}/${arquivo}`);
+
+  console.log(`${OUT}/${arquivo}`);
 }
+
+for (const t of [192, 512]) await icone(t, RESPIRO_ANY, `icon-${t}.png`);
+await icone(180, RESPIRO_ANY, "apple-touch-icon.png");
+for (const t of [192, 512]) await icone(t, RESPIRO_MASK, `maskable-${t}.png`);
