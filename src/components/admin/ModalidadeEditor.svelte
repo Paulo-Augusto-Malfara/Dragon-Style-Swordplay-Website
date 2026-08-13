@@ -13,6 +13,7 @@
   let objective = $state("");
   let scoringRespawn = $state("");
   let requirements = $state("");
+  let minParticipantes = $state(0);
   let variations = $state("");
   let status = $state<"idle" | "loading" | "saving" | "saved" | "error">(isNew ? "idle" : "loading");
   let errorMessage = $state("");
@@ -33,6 +34,7 @@
     objective = toLines(data.objective);
     scoringRespawn = toLines(data.scoring_respawn);
     requirements = toLines(data.requirements);
+    minParticipantes = data.min_participantes ?? 0;
     variations = toLines(data.variations);
     status = "idle";
   }
@@ -47,6 +49,7 @@
       objective: toArray(objective),
       scoring_respawn: toArray(scoringRespawn),
       requirements: toArray(requirements),
+      min_participantes: Number(minParticipantes) || 0,
       variations: toArray(variations),
     };
     const { error } = isNew
@@ -87,6 +90,14 @@
     <label>
       Sistema de Pontuação/Respawn (um item por linha)
       <textarea bind:value={scoringRespawn} rows="4"></textarea>
+    </label>
+    <label>
+      Mínimo de participantes
+      <input type="number" bind:value={minParticipantes} min="0" max="200" step="1" />
+      <small>
+        Alimenta o filtro "quantos vieram hoje?" da página de modalidades. Deixe 0 se
+        não houver mínimo: aí a modalidade aparece em todos os filtros.
+      </small>
     </label>
     <label>
       Requisitos/Armas Permitidas (um item por linha)

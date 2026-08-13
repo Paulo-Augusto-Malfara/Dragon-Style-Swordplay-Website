@@ -10,7 +10,6 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import Accordion from "../components/Accordion.astro";
 import { supabasePublic } from "../lib/supabase-public";
-import { minimoDeParticipantes } from "../lib/modalidades";
 
 export const prerender = false;
 
@@ -21,7 +20,10 @@ const { data } = await supabasePublic
 
 const modalidades = (data ?? []).map((m) => ({
   ...m,
-  minimo: minimoDeParticipantes(m.requirements),
+  // Coluna do banco, editável no painel. Antes isto era lido por heurística do
+  // texto dos requisitos; zero segue significando "não informado", e nesse caso
+  // a modalidade aparece em todos os filtros em vez de sumir de todos.
+  minimo: m.min_participantes ?? 0,
 }));
 
 // As faixas saem do próprio acervo, não de uma lista chutada: se um dia entrar
