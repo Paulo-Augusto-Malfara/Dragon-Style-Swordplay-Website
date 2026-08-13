@@ -1,6 +1,7 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
+import { corDaFaixa } from "../lib/faixa";
 
 export const prerender = false;
 
@@ -45,14 +46,21 @@ const grupos = [
         <br />
         <section class="grid-mural">
           {lista.map((m) => (
-            <div>
+            <div class="mural-card">
               <p class="mural-avatar">
                 {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}
               </p>
-              <h2>{m.nome}</h2>
-              <p><strong class="gold-title">Nível Geral:</strong> {m.nivel_geral}</p>
-              <p><strong class="gold-title">Faixa:</strong> {m.nome_faixa ?? "-"}</p>
-              <p><strong class="gold-title">PH's:</strong> {m.ph_total}</p>
+              <h3 class="mural-nome">{m.nome}</h3>
+              {corDaFaixa(m.nome_faixa) && (
+                <p class="mural-faixa">
+                  <span class="mural-faixa-cor" style={`--faixa: ${corDaFaixa(m.nome_faixa)}`} />
+                  Faixa {m.nome_faixa}
+                </p>
+              )}
+              <p class="mural-numeros">
+                <span><strong>{m.nivel_geral}</strong>Nível</span>
+                <span><strong>{m.ph_total}</strong>PH</span>
+              </p>
             </div>
           ))}
         </section>
