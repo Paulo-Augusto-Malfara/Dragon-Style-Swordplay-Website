@@ -86,21 +86,6 @@ const sistema = [
 
   <h2 class="cl-titulo">As 10 classes</h2>
 
-  {/* O comparador aparece sozinho ao marcar a segunda classe. O design tinha um
-      botão "Comparar classes" que ligava um modo e mudava o que o card faz ao
-      ser tocado; aqui o card continua sendo só um link e a seleção é um
-      controle separado. Um estado a menos pra entender, e o card não muda de
-      significado no meio do uso. */}
-  <section class="cl-comparador" id="cl-comparador" hidden aria-live="polite">
-    <div class="cl-comparador-topo">
-      <h3>Comparando</h3>
-      <button type="button" id="cl-limpar" class="cl-limpar">Limpar</button>
-    </div>
-    <div class="cl-tabela-rolagem">
-      <table class="cl-tabela" id="cl-tabela"></table>
-    </div>
-  </section>
-
   <ul class="cl-grade">
     {
       classes.map((c) => (
@@ -114,32 +99,13 @@ const sistema = [
               Alcance {c.data.alcance.toLowerCase()} · Dificuldade{" "}
               {c.data.dificuldade.toLowerCase()}
             </span>
-            <span class="cl-mais">Ver classe completa</span>
+            <span class="cl-mais">Mais detalhes →</span>
             {c.data.selo && <span class="cl-selo">{c.data.selo}</span>}
           </a>
-          <label class="cl-cmp">
-            <input type="checkbox" data-cmp value={c.data.title} />
-            <span>Comparar</span>
-          </label>
         </li>
       ))
     }
   </ul>
-
-  <script
-    type="application/json"
-    id="cl-dados"
-    set:html={JSON.stringify(
-      classes.map((c) => ({
-        nome: c.data.title,
-        href: `/${c.id}`,
-        Armas: c.data.armamento,
-        Alcance: c.data.alcance,
-        Dificuldade: c.data.dificuldade,
-        "Em uma frase": c.data.resumo,
-      })),
-    )}
-  />
 
   <CatalogoLinks titulo="Sobre o sistema de classes" itens={sistema} />
 </PageLayout>
@@ -269,14 +235,24 @@ const sistema = [
     color: var(--ds-text-4);
   }
 
-  /* Empurrado para o rodapé do card, para que todos alinhem na mesma altura. */
+  /* Empurrado para o rodapé do card, para que todos alinhem na mesma altura.
+     Tem cara de botão, mas continua sendo parte do link do card: o card inteiro
+     já é clicável, um botão de verdade aqui seria um segundo alvo pro mesmo
+     destino. */
   .cl-mais {
     margin-top: auto;
-    padding-top: 8px;
+    padding: 7px 10px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 8px;
+    text-align: center;
     font-size: 0.76rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
     color: var(--ds-gold-light);
+  }
+
+  .cl-card:hover .cl-mais,
+  .cl-card:focus-visible .cl-mais {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
   }
 
   /* Encosta no canto e encolhe com o próprio texto, nunca estica no card. */
@@ -299,235 +275,4 @@ const sistema = [
     }
   }
 
-  /* ======== COMPARADOR ======== */
-
-  .cl-grade > li {
-    position: relative;
-  }
-
-  /* Fica fora do <a>: link dentro de link é markup inválido, e um clique em
-     "Comparar" não pode navegar sem querer. */
-  .cl-cmp {
-    position: absolute;
-    left: 8px;
-    bottom: 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 10px;
-    border: 1px solid var(--ds-line-strong);
-    border-radius: 999px;
-    background: var(--ds-bg-alt);
-    font-size: 0.68rem;
-    color: var(--ds-text-4);
-    cursor: pointer;
-    /* Alvo de toque de 44px sem inflar a pílula, que ficaria desproporcional
-       dentro do card. */
-    min-height: 32px;
-  }
-
-  .cl-cmp:hover,
-  .cl-cmp:focus-within {
-    border-color: var(--ds-gold-dim);
-    color: var(--ds-text-2);
-  }
-
-  .cl-cmp input {
-    width: 13px;
-    height: 13px;
-    margin: 0;
-    accent-color: var(--ds-gold);
-  }
-
-  .cl-cmp:has(input:checked) {
-    border-color: var(--ds-gold);
-    background: var(--ds-gold-wash);
-    color: var(--ds-gold-light);
-  }
-
-  .cl-comparador {
-    margin: 0 0 1.6em;
-    border: 1px solid var(--ds-gold-dim);
-    border-radius: 16px;
-    background: var(--ds-surface);
-  }
-
-  .cl-comparador[hidden] {
-    display: none;
-  }
-
-  .cl-comparador-topo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-bottom: 1px solid var(--ds-line);
-  }
-
-  .cl-comparador-topo h3 {
-    margin: 0;
-    font-family: var(--ds-font-display);
-    font-size: 0.72rem;
-    font-weight: 700;
-    letter-spacing: 0.16em;
-    text-transform: uppercase;
-    color: var(--ds-gold-deep);
-  }
-
-  .cl-limpar {
-    margin-left: auto;
-    padding: 5px 12px;
-    border: 1px solid var(--ds-line-strong);
-    border-radius: 999px;
-    background: none;
-    color: var(--ds-text-3);
-    font-size: 0.72rem;
-    cursor: pointer;
-  }
-
-  .cl-limpar:hover {
-    border-color: var(--ds-gold-dim);
-    color: var(--ds-gold-light);
-  }
-
-  /* Três colunas não cabem na largura de um celular sem espremer o texto até
-     virar uma palavra por linha. Rola na horizontal dentro do próprio cartão,
-     que é a única parte da página que rola de lado. */
-  .cl-tabela-rolagem {
-    overflow-x: auto;
-  }
-
-  .cl-tabela {
-    width: 100%;
-    min-width: 420px;
-    border-collapse: collapse;
-  }
-
-  .cl-tabela th,
-  .cl-tabela td {
-    padding: 11px 16px;
-    border-bottom: 1px solid var(--ds-line);
-    text-align: left;
-    vertical-align: top;
-    font-size: 0.85rem;
-    line-height: 1.5;
-  }
-
-  .cl-tabela tr:last-child th,
-  .cl-tabela tr:last-child td {
-    border-bottom: 0;
-  }
-
-  /* A coluna de rótulos é cabeçalho de linha, não dado: fica estreita, fria e
-     não compete com os valores que estão sendo comparados. */
-  .cl-tabela tbody th {
-    width: 108px;
-    font-weight: 400;
-    font-size: 0.74rem;
-    color: var(--ds-text-4);
-  }
-
-  .cl-tabela thead th {
-    font-family: var(--ds-font-display);
-    font-size: 0.95rem;
-    color: var(--ds-gold-light);
-    border-bottom-color: var(--ds-line-strong);
-  }
-
-  .cl-tabela td {
-    border-left: 1px solid var(--ds-line);
-    color: var(--ds-text-2);
-  }
-
-  .cl-tabela thead th + th {
-    border-left: 1px solid var(--ds-line);
-  }
 </style>
-
-<script>
-  /**
-   * Comparador de classes. Aparece ao marcar a segunda, some ao sobrar menos de
-   * duas, e no teto de três a mais antiga sai pra abrir vaga, que é o que o
-   * design faz. Sem teto a tabela vira uma planilha de dez colunas no celular.
-   */
-  const TETO = 3;
-
-  const dados = JSON.parse(
-    document.getElementById("cl-dados")?.textContent ?? "[]",
-  ) as Record<string, string>[];
-
-  const painel = document.getElementById("cl-comparador");
-  const tabela = document.getElementById("cl-tabela");
-  const limpar = document.getElementById("cl-limpar");
-  const caixas = Array.from(
-    document.querySelectorAll<HTMLInputElement>("input[data-cmp]"),
-  );
-
-  if (painel && tabela && limpar && caixas.length) {
-    // Ordem de marcação, não ordem da grade: quem entrou primeiro é quem sai.
-    let escolhidas: string[] = [];
-
-    const LINHAS = ["Armas", "Alcance", "Dificuldade", "Em uma frase"];
-
-    function desenhar() {
-      const sel = escolhidas
-        .map((nome) => dados.find((d) => d.nome === nome))
-        .filter((d): d is Record<string, string> => !!d);
-
-      painel!.hidden = sel.length < 2;
-      if (sel.length < 2) return;
-
-      const cabecalho = document.createElement("tr");
-      cabecalho.append(document.createElement("th"));
-      for (const c of sel) {
-        const th = document.createElement("th");
-        const link = document.createElement("a");
-        link.href = c.href;
-        link.textContent = c.nome;
-        th.append(link);
-        cabecalho.append(th);
-      }
-      const thead = document.createElement("thead");
-      thead.append(cabecalho);
-
-      const tbody = document.createElement("tbody");
-      for (const campo of LINHAS) {
-        const tr = document.createElement("tr");
-        const rotulo = document.createElement("th");
-        rotulo.scope = "row";
-        rotulo.textContent = campo;
-        tr.append(rotulo);
-        for (const c of sel) {
-          const td = document.createElement("td");
-          td.textContent = c[campo] ?? "—";
-          tr.append(td);
-        }
-        tbody.append(tr);
-      }
-
-      tabela!.replaceChildren(thead, tbody);
-    }
-
-    for (const caixa of caixas) {
-      caixa.addEventListener("change", () => {
-        if (caixa.checked) {
-          escolhidas.push(caixa.value);
-          if (escolhidas.length > TETO) {
-            const saiu = escolhidas.shift();
-            const antiga = caixas.find((c) => c.value === saiu);
-            if (antiga) antiga.checked = false;
-          }
-        } else {
-          escolhidas = escolhidas.filter((n) => n !== caixa.value);
-        }
-        desenhar();
-      });
-    }
-
-    limpar.addEventListener("click", () => {
-      escolhidas = [];
-      for (const caixa of caixas) caixa.checked = false;
-      desenhar();
-    });
-  }
-</script>
