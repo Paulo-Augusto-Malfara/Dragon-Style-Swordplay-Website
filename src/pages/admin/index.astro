@@ -62,13 +62,37 @@ const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes] = await Promis
 const dataBR = (d: string) =>
   new Date(d + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 
-const numeros = [
+// O quarto card é o único que leva a algum lugar. A fila de aprovação é o
+// número que muda sozinho, sem ninguém do painel ter feito nada, então é o
+// único aqui em que ver o número já dá vontade de agir.
+type Numero = {
+  valor: string | number;
+  rotulo: string;
+  href?: string;
+  acao?: string;
+  urgente?: boolean;
+};
+
+const pendentes = aprovacoes.count ?? 0;
+
+const numeros: Numero[] = [
   { valor: ativos.count ?? 0, rotulo: "Membros ativos" },
   { valor: treinosDoAno.count ?? 0, rotulo: `Treinos em ${hojeBR.slice(0, 4)}` },
   {
     valor: proximo.data ? dataBR(proximo.data.data_treino) : "—",
     rotulo: proximo.data ? `Próximo, ${proximo.data.cidade}` : "Nada na agenda",
   },
+  ...(membro.isAdminSistema
+    ? [
+        {
+          valor: pendentes,
+          rotulo: "Esperando aprovação",
+          href: "/admin/moderacao",
+          acao: "Revisar",
+          urgente: pendentes > 0,
+        },
+      ]
+    : []),
 ];
 
 const emAberto = [
@@ -87,15 +111,10 @@ const emAberto = [
     titulo: `${evento.data.nome_evento}, ${evento.data.cidade}`,
     acao: "Registrar participantes e fechar",
   },
-  (aprovacoes.count ?? 0) > 0 && {
-    href: "/admin/moderacao",
-    tipo: "Esperando aprovação",
-    titulo:
-      aprovacoes.count === 1
-        ? "1 membro enviou foto ou apelido"
-        : `${aprovacoes.count} membros enviaram foto ou apelido`,
-    acao: "Aprovar ou recusar",
-  },
+  // A fila de aprovação saiu daqui em 14/08 e virou o quarto card de número:
+  // ela é uma contagem, e como contagem ela cabe ao lado das outras três em vez
+  // de abrir um bloco só pra si. Aparecer nos dois lugares era a mesma
+  // informação duas vezes na mesma tela.
 ].filter(Boolean) as { href: string; tipo: string; titulo: string; acao: string }[];
 
 const atalhos = [
@@ -127,9 +146,14 @@ const atalhos = [
   <ul class="admin-stats">
     {
       numeros.map((n) => (
-        <li class="admin-stat">
+        <li class:list={["admin-stat", n.href && "admin-stat--acao", n.urgente && "admin-stat--urgente"]}>
           <span class="admin-stat-valor">{n.valor}</span>
           <span class="admin-stat-rotulo">{n.rotulo}</span>
+          {n.href && (
+            <a class="admin-stat-acao" href={n.href} aria-label={`${n.acao} ${n.rotulo.toLowerCase()}`}>
+              {n.acao} →
+            </a>
+          )}
         </li>
       ))
     }
@@ -171,6 +195,49 @@ const atalhos = [
 </AdminShell>
 
 <style>
+  /* Card de número que também é link. O `::after` esticado faz o cartão inteiro
+     ser clicável sem aninhar uma caixa dentro da outra, então ele continua com
+     a mesma borda, o mesmo fundo e o mesmo tamanho dos três vizinhos. Quem dá
+     o nome acessível ao link é o texto "Revisar", não o cartão. */
+  .admin-stat--acao {
+    position: relative;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+  }
+
+  .admin-stat--acao:hover,
+  .admin-stat--acao:focus-within {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
+  .admin-stat-acao {
+    margin-top: 5px;
+    font-size: 0.78rem;
+    color: var(--ds-text-3);
+    text-decoration: none;
+  }
+
+  .admin-stat-acao::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+
+  .admin-stat--acao:hover .admin-stat-acao,
+  .admin-stat--acao:focus-within .admin-stat-acao {
+    color: var(--ds-gold-light);
+  }
+
+  /* Fila com alguém esperando. É o mesmo dourado do bloco "Precisa de atenção",
+     que era onde a fila morava antes: sutil quando está zerada, visível quando
+     tem gente parada nela. */
+  .admin-stat--urgente {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
   .hub-aberto ul,
   .hub-atalhos {
     list-style: none;
