@@ -549,9 +549,17 @@ body > header {
 }
 
 @media (min-width: 861px) {
+  /* O `width: 100%` não é redundante com o `max-width`. O <body> é um flex de
+     coluna, e nele a casca esticaria sozinha até a largura da janela; só que
+     `margin-inline: auto` num item flex CANCELA esse esticamento, e o item
+     passa a ter a largura do próprio conteúdo. Numa página cheia isso não
+     aparece, porque o conteúdo já é largo. Numa página curta a casca inteira
+     encolhia, e o menu lateral pulava de lugar ao navegar entre uma página e
+     outra: /vestimentas dava 741px de casca contra 1265px em /conquistas. */
   .shell {
     display: flex;
     align-items: flex-start;
+    width: 100%;
     max-width: 1400px;
     margin-inline: auto;
   }

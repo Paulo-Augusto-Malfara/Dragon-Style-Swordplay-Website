@@ -4,6 +4,36 @@ import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
 import vercel from "@astrojs/vercel";
 
+// A árvore de dependências do sanitize-html, empacotada junto no build. Ver o
+// comentário grande em `vite.ssr` abaixo, que explica por que é a árvore
+// inteira e não só o pacote de cima.
+const ARVORE_SANITIZE_HTML = [
+  "sanitize-html",
+  "dayjs",
+  "deepmerge",
+  "dom-serializer",
+  "domelementtype",
+  "domhandler",
+  "domutils",
+  "entities",
+  "escape-string-regexp",
+  "htmlparser2",
+  "is-plain-object",
+  "launder",
+  "nanoid",
+  "parse-srcset",
+  "picocolors",
+  "postcss",
+  "source-map-js",
+];
+
+// Só no build. No `astro dev` o Vite passa esses pacotes pelo pipeline de ESM
+// em vez de deixar o Node carregá-los, e o sanitize-html é CommonJS: os
+// `require()` dele ficam sem definição e /novidades morre com "require is not
+// defined". No desenvolvimento não existe rastreio de arquivos pra enganar,
+// então empacotar não serve pra nada ali.
+const EMPACOTANDO = process.argv.includes("build");
+
 export default defineConfig({
   site: "https://swordplayds.com.br",
   // ponytail: output stays "static" (the default) -- the 40 Phase 1 pages don't need
@@ -37,25 +67,7 @@ export default defineConfig({
     // Quem avisa é scripts/test-funcao-vercel.mjs, que roda a função compilada
     // fora do repositório e falha se alguma rota parar de responder.
     ssr: {
-      noExternal: [
-        "sanitize-html",
-        "dayjs",
-        "deepmerge",
-        "dom-serializer",
-        "domelementtype",
-        "domhandler",
-        "domutils",
-        "entities",
-        "escape-string-regexp",
-        "htmlparser2",
-        "is-plain-object",
-        "launder",
-        "nanoid",
-        "parse-srcset",
-        "picocolors",
-        "postcss",
-        "source-map-js",
-      ],
+      noExternal: EMPACOTANDO ? ARVORE_SANITIZE_HTML : [],
     },
   },
 });

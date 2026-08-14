@@ -129,12 +129,12 @@
     {/if}
   </p>
 {:else}
+  <!-- Sem quebra de linha antes do {#if}: no Svelte a quebra vira espaço no
+       HTML, e a contagem saía como "182 membros , página 1 de 8". -->
   <p class="membros-contagem">
-    {total}
-    {total === 1 ? "membro" : "membros"}
-    {#if totalPaginas > 1}
-      <span>, página {pagina} de {totalPaginas}</span>
-    {/if}
+    {total} {total === 1 ? "membro" : "membros"}{#if totalPaginas > 1}<span
+        >, página {pagina} de {totalPaginas}</span
+      >{/if}
   </p>
 
   <ul class="admin-list">

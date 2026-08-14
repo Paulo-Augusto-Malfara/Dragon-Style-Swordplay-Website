@@ -148,10 +148,14 @@
     border-right: 1px solid var(--ds-line);
     font-size: 0.75rem;
     color: var(--ds-text-4);
-    text-transform: capitalize;
   }
 
-  .agenda-data strong {
+  /* O capitalize existe pro dia da semana, que sai minúsculo do toLocaleDateString
+     ("dom, 16/08"). Ele morava no bloco inteiro e alcançava também a linha do
+     horário, onde virava "15:00 Às 18:00". Escopado no filho direto, como manda
+     a convenção deste projeto. */
+  .agenda-data > strong {
+    text-transform: capitalize;
     font-family: var(--ds-font-display);
     font-size: 0.92rem;
     font-weight: 700;
