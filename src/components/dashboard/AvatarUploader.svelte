@@ -128,19 +128,42 @@
       canvas.height = OUTPUT_SIZE;
       const ctx = canvas.getContext("2d");
       if (!ctx) throw new Error("Canvas indisponível neste navegador.");
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, 0, Math.PI * 2);
-      ctx.clip();
+      // Sem recorte circular aqui: o círculo é do CSS, em toda parte que mostra
+      // avatar (.avatar-uploader-preview img, .mural-avatar img, .row-avatar,
+      // todos border-radius 50% com object-fit cover). Recortar também no canvas
+      // só produzia canto transparente que ninguém vê, e canto transparente é
+      // exatamente o que o JPEG abaixo não sabe guardar: viraria preto se um dia
+      // a foto aparecesse quadrada em algum lugar.
       ctx.drawImage(imgEl, srcX, srcY, srcSize, srcSize, 0, 0, OUTPUT_SIZE, OUTPUT_SIZE);
-      ctx.restore();
 
-      // qualidade 0.85 costuma ficar bem abaixo de 100KB num recorte 512x512,
-      // bem longe do limite de 3MB do bucket, mesmo para fotos originais pesadas
+      /* O Safari do iOS exibe webp mas não codifica: o toBlob ignora o tipo
+       * pedido e devolve PNG calado, sem erro nenhum. Num recorte 512x512 isso
+       * sai ~10x maior, medido em 14/08/2026 nos registros do Storage: 31KB do
+       * Chrome contra 340KB do iPhone.
+       *
+       * Padronizar tudo em webp exigiria embutir um codificador em WebAssembly,
+       * baixado por todo visitante pra economizar poucos KB de quem tem iPhone.
+       * JPEG chega perto e existe em todo lugar.
+       *
+       * A descoberta é num canvas de 1px pra não pagar a codificação grande duas
+       * vezes. E o tipo precisa sair certo no próprio blob: pra upload de Blob a
+       * biblioteca do Storage manda o mime na parte do multipart e ignora a
+       * opção `contentType`. É por isso que existe foto gravada como image/png
+       * com nome .webp no bucket.
+       *
+       * Qualidade 0.85 num 512x512 fica bem abaixo dos 3MB do bucket mesmo
+       * partindo de foto pesada. */
+      const sonda = document.createElement("canvas");
+      sonda.width = 1;
+      sonda.height = 1;
+      const tipo = sonda.toDataURL("image/webp").startsWith("data:image/webp")
+        ? "image/webp"
+        : "image/jpeg";
+
       const blob: Blob = await new Promise((resolve, reject) => {
         canvas.toBlob(
           (b) => (b ? resolve(b) : reject(new Error("Falha ao gerar imagem."))),
-          "image/webp",
+          tipo,
           0.85
         );
       });

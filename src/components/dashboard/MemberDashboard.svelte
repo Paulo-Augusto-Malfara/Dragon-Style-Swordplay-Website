@@ -283,10 +283,15 @@
     // Bucket privado, não o público. O membro escreve só na pasta dele e não
     // consegue ler nem a própria: quem lê a fila é organizador. A foto só chega
     // no bucket público depois de aprovada, e quem copia é a função de borda.
+    // O nome é fixo de propósito, mesmo quando o conteúdo é JPEG (iPhone, ver
+    // AvatarUploader): a função de borda `aprovar-foto` baixa por este caminho
+    // exato e a prévia da moderação assina esta mesma string. Extensão variável
+    // obrigaria as duas a listar a pasta pra adivinhar o arquivo. Quem decide o
+    // formato na hora de exibir é o Content-Type, que sai do mime guardado.
     const path = `${user.id}/avatar.webp`;
     const { error: uploadError } = await supabase.storage
       .from("avatars-pendentes")
-      .upload(path, blob, { upsert: true, contentType: "image/webp" });
+      .upload(path, blob, { upsert: true, contentType: blob.type });
     if (uploadError) throw uploadError;
 
     const { error: rpcError } = await supabase.rpc("enviar_foto_para_analise");

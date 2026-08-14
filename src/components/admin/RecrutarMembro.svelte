@@ -109,7 +109,7 @@
     const path = `membro-${idMembroCriado}/avatar.webp`;
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(path, blob, { upsert: true, contentType: "image/webp" });
+      .upload(path, blob, { upsert: true, contentType: blob.type });
     if (uploadError) throw uploadError;
 
     const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
