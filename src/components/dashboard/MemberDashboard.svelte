@@ -50,6 +50,8 @@
   let nomeFaixa = $state<string | null>(null);
   let phTotal = $state(0);
   let porClasse = $state<any[]>([]);
+  /** id_classe → colocação da pessoa naquela classe. Ver `calcularRanks`. */
+  let rankPorClasse = $state(new Map<number, { posicao: number; total: number }>());
   let historico = $state<any[]>([]);
   let faixas = $state<{ nome_faixa: string; nivel_minimo: number }[]>([]);
 
@@ -111,6 +113,42 @@
    * mostrar um progresso errado. Errar calado é pior do que não mostrar.
    */
   const TREINOS_POR_NIVEL = 4;
+
+  /** Classe que existe pra liberar o veterano, não pra disputar posição. */
+  const CLASSE_BASICO = 11;
+
+  /**
+   * A colocação da pessoa em cada classe que ela treina.
+   *
+   * Vem da mesma view do Ranking por Classe, e a conta é feita aqui porque a
+   * view não guarda posição: ela é uma lista, e quem numera é quem ordena. São
+   * ~360 linhas de duas colunas, então puxar a classe inteira sai mais barato
+   * que uma consulta de contagem por classe.
+   *
+   * Empate divide a posição (dois em 3º, ninguém em 4º), que é como ranking de
+   * competição sempre se comportou. A página do Ranking por Classe numera pela
+   * ordem do array e nesse caso mostraria 3 e 4; a diferença só aparece com
+   * empate, e inventar desempate aqui seria pior: a pessoa veria uma colocação
+   * que nenhum critério visível na tela explica.
+   */
+  function calcularRanks(todos: { id_classe: number; treinos_por_classe: number }[]) {
+    const mapa = new Map<number, { posicao: number; total: number }>();
+    for (const minha of porClasse) {
+      if (minha.id_classe === CLASSE_BASICO) continue;
+      const daClasse = todos.filter((t) => t.id_classe === minha.id_classe);
+      if (daClasse.length === 0) continue;
+      mapa.set(minha.id_classe, {
+        posicao:
+          daClasse.filter((t) => t.treinos_por_classe > minha.treinos_por_classe).length + 1,
+        total: daClasse.length,
+      });
+    }
+    return mapa;
+  }
+
+  /** Mesma regra de `slug` em ranking-por-classe.astro: é o que a URL de lá lê. */
+  const slugDaClasse = (nome: string) =>
+    nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
   function progressoDaClasse(c: any) {
     const treinos = c.treinos_por_classe ?? 0;
@@ -174,9 +212,10 @@
       apelidoPendente = membro.apelido_pendente;
       apelidoRecusaMotivo = membro.apelido_recusa_motivo;
 
-      const [geral, classes, historia, escala] = await Promise.all([
+      const [geral, classes, todasAsClasses, historia, escala] = await Promise.all([
         supabase.from("v_ranking_nivel_geral").select("*").eq("id_membro", membro.id_membro).single(),
         supabase.from("v_ranking_por_classe").select("*").eq("id_membro", membro.id_membro),
+        supabase.from("v_ranking_por_classe").select("id_classe, treinos_por_classe"),
         supabase
           .from("v_historico_presencas")
           .select("*")
@@ -201,6 +240,9 @@
         if (aBasico !== bBasico) return aBasico ? 1 : -1;
         return b.treinos_por_classe - a.treinos_por_classe;
       });
+      // Colocação é enfeite informativo, igual à escala de faixas: se a consulta
+      // falhar, some a linha do rank e o cartão continua inteiro.
+      rankPorClasse = calcularRanks(todasAsClasses.data ?? []);
       historico = historia.data ?? [];
       // A escala de faixas é enfeite informativo: se falhar, some a barra de
       // progresso e o resto da ficha continua de pé.
@@ -446,12 +488,27 @@
       <ul class="ficha-classes">
         {#each porClasse as c}
           {@const progresso = progressoDaClasse(c)}
+          {@const rank = rankPorClasse.get(c.id_classe)}
           <li>
             <span class="ficha-classe-nome">{c.nome_classe}</span>
             <span class="ficha-classe-nivel">Nível {c.nivel_por_classe}</span>
             <span class="ficha-classe-treinos">
               {c.treinos_por_classe === 1 ? "1 treino" : `${c.treinos_por_classe} treinos`}
             </span>
+            <!-- A colocação divide a linha dos treinos, que estava vazia à
+                 direita, então o cartão não cresce um pixel. -->
+            {#if rank}
+              <a
+                class="ficha-classe-rank"
+                class:podio-1={rank.posicao === 1}
+                class:podio-2={rank.posicao === 2}
+                class:podio-3={rank.posicao === 3}
+                href={`/ranking-por-classe?classe=${slugDaClasse(c.nome_classe)}`}
+                title={`Sua colocação em ${c.nome_classe}`}
+              >
+                <strong>{rank.posicao}º</strong> de {rank.total}
+              </a>
+            {/if}
             {#if progresso}
               <ol
                 class="ficha-casas ficha-casas--classe"
@@ -779,9 +836,45 @@
   }
 
   .ficha-classe-treinos {
-    grid-column: 1 / -1;
     font-size: 0.76rem;
     color: var(--ds-text-4);
+  }
+
+  /* Segundo lugar de importância no cartão, atrás do nível: por isso número
+     claro com o "de N" apagado, e nada de dourado, que aqui é a cor do nível. */
+  .ficha-classe-rank {
+    justify-self: end;
+    font-size: 0.72rem;
+    color: var(--ds-text-5);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .ficha-classe-rank strong {
+    font-family: var(--ds-font-display);
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--ds-text-2);
+  }
+
+  .ficha-classe-rank:hover strong,
+  .ficha-classe-rank:focus-visible strong {
+    color: var(--ds-gold);
+  }
+
+  /* Ouro, prata e bronze, os mesmos do Ranking. Depois do :hover de propósito:
+     no pódio a cor da colocação é informação, não estado de ponteiro, e trocá-la
+     ao passar o mouse apagaria justamente o que ali interessa. */
+  .ficha-classe-rank.podio-1 strong {
+    color: var(--ds-gold-light);
+  }
+
+  .ficha-classe-rank.podio-2 strong {
+    color: var(--ds-prata);
+  }
+
+  .ficha-classe-rank.podio-3 strong {
+    color: var(--ds-bronze);
   }
 
   .ficha-presencas {
