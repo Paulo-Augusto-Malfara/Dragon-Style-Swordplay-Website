@@ -47,7 +47,11 @@ if (alvos.length !== dialogs.size) {
 // Os chips de categoria têm que cobrir todas as categorias que os itens usam,
 // senão existe item que nenhum filtro alcança.
 const chips = new Set(
-  [...HTML.matchAll(/<button type="button" class="eq-chip[^"]*" data-cat="([^"]*)"/g)].map((m) => m[1]),
+  // eq-chip no meio da lista de classes, não no começo: a aparência vem de
+  // .chip, que vem antes dele no atributo.
+  [...HTML.matchAll(/<button type="button" class="[^"]*\beq-chip\b[^"]*" data-cat="([^"]*)"/g)].map(
+    (m) => m[1],
+  ),
 );
 for (const cat of new Set(itens.map((i) => i.cat))) {
   if (!chips.has(cat)) erros.push(`categoria "${cat}" tem item mas não tem chip`);

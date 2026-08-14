@@ -59,10 +59,10 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
   description="O ranking de todos os membros do Dragon Style por nível geral, nível de classe, treinos e pontos de honra."
   resumo="Todo mundo que treina, em ordem. Toque em um critério para reordenar a lista."
 >
-  <nav class="ranking-quick-nav" aria-label="Ordenar ranking">
+  <nav class="chips" aria-label="Ordenar ranking">
     {Object.entries(SORTS).map(([key, { label }]) => (
       <a
-        class={`btn btn-sm${key === sort ? " btn-primary" : ""}`}
+        class:list={["chip", key === sort && "ativo"]}
         href={`?sort=${key}`}
         aria-current={key === sort ? "page" : undefined}
       >

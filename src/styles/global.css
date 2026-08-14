@@ -2977,56 +2977,77 @@ p {
   color: #1b5e20;
 }
 
-/* ponytail: sticky instead of scrolling away -- with the page previously
-   requiring a scroll back to top to switch classes, keeping this pinned
-   near the viewport top is a straightforward UX fix, no JS needed. */
-/* Faixa que rola de lado, não caixa que quebra em duas linhas. Com quatro
-   critérios e a tela de um celular, a caixa centralizada gastava ~90px de
-   altura antes do primeiro colocado aparecer, numa página em que a única
-   coisa que importa é a lista. */
-.ranking-quick-nav {
+/* ======== FILA DE CHIPS ========
+   Seleção em pílula, a mesma linguagem do catálogo de equipamentos. Rola de
+   lado no celular em vez de quebrar em três linhas, e gruda no topo pra dar
+   pra trocar de seleção com a lista já rolada.
+
+   Alinhada à esquerda, e não centralizada: com dez classes a última linha
+   ficava com um chip sozinho no meio da tela, e o começo de cada linha
+   mudava de lugar. Mesmo motivo dos títulos das páginas. */
+.chips {
   position: sticky;
   top: var(--ds-header-h);
   z-index: 5;
   display: flex;
-  gap: 0.5em;
+  gap: 8px;
   margin: 0 0 1.2em;
-  padding: 0.7em 0;
+  padding: 12px 0;
   overflow-x: auto;
   scrollbar-width: none;
   background: var(--ds-bg);
   border-bottom: 1px solid var(--ds-line);
 }
 
-.ranking-quick-nav::-webkit-scrollbar {
+.chips::-webkit-scrollbar {
   display: none;
 }
 
-.ranking-quick-nav > * {
+.chip {
   flex: none;
+  padding: 7px 14px;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ds-text-3);
+  font-family: var(--ds-font-body);
+  font-size: 0.84rem;
+  line-height: 1.35;
+  white-space: nowrap;
+  text-decoration: none;
+  cursor: pointer;
+  transition:
+    color 0.15s,
+    border-color 0.15s,
+    background 0.15s;
 }
 
-/* No desktop cabem todos sem rolar, e aí centralizar volta a fazer sentido. */
+.chip:hover {
+  color: var(--ds-text-1);
+  border-color: var(--ds-gold-dim);
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--ds-gold);
+  outline-offset: 2px;
+}
+
+.chip.ativo {
+  background: var(--ds-gold-wash);
+  border-color: var(--ds-gold-dim);
+  color: var(--ds-gold-light);
+}
+
+/* No desktop cabem todos sem rolar de lado. */
 @media (min-width: 861px) {
-  .ranking-quick-nav {
-    justify-content: center;
+  .chips {
     flex-wrap: wrap;
   }
 }
 
-/* ponytail: single-selection UI via :target instead of a JS toggle --
-   each section is hidden until the URL hash matches its id, and the
-   browser only ever matches one hash at a time, so clicking a class
-   button swaps which table shows without any client-side script. */
 .ranking-classe {
-  display: none;
   max-width: 900px;
   margin: 0 auto 1.5em;
-  scroll-margin-top: 1em;
-}
-
-.ranking-classe:target {
-  display: block;
 }
 
 .ranking-pagination {
@@ -3044,9 +3065,10 @@ p {
 }
 
 @media (max-width: 560px) {
-  .ranking-quick-nav {
+  /* Abaixo de 560px o cabeçalho do site não é mais grudado, então os chips
+     colam no topo da janela. */
+  .chips {
     top: 0;
-    border-radius: 0 0 10px 10px;
   }
 
   /* tabelas do dashboard (conteúdo curto) ficam mais compactas no celular

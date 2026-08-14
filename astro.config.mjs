@@ -19,5 +19,12 @@ export default defineConfig({
   integrations: [svelte(), sitemap(), mdx()],
   // Nenhum script embutido no HTML: todos viram arquivo, que a CSP já cobre
   // com 'self'. Ver o comentário no topo de scripts/csp-hashes.mjs.
-  vite: { build: { assetsInlineLimit: 0 } },
+  vite: {
+    build: { assetsInlineLimit: 0 },
+    // sanitize-html é CommonJS e depende do htmlparser2 12, que é ESM puro.
+    // Fora do pacote, o Node da função tenta `require()` no ESM e derruba a
+    // rota com 500: /novidades morria assim em produção e passava no dev,
+    // porque no dev o Vite empacota tudo. Empacotado junto, o require some.
+    ssr: { noExternal: ["sanitize-html"] },
+  },
 });

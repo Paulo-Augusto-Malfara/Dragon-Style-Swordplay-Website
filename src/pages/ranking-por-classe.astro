@@ -28,25 +28,45 @@ for (const row of data ?? []) {
 
 const classes = [...porClasse.entries()].sort(([a], [b]) => a.localeCompare(b));
 const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+
+// Uma classe por vez, escolhida pela URL, no mesmo padrão do ?sort= do Ranking
+// Geral. Antes as dez seções vinham todas no HTML e o CSS escondia nove com
+// :target: clicar num botão trocava qual seção existia na página e o navegador
+// tentava rolar até uma âncora cuja posição só passava a existir depois dessa
+// troca. Daí a rolagem estranha, e daí a página em branco antes do primeiro
+// clique, quando não havia âncora nenhuma pra casar.
+const pedida = Astro.url.searchParams.get("classe");
+const atual = classes.find(([nome]) => slug(nome) === pedida) ?? classes[0];
 ---
 
 <PageLayout
   title="Ranking por Classe"
   description="O ranking de cada uma das classes do Dragon Style, por treinos registrados."
-  resumo="Cada classe tem o seu ranking, ordenado por treinos registrados. Toque em uma classe para pular direto pra ela."
+  resumo="Cada classe tem o seu ranking, ordenado por treinos registrados. Escolha a classe que quer ver."
 >
-  <nav class="ranking-quick-nav">
+  <nav class="chips" aria-label="Escolher a classe">
     {classes.map(([nomeClasse]) => (
-      <a href={`#classe-${slug(nomeClasse)}`} class="btn btn-sm">{nomeClasse}</a>
+      <a
+        href={`?classe=${slug(nomeClasse)}`}
+        class:list={["chip", nomeClasse === atual?.[0] && "ativo"]}
+        aria-current={nomeClasse === atual?.[0] ? "page" : undefined}
+      >
+        {nomeClasse}
+      </a>
     ))}
   </nav>
+
   {
-    classes.map(([nomeClasse, rows]) => (
-      <section class="ranking-classe" id={`classe-${slug(nomeClasse)}`}>
-        <h2>{nomeClasse}</h2>
+    atual ? (
+      <section class="ranking-classe">
+        <h2>{atual[0]}</h2>
+        <p class="rk-conta">
+          {atual[1]!.length} {atual[1]!.length === 1 ? "membro" : "membros"} com treino
+          registrado nesta classe
+        </p>
         <RankingLista
           colunas={2}
-          itens={rows!.map((m, i) => ({
+          itens={atual[1]!.map((m, i) => ({
             posicao: i + 1,
             nome: m.nome,
             fotoUrl: m.foto_url,
@@ -58,6 +78,29 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
           }))}
         />
       </section>
-    ))
+    ) : (
+      <p class="rk-vazio">
+        Nenhum treino registrado ainda. Assim que o primeiro treino for fechado, os
+        rankings de classe aparecem aqui.
+      </p>
+    )
   }
 </PageLayout>
+
+<style>
+  .rk-conta {
+    margin: -0.4em 0 1em;
+    font-size: 0.82rem;
+    color: var(--ds-text-5);
+  }
+
+  .rk-vazio {
+    max-width: 900px;
+    margin: 2em auto;
+    padding: 1.2em;
+    border: 1px dashed var(--ds-line-strong);
+    border-radius: 12px;
+    color: var(--ds-text-4);
+    text-align: center;
+  }
+</style>

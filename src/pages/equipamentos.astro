@@ -64,10 +64,10 @@ const chave = (s: string) =>
     />
 
     <div class="eq-chips" role="group" aria-label="Categoria">
-      <button type="button" class="eq-chip ativo" data-cat="">Todas</button>
+      <button type="button" class="chip eq-chip ativo" data-cat="">Todas</button>
       {
         categorias.map((c) => (
-          <button type="button" class="eq-chip" data-cat={c.id}>
+          <button type="button" class="chip eq-chip" data-cat={c.id}>
             {c.data.title}
           </button>
         ))
@@ -330,33 +330,8 @@ const chave = (s: string) =>
     display: none;
   }
 
-  .eq-chip {
-    flex: none;
-    padding: 7px 14px;
-    border: 1px solid var(--ds-line-strong);
-    border-radius: 999px;
-    background: transparent;
-    color: var(--ds-text-3);
-    font-family: inherit;
-    font-size: 0.84rem;
-    white-space: nowrap;
-    cursor: pointer;
-    transition:
-      color 0.15s,
-      border-color 0.15s,
-      background 0.15s;
-  }
-
-  .eq-chip:hover {
-    color: var(--ds-text-1);
-    border-color: var(--ds-gold-dim);
-  }
-
-  .eq-chip.ativo {
-    background: var(--ds-gold-wash);
-    border-color: var(--ds-gold-dim);
-    color: var(--ds-gold-light);
-  }
+  /* A aparência do chip vive em .chip, no global.css, junto com a dos dois
+     rankings. Aqui sobra só o gancho que o script usa pra achar os botões. */
 
   .eq-selects {
     display: flex;
