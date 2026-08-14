@@ -25,6 +25,12 @@ export default defineConfig({
     // Fora do pacote, o Node da função tenta `require()` no ESM e derruba a
     // rota com 500: /novidades morria assim em produção e passava no dev,
     // porque no dev o Vite empacota tudo. Empacotado junto, o require some.
-    ssr: { noExternal: ["sanitize-html"] },
+    //
+    // Os dois precisam entrar. Só com o sanitize-html na lista o empacotador
+    // deixa o `require("htmlparser2")` dele apontando pra fora, e aí o rastreio
+    // de arquivos da Vercel não copia mais o pacote (ninguém o importa
+    // visivelmente): o erro deixa de ser "require de ESM" e vira "módulo não
+    // encontrado", que quebra a mesma rota do mesmo jeito.
+    ssr: { noExternal: ["sanitize-html", "htmlparser2"] },
   },
 });
