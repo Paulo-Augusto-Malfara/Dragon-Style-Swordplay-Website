@@ -14,6 +14,22 @@ revisão: se alguém apagar sem querer, é daqui que se recupera.
 
 Depois de colar, mande um de cada para você mesmo antes de considerar pronto.
 
+## Quanto tempo o código vale
+
+**Authentication > Emails > "Email OTP Expiration": 600 segundos** (10 minutos),
+apertado em 14/08/2026. O padrão do Supabase é 3600.
+
+Dez minutos é folgado para quem pede o código e vai ler o e-mail, e corta a
+janela em que um código vazado (e-mail aberto num computador compartilhado,
+caixa de entrada sincronizada num aparelho antigo) ainda serve para entrar.
+
+**Esse mesmo número governa o token do convite**, e é por isso que ele pode ser
+tão curto: o convite aqui não usa token nenhum. Ver a seção abaixo. Se um dia o
+`{{ .ConfirmationURL }}` voltar para o `convite.html`, **10 minutos passa a ser
+tempo demais de menos**, porque ninguém abre e-mail em 10 minutos. Nesse caso as
+duas coisas voltam a brigar pelo mesmo campo, e a saída é manter o convite sem
+link, não afrouxar a validade do código de entrada.
+
 ## A variável que não pode sumir
 
 O `codigo-de-acesso.html` **tem que conter `{{ .Token }}`**. O site pede o
