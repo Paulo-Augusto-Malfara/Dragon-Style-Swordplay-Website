@@ -34,66 +34,213 @@ for (const c of confirmacoes ?? []) {
 const formatHora = (h: string) => h.slice(0, 5);
 
 const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replace(".", "");
+
+// Meia-noite de hoje, pra contagem em dias inteiros: com a hora corrente,
+// "amanhã às 15h" daria 0 dias em vez de 1 dependendo do horário do acesso.
+const hoje = new Date();
+hoje.setHours(0, 0, 0, 0);
+
+const textoFaltam = (dias: number) => {
+  if (dias <= 0) return "hoje";
+  if (dias === 1) return "amanhã";
+  if (dias < 7) return `em ${dias} dias`;
+  const semanas = Math.round(dias / 7);
+  return semanas === 1 ? "em 1 semana" : `em ${semanas} semanas`;
+};
 ---
 
-<PageLayout title="Agenda de Treinos">
-  <section>
-    <p>Confira abaixo os próximos treinos agendados do Dragon Style.</p>
-    <br />
-  </section>
+<PageLayout
+  title="Agenda de Treinos"
+  description="Os próximos treinos do Dragon Style, com horário, local e confirmação de presença."
+  resumo="O grupo não tem dia fixo. É aqui que os próximos treinos são marcados, e é aqui que você confirma presença."
+>
   {
     proximosTreinos.length === 0 ? (
       <p class="dashboard-empty">Nenhum treino agendado no momento.</p>
     ) : (
-      <div class="agenda-lista">
-        {proximosTreinos.map((t) => (
-          <article class="agenda-card">
-            <div class="agenda-card-topo">
-              <div class="agenda-card-data">
-                <span class="agenda-card-semana">
-                  {capitalizar(new Date(t.data_treino + "T00:00:00").toLocaleDateString("pt-BR", { weekday: "short" }))}
+      <ol class="ag-lista">
+        {proximosTreinos.map((t) => {
+          const quando = new Date(t.data_treino + "T00:00:00");
+          const faltam = Math.round((quando.getTime() - hoje.getTime()) / 86400000);
+          return (
+            <li class:list={["ag-item", t.status !== "agendado" && "ag-item--cancelado"]}>
+              <div class="ag-linha">
+                <span class="ag-data">
+                  <strong>{quando.getDate()}</strong>
+                  <small>{capitalizar(quando.toLocaleDateString("pt-BR", { month: "short" }))}</small>
                 </span>
-                <span class="agenda-card-dia">{new Date(t.data_treino + "T00:00:00").getDate()}</span>
-                <span class="agenda-card-mes">
-                  {capitalizar(new Date(t.data_treino + "T00:00:00").toLocaleDateString("pt-BR", { month: "short" }))}
-                </span>
-              </div>
-              <div class="agenda-card-corpo">
-                <p class="agenda-card-linha">
-                  <span class={`status-badge status-badge--${t.status}`}>
-                    {t.status === "agendado" ? "Agendado" : "Cancelado"}
+
+                <span class="ag-resumo">
+                  <span class="ag-titulo">
+                    Treino {capitalizar(quando.toLocaleDateString("pt-BR", { weekday: "long" }))}
                   </span>
-                </p>
-                <p class="agenda-card-linha">
-                  <span class="gold-title">Horário:</span> {formatHora(t.horario_inicio)}
-                  {t.horario_termino ? ` às ${formatHora(t.horario_termino)}` : ""}
-                </p>
-                <p class="agenda-card-linha">
-                  <span class="gold-title">Local:</span> {t.local}
-                </p>
-                {t.endereco && (
-                  <p class="agenda-card-linha">
-                    <span class="gold-title">Endereço:</span> {t.endereco}
-                  </p>
-                )}
+                  <span class="ag-detalhe">
+                    {formatHora(t.horario_inicio)}
+                    {t.horario_termino ? ` às ${formatHora(t.horario_termino)}` : ""} · {t.local}
+                  </span>
+                </span>
+
+                <span class="ag-quando">{textoFaltam(faltam)}</span>
               </div>
-            </div>
-            {t.link_maps && (
-              <a href={t.link_maps} target="_blank" rel="noopener noreferrer" class="btn btn-sm agenda-card-mapa">
-                Ver no mapa
-              </a>
-            )}
-            {t.status === "agendado" && (
-              <ConfirmarPresenca
-                idAgenda={t.id_agenda}
-                contagemInicial={contagemPorAgenda.get(t.id_agenda) ?? 0}
-                mostrarLista={true}
-                client:load
-              />
-            )}
-          </article>
-        ))}
-      </div>
+
+              {t.status === "agendado" ? (
+                <ConfirmarPresenca
+                  idAgenda={t.id_agenda}
+                  contagemInicial={contagemPorAgenda.get(t.id_agenda) ?? 0}
+                  mostrarLista={true}
+                  client:load
+                />
+              ) : (
+                <p class="ag-cancelado">Este treino foi cancelado.</p>
+              )}
+
+              {(t.endereco || t.link_maps) && (
+                <details class="ag-mais">
+                  <summary>Como chegar</summary>
+                  {t.endereco && <p class="ag-endereco">{t.endereco}</p>}
+                  {t.link_maps && (
+                    <a href={t.link_maps} target="_blank" rel="noopener noreferrer" class="btn btn-sm">
+                      Abrir no mapa
+                    </a>
+                  )}
+                </details>
+              )}
+            </li>
+          );
+        })}
+      </ol>
     )
   }
 </PageLayout>
+
+<style>
+  /* Linha, não cartão. O cartão de antes empilhava horário, local, endereço e
+     botão de mapa, e ocupava quase uma tela de celular por treino: com três
+     treinos marcados dava três telas de rolagem pra responder "quando é o
+     próximo?". O que decide isso é dia, hora e quanto falta, e é só isso que
+     fica aberto. Endereço e mapa entram no "como chegar", que só interessa a
+     quem vai de fato, e uma vez. */
+  .ag-lista {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .ag-item {
+    padding: 14px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 14px;
+    background: var(--ds-surface);
+  }
+
+  /* O primeiro é o próximo, e é o que a pessoa veio ver. */
+  .ag-item:first-child {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .ag-item--cancelado {
+    opacity: 0.6;
+  }
+
+  .ag-linha {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .ag-data {
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 46px;
+    padding-right: 14px;
+    border-right: 1px solid var(--ds-line);
+    line-height: 1.05;
+  }
+
+  .ag-data strong {
+    font-family: var(--ds-font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ds-gold);
+  }
+
+  .ag-data small {
+    font-size: 0.64rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ds-text-5);
+  }
+
+  .ag-resumo {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .ag-titulo {
+    font-size: 0.98rem;
+  }
+
+  .ag-detalhe {
+    font-size: 0.8rem;
+    color: var(--ds-text-4);
+  }
+
+  .ag-quando {
+    flex: none;
+    font-family: var(--ds-font-display);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ds-gold-deep);
+  }
+
+  .ag-cancelado {
+    margin: 12px 0 0;
+    font-size: 0.85rem;
+    color: var(--ds-text-4);
+  }
+
+  .ag-mais {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ds-line);
+  }
+
+  .ag-mais summary {
+    font-size: 0.8rem;
+    color: var(--ds-text-3);
+    cursor: pointer;
+  }
+
+  .ag-mais summary:hover {
+    color: var(--ds-gold-light);
+  }
+
+  .ag-endereco {
+    margin: 10px 0;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: var(--ds-text-2);
+  }
+
+  /* Abaixo de 440px o "em 2 semanas" e o horário disputam a mesma linha e
+     quebram feio. A contagem desce pra debaixo do resumo. */
+  @media (max-width: 440px) {
+    .ag-linha {
+      flex-wrap: wrap;
+      row-gap: 6px;
+    }
+
+    .ag-quando {
+      margin-left: 60px;
+    }
+  }
+</style>

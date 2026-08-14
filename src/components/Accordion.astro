@@ -1,9 +1,9 @@
 ---
-import Icon from "./Icon.astro";
-
 interface Props {
   id?: string;
   title: string;
+  /** Quantas pessoas a modalidade exige. Zero significa "não informado". */
+  minimo?: number;
   tags?: string[];
   descricao: string[];
   objetivo: string[];
@@ -11,41 +11,229 @@ interface Props {
   requisitos: string[];
   variacoes?: string[];
 }
-const { id, title, tags = [], descricao, objetivo, pontuacao, requisitos, variacoes = [] } = Astro.props;
+const {
+  id,
+  title,
+  minimo = 0,
+  tags = [],
+  descricao,
+  objetivo,
+  pontuacao,
+  requisitos,
+  variacoes = [],
+} = Astro.props;
+
+/**
+ * A linha fechada resume a modalidade em uma frase, como no design: quantas
+ * pessoas, formato e respawn. Antes eram quatro ou cinco pílulas empilhadas,
+ * que no celular ocupavam duas linhas inteiras por card e obrigavam a ler
+ * etiqueta por etiqueta pra saber se aquele jogo cabia no treino de hoje.
+ *
+ * Duas etiquetas, não todas: as primeiras do banco são as que dizem o formato
+ * ("2 Times", "Duelo 1x1"). O resto continua inteiro lá dentro.
+ */
+const resumo = [
+  minimo ? `${minimo}+ pessoas` : null,
+  ...tags.slice(0, 2),
+].filter(Boolean).join(" · ");
+
+const blocos = [
+  { rotulo: "Como vence", itens: objetivo },
+  { rotulo: "Pontuação e respawn", itens: pontuacao },
+  { rotulo: "Precisa de", itens: requisitos },
+].filter((b) => b.itens?.length);
+
+/** Tira o "- " que o texto do banco usa pra marcar item de lista. */
+const limpar = (linha: string) => linha.replace(/^\s*-\s*/, "");
 ---
 
-<details id={id} class="modalidades-box card modalidade-card">
+<details class="md" id={id}>
   <summary>
-    <div class="modalidades-summary-text">
-      <h2 class="modalidades-button">{title}</h2>
-      {tags.length > 0 && (
-        <div class="modalidade-tags">
-          {tags.map((tag) => <span class="stat-pill">{tag}</span>)}
-        </div>
-      )}
-    </div>
-    <Icon name="chevron-forward" class="modalidades-chevron" />
+    <span class="md-texto">
+      <span class="md-nome">{title}</span>
+      {resumo && <span class="md-resumo">{resumo}</span>}
+    </span>
+    <span class="md-sinal" aria-hidden="true"></span>
   </summary>
-  <div class="modalidades-conteudo">
-    <h3>Descrição</h3>
-    {descricao.map((p, i) => (
-      <>
-        <p>{p}</p>
-        {i < descricao.length - 1 && <br />}
-      </>
-    ))}
-    <h3>Objetivo/Condição de Vitória</h3>
-    {objetivo.map((p) => <p>{p}</p>)}
-    <h3>Sistema de Pontuação/Respawn</h3>
-    {pontuacao.map((p) => <p>{p}</p>)}
-    <h3>Requisitos/Armas Permitidas</h3>
-    {requisitos.map((p) => <p>{p}</p>)}
-    {variacoes.length > 0 && (
-      <>
-        <h3>Regras específicas/Variações</h3>
-        {variacoes.map((p) => <p>{p}</p>)}
-      </>
-    )}
-    <br />
+
+  <div class="md-corpo">
+    {descricao?.map((p) => <p class="md-desc">{limpar(p)}</p>)}
+
+    {
+      blocos.length > 0 && (
+        <div class="md-grade">
+          {blocos.map((b) => (
+            <div class="md-bloco">
+              <span class="md-bloco-rotulo">{b.rotulo}</span>
+              <ul>
+                {b.itens.map((i) => (
+                  <li>{limpar(i)}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      variacoes.length > 0 && (
+        <div class="md-variacoes">
+          <span class="md-bloco-rotulo">Variações</span>
+          <ul>
+            {variacoes.map((v) => (
+              <li>{limpar(v)}</li>
+            ))}
+          </ul>
+        </div>
+      )
+    }
   </div>
 </details>
+
+<style>
+  .md {
+    border: 1px solid var(--ds-line);
+    border-radius: 16px;
+    background: var(--ds-surface);
+  }
+
+  .md[open] {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .md summary {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .md summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .md summary:hover .md-nome {
+    color: var(--ds-gold-light);
+  }
+
+  .md-texto {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .md-nome {
+    font-family: var(--ds-font-display);
+    font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.28rem);
+    font-weight: 600;
+    line-height: 1.15;
+  }
+
+  .md-resumo {
+    font-size: 0.78rem;
+    color: var(--ds-text-4);
+  }
+
+  /* Um "+" que vira "−", desenhado com duas barras em vez de texto: assim ele
+     fica alinhado sozinho e não depende da fonte carregar. */
+  .md-sinal {
+    flex: none;
+    position: relative;
+    width: 15px;
+    height: 15px;
+  }
+
+  .md-sinal::before,
+  .md-sinal::after {
+    content: "";
+    position: absolute;
+    inset: 50% 0 auto;
+    height: 1.5px;
+    background: var(--ds-gold);
+  }
+
+  .md-sinal::after {
+    transform: rotate(90deg);
+  }
+
+  .md[open] .md-sinal::after {
+    transform: rotate(180deg);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .md-sinal::after {
+      transition: transform 0.18s ease-out;
+    }
+  }
+
+  .md-corpo {
+    padding: 0 18px 20px;
+  }
+
+  .md-desc {
+    margin: 0 0 14px;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ds-text-2);
+  }
+
+  .md-desc:first-child {
+    padding-top: 14px;
+    border-top: 1px solid var(--ds-line);
+  }
+
+  .md-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .md-bloco {
+    padding: 13px 15px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: rgba(11, 16, 22, 0.4);
+  }
+
+  .md-bloco-rotulo {
+    display: block;
+    margin-bottom: 7px;
+    font-family: var(--ds-font-display);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ds-gold-deep);
+  }
+
+  .md-bloco ul,
+  .md-variacoes ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--ds-text-2);
+  }
+
+  /* Variação é exceção à regra, não mais uma regra: a barra dourada à esquerda
+     diz isso sem precisar escrever "atenção". */
+  .md-variacoes {
+    padding: 13px 16px;
+    border-left: 2px solid var(--ds-gold);
+    background: var(--ds-gold-wash);
+  }
+
+  .md-variacoes .md-bloco-rotulo {
+    color: var(--ds-gold);
+  }
+</style>

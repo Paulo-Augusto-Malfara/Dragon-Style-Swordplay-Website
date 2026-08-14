@@ -2164,32 +2164,41 @@ p {
 
 /* ======== CONFIRMAÇÃO DE PRESENÇA (agenda) ======== */
 
+/* Linha, não bloco centralizado. Dentro do cartão compacto da agenda o antigo
+   empilhava contagem, link e botão no centro, e a contagem em dourado forte
+   competia com a data, que é a informação principal da linha. */
 .confirma-presenca {
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 0.6em;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--ds-line);
 }
 
 .confirma-presenca-contagem {
   margin: 0;
   width: auto;
-  font-weight: 700;
-  color: var(--golden-color);
+  font-size: 0.82rem;
+  color: var(--ds-text-3);
   font-variant-numeric: tabular-nums;
 }
 
+/* O botão é a ação da linha, então encosta na direita e fecha a leitura. */
+.confirma-presenca > .btn {
+  margin-left: auto;
+}
+
 .confirma-presenca-lista {
-  width: 100%;
-  max-width: 360px;
-  margin-bottom: 0.6em;
+  order: 3;
+  flex-basis: 100%;
 }
 
 .confirma-presenca-lista summary {
   cursor: pointer;
   color: var(--text-secondary-color);
-  font-size: 0.88em;
-  text-align: center;
+  font-size: 0.82rem;
   text-decoration: underline;
   text-underline-offset: 3px;
 }

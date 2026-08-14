@@ -71,7 +71,8 @@ const faixas = [
             <Accordion
               id={m.slug}
               title={m.title}
-              tags={[...(m.minimo ? [`${m.minimo}+ pessoas`] : []), ...(m.tags ?? [])]}
+              minimo={m.minimo}
+              tags={m.tags ?? []}
               descricao={m.description}
               objetivo={m.objective}
               pontuacao={m.scoring_respawn}
@@ -153,6 +154,13 @@ const faixas = [
 
   .mod-item[hidden] {
     display: none;
+  }
+
+  /* Aberta, a modalidade toma a linha inteira. Espremida numa coluna do grid a
+     descrição virava uma tira de cinco palavras por linha, com a outra coluna
+     vazia ao lado. */
+  .mod-item:has(.md[open]) {
+    grid-column: 1 / -1;
   }
 
   .mod-vazio {
