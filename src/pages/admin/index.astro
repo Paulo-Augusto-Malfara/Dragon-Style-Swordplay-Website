@@ -51,7 +51,7 @@ const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes] = await Promis
     .maybeSingle(),
   // Fila de aprovação de foto e apelido. Contagem, não lista: aqui só importa
   // se tem alguém esperando.
-  membro.isOrganizador
+  membro.isAdminSistema
     ? supabase
         .from("dMembros")
         .select("id_membro", { count: "exact", head: true })
@@ -106,14 +106,16 @@ const atalhos = [
     ? [{ href: "/admin/agenda", label: "Agenda", desc: "Marcar os próximos treinos." }]
     : []),
   ...(membro.isAdminSistema
-    ? [{ href: "/admin/doacoes", label: "Doações", desc: "Lançar e conferir as doações." }]
+    ? [
+        { href: "/admin/doacoes", label: "Doações", desc: "Lançar e conferir as doações." },
+        { href: "/admin/moderacao", label: "Aprovações", desc: "Foto e apelido esperando liberação." },
+      ]
     : []),
   // Novidades e Modalidades eram duas listas soltas no fim do hub. Como
   // seção, entram na mesma grade e a tela inicial volta a ser só uma escolha
   // de para onde ir.
   ...(membro.isOrganizador
     ? [
-        { href: "/admin/moderacao", label: "Aprovações", desc: "Foto e apelido esperando liberação." },
         { href: "/admin/posts", label: "Novidades", desc: "Escrever e publicar avisos na home." },
         { href: "/admin/modalidades", label: "Modalidades", desc: "Regras e mínimo de participantes." },
       ]

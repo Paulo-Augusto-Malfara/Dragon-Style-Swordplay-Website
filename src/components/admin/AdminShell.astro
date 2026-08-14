@@ -31,7 +31,7 @@ const { title, resumo, voltar } = Astro.props;
 const { membro } = Astro.locals;
 
 const secoes = [
-  { href: "/admin/moderacao", label: "Aprovações", ver: membro.isOrganizador },
+  { href: "/admin/moderacao", label: "Aprovações", ver: membro.isAdminSistema },
   { href: "/admin/membros", label: "Membros", ver: true },
   { href: "/admin/treinos", label: "Treinos", ver: true },
   { href: "/admin/eventos", label: "Eventos", ver: true },

@@ -6,15 +6,16 @@ import AtivarNotificacoes from "../../../components/admin/AtivarNotificacoes.sve
 export const prerender = false;
 
 const { membro } = Astro.locals;
-if (!membro.isOrganizador) return Astro.redirect("/admin");
+// Por ora só admin do sistema. As RPCs de aprovar/recusar aceitam organizador
+// (nível 2), então abrir isso depois pra organizador e staff é mexer só aqui e
+// nas duas linhas do AdminShell e do hub.
+if (!membro.isAdminSistema) return Astro.redirect("/admin");
 ---
 
 <AdminShell
   title="Aprovações"
   resumo="Foto e apelido que o membro escolhe só aparecem no site depois de passar por aqui."
 >
-  {/* Só admin do sistema recebe o push, então só ele vê o botão: deixar um
-      organizador ligar algo que nunca vai tocar é mentira de interface. */}
-  {membro.isAdminSistema && <AtivarNotificacoes client:load />}
+  <AtivarNotificacoes client:load />
   <ModeracaoPerfil client:load />
 </AdminShell>
