@@ -105,10 +105,9 @@ Deno.serve(async (req) => {
   }
 
   // Sem `redirectTo`: o link do convite cai na Site URL configurada no projeto.
-  // Passar um endereço daqui só criaria mais um lugar pra desconfigurar, e o
-  // link nem é o essencial: o que destrava a entrada é a linha em `auth.users`
-  // existir, então a pessoa pode ignorar o convite e pedir o código normalmente.
-  const { error: erroConvite } = await admin.auth.admin.inviteUserByEmail(membro.email);
+  // Passar um endereço daqui só criaria mais um lugar pra desconfigurar.
+  const { data: convidado, error: erroConvite } =
+    await admin.auth.admin.inviteUserByEmail(membro.email);
 
   if (erroConvite) {
     // Já existe usuário com esse e-mail, mas o cadastro do membro não aponta
@@ -121,6 +120,35 @@ Deno.serve(async (req) => {
       );
     }
     return responde({ erro: erroConvite.message }, 500);
+  }
+
+  // Confirma o e-mail na hora, sem esperar a pessoa clicar no link.
+  //
+  // Testado em 14/08/2026, e o resultado foi o contrário do esperado: enquanto
+  // o convidado não aceita, pedir código devolve `signup_disabled`, a mesma
+  // resposta que um endereço que não existe. Como o link do convite expira, a
+  // pessoa que demorasse ficava travada e ainda sumia desta lista, porque o
+  // `auth_user_id` já estava preenchido. Ninguém entenderia o porquê.
+  //
+  // Confirmar aqui não afrouxa nada: quem entra continua tendo que receber o
+  // código no e-mail, e é isso que prova que a caixa é dela. A confirmação só
+  // registra que o endereço está cadastrado, e ele veio do cadastro do grupo,
+  // não de alguém digitando na tela de acesso.
+  const idNovo = convidado?.user?.id;
+  if (!idNovo) {
+    return responde({ erro: "Convite enviado, mas o usuário não voltou do Supabase." }, 500);
+  }
+
+  const { error: erroConfirma } = await admin.auth.admin.updateUserById(idNovo, {
+    email_confirm: true,
+  });
+  if (erroConfirma) {
+    // Falha alto em vez de dizer "ok": o convite saiu, mas a pessoa não
+    // conseguiria entrar, e esse é o defeito que ficaria escondido por semanas.
+    return responde(
+      { erro: `Convite enviado, mas a confirmação falhou: ${erroConfirma.message}` },
+      500,
+    );
   }
 
   return responde({ ok: true, nome: membro.nome }, 200);
