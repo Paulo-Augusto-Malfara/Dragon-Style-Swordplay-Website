@@ -47,14 +47,32 @@ Word.
 - **Layout em `<table>`**, não em flex nem grid.
 - **Estilo embutido no elemento.** Folha de estilo externa e `<style>` no
   cabeçalho são descartados por parte dos clientes.
-- **Imagem com endereço absoluto e do site já publicado.** Endereço relativo não
-  existe dentro de um e-mail. Hoje só o
-  `https://swordplayds.com.br/assets/img/logo-ds-landscape.png` está no ar; os
-  outros logos da pasta `public/assets/img/` ainda não foram para produção e
-  respondem 404. Sempre confira antes de trocar a imagem.
+- **Nada de imagem para a marca.** Ver a seção abaixo, custou uma rodada.
 - **Sem fonte da web.** Cinzel e Rubik não carregam em e-mail, então os modelos
   usam Georgia para o título e Arial para o corpo, que é o par mais próximo
   disponível em qualquer aparelho.
 - **Botão é uma tabela com `bgcolor`**, senão o Outlook come o fundo colorido.
 - **Todo texto tem cor explícita.** Em modo escuro alguns clientes invertem o
   que não foi declarado, e sobra texto claro em fundo claro.
+
+## Por que o logotipo é texto e não imagem
+
+A primeira versão trazia o `logo-ds-landscape.png` por endereço absoluto. No
+preview do próprio painel do Supabase ele aparecia quebrado, e a suspeita
+inicial foi formato de arquivo. **Não era.** O servidor entrega um PNG legítimo,
+420x120, com `Content-Type: image/png`, confirmado pelos bytes iniciais
+(`89504e47`, que é a assinatura do PNG).
+
+O que acontece é outra coisa, e trocar de formato não resolveria: **cliente de
+e-mail não busca imagem remota por padrão.** O Outlook bloqueia até a pessoa
+mandar exibir, e o preview do painel do Supabase roda num iframe que bloqueia
+sempre. A imagem nunca chega a ser pedida, então PNG, webp ou jpg dá no mesmo.
+
+Por isso a marca virou texto, repetindo a composição do cabeçalho do site
+("DRAGON STYLE" em serifada dourada, "SWORDPLAY E EVENTOS" abaixo). Texto
+desenha em toda parte, sem bloqueio, sem clique e sem depender de o site estar
+no ar.
+
+**Se um dia alguém quiser o brasão de volta:** ele só apareceria para parte das
+pessoas, e apareceria quebrado para o resto. Se for para tentar, o desenho tem
+que continuar de pé sem a imagem, com o texto ao lado dela e não no lugar dela.
