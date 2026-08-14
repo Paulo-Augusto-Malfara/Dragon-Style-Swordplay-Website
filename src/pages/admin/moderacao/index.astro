@@ -1,0 +1,16 @@
+---
+import AdminShell from "../../../components/admin/AdminShell.astro";
+import ModeracaoPerfil from "../../../components/admin/ModeracaoPerfil.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+if (!membro.isOrganizador) return Astro.redirect("/admin");
+---
+
+<AdminShell
+  title="Aprovações"
+  resumo="Foto e apelido que o membro escolhe só aparecem no site depois de passar por aqui."
+>
+  <ModeracaoPerfil client:load />
+</AdminShell>

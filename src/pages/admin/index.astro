@@ -20,7 +20,7 @@ const inicioDoAno = hojeBR.slice(0, 4) + "-01-01";
 // E, junto disso, os quatro números que respondem "como está o grupo" sem
 // precisar entrar em seção nenhuma. Todas as consultas são contagem (head:
 // true não traz linha, só o total) ou uma linha só.
-const [treino, evento, ativos, treinosDoAno, proximo] = await Promise.all([
+const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes] = await Promise.all([
   supabase
     .from("fTreinos")
     .select("id_treino, data_treino, status")
@@ -49,6 +49,14 @@ const [treino, evento, ativos, treinosDoAno, proximo] = await Promise.all([
     .order("data_treino")
     .limit(1)
     .maybeSingle(),
+  // Fila de aprovação de foto e apelido. Contagem, não lista: aqui só importa
+  // se tem alguém esperando.
+  membro.isOrganizador
+    ? supabase
+        .from("dMembros")
+        .select("id_membro", { count: "exact", head: true })
+        .or("foto_pendente_em.not.is.null,apelido_pendente.not.is.null")
+    : Promise.resolve({ count: 0 }),
 ]);
 
 const dataBR = (d: string) =>
@@ -79,6 +87,15 @@ const emAberto = [
     titulo: `${evento.data.nome_evento}, ${evento.data.cidade}`,
     acao: "Registrar participantes e fechar",
   },
+  (aprovacoes.count ?? 0) > 0 && {
+    href: "/admin/moderacao",
+    tipo: "Esperando aprovação",
+    titulo:
+      aprovacoes.count === 1
+        ? "1 membro enviou foto ou apelido"
+        : `${aprovacoes.count} membros enviaram foto ou apelido`,
+    acao: "Aprovar ou recusar",
+  },
 ].filter(Boolean) as { href: string; tipo: string; titulo: string; acao: string }[];
 
 const atalhos = [
@@ -96,6 +113,7 @@ const atalhos = [
   // de para onde ir.
   ...(membro.isOrganizador
     ? [
+        { href: "/admin/moderacao", label: "Aprovações", desc: "Foto e apelido esperando liberação." },
         { href: "/admin/posts", label: "Novidades", desc: "Escrever e publicar avisos na home." },
         { href: "/admin/modalidades", label: "Modalidades", desc: "Regras e mínimo de participantes." },
       ]

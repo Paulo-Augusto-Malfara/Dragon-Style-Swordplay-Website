@@ -20,6 +20,13 @@
   let nomeOficial = $state("");
   let fotoUrl = $state<string | null>(null);
   let apelido = $state<string | null>(null);
+  // Foto e apelido passam por aprovação antes de aparecer pros outros. Estes
+  // quatro campos são o que a pessoa precisa saber sobre isso: se tem algo na
+  // fila, e por que foi recusado se foi.
+  let fotoPendenteEm = $state<string | null>(null);
+  let fotoRecusaMotivo = $state<string | null>(null);
+  let apelidoPendente = $state<string | null>(null);
+  let apelidoRecusaMotivo = $state<string | null>(null);
   let editingApelido = $state(false);
   let apelidoInput = $state("");
   let savingApelido = $state(false);
@@ -116,7 +123,9 @@
 
       let { data: membro } = await supabase
         .from("dMembros")
-        .select("id_membro, nome, apelido, foto_url, oculto, auth_level")
+        .select(
+          "id_membro, nome, apelido, foto_url, oculto, auth_level, foto_pendente_em, foto_recusa_motivo, apelido_pendente, apelido_recusa_motivo",
+        )
         .eq("auth_user_id", session.user.id)
         .single();
 
@@ -126,7 +135,9 @@
         await supabase.rpc("vincular_membro_por_email");
         const retry = await supabase
           .from("dMembros")
-          .select("id_membro, nome, apelido, foto_url, oculto, auth_level")
+          .select(
+          "id_membro, nome, apelido, foto_url, oculto, auth_level, foto_pendente_em, foto_recusa_motivo, apelido_pendente, apelido_recusa_motivo",
+        )
           .eq("auth_user_id", session.user.id)
           .single();
         membro = retry.data;
@@ -142,6 +153,10 @@
       apelido = membro.apelido;
       ehStaffOuMais = membro.auth_level <= 3;
       apelidoInput = membro.apelido ?? "";
+      fotoPendenteEm = membro.foto_pendente_em;
+      fotoRecusaMotivo = membro.foto_recusa_motivo;
+      apelidoPendente = membro.apelido_pendente;
+      apelidoRecusaMotivo = membro.apelido_recusa_motivo;
 
       const [geral, classes, historia, escala] = await Promise.all([
         supabase.from("v_ranking_nivel_geral").select("*").eq("id_membro", membro.id_membro).single(),
@@ -194,7 +209,16 @@
       apelidoError = error.message;
       return;
     }
-    apelido = apelidoInput.trim() || null;
+    // Limpar o apelido vale na hora (voltar pro nome oficial nunca é o
+    // problema que a fila existe pra pegar); escolher um novo espera aprovação.
+    const proposto = apelidoInput.trim();
+    if (proposto) {
+      apelidoPendente = proposto;
+      apelidoRecusaMotivo = null;
+    } else {
+      apelido = null;
+      apelidoPendente = null;
+    }
     editingApelido = false;
   }
 
@@ -210,28 +234,27 @@
     window.location.reload();
   }
 
-  async function saveMinhaFoto(blob: Blob): Promise<string> {
+  async function saveMinhaFoto(blob: Blob): Promise<void> {
     const supabase = await getSupabase();
     const {
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) throw new Error("Sessão expirada, faça login novamente.");
 
+    // Bucket privado, não o público. O membro escreve só na pasta dele e não
+    // consegue ler nem a própria: quem lê a fila é organizador. A foto só chega
+    // no bucket público depois de aprovada, e quem copia é a função de borda.
     const path = `${user.id}/avatar.webp`;
     const { error: uploadError } = await supabase.storage
-      .from("avatars")
+      .from("avatars-pendentes")
       .upload(path, blob, { upsert: true, contentType: "image/webp" });
     if (uploadError) throw uploadError;
 
-    const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
-    // cache-busting: mesmo path sempre (upsert), a query string muda a cada
-    // envio para o navegador não continuar mostrando a foto antiga em cache
-    const finalUrl = `${pub.publicUrl}?v=${Date.now()}`;
-
-    const { error: rpcError } = await supabase.rpc("set_minha_foto", { nova_foto_url: finalUrl });
+    const { error: rpcError } = await supabase.rpc("enviar_foto_para_analise");
     if (rpcError) throw rpcError;
 
-    return finalUrl;
+    fotoPendenteEm = new Date().toISOString();
+    fotoRecusaMotivo = null;
   }
 
   onMount(load);
@@ -257,7 +280,7 @@
   {:else}
     <section class="ficha-perfil">
       <div class="ficha-topo">
-        <AvatarUploader {fotoUrl} nome={displayName} onUploaded={(url) => (fotoUrl = url)} savePhoto={saveMinhaFoto} />
+        <AvatarUploader {fotoUrl} nome={displayName} savePhoto={saveMinhaFoto} />
         <div class="ficha-id">
           <p class="ficha-nome">{displayName}</p>
           {#if nomeFaixa}
@@ -268,6 +291,35 @@
           {/if}
         </div>
       </div>
+
+      <!-- Estado da fila. Sem isto a pessoa manda a foto, nada muda na tela e
+           ela conclui que quebrou, e manda de novo. -->
+      {#if fotoPendenteEm || apelidoPendente || fotoRecusaMotivo || apelidoRecusaMotivo}
+        <ul class="ficha-moderacao">
+          {#if fotoPendenteEm}
+            <li class="analise">
+              <strong>Foto em análise.</strong> Um organizador precisa aprovar antes dela aparecer
+              no seu perfil. A que está no ar continua a de sempre até lá.
+            </li>
+          {/if}
+          {#if apelidoPendente}
+            <li class="analise">
+              <strong>Apelido em análise:</strong> "{apelidoPendente}". Até a aprovação, o site
+              continua te mostrando como {apelido || nomeOficial}.
+            </li>
+          {/if}
+          {#if fotoRecusaMotivo}
+            <li class="recusado">
+              <strong>Foto recusada.</strong> {fotoRecusaMotivo}
+            </li>
+          {/if}
+          {#if apelidoRecusaMotivo}
+            <li class="recusado">
+              <strong>Apelido recusado.</strong> {apelidoRecusaMotivo}
+            </li>
+          {/if}
+        </ul>
+      {/if}
 
       <div class="ficha-stats">
         <div class="ficha-stat">
@@ -398,6 +450,37 @@
 </div>
 
 <style>
+  /* Avisos da fila de aprovação. Ficam logo abaixo da identidade porque é
+     sobre a identidade que eles falam. */
+  .ficha-moderacao {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ficha-moderacao li {
+    padding: 10px 13px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 10px;
+    background: var(--ds-surface);
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--ds-text-3);
+    text-align: left;
+  }
+
+  .ficha-moderacao .analise {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
+  .ficha-moderacao .recusado {
+    border-color: var(--ds-danger);
+  }
+
   /* Este bloco saiu do global.css. Era o único lugar do site que usava as
      classes .dashboard-*, então elas viviam num arquivo global sem motivo. */
 

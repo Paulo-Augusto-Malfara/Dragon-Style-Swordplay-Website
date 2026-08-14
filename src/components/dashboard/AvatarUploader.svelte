@@ -2,10 +2,14 @@
   interface Props {
     fotoUrl: string | null;
     nome: string;
-    onUploaded: (url: string) => void;
-    savePhoto: (blob: Blob) => Promise<string>;
+    /**
+     * Manda o recorte pra fila de aprovação. Não devolve URL de propósito: a
+     * foto do perfil só muda quando um organizador aprova, então trocar a
+     * imagem aqui na hora seria mentir pra pessoa que já está no ar.
+     */
+    savePhoto: (blob: Blob) => Promise<void>;
   }
-  let { fotoUrl, nome, onUploaded, savePhoto }: Props = $props();
+  let { fotoUrl, nome, savePhoto }: Props = $props();
 
   const VIEWPORT = 220; // px, área circular de recorte mostrada na tela
   const OUTPUT_SIZE = 512; // px, resolução final exportada (nítida até em telas retina)
@@ -141,8 +145,7 @@
         );
       });
 
-      const finalUrl = await savePhoto(blob);
-      onUploaded(finalUrl);
+      await savePhoto(blob);
       cancelCrop();
     } catch (err) {
       errorMessage = err instanceof Error ? err.message : String(err);
