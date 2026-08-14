@@ -258,21 +258,52 @@
     window.location.href = "/admin/treinos";
   }
 
+  /* No treino são três ou quatro organizadores lançando presença ao mesmo
+   * tempo, cada um no seu celular. Sem isto, a tela de cada um só se atualiza
+   * depois da própria ação: dois lançam o mesmo membro, e quem remove uma linha
+   * some dela sozinho. */
+  async function aplicarStatus(novo: string | undefined) {
+    // Quem executou a ação já mudou o estado na mão. O eco do Realtime chega
+    // pra ele também, e sem esta saída ele refaria o resumo inteiro à toa.
+    if (!novo || novo === statusTreino) return;
+    statusTreino = novo;
+    await carregarPresencas();
+    if (novo === "finalizado") {
+      await carregarResumoFinalizado();
+    } else {
+      resumo = null;
+    }
+  }
+
   onMount(async () => {
     await carregarClasses();
     await carregarPresencas();
     const { data: treino } = await supabase.from("fTreinos").select("status").eq("id_treino", idTreino).single();
     statusTreino = treino?.status ?? "aberto";
-    if (statusTreino === "finalizado") {
-      await carregarResumoFinalizado();
-      return;
-    }
+    if (statusTreino === "finalizado") await carregarResumoFinalizado();
+
+    // A inscrição vale também com o treino já fechado, senão quem estivesse na
+    // tela de resumo não veria a reabertura feita por outro.
     channel = supabase
       .channel(`treino-${idTreino}`)
       .on(
         "postgres_changes",
         { event: "INSERT", schema: "public", table: "fPresencas", filter: `id_treino=eq.${idTreino}` },
         () => carregarPresencas()
+      )
+      .on(
+        // Sem filtro de propósito. Com REPLICA IDENTITY default o Postgres só
+        // manda a chave primária da linha apagada, então um `id_treino=eq.N`
+        // nunca casaria e a remoção não chegaria em ninguém. Só existe um
+        // treino aberto por vez, então recarregar à toa é raro.
+        "postgres_changes",
+        { event: "DELETE", schema: "public", table: "fPresencas" },
+        () => carregarPresencas()
+      )
+      .on(
+        "postgres_changes",
+        { event: "UPDATE", schema: "public", table: "fTreinos", filter: `id_treino=eq.${idTreino}` },
+        (payload) => aplicarStatus((payload.new as { status?: string }).status)
       )
       .subscribe();
   });
