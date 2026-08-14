@@ -13,7 +13,19 @@
     return supabasePromise;
   }
 
-  type Status = "checking" | "unauthenticated" | "loading" | "ready" | "no-member" | "error";
+  // "sem-cadastro" e "oculto" eram o mesmo estado, e a mensagem dizia "seu email
+  // não está vinculado a um cadastro" nos dois casos. No segundo isso é falso: o
+  // vínculo existe, o cadastro é que está fora do site. Enganou duas vezes o
+  // próprio administrador em 14/08, e enganaria qualquer membro oculto que
+  // entrasse. São causas diferentes e pedem providências diferentes.
+  type Status =
+    | "checking"
+    | "unauthenticated"
+    | "loading"
+    | "ready"
+    | "sem-cadastro"
+    | "oculto"
+    | "error";
   let status = $state<Status>("checking");
   let errorMessage = $state("");
 
@@ -143,8 +155,12 @@
         membro = retry.data;
       }
 
-      if (!membro || membro.oculto) {
-        status = "no-member";
+      if (!membro) {
+        status = "sem-cadastro";
+        return;
+      }
+      if (membro.oculto) {
+        status = "oculto";
         return;
       }
 
@@ -289,10 +305,18 @@
     <p class="ficha-aviso">Carregando...</p>
   {:else if status === "unauthenticated"}
     <LoginForm redirectPath="/dashboard" />
-  {:else if status === "no-member"}
+  {:else if status === "sem-cadastro"}
     <div class="ficha-bloco-status">
       <p class="admin-error">
         Seu email ainda não está vinculado a um cadastro de membro. Fale com um organizador.
+      </p>
+      <button class="btn btn-sm" onclick={logout}>Novo login</button>
+    </div>
+  {:else if status === "oculto"}
+    <div class="ficha-bloco-status">
+      <p class="admin-error">
+        Seu cadastro está fora do site no momento, então a ficha não aparece. Fale com um
+        organizador para reativar.
       </p>
       <button class="btn btn-sm" onclick={logout}>Novo login</button>
     </div>
