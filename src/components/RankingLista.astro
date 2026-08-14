@@ -9,7 +9,12 @@ import { corDaFaixa } from "../lib/faixa";
  * inventar coluna vazia para metade dos usos.
  */
 export type Colocacao = {
-  posicao: number;
+  /**
+   * Opcional: o Mural de Doações usa esta mesma lista e ali não há colocação
+   * nenhuma, é histórico. Sem o número a linha perde a primeira coluna e o
+   * resto continua igual, que é o ponto de reusar em vez de copiar a aparência.
+   */
+  posicao?: number;
   /** Só pro navegador achar a sua linha. Ver o <script> no fim do arquivo. */
   idMembro: number;
   nome: string;
@@ -25,6 +30,7 @@ interface Props {
 }
 
 const { itens, colunas = 4 } = Astro.props;
+const comPosicao = itens.some((i) => i.posicao != null);
 ---
 
 {/*
@@ -34,14 +40,17 @@ const { itens, colunas = 4 } = Astro.props;
   arrastar a tabela e perder o nome de vista. Aqui as métricas quebram para
   a segunda linha sozinhas quando falta largura, e nada sai da tela.
 */}
-<ol class="rk" style={`--rk-colunas:${colunas}`}>
+<ol class:list={["rk", !comPosicao && "rk--sem-pos"]} style={`--rk-colunas:${colunas}`}>
   {
     itens.map((item) => (
       <li
-        class:list={["rk-item", item.posicao <= 3 && `rk-podio rk-${item.posicao}`]}
+        class:list={[
+          "rk-item",
+          item.posicao != null && item.posicao <= 3 && `rk-podio rk-${item.posicao}`,
+        ]}
         data-membro={item.idMembro}
       >
-        <span class="rk-pos">{item.posicao}</span>
+        {item.posicao != null && <span class="rk-pos">{item.posicao}</span>}
 
         <span class="rk-quem">
           <span class="rk-avatar">
@@ -97,6 +106,16 @@ const { itens, colunas = 4 } = Astro.props;
     border: 1px solid var(--ds-line);
     border-radius: 12px;
     background: var(--ds-surface);
+  }
+
+  /* Sem colocação a primeira coluna não existe, e as métricas passam a começar
+     na coluna 1. Sem isso elas ficariam na 2, que aqui não é coluna nenhuma. */
+  .rk--sem-pos .rk-item {
+    grid-template-columns: 1fr;
+  }
+
+  .rk--sem-pos .rk-metricas {
+    grid-column: 1;
   }
 
   .rk-pos {
@@ -208,6 +227,10 @@ const { itens, colunas = 4 } = Astro.props;
     .rk-item {
       grid-template-columns: 40px minmax(0, 1fr) auto;
       padding: 13px 18px;
+    }
+
+    .rk--sem-pos .rk-item {
+      grid-template-columns: minmax(0, 1fr) auto;
     }
 
     .rk-metricas {

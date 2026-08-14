@@ -2534,13 +2534,6 @@ p {
   gap: 0.5em;
 }
 
-.ranking-tabela--doacoes-publico {
-  width: 100%;
-  min-width: 460px;
-  max-width: 700px;
-  grid-template-columns: minmax(140px, 170px) auto auto auto;
-}
-
 /* presenças de um treino -- nome, classe (sigla), vestimenta, faixa, PH, ações */
 .ranking-tabela--presencas {
   width: 100%;

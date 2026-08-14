@@ -1,6 +1,7 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
+import RankingLista from "../components/RankingLista.astro";
 
 export const prerender = false;
 
@@ -18,6 +19,11 @@ const pagina = Number.isFinite(paginaPedida)
   : 1;
 const inicio = (pagina - 1) * PAGE_SIZE;
 const paginaAtual = (doacoes ?? []).slice(inicio, inicio + PAGE_SIZE);
+
+/* "R$ 10.00" era ponto decimal, que não é como se escreve dinheiro em
+   português. O toFixed(2) não sabe disso, o Intl sabe. */
+const reais = (v: unknown) =>
+  Number(v).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 ---
 
 <PageLayout
@@ -28,45 +34,30 @@ const paginaAtual = (doacoes ?? []).slice(inicio, inicio + PAGE_SIZE);
   {(doacoes ?? []).length === 0 ? (
     <p class="vazio">Nenhuma doação registrada ainda.</p>
   ) : (
-    <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--doacoes-publico tabela-cartoes">
-        <thead>
-          <tr>
-            <th class="col-nome">Membro</th>
-            <th class="col-faixa">Data</th>
-            <th class="col-stat">Valor</th>
-            <th class="col-stat">Total doado</th>
-          </tr>
-        </thead>
-        <tbody>
+    /* A mesma lista do Ranking, sem a coluna de colocação: doação não tem
+       posição, é histórico. Era a última tabela pública com a moldura dourada
+       e o cabeçalho em versalete do site antigo, e a página inteira destoava
+       das outras duas que mostram pessoa, foto e números. */
+    <RankingLista
+      colunas={3}
+      itens={paginaAtual.map((d) => ({
+        idMembro: d.id_membro,
+        nome: d.nome,
+        fotoUrl: d.foto_url,
+        metricas: [
           {
-            paginaAtual.map((d) => (
-              <tr>
-                <td class="col-nome">
-                  <span class="row-avatar">
-                    {d.foto_url ? <img src={d.foto_url} alt="" /> : d.nome.charAt(0).toUpperCase()}
-                  </span>
-                  <span class="row-name">{d.nome}</span>
-                </td>
-                <td class="col-faixa" data-label="Data">
-                  {new Date(d.data_doacao + "T00:00:00").toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "2-digit",
-                  })}
-                </td>
-                <td class="col-stat" data-label="Valor">
-                  <span class="stat-pill">R$ {Number(d.valor).toFixed(2)}</span>
-                </td>
-                <td class="col-stat" data-label="Total doado">
-                  <span class="stat-pill">R$ {Number(d.total_doado).toFixed(2)}</span>
-                </td>
-              </tr>
-            ))
-          }
-        </tbody>
-      </table>
-    </div>
+            rotulo: "Data",
+            valor: new Date(d.data_doacao + "T00:00:00").toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "2-digit",
+            }),
+          },
+          { rotulo: "Valor", valor: reais(d.valor) },
+          { rotulo: "Total doado", valor: reais(d.total_doado) },
+        ],
+      }))}
+    />
   )}
   {totalPaginas > 1 && (
     <nav class="ranking-pagination" aria-label="Páginas do mural de doações">
