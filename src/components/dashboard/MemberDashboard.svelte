@@ -215,6 +215,7 @@
     if (proposto) {
       apelidoPendente = proposto;
       apelidoRecusaMotivo = null;
+      void avisarAdmins();
     } else {
       apelido = null;
       apelidoPendente = null;
@@ -232,6 +233,28 @@
     const supabase = await getSupabase();
     await supabase.auth.signOut();
     window.location.reload();
+  }
+
+  /**
+   * Cutuca a notificação de quem administra. Falhar aqui não é problema do
+   * membro: o pedido já está na fila e o painel mostra a contagem de qualquer
+   * jeito, então o erro é engolido de propósito em vez de virar aviso
+   * vermelho numa tela onde deu tudo certo.
+   */
+  async function avisarAdmins() {
+    try {
+      const supabase = await getSupabase();
+      const { data: sessao } = await supabase.auth.getSession();
+      const token = sessao.session?.access_token;
+      if (!token) return;
+      await fetch(`${import.meta.env.PUBLIC_SUPABASE_URL}/functions/v1/notificar-aprovacao`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: "{}",
+      });
+    } catch {
+      // silêncio proposital, ver acima
+    }
   }
 
   async function saveMinhaFoto(blob: Blob): Promise<void> {
@@ -255,6 +278,7 @@
 
     fotoPendenteEm = new Date().toISOString();
     fotoRecusaMotivo = null;
+    void avisarAdmins();
   }
 
   onMount(load);

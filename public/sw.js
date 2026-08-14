@@ -43,6 +43,54 @@ self.addEventListener("activate", (e) => {
   );
 });
 
+/* Notificação de aprovação pendente.
+ *
+ * O corpo vem como JSON da função de borda. Se vier vazio ou quebrado, ainda
+ * assim mostra alguma coisa: o navegador é obrigado a exibir uma notificação
+ * depois de receber um push, e um push silencioso derruba a permissão do site
+ * com o tempo. Melhor uma genérica do que nenhuma.
+ */
+self.addEventListener("push", (e) => {
+  let dados = {};
+  try {
+    dados = e.data ? e.data.json() : {};
+  } catch {
+    dados = {};
+  }
+
+  const titulo = dados.titulo || "Dragon Style";
+  const opcoes = {
+    body: dados.corpo || "Tem coisa esperando aprovação no painel.",
+    icon: "/pwa/icon-192.png",
+    badge: "/pwa/icon-192.png",
+    // Mesma tag pra fila: dois envios seguidos empilhariam duas notificações
+    // dizendo a mesma coisa, e a segunda substitui a primeira.
+    tag: dados.tag || "ds-aprovacao",
+    data: { url: dados.url || "/admin/moderacao" },
+  };
+
+  e.waitUntil(self.registration.showNotification(titulo, opcoes));
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  const destino = (e.notification.data && e.notification.data.url) || "/admin/moderacao";
+
+  // Reaproveita uma aba do site se já houver uma aberta, em vez de abrir a
+  // terceira janela do app no celular.
+  e.waitUntil(
+    self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((janelas) => {
+      for (const j of janelas) {
+        if (new URL(j.url).origin === self.location.origin && "focus" in j) {
+          j.navigate(destino);
+          return j.focus();
+        }
+      }
+      return self.clients.openWindow(destino);
+    }),
+  );
+});
+
 self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;

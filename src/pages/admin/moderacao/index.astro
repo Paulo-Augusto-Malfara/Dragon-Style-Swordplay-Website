@@ -1,6 +1,7 @@
 ---
 import AdminShell from "../../../components/admin/AdminShell.astro";
 import ModeracaoPerfil from "../../../components/admin/ModeracaoPerfil.svelte";
+import AtivarNotificacoes from "../../../components/admin/AtivarNotificacoes.svelte";
 
 export const prerender = false;
 
@@ -12,5 +13,8 @@ if (!membro.isOrganizador) return Astro.redirect("/admin");
   title="Aprovações"
   resumo="Foto e apelido que o membro escolhe só aparecem no site depois de passar por aqui."
 >
+  {/* Só admin do sistema recebe o push, então só ele vê o botão: deixar um
+      organizador ligar algo que nunca vai tocar é mentira de interface. */}
+  {membro.isAdminSistema && <AtivarNotificacoes client:load />}
   <ModeracaoPerfil client:load />
 </AdminShell>
