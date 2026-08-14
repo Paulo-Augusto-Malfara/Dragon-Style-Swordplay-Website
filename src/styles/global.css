@@ -2384,11 +2384,18 @@ p {
   overflow-x: auto;
 }
 
+/* A moldura dourada e o cabeçalho em versalete dourado eram do site antigo. As
+   telas públicas já saíram dele (RankingLista, mural de membros, mural de
+   doações); as sete tabelas que sobraram vivem no admin, e ali a tabela continua
+   sendo a forma certa, porque comparar linha por coluna é justamente o ponto.
+   Então o que muda é a pele, não a estrutura: cartão escuro, borda de 1px e
+   cabeçalho de rótulo apagado, o mesmo dos rótulos de métrica do ranking. O
+   dourado fica pros números, que é onde ele informa alguma coisa. */
 .ranking-tabela {
   display: grid;
   margin: 1.4em auto;
-  background: var(--primary-color);
-  border: 1px solid var(--card-border);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
   border-radius: var(--card-radius);
   /* "clip" (não "hidden") arredonda os cantos sem virar um container de
      scroll -- "hidden" sequestra o position:sticky das colunas .col-nome/
@@ -2409,7 +2416,7 @@ p {
   align-items: center;
   min-width: 0;
   padding: 0.65em 0.9em;
-  border-bottom: 1px solid rgba(232, 172, 70, 0.12);
+  border-bottom: 1px solid var(--ds-line);
   text-align: left;
   white-space: nowrap;
   transition: background 0.2s ease;
@@ -2428,8 +2435,8 @@ p {
 .ranking-tabela thead th {
   padding-top: 0.85em;
   padding-bottom: 0.85em;
-  border-bottom: 1px solid var(--golden-color-opaco);
-  color: var(--golden-color);
+  border-bottom: 1px solid var(--ds-line-strong);
+  color: var(--ds-text-5);
   font-size: 0.7em;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -2440,9 +2447,14 @@ p {
   border-bottom: none;
 }
 
-.ranking-tabela tbody tr:hover td,
-.graduacao-tabela tbody tr:hover,
-.grid-mural tbody tr:hover {
+/* Realce de linha discreto, do mesmo tom das listas novas. O fundo quase preto
+   de antes escurecia a linha em vez de acender, e num cartão que agora é claro
+   por cima do fundo isso ficaria de trás pra frente. */
+.ranking-tabela tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.graduacao-tabela tbody tr:hover {
   background: var(--secondary-color-opacity);
 }
 
@@ -2478,26 +2490,8 @@ p {
    só o nome trunca com reticências quando o espaço aperta). */
 /* 6 colunas: a de "Faixa" (texto) saiu, virou a barrinha colorida dentro da
    célula do nome. min-width acompanhou a coluna a menos. */
-.ranking-tabela--geral {
-  width: 100%;
-  min-width: 680px;
-  max-width: 900px;
-  grid-template-columns: 64px minmax(120px, 170px) auto auto auto auto;
-}
-
-.ranking-tabela--classe {
-  width: 100%;
-  min-width: 460px;
-  max-width: 640px;
-  grid-template-columns: 64px minmax(120px, 170px) auto auto;
-}
-
-.ranking-tabela--treino {
-  width: 100%;
-  min-width: 480px;
-  max-width: 700px;
-  grid-template-columns: minmax(120px, 170px) auto auto auto;
-}
+/* As variantes --geral, --classe e --treino saíram: eram das páginas públicas de
+   ranking, que hoje desenham com o RankingLista. Nenhuma tabela as usava. */
 
 /* tabelas pessoais do dashboard do membro (níveis por classe, histórico) --
    sem coluna de posição/avatar, só um rótulo à esquerda e pills à direita.
