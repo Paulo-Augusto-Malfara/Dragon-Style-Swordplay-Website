@@ -1,0 +1,112 @@
+<!--
+  Modelo do e-mail "Invite user" do Supabase.
+  Cole em Authentication > Emails > Templates > Invite user.
+  Ver supabase/emails/LEIAME.md antes de mexer.
+
+  Tudo aqui é tabela e estilo embutido de propósito: cliente de e-mail não é
+  navegador. Gmail, Outlook e Apple Mail ignoram folha de estilo externa, e o
+  Outlook do Windows ainda desenha com o motor do Word, que não entende flex nem
+  grid. Layout em <table> é o que funciona nos três.
+-->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <!-- Sem esta linha o celular monta a página numa largura de 980px e depois
+       encolhe tudo, deixando o texto minúsculo. Medido, não suposto. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Seu acesso ao Dragon Style</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0b1016;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0;padding:0;background-color:#0b1016;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;">
+
+        <!-- Marca. A imagem vem do site publicado, com endereço absoluto: e-mail
+             não tem como enxergar arquivo do projeto. Se o logo sumir do ar, o
+             alt segura o sentido. -->
+        <tr>
+          <td align="center" style="padding-bottom:28px;">
+            <img src="https://swordplayds.com.br/assets/img/logo-ds-landscape.png"
+                 alt="Dragon Style Swordplay e Eventos"
+                 width="210" height="60"
+                 style="display:block;width:210px;height:60px;border:0;outline:none;text-decoration:none;" />
+          </td>
+        </tr>
+
+        <tr>
+          <td style="background-color:#141d26;border:1px solid rgba(255,255,255,0.10);border-radius:14px;padding:36px 32px;">
+
+            <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:0.14em;text-transform:uppercase;color:#e8ac46;">
+              Acesso liberado
+            </p>
+
+            <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:27px;line-height:1.25;font-weight:normal;color:#ffdf91;">
+              Sua área de membro está pronta
+            </h1>
+
+            <p style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#d5d9de;">
+              Alguém da organização liberou o seu acesso ao site do Dragon Style. Lá você
+              acompanha seu nível geral, seus níveis por classe, seus pontos de honra e o
+              histórico de tudo que já treinou.
+            </p>
+
+            <p style="margin:0 0 26px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#d5d9de;">
+              <strong style="color:#ffdf91;">Não existe senha.</strong> Toda vez que quiser
+              entrar, você digita o seu e-mail e recebe um código de 8 dígitos aqui mesmo.
+            </p>
+
+            <!-- Botão em tabela, não <button> nem <div>: é o único jeito de a área
+                 clicável e o fundo colorido aparecerem também no Outlook. -->
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 26px;">
+              <tr>
+                <td align="center" bgcolor="#e8ac46" style="border-radius:10px;">
+                  <a href="{{ .SiteURL }}/dashboard"
+                     style="display:inline-block;padding:14px 30px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:bold;letter-spacing:0.08em;text-transform:uppercase;color:#0b1016;text-decoration:none;border-radius:10px;">
+                    Entrar no site
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border-top:1px solid rgba(255,255,255,0.10);">
+              <tr>
+                <td style="padding-top:20px;">
+                  <p style="margin:0 0 6px;font-family:Arial,Helvetica,sans-serif;font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:#6b7681;">
+                    Entre com este e-mail
+                  </p>
+                  <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#ffdf91;">
+                    {{ .Email }}
+                  </p>
+                </td>
+              </tr>
+            </table>
+
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:22px 8px 0;">
+            <p style="margin:0 0 8px;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#6b7681;">
+              Se o botão não abrir, copie este endereço no navegador:<br />
+              <span style="color:#94a0ab;">{{ .SiteURL }}/dashboard</span>
+            </p>
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#6b7681;">
+              Mensagem automática, não responda. Se você não conhece o Dragon Style, pode
+              ignorar este e-mail: sem o código que chega na sua caixa, ninguém entra.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>

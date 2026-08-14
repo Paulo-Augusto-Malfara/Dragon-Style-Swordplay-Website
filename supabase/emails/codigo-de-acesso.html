@@ -1,0 +1,90 @@
+<!--
+  Modelo do e-mail "Magic Link" do Supabase, que é o que o site usa pra mandar o
+  código de acesso. Cole em Authentication > Emails > Templates > Magic Link.
+
+  ATENÇÃO: o `{{ .Token }}` abaixo é obrigatório. O site pede o código por
+  `signInWithOtp` e valida com `verifyOtp`, então é o número que a pessoa digita
+  na tela. Um modelo sem essa variável manda um e-mail bonito e inútil, e o
+  login inteiro para. Ver supabase/emails/LEIAME.md.
+-->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <!-- Sem esta linha o celular monta a página numa largura de 980px e depois
+       encolhe tudo, deixando o texto minúsculo. Medido, não suposto. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark light" />
+  <title>Seu código de acesso</title>
+</head>
+<body style="margin:0;padding:0;background-color:#0b1016;">
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0;padding:0;background-color:#0b1016;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0" border="0" style="width:100%;max-width:600px;">
+
+        <tr>
+          <td align="center" style="padding-bottom:28px;">
+            <img src="https://swordplayds.com.br/assets/img/logo-ds-landscape.png"
+                 alt="Dragon Style Swordplay e Eventos"
+                 width="210" height="60"
+                 style="display:block;width:210px;height:60px;border:0;outline:none;text-decoration:none;" />
+          </td>
+        </tr>
+
+        <tr>
+          <td style="background-color:#141d26;border:1px solid rgba(255,255,255,0.10);border-radius:14px;padding:36px 32px;">
+
+            <p style="margin:0 0 10px;font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:bold;letter-spacing:0.14em;text-transform:uppercase;color:#e8ac46;">
+              Área do membro
+            </p>
+
+            <h1 style="margin:0 0 18px;font-family:Georgia,'Times New Roman',serif;font-size:27px;line-height:1.25;font-weight:normal;color:#ffdf91;">
+              Seu código de acesso
+            </h1>
+
+            <p style="margin:0 0 24px;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.65;color:#d5d9de;">
+              Digite este código na tela onde você pediu para entrar:
+            </p>
+
+            <!-- O código é o conteúdo principal do e-mail, então ganha o maior peso
+                 visual da mensagem. Espaçamento entre letras generoso porque quase
+                 todo mundo vai ler daqui e digitar no celular. -->
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px;">
+              <tr>
+                <td align="center" bgcolor="#0b1016" style="border:1px solid rgba(232,172,70,0.55);border-radius:12px;padding:22px 12px;">
+                  <span style="font-family:'Courier New',Courier,monospace;font-size:32px;font-weight:bold;letter-spacing:0.22em;color:#ffdf91;">
+                    {{ .Token }}
+                  </span>
+                </td>
+              </tr>
+            </table>
+
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.65;color:#94a0ab;">
+              O código vale por pouco tempo e só funciona uma vez. Se ele expirar, é só
+              pedir outro na mesma tela.
+            </p>
+
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:22px 8px 0;">
+            <p style="margin:0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.6;color:#6b7681;">
+              Mensagem automática, não responda. Se não foi você que pediu para entrar,
+              ignore: sem este código ninguém acessa a sua conta. Nesse caso, avise um
+              organizador.
+            </p>
+          </td>
+        </tr>
+
+      </table>
+
+    </td>
+  </tr>
+</table>
+
+</body>
+</html>
