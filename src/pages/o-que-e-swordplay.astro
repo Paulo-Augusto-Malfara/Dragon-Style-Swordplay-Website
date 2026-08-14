@@ -7,9 +7,12 @@ const entry = await getEntry("sobreNos", "o-que-e-swordplay");
 const { Content, headings } = await render(entry);
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="Combate medieval com equipamento acolchoado, onde o ponto se faz por toque e não por força."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
 </PageLayout>

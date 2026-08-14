@@ -38,9 +38,12 @@ const fotoPorApelido = Object.fromEntries(
 );
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="Três organizadores tocam o grupo hoje. Aqui está quem são eles e por quais tarefas cada um responde."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
     <h2>Organizadores</h2>
     <div class="organizadores-grid">

@@ -7,9 +7,12 @@ const entry = await getEntry("sobreNos", "doacoes");
 const { Content, headings } = await render(entry);
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="O grupo não tem mensalidade e não dá lucro a ninguém. Toda doação recebida entra no mural, onde qualquer um confere."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
 </PageLayout>

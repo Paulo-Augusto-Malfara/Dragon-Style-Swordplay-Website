@@ -7,9 +7,12 @@ const entry = await getEntry("progressaoInfo", "pontos-de-honra");
 const { Content, headings } = await render(entry);
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="O que você faz pelo grupo vira ponto. A cada 40 pontos, um nível geral."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
 </PageLayout>

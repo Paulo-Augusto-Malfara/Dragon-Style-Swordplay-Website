@@ -7,9 +7,12 @@ const entry = await getEntry("progressaoInfo", "nivel-geral");
 const { Content, headings } = await render(entry);
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="A conta que mede sua experiência total no grupo, e que decide em qual graduação você está."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
 </PageLayout>

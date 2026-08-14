@@ -938,6 +938,21 @@ p {
   line-height: 1.6;
 }
 
+/* Texto corrido vindo dos .mdx (regulamentos, progressão, sobre nós).
+
+   O `margin: auto` da regra acima zera a margem vertical de todo parágrafo do
+   site, e é por isso que os arquivos de conteúdo tinham 56 `<br />` soltos
+   entre um `</p>` e o `<p>` seguinte: era a única forma de separar parágrafo
+   sem tocar no CSS. Espaço entre blocos é trabalho daqui, então a margem volta
+   e os `<br />` saíram.
+
+   Escopado em .prosa, e não solto no `p`, porque a mesma regra base atende
+   parágrafo dentro de card, de painel e de formulário, onde a margem já é
+   decidida pelo componente. Quem ganha respiro é só o texto de leitura. */
+.prosa p {
+  margin-bottom: 1em;
+}
+
 .lista-comum {
   width: 90%;
   margin: auto;
@@ -3560,10 +3575,9 @@ footer {
 
 /* ======== COMO PARTICIPAR ======== */
 
-.participar-lede {
-  font-size: clamp(1.05rem, 1rem + 0.3vw, 1.2rem);
-  color: var(--text-primary-color);
-}
+/* .participar-lede saiu: a frase de abertura da página virou `resumo=` no
+   PageLayout, que é onde toda página põe a dela. Uma regra local que só
+   imitava o .pagina-resumo era o padrão antigo sobrevivendo em uma página. */
 
 /* O h2 base já traz padding de 20px em cima e embaixo. Numa página de seções
    curtas em sequência isso soma com o margin do bloco e abre um buraco entre

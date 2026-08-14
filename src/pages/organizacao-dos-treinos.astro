@@ -27,9 +27,12 @@ const regras = [
 ];
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="Onde treinamos, a que horas, e o que acontece em cada bloco de um treino oficial."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
   <CatalogoLinks titulo="As outras regras" itens={regras} />

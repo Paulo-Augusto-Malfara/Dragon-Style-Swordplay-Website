@@ -7,9 +7,12 @@ const entry = await getEntry("regulamentos", "codigo-de-conduta");
 const { Content, headings } = await render(entry);
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="O que se espera de quem treina com a gente, em quatro pilares: respeito, honra, fraternidade e segurança."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
 </PageLayout>

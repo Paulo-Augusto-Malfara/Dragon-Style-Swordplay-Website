@@ -7,9 +7,12 @@ const entry = await getEntry("regulamentos", "regras-de-combate");
 const { Content, headings } = await render(entry);
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="Onde vale acertar, onde não vale, e por que a força não decide nada aqui."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
 </PageLayout>

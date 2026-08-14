@@ -7,9 +7,12 @@ const entry = await getEntry("sobreNos", "historia-do-ds");
 const { Content, headings } = await render(entry);
 ---
 
-<PageLayout title={entry.data.title}>
+<PageLayout
+  title={entry.data.title}
+  resumo="De 2008 até hoje, ano a ano: como o grupo nasceu, quem o manteve de pé e o que mudou pelo caminho."
+>
   <SumarioPagina {headings} />
-  <section>
+  <section class="prosa">
     <Content />
   </section>
 </PageLayout>
