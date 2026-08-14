@@ -15,7 +15,7 @@
     loading = true;
     const { data, error } = await supabase
       .from("fAgendaTreinos")
-      .select("id_agenda, data_treino, horario_inicio, horario_termino, cidade, local, status")
+      .select("id_agenda, data_treino, horario_inicio, horario_termino, cidade, local, status, id_treino")
       .order("data_treino");
     erro = error?.message ?? "";
     itens = data ?? [];
@@ -52,6 +52,19 @@
     });
 
   const hora = (h: string | null) => (h ? h.slice(0, 5) : "");
+
+  /* A agenda não guarda "realizado", e nem deve: quem sabe se o treino
+   * aconteceu é o vínculo com fTreinos, preenchido pela abrir_treino. Um status
+   * a mais seria uma segunda fonte pra mesma verdade, livre pra divergir, e o
+   * editor de agenda ainda sobrescreveria o valor ao salvar. */
+  const rotulo = (i: any) =>
+    i.status !== "agendado" ? "cancelado" : i.id_treino != null ? "realizado" : "agendado";
+
+  const ROTULOS: Record<string, string> = {
+    agendado: "Agendado",
+    cancelado: "Cancelado",
+    realizado: "Realizado",
+  };
 
   load();
 </script>
@@ -91,8 +104,8 @@
             <span class="row-titulo">{item.local}</span>
             <span class="row-meta">
               <span>{item.cidade}</span>
-              <span class="status-badge status-badge--{item.status}">
-                {item.status === "agendado" ? "Agendado" : "Cancelado"}
+              <span class="status-badge status-badge--{rotulo(item)}">
+                {ROTULOS[rotulo(item)]}
               </span>
             </span>
           </div>
@@ -119,8 +132,10 @@
               <span class="row-titulo">{item.local}</span>
               <span class="row-meta">
                 <span>{item.cidade}</span>
-                {#if item.status !== "agendado"}
-                  <span class="status-badge status-badge--cancelado">Cancelado</span>
+                {#if rotulo(item) !== "agendado"}
+                  <span class="status-badge status-badge--{rotulo(item)}">
+                    {ROTULOS[rotulo(item)]}
+                  </span>
                 {/if}
               </span>
             </div>

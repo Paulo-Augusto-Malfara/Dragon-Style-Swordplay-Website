@@ -45,6 +45,9 @@ const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes] = await Promis
     .from("fAgendaTreinos")
     .select("data_treino, cidade")
     .eq("status", "agendado")
+    // Agenda já amarrada a um treino aberto não é mais "o próximo treino":
+    // o organizador já está lançando presença nela.
+    .is("id_treino", null)
     .gte("data_treino", hojeBR)
     .order("data_treino")
     .limit(1)

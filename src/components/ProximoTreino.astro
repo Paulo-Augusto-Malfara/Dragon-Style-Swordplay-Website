@@ -20,6 +20,10 @@ const { data: agendaData } = await supabasePublic
   .select("id_agenda, data_treino, horario_inicio, horario_termino, local, link_maps")
   .gte("data_treino", hojeBrasil)
   .eq("status", "agendado")
+  // Treino já aberto pelo organizador deixa de ser "o próximo": a agenda passa
+  // a apontar pro treino do dia, e o card iria convidar a confirmar presença
+  // num treino que já está rolando.
+  .is("id_treino", null)
   .order("data_treino")
   .order("horario_inicio")
   .limit(1)

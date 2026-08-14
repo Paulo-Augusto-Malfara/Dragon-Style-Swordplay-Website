@@ -85,6 +85,18 @@
   let presencas = $state<any[]>([]);
   let carregandoPresencas = $state(true);
 
+  /* Quem confirmou presença na agenda daquele dia. Não é presença registrada:
+   * é quem avisou que vinha, pra o staff não ter que digitar o nome de novo.
+   * Quem confirmou e faltou simplesmente nunca sai desta lista. O vínculo
+   * agenda↔treino é feito pela abrir_treino, casando por data. */
+  let confirmados = $state<{ id_membro: number; nome: string; foto_url: string | null }[]>([]);
+
+  // Filtra na tela em vez de refazer a consulta a cada presença lançada: é a
+  // mesma pessoa, só mudou de lado.
+  const confirmadosPendentes = $derived(
+    confirmados.filter((c) => !presencas.some((p) => p.id_membro === c.id_membro))
+  );
+
   let finalizando = $state(false);
   let statusTreino = $state<string | null>(null);
   let resumo = $state<any | null>(null);
@@ -138,6 +150,20 @@
     carregandoPresencas = false;
   }
 
+  async function carregarConfirmados() {
+    const { data: agenda } = await supabase
+      .from("fAgendaTreinos")
+      .select("id_agenda")
+      .eq("id_treino", idTreino)
+      .maybeSingle();
+    if (!agenda) return;
+    const { data } = await supabase
+      .from("v_agenda_confirmacoes")
+      .select("id_membro, nome, foto_url")
+      .eq("id_agenda", agenda.id_agenda);
+    confirmados = data ?? [];
+  }
+
   async function checarElegibilidade(idMembro: number) {
     const { data } = await supabase
       .from("v_ranking_por_classe")
@@ -153,12 +179,28 @@
     classeEscolhida = classesDisponiveis[0]?.id_classe ?? null;
   }
 
-  async function selecionarMembro(m: { id_membro: number; nome: string }) {
+  async function selecionarMembro(m: { id_membro: number; nome: string; nivel_geral?: number; foto_url?: string | null }) {
     idPresencaEditando = null;
     membroSelecionado = m;
     torso = "nenhum";
     usouFaixa = false;
     erroAdicionar = "";
+    // O MembroPicker já traz o nível junto; a lista de confirmados e o
+    // RecrutarMembro não. A busca fica aqui, e não em cada chamador, porque sem
+    // ela o cartão diz "Nível geral 0", que é informação errada e não
+    // informação faltando. Vem da view, que é quem calcula o nível.
+    if (m.nivel_geral == null) {
+      supabase
+        .from("v_ranking_nivel_geral")
+        .select("nivel_geral")
+        .eq("id_membro", m.id_membro)
+        .maybeSingle()
+        .then(({ data }) => {
+          if (membroSelecionado?.id_membro === m.id_membro) {
+            membroSelecionado = { ...membroSelecionado, nivel_geral: data?.nivel_geral ?? 0 };
+          }
+        });
+    }
     await checarElegibilidade(m.id_membro);
   }
 
@@ -366,6 +408,7 @@
   onMount(async () => {
     await Promise.all([carregarClasses(), carregarRegrasPH()]);
     await carregarPresencas();
+    await carregarConfirmados();
     const { data: treino } = await supabase.from("fTreinos").select("status").eq("id_treino", idTreino).single();
     statusTreino = treino?.status ?? "aberto";
     if (statusTreino === "finalizado") await carregarResumoFinalizado();
@@ -647,6 +690,45 @@
     {/if}
   </div>
 
+  <!-- Quem já disse que vem aparece pronto pra registrar, mas continua sendo
+       registro manual: confirmar na agenda é intenção, presença é o staff que
+       dá, junto da classe. Por isso um botão que preenche o formulário de
+       cima, e não um que lança a presença sozinho. -->
+  {#if confirmadosPendentes.length > 0}
+    <div class="admin-secao-cab">
+      <h2>Confirmaram na agenda <span class="contagem">{confirmadosPendentes.length}</span></h2>
+    </div>
+    <p class="admin-form-nota confirmados-nota">
+      Avisaram que vinham e ainda não foram registrados. O nome vai pro formulário acima; o PH só
+      conta depois que você escolher a classe e confirmar.
+    </p>
+    <ul class="admin-list">
+      {#each confirmadosPendentes as c}
+        <li>
+          <span class="row-avatar">
+            {#if c.foto_url}
+              <img src={c.foto_url} alt="" />
+            {:else}
+              {c.nome.charAt(0).toUpperCase()}
+            {/if}
+          </span>
+          <div class="row-corpo">
+            <span class="row-titulo">{c.nome}</span>
+          </div>
+          <div class="row-acoes">
+            <button
+              type="button"
+              class="btn btn-sm btn-primary"
+              onclick={() => selecionarMembro(c)}
+            >
+              Registrar
+            </button>
+          </div>
+        </li>
+      {/each}
+    </ul>
+  {/if}
+
   <div class="admin-secao-cab">
     <h2>Presenças <span class="contagem">{presencas.length}</span></h2>
   </div>
@@ -783,5 +865,9 @@
     max-width: 760px;
     margin: 0 auto 1.4em;
     text-align: center;
+  }
+
+  .confirmados-nota {
+    margin: -0.4em 0 0.8em;
   }
 </style>

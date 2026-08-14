@@ -12,7 +12,7 @@ const hojeBrasil = new Date().toLocaleDateString("en-CA", { timeZone: "America/S
 
 const { data } = await supabasePublic
   .from("fAgendaTreinos")
-  .select("id_agenda, data_treino, horario_inicio, horario_termino, cidade, local, endereco, link_maps, status")
+  .select("id_agenda, data_treino, horario_inicio, horario_termino, cidade, local, endereco, link_maps, status, id_treino")
   .gte("data_treino", hojeBrasil)
   .order("data_treino")
   .order("horario_inicio");
@@ -83,15 +83,21 @@ const textoFaltam = (dias: number) => {
                 <span class="ag-quando">{textoFaltam(faltam)}</span>
               </div>
 
-              {t.status === "agendado" ? (
+              {/* "Já rolou" vem do vínculo com o treino, não de um status novo:
+                  quem abre o treino do dia amarra a agenda a ele, e daí em
+                  diante não faz sentido oferecer confirmação de presença. Um
+                  status a mais seria uma segunda fonte pra mesma verdade. */}
+              {t.status !== "agendado" ? (
+                <p class="ag-cancelado">Este treino foi cancelado.</p>
+              ) : t.id_treino != null ? (
+                <p class="ag-realizado">Este treino já aconteceu.</p>
+              ) : (
                 <ConfirmarPresenca
                   idAgenda={t.id_agenda}
                   contagemInicial={contagemPorAgenda.get(t.id_agenda) ?? 0}
                   mostrarLista={true}
                   client:load
                 />
-              ) : (
-                <p class="ag-cancelado">Este treino foi cancelado.</p>
               )}
 
               {(t.endereco || t.link_maps) && (
@@ -202,7 +208,8 @@ const textoFaltam = (dias: number) => {
     color: var(--ds-gold-deep);
   }
 
-  .ag-cancelado {
+  .ag-cancelado,
+  .ag-realizado {
     margin: 12px 0 0;
     font-size: 0.85rem;
     color: var(--ds-text-4);
