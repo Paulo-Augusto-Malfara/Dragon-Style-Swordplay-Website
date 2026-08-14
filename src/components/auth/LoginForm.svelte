@@ -57,24 +57,25 @@
       // evaluate createBrowserClient() during Astro's SSR pass at build time,
       // which crashes the whole build if the Supabase env vars aren't set then.
       const { supabase } = await import("../../lib/supabase-browser");
-      const { data: existe, error: checkError } = await supabase.rpc("email_tem_cadastro", {
-        p_email: email,
-      });
-      if (checkError) {
-        status = "error";
-        errorMessage = readableMessage(checkError.message);
-        return;
-      }
-      if (!existe) {
-        status = "error";
-        errorMessage = "Esse email não está vinculado a um cadastro de membro. Fale com um organizador.";
-        return;
-      }
 
+      // Aqui havia uma consulta ao banco perguntando "esse email tem cadastro?"
+      // antes de pedir o código. Ela respondia a qualquer um, sem login e sem
+      // limite: dava pra testar uma lista inteira de endereços e descobrir quem
+      // é do grupo. Saiu em 14/08/2026.
+      //
+      // O cadastro novo está desligado no Supabase, então quem não tem usuário
+      // esbarra em `signup_disabled` sem que nada seja criado nem enviado, e
+      // essa recusa já passa pelo limite de taxa do próprio Supabase.
       const { error } = await supabase.auth.signInWithOtp({ email });
       if (error) {
         status = "error";
-        errorMessage = readableMessage(error.message);
+        // Mesma frase pra quem não é do grupo e pra quem é mas ainda não foi
+        // convidado. Separar os dois casos é justamente o que devolveria o
+        // oráculo, agora pela porta da frente.
+        errorMessage =
+          error.code === "signup_disabled"
+            ? "Esse email ainda não tem acesso liberado. Fale com um organizador."
+            : readableMessage(error.message);
         return;
       }
       sessionStorage.setItem(COOLDOWN_STORAGE_KEY, Date.now().toString());
