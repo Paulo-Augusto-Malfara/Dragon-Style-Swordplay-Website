@@ -6,7 +6,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "smoke-test": "node scripts/smoke-test.mjs",
-    "test": "node scripts/test-sw-scope.mjs && node scripts/test-icone-maskable.mjs && node scripts/test-alcance.mjs && node scripts/test-catalogo.mjs && node scripts/csp-hashes.mjs --check"
+    "test": "node scripts/test-sw-scope.mjs && node scripts/test-icone-maskable.mjs && node scripts/test-alcance.mjs && node scripts/test-catalogo.mjs && node scripts/test-funcao-vercel.mjs && node scripts/csp-hashes.mjs --check"
   },
   "dependencies": {
     "@astrojs/mdx": "^7.0.3",

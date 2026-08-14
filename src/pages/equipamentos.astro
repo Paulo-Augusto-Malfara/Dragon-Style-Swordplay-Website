@@ -27,7 +27,9 @@ const painels = await Promise.all(
 );
 
 const itens = categorias.flatMap((c) =>
-  c.data.itens.map((i) => ({ ...i, cat: c.id, catNome: c.data.title })),
+  c.data.itens
+    .filter((i) => !i.oculto)
+    .map((i) => ({ ...i, cat: c.id, catNome: c.data.title })),
 );
 
 const classes = [...new Set(itens.flatMap((i) => i.classes))].sort((a, b) =>

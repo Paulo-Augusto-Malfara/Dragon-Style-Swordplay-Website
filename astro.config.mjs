@@ -21,16 +21,41 @@ export default defineConfig({
   // com 'self'. Ver o comentário no topo de scripts/csp-hashes.mjs.
   vite: {
     build: { assetsInlineLimit: 0 },
-    // sanitize-html é CommonJS e depende do htmlparser2 12, que é ESM puro.
-    // Fora do pacote, o Node da função tenta `require()` no ESM e derruba a
-    // rota com 500: /novidades morria assim em produção e passava no dev,
-    // porque no dev o Vite empacota tudo. Empacotado junto, o require some.
+    // O sanitize-html é CommonJS e o htmlparser2 12, do qual ele depende, é
+    // ESM puro. O carregador da Vercel não faz require() de ESM, então
+    // /novidades caía com 500 em produção enquanto passava no dev, onde o Vite
+    // empacota tudo. A saída é empacotar o sanitize-html junto no build.
     //
-    // Os dois precisam entrar. Só com o sanitize-html na lista o empacotador
-    // deixa o `require("htmlparser2")` dele apontando pra fora, e aí o rastreio
-    // de arquivos da Vercel não copia mais o pacote (ninguém o importa
-    // visivelmente): o erro deixa de ser "require de ESM" e vira "módulo não
-    // encontrado", que quebra a mesma rota do mesmo jeito.
-    ssr: { noExternal: ["sanitize-html", "htmlparser2"] },
+    // Mas tem que ser a árvore inteira, e não só ele. Empacotando só o pacote
+    // de cima, os require() das dependências dele ficam apontando pra fora
+    // como chamada dinâmica, que o rastreio de arquivos da Vercel não enxerga:
+    // os pacotes deixam de ser copiados pra função e o 500 volta, agora
+    // dizendo "módulo não encontrado". Foram dois deploys assim, um por
+    // dependência.
+    //
+    // A lista é a árvore do sanitize-html, e ela envelhece a cada upgrade dele.
+    // Quem avisa é scripts/test-funcao-vercel.mjs, que roda a função compilada
+    // fora do repositório e falha se alguma rota parar de responder.
+    ssr: {
+      noExternal: [
+        "sanitize-html",
+        "dayjs",
+        "deepmerge",
+        "dom-serializer",
+        "domelementtype",
+        "domhandler",
+        "domutils",
+        "entities",
+        "escape-string-regexp",
+        "htmlparser2",
+        "is-plain-object",
+        "launder",
+        "nanoid",
+        "parse-srcset",
+        "picocolors",
+        "postcss",
+        "source-map-js",
+      ],
+    },
   },
 });

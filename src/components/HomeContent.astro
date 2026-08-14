@@ -94,9 +94,12 @@ const fotos = [
         <p class="home-hero-local">São José do Rio Preto</p>
         <h1 class="home-hero-titulo">Combate medieval com armas acolchoadas</h1>
         <p class="home-hero-lede">
-          O Dragon Style treina esgrima medieval esportiva desde 2008. As armas são acolchoadas e o contato é de
-          verdade, então dá pra jogar sério sem armadura e sem ninguém se machucar. Não existe juiz: quem leva o
-          toque reconhece o toque. Treinar com a gente é gratuito e a arma é emprestada.
+          O Dragon Style treina Swordplay desde 2008. Um esporte de contato onde se luta com equipamentos
+          acolchoados: espadas, machados, escudos, arco e flecha, entre outros.
+        </p>
+        <p class="home-hero-lede">
+          Venha participar do próximo treino! É gratuito, a arma é emprestada e não precisa ter nenhuma
+          experiência.
         </p>
         <div class="home-ctas">
           <a class="btn btn-primary" href="/como-participar">Quero treinar</a>
@@ -266,10 +269,16 @@ const fotos = [
   .home-hero-lede {
     max-width: 54ch;
     width: auto;
-    margin: 0 0 1.8em;
+    /* Entre os dois parágrafos, o vão de um parágrafo. O respiro maior fica
+       só antes dos botões, pra eles não colarem no texto. */
+    margin: 0 0 0.9em;
     font-size: clamp(1rem, 0.95rem + 0.4vw, 1.15rem);
     line-height: 1.6;
     color: var(--ds-text-2);
+  }
+
+  .home-hero-lede:last-of-type {
+    margin-bottom: 1.8em;
   }
 
   .home-ctas {

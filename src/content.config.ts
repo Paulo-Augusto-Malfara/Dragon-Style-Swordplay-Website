@@ -59,6 +59,12 @@ const equipamento = z.object({
   nota: z.string().optional(),
   /** Selo dourado no card. Hoje só a Clava usa, como arma inicial. */
   selo: z.string().optional(),
+  /**
+   * Fora do catálogo, mas a regra continua escrita aqui. Pra equipamento que
+   * saiu de circulação: apagar a entrada levaria junto as medidas e o texto,
+   * e voltar atrás viraria trabalho de arqueologia no histórico do git.
+   */
+  oculto: z.boolean().default(false),
   specs: z.array(z.object({ rotulo: z.string(), valor: z.string() })).default([]),
   descricao: z.array(z.string()).default([]),
 });
