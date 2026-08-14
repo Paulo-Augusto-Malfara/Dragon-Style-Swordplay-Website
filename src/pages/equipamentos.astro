@@ -397,6 +397,15 @@ const chave = (s: string) =>
     background: var(--ds-surface);
   }
 
+  /* O glossário é o único .eq-regra que vem DEPOIS da grade. Os outros são os
+     painéis de regra da categoria, que ficam acima dela e por isso só precisam
+     de margem embaixo: sem margem em cima, o glossário encostava no último
+     card. O vão é maior que o de 12px entre os cards, senão ele se lê como
+     mais um item da grade. */
+  .eq-glossario {
+    margin-top: 30px;
+  }
+
   .eq-regra summary {
     display: flex;
     flex-direction: column;
