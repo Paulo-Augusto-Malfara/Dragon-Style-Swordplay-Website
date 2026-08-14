@@ -82,6 +82,12 @@
 
 <style>
   .confirmar {
+    /* O navegador centraliza <dialog> modal com um `margin: auto` na folha
+       dele, e o `* { margin: 0 }` do reset do site apaga esse auto: a caixa
+       grudava no alto da tela. A busca já contorna isso na mão (ver o margin
+       do #busca-dialog), esta faltava. Uma pergunta que interrompe o trabalho
+       pertence ao meio da tela, que é pra onde o olho vai. */
+    margin: auto;
     width: min(420px, calc(100vw - 2rem));
     padding: clamp(1.1rem, 4vw, 1.5rem);
     border: 1px solid var(--ds-line-strong);
@@ -113,7 +119,7 @@
   .confirmar-acoes {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
+    justify-content: center;
     gap: 0.6em;
     margin-top: 1.3em;
   }

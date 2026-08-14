@@ -23,6 +23,29 @@
   // constante porque a tela desenha as casas a partir dele.
   const TREINOS_POR_NIVEL = 4;
 
+  /* Quanto vale cada item, lido do banco e não copiado pra cá: dRegrasPH é a
+   * fonte da verdade do PH e é legível por qualquer um. Serve pra uma coisa só,
+   * descobrir qual tabardo a pessoa usou, e isso precisa de conta porque o banco
+   * guarda `usou_tabardo` booleano: Oficial e Modificado dividem a mesma coluna
+   * e só se distinguem pelo PH que geraram. Sem isso, editar quem veio de
+   * tabardo modificado devolveria "Oficial" na tela e promoveria o PH dela em
+   * silêncio, mexendo num valor que ninguém pediu pra mexer. */
+  let phPorAtividade = $state(new Map<string, number>());
+
+  function torsoDaPresenca(p: any): string {
+    if (p.usou_camiseta) return "camiseta";
+    if (!p.usou_tabardo) return "nenhum";
+    const phFaixa = p.usou_faixa ? (phPorAtividade.get("Faixa") ?? 0) : 0;
+    const phTorso = Number(p.ph_ganho_treino ?? 0) - phFaixa;
+    const oficial = phPorAtividade.get("Tabardo Oficial") ?? 0;
+    const modificado = phPorAtividade.get("Tabardo Modificado") ?? 0;
+    // Empata pro Oficial: se um dia os dois valerem o mesmo, a diferença deixa
+    // de existir pro PH e o rótulo mais provável é o oficial.
+    return Math.abs(phTorso - modificado) < Math.abs(phTorso - oficial)
+      ? "tabardo_modificado"
+      : "tabardo_oficial";
+  }
+
   let classesMap = new Map<number, string>();
   let siglaMap = new Map<number, string>();
   let classesTodas = $state<{ id_classe: number; nome_classe: string }[]>([]);
@@ -35,6 +58,8 @@
   let usouFaixa = $state(false);
   let adicionando = $state(false);
   let erroAdicionar = $state("");
+  /** null = lançando presença nova; um id = corrigindo aquela linha. */
+  let idPresencaEditando = $state<number | null>(null);
   let nivelPorClasseMap = $state(new Map<number, { treinos_por_classe: number; nivel_por_classe: number }>());
   let confirmar: ConfirmarAcao;
 
@@ -74,6 +99,11 @@
   let excluindo = $state(false);
 
   let channel: ReturnType<typeof supabase.channel> | null = null;
+
+  async function carregarRegrasPH() {
+    const { data } = await supabase.from("dRegrasPH").select("atividade, valor_ph");
+    phPorAtividade = new Map((data ?? []).map((r) => [r.atividade, Number(r.valor_ph)]));
+  }
 
   async function carregarClasses() {
     const { data } = await supabase.from("dClasses").select("id_classe, nome_classe, sigla_classe").order("nome_classe");
@@ -124,11 +154,69 @@
   }
 
   async function selecionarMembro(m: { id_membro: number; nome: string }) {
+    idPresencaEditando = null;
     membroSelecionado = m;
     torso = "nenhum";
     usouFaixa = false;
     erroAdicionar = "";
     await checarElegibilidade(m.id_membro);
+  }
+
+  /* Editar reusa o formulário de cima em vez de abrir campos dentro da linha.
+   * A linha é estreita, e no celular ela é um cartão: caberia mal, e ainda
+   * duplicaria a lista de classes, as casas de progresso e a validação de
+   * novato. O que muda é o botão do fim e o título. */
+  async function editarPresenca(p: any) {
+    idPresencaEditando = p.id_presenca;
+    membroSelecionado = { id_membro: p.id_membro, nome: p.nome, foto_url: p.foto_url };
+    erroAdicionar = "";
+    // A lista de presenças não carrega nível: sem isto o cartão dizia "Nível
+    // geral 0" pra todo mundo, que é informação errada, não informação
+    // faltando. Vem da view, e não de dMembros, que não tem essa coluna.
+    supabase
+      .from("v_ranking_nivel_geral")
+      .select("nivel_geral")
+      .eq("id_membro", p.id_membro)
+      .single()
+      .then(({ data }) => {
+        if (membroSelecionado?.id_membro === p.id_membro) {
+          membroSelecionado = { ...membroSelecionado, nivel_geral: data?.nivel_geral ?? 0 };
+        }
+      });
+    await checarElegibilidade(p.id_membro);
+    // Depois da elegibilidade, que sobrescreve classeEscolhida com a sugestão.
+    classeEscolhida = p.id_classe;
+    torso = torsoDaPresenca(p);
+    usouFaixa = p.usou_faixa;
+    document.querySelector(".admin-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function cancelarEdicao() {
+    idPresencaEditando = null;
+    membroSelecionado = null;
+    classeEscolhida = null;
+    torso = "nenhum";
+    usouFaixa = false;
+    erroAdicionar = "";
+  }
+
+  async function salvarEdicao() {
+    if (idPresencaEditando === null || !classeEscolhida) return;
+    adicionando = true;
+    erroAdicionar = "";
+    const { error } = await supabase.rpc("atualizar_presenca_treino", {
+      p_id_presenca: idPresencaEditando,
+      p_id_classe: classeEscolhida,
+      p_torso: torso,
+      p_usou_faixa: usouFaixa,
+    });
+    adicionando = false;
+    if (error) {
+      erroAdicionar = error.message;
+      return;
+    }
+    cancelarEdicao();
+    await carregarPresencas();
   }
 
   async function adicionarPresenca() {
@@ -276,7 +364,7 @@
   }
 
   onMount(async () => {
-    await carregarClasses();
+    await Promise.all([carregarClasses(), carregarRegrasPH()]);
     await carregarPresencas();
     const { data: treino } = await supabase.from("fTreinos").select("status").eq("id_treino", idTreino).single();
     statusTreino = treino?.status ?? "aberto";
@@ -421,7 +509,9 @@
   {/if}
 {:else}
   <div class="admin-form">
-    <p class="admin-form-titulo">Registrar presença</p>
+    <p class="admin-form-titulo">
+      {idPresencaEditando === null ? "Registrar presença" : "Corrigir presença"}
+    </p>
 
     {#if membroSelecionado}
       <div class="membro-escolhido">
@@ -437,9 +527,11 @@
           <span class="row-meta">Nível geral {membroSelecionado.nivel_geral ?? 0}</span>
         </div>
         <div class="row-acoes">
-          <button type="button" class="btn btn-sm btn-ghost" onclick={() => (membroSelecionado = null)}>
-            Trocar
-          </button>
+          {#if idPresencaEditando === null}
+            <button type="button" class="btn btn-sm btn-ghost" onclick={() => (membroSelecionado = null)}>
+              Trocar
+            </button>
+          {/if}
         </div>
       </div>
 
@@ -483,26 +575,56 @@
         </div>
       {/if}
 
-      <div class="campos">
-        <label>
-          Vestimenta (torso)
-          <select bind:value={torso}>
-            {#each TORSO_OPCOES as o}
-              <option value={o.valor}>{o.label}</option>
-            {/each}
-          </select>
-        </label>
-      </div>
+      <!-- Quatro opções viram quatro alvos, não um <select>. Isso é lançado no
+           celular, em pé, um membro atrás do outro: cada select era abrir a
+           roda do sistema, rolar e confirmar, três toques pra uma escolha que
+           cabe inteira na tela. A faixa segue a mesma ideia, porque a caixinha
+           de marcar tem alvo de 13px e aqui o dedo é o ponteiro. -->
+      <fieldset class="escolha">
+        <legend>Vestimenta (torso)</legend>
+        <div class="escolha-opcoes">
+          {#each TORSO_OPCOES as o}
+            <button
+              type="button"
+              class="chip"
+              class:ativo={torso === o.valor}
+              aria-pressed={torso === o.valor}
+              onclick={() => (torso = o.valor)}
+            >
+              {o.label}
+            </button>
+          {/each}
+        </div>
+      </fieldset>
 
-      <label class="checkbox">
-        <input type="checkbox" bind:checked={usouFaixa} />
-        Usou faixa
-      </label>
+      <fieldset class="escolha">
+        <legend>Faixa</legend>
+        <div class="escolha-opcoes">
+          <button
+            type="button"
+            class="chip"
+            class:ativo={usouFaixa}
+            aria-pressed={usouFaixa}
+            onclick={() => (usouFaixa = !usouFaixa)}
+          >
+            Usou faixa
+          </button>
+        </div>
+      </fieldset>
 
       <div class="form-acoes">
-        <button type="button" class="btn btn-primary" onclick={adicionarPresenca} disabled={adicionando}>
-          {adicionando ? "Adicionando..." : "Adicionar presença"}
-        </button>
+        {#if idPresencaEditando === null}
+          <button type="button" class="btn btn-primary" onclick={adicionarPresenca} disabled={adicionando}>
+            {adicionando ? "Adicionando..." : "Adicionar presença"}
+          </button>
+        {:else}
+          <button type="button" class="btn btn-primary" onclick={salvarEdicao} disabled={adicionando}>
+            {adicionando ? "Salvando..." : "Salvar correção"}
+          </button>
+          <button type="button" class="btn btn-ghost" onclick={cancelarEdicao} disabled={adicionando}>
+            Cancelar
+          </button>
+        {/if}
       </div>
       {#if erroAdicionar}
         <p class="admin-error" role="alert">{erroAdicionar}</p>
@@ -575,10 +697,33 @@
                 </span>
               </td>
               <td class="col-stat" data-label="PH"><span class="stat-pill">{p.ph_ganho_treino}</span></td>
+              <!-- Corrigir é de quem lança, não só do nível 1: quem digitou a
+                   classe errada há dez segundos é justamente quem está com o
+                   celular na mão. Apagar continua sendo do administrador, que
+                   é a ação que some com PH. -->
               <td class="col-stat col-acoes">
+                <button
+                  type="button"
+                  class="btn-icone"
+                  onclick={() => editarPresenca(p)}
+                  aria-label={`Corrigir a presença de ${p.nome}`}
+                  title="Corrigir presença"
+                >
+                  <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+                  </svg>
+                </button>
                 {#if souAdminSistema}
-                  <button type="button" class="btn btn-sm btn-danger" onclick={() => removerPresenca(p)}>
-                    Remover
+                  <button
+                    type="button"
+                    class="btn-icone btn-icone--perigo"
+                    onclick={() => removerPresenca(p)}
+                    aria-label={`Remover a presença de ${p.nome}`}
+                    title="Remover presença"
+                  >
+                    <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+                      <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z" />
+                    </svg>
                   </button>
                 {/if}
               </td>

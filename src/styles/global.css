@@ -1675,6 +1675,46 @@ p {
   border-radius: 8px;
 }
 
+/* Ação que é só um ícone. Existe porque numa linha de lista o rótulo escrito
+   custa caro: "Remover" ocupava metade da largura útil do cartão no celular e
+   empurrava tudo pra baixo. O alvo continua com 36px, que é o mínimo que se
+   acerta com o dedo, mesmo o desenho tendo 16. */
+.btn-icone {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ds-text-3);
+  font-size: 1rem;
+  cursor: pointer;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease,
+    background 0.15s ease;
+}
+
+.btn-icone:hover {
+  border-color: var(--ds-gold-dim);
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
+}
+
+.btn-icone:focus-visible {
+  outline: 2px solid var(--ds-gold-light);
+  outline-offset: 2px;
+}
+
+.btn-icone--perigo:hover {
+  border-color: rgba(192, 57, 43, 0.6);
+  background: rgba(192, 57, 43, 0.12);
+  color: #e57368;
+}
+
 .btn-danger {
   border-color: rgba(192, 57, 43, 0.6);
   color: #e57368;
@@ -1755,6 +1795,36 @@ p {
   color: var(--ds-text-3);
 }
 
+
+/* Escolha em botões, no lugar de <select> ou caixa de marcar, pra quando as
+   opções são poucas e a mão está no celular. A legenda copia o rótulo dos
+   campos do formulário, então as duas formas convivem na mesma tela sem uma
+   parecer de outro lugar. */
+.escolha {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+.escolha legend {
+  padding: 0 0 0.5em;
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-text-3);
+}
+
+.escolha-opcoes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+/* Alvo de dedo: o chip nasceu pra navegação no desktop e tem 0.84rem. */
+.escolha-opcoes .chip {
+  min-height: 40px;
+}
 
 .admin-form label.checkbox {
   flex-direction: row;
@@ -2625,6 +2695,69 @@ p {
     justify-content: flex-end;
     gap: 6px;
     padding-top: 8px;
+  }
+
+  /* Menos na tela de presenças, onde elas sobem pra linha do nome. São dois
+     ícones, cabem na sobra à direita, e cada cartão encolhe uma linha inteira:
+     numa lista de vinte pessoas isso é meia tela de rolagem a menos, lançada
+     em pé no meio do treino. Os dois dividem a divisória do título do cartão
+     pra ela continuar atravessando de ponta a ponta. */
+  /* Duas metades iguais, como se houvesse uma linha no meio do cartão. Antes a
+     primeira coluna era 1fr e a segunda só o tamanho do conteúdo: o valor da
+     esquerda ia parar longe do próprio rótulo, quase encostado no rótulo da
+     direita, e cada linha parecia dividida em lugar diferente. */
+  .ranking-tabela--presencas.tabela-cartoes tbody tr {
+    position: relative;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* O nome fica com a largura inteira e reserva à direita o espaço dos ícones,
+     que saem do fluxo. Se entrassem numa das metades, um nome comprido cortaria
+     com reticências na metade do cartão pra caber ao lado de dois botões. */
+  .ranking-tabela--presencas.tabela-cartoes tbody td:first-child {
+    grid-column: 1 / -1;
+    min-height: 36px;
+    padding-right: 86px;
+  }
+
+  .ranking-tabela--presencas.tabela-cartoes tbody td.col-acoes {
+    position: absolute;
+    top: 11px;
+    right: 13px;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
+  }
+
+  /* Rótulo e valor andam juntos no meio da sua metade. Espalhados nas pontas
+     (o space-between das outras tabelas), os dois de dentro ficavam colados e
+     os de fora nas bordas, e o cartão lia-se como quatro colunas tortas. */
+  .ranking-tabela--presencas.tabela-cartoes tbody td[data-label] {
+    justify-content: center;
+    gap: 8px;
+  }
+
+  /* Classe sobre PH numa coluna, vestimenta sobre faixa na outra. Na ordem em
+     que as células nascem elas caem classe/vestimenta e faixa/PH, e aí os dois
+     valores de "sim ou não" ficam em diagonal, cada um com um vizinho de
+     natureza diferente. Posto assim, cada coluna tem uma pergunta só: o que a
+     pessoa treinou e quanto valeu de um lado, o que ela vestiu do outro.
+     Por posição, e não por classe do elemento: "Classe" usa .col-faixa e os
+     outros três dividem .col-stat, então não há seletor que os separe. */
+  .ranking-tabela--presencas.tabela-cartoes tbody td:nth-child(2) {
+    grid-area: 2 / 1;
+  }
+
+  .ranking-tabela--presencas.tabela-cartoes tbody td:nth-child(3) {
+    grid-area: 2 / 2;
+  }
+
+  .ranking-tabela--presencas.tabela-cartoes tbody td:nth-child(4) {
+    grid-area: 3 / 2;
+  }
+
+  .ranking-tabela--presencas.tabela-cartoes tbody td:nth-child(5) {
+    grid-area: 3 / 1;
   }
 
   .ranking-tabela.tabela-cartoes tbody tr:hover td {
