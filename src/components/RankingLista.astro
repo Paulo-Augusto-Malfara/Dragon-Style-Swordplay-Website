@@ -114,11 +114,9 @@ const { itens, colunas = 4 } = Astro.props;
     font-size: 1.15rem;
   }
 
-  .rk-1 {
-    border-color: var(--ds-gold-dim);
-    background: var(--ds-gold-wash);
-  }
-
+  /* O pódio é só a cor do número. A moldura dourada que o primeiro lugar tinha
+     saiu de propósito: a linha inteira acesa concorria com o anel de "você",
+     que é o destaque que importa pra quem está lendo a própria colocação. */
   .rk-1 .rk-pos {
     color: var(--ds-gold-light);
   }
@@ -157,10 +155,6 @@ const { itens, colunas = 4 } = Astro.props;
     width: 100%;
     height: 100%;
     object-fit: cover;
-  }
-
-  .rk-1 .rk-avatar {
-    border-color: var(--ds-gold);
   }
 
   .rk-nome {
@@ -236,9 +230,8 @@ const { itens, colunas = 4 } = Astro.props;
 
   /* "Esta linha é você".
    *
-   * Anel por fora, e não troca de borda ou de fundo: assim ele soma ao pódio em
-   * vez de disputar com o dourado do primeiro lugar, e você se reconhece na
-   * lista sem que a leitura de quem está ganhando se perca. */
+   * Anel por fora, e não troca de borda ou de fundo: é o único realce de linha
+   * inteira da lista, então você se acha de longe sem nada mais competindo. */
   .rk-eu {
     box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.22);
   }

@@ -352,7 +352,7 @@
           {#if fotoPendenteEm}
             <li class="analise">
               <strong>Foto em análise.</strong> Um organizador precisa aprovar antes dela aparecer
-              no seu perfil. A que está no ar continua a de sempre até lá.
+              no seu perfil.
             </li>
           {/if}
           {#if apelidoPendente}
