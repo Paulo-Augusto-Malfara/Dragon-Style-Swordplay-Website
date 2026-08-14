@@ -21,11 +21,15 @@ const WHATSAPP = "https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK";
 // do site e não pode devolver erro 500 porque o banco demorou a responder: sem
 // dado, a seção some ou diz o que houve, e o resto da página continua de pé.
 const [membrosAtivos, treinosRegistrados, novidades] = await Promise.all([
+  // Membro ativo é membro ativo: organizador e staff entram na conta. O corte
+  // por auth_level que ficava aqui veio copiado do mural, onde faz sentido
+  // porque lá os três grupos aparecem em listas separadas. Na home não existe
+  // essa separação, então ele só sumia com nove pessoas e fazia o número
+  // discordar do painel administrativo.
   supabasePublic
     .from("v_ranking_nivel_geral")
     .select("id_membro", { count: "exact", head: true })
     .eq("status_ativo", true)
-    .or("auth_level.is.null,auth_level.gte.4")
     .then((r) => r.count, () => null),
   supabasePublic
     .from("v_registro_treinos")
