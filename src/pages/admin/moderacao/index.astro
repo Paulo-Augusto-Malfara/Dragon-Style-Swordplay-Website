@@ -1,6 +1,7 @@
 ---
 import AdminShell from "../../../components/admin/AdminShell.astro";
 import ModeracaoPerfil from "../../../components/admin/ModeracaoPerfil.svelte";
+import ConvidarMembros from "../../../components/admin/ConvidarMembros.svelte";
 import AtivarNotificacoes from "../../../components/admin/AtivarNotificacoes.svelte";
 
 export const prerender = false;
@@ -14,8 +15,9 @@ if (!membro.isAdminSistema) return Astro.redirect("/admin");
 
 <AdminShell
   title="Aprovações"
-  resumo="Foto e apelido que o membro escolhe só aparecem no site depois de passar por aqui."
+  resumo="Foto e apelido só aparecem no site depois de passar por aqui, e é daqui que sai o convite de acesso de quem ainda não entrou."
 >
   <AtivarNotificacoes client:load />
   <ModeracaoPerfil client:load />
+  <ConvidarMembros client:load />
 </AdminShell>

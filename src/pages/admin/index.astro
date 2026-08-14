@@ -49,13 +49,17 @@ const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes] = await Promis
     .order("data_treino")
     .limit(1)
     .maybeSingle(),
-  // Fila de aprovação de foto e apelido. Contagem, não lista: aqui só importa
-  // se tem alguém esperando.
+  // Fila de aprovações. Contagem, não lista: aqui só importa se tem alguém
+  // esperando. Conta as três coisas que a página resolve, e não só foto e
+  // apelido: um convite parado é trabalho esperando igual, e uma fila que não
+  // aparece no número é uma fila que ninguém abre.
   membro.isAdminSistema
     ? supabase
         .from("dMembros")
         .select("id_membro", { count: "exact", head: true })
-        .or("foto_pendente_em.not.is.null,apelido_pendente.not.is.null")
+        .or(
+          "foto_pendente_em.not.is.null,apelido_pendente.not.is.null,and(email.not.is.null,auth_user_id.is.null)"
+        )
     : Promise.resolve({ count: 0 }),
 ]);
 
@@ -86,7 +90,7 @@ const numeros: Numero[] = [
     ? [
         {
           valor: pendentes,
-          rotulo: "Esperando aprovação",
+          rotulo: "Na fila de aprovações",
           href: "/admin/moderacao",
           acao: "Revisar",
           urgente: pendentes > 0,
