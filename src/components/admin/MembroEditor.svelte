@@ -207,10 +207,10 @@
     <h2>Níveis por classe <span class="contagem">{porClasse.length}</span></h2>
   </div>
   {#if porClasse.length === 0}
-    <p class="admin-vazio">Nenhum treino registrado ainda.</p>
+    <p class="vazio">Nenhum treino registrado ainda.</p>
   {:else}
     <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--dashboard tabela-admin">
+      <table class="ranking-tabela ranking-tabela--dashboard tabela-cartoes">
         <thead>
           <tr>
             <th class="col-nome">Classe</th>
@@ -235,10 +235,10 @@
     <h2>Histórico de presença <span class="contagem">{historico.length}</span></h2>
   </div>
   {#if historico.length === 0}
-    <p class="admin-vazio">Nenhuma presença registrada ainda.</p>
+    <p class="vazio">Nenhuma presença registrada ainda.</p>
   {:else}
     <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--historico tabela-admin">
+      <table class="ranking-tabela ranking-tabela--historico tabela-cartoes">
         <thead>
           <tr>
             <th class="col-rank">Nº Treino</th>

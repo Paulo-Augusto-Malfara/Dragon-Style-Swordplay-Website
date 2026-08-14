@@ -68,7 +68,7 @@ const dataCurta = (iso: string | null) =>
     : null;
 
 const atalhos = [
-  { href: "/dashboard", titulo: "Minha Ficha", texto: "Seu nível, suas presenças e seus pontos de honra." },
+  { href: "/dashboard", titulo: "Meu Perfil", texto: "Seu nível, suas presenças e seus pontos de honra." },
   { href: "/agenda", titulo: "Agenda", texto: "Data, horário e local dos próximos treinos." },
   { href: "/equipamentos", titulo: "Equipamentos", texto: "O arsenal inteiro, com filtro pela sua classe." },
   { href: "/resumo-das-classes", titulo: "Classes", texto: "As 10 classes e o que cada uma empunha." },
@@ -340,10 +340,10 @@ const fotos = [
   }
 
   /* ProximoTreino é componente compartilhado e traz o próprio "nenhum treino
-     agendado" em .dashboard-empty. Aqui ele veste a mesma caixa dos outros
+     agendado" em .vazio. Aqui ele veste a mesma caixa dos outros
      vazios da home, pra ausência de dado parecer resposta e não falha. */
   .home-vazio,
-  .home-secao :global(.dashboard-empty) {
+  .home-secao :global(.vazio) {
     width: auto;
     margin: 0;
     padding: 1.1em 1.2em;

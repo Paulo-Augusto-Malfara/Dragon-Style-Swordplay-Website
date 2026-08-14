@@ -82,7 +82,7 @@
     {/each}
   </div>
 {:else if items.length === 0}
-  <p class="admin-vazio">Nenhuma {rotulo} cadastrada ainda.</p>
+  <p class="vazio">Nenhuma {rotulo} cadastrada ainda.</p>
 {:else}
   <ul class="admin-list">
     {#each items as item}

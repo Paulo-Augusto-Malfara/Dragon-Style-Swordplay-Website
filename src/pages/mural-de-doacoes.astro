@@ -22,19 +22,14 @@ const paginaAtual = (doacoes ?? []).slice(inicio, inicio + PAGE_SIZE);
 
 <PageLayout
   title="Mural de Doações"
+  description="Histórico das doações recebidas pelo Dragon Style Swordplay e Eventos."
+  resumo="O histórico de doações recebidas pelo grupo, registradas pelos organizadores."
 >
-  <section>
-    <p>
-      Confira abaixo o histórico de doações recebidas pelo Dragon Style,
-      registradas pelos organizadores.
-    </p>
-    <br />
-  </section>
   {(doacoes ?? []).length === 0 ? (
-    <p class="dashboard-empty">Nenhuma doação registrada ainda.</p>
+    <p class="vazio">Nenhuma doação registrada ainda.</p>
   ) : (
     <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--doacoes-publico">
+      <table class="ranking-tabela ranking-tabela--doacoes-publico tabela-cartoes">
         <thead>
           <tr>
             <th class="col-nome">Membro</th>
@@ -53,17 +48,17 @@ const paginaAtual = (doacoes ?? []).slice(inicio, inicio + PAGE_SIZE);
                   </span>
                   <span class="row-name">{d.nome}</span>
                 </td>
-                <td class="col-faixa">
+                <td class="col-faixa" data-label="Data">
                   {new Date(d.data_doacao + "T00:00:00").toLocaleDateString("pt-BR", {
                     day: "2-digit",
                     month: "2-digit",
                     year: "2-digit",
                   })}
                 </td>
-                <td class="col-stat">
-                  <span class="status-badge status-badge--agendado">R$ {Number(d.valor).toFixed(2)}</span>
+                <td class="col-stat" data-label="Valor">
+                  <span class="stat-pill">R$ {Number(d.valor).toFixed(2)}</span>
                 </td>
-                <td class="col-stat">
+                <td class="col-stat" data-label="Total doado">
                   <span class="stat-pill">R$ {Number(d.total_doado).toFixed(2)}</span>
                 </td>
               </tr>
@@ -76,11 +71,11 @@ const paginaAtual = (doacoes ?? []).slice(inicio, inicio + PAGE_SIZE);
   {totalPaginas > 1 && (
     <nav class="ranking-pagination" aria-label="Páginas do mural de doações">
       {pagina > 1 && (
-        <a class="btn btn-sm" href={`?page=${pagina - 1}`} rel="prev">‹</a>
+        <a class="chip" href={`?page=${pagina - 1}`} rel="prev" aria-label="Página anterior">‹</a>
       )}
       {Array.from({ length: totalPaginas }, (_, idx) => idx + 1).map((p) => (
         <a
-          class={`btn btn-sm${p === pagina ? " btn-primary" : ""}`}
+          class:list={["chip", p === pagina && "ativo"]}
           href={`?page=${p}`}
           aria-current={p === pagina ? "page" : undefined}
         >
@@ -88,7 +83,7 @@ const paginaAtual = (doacoes ?? []).slice(inicio, inicio + PAGE_SIZE);
         </a>
       ))}
       {pagina < totalPaginas && (
-        <a class="btn btn-sm" href={`?page=${pagina + 1}`} rel="next">›</a>
+        <a class="chip" href={`?page=${pagina + 1}`} rel="next" aria-label="Próxima página">›</a>
       )}
     </nav>
   )}

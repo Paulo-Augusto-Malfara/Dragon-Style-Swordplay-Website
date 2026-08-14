@@ -151,7 +151,7 @@
     <h2>Como ficou <span class="contagem">{participantesResumo.length}</span></h2>
   </div>
   <div class="table-scroll">
-    <table class="ranking-tabela ranking-tabela--evento tabela-admin">
+    <table class="ranking-tabela ranking-tabela--evento tabela-cartoes">
       <thead>
         <tr>
           <th class="col-nome">Nome</th>
@@ -256,7 +256,7 @@
       {/each}
     </div>
   {:else if presencas.length === 0}
-    <p class="admin-vazio">Ninguém lançado ainda. Busque o membro acima para começar.</p>
+    <p class="vazio">Ninguém lançado ainda. Busque o membro acima para começar.</p>
   {:else}
     <ul class="admin-list">
       {#each presencas as p}

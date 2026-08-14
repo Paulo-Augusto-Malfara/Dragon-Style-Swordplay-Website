@@ -37,10 +37,10 @@ const dataFormatada = new Date(dataEvento + "T00:00:00").toLocaleDateString("pt-
   </summary>
   <div class="modalidades-conteudo">
     {participantes.length === 0 ? (
-      <p class="dashboard-empty">Nenhuma presença registrada.</p>
+      <p class="vazio">Nenhuma presença registrada.</p>
     ) : (
       <div class="table-scroll">
-        <table class="ranking-tabela ranking-tabela--evento">
+        <table class="ranking-tabela ranking-tabela--evento tabela-cartoes">
           <thead>
             <tr>
               <th class="col-nome">Nome</th>
@@ -57,8 +57,8 @@ const dataFormatada = new Date(dataEvento + "T00:00:00").toLocaleDateString("pt-
                   </span>
                   <span class="row-name">{p.nome}</span>
                 </td>
-                <td class="col-stat"><span class="stat-pill">{p.ph_ganho}</span></td>
-                <td class="col-stat">
+                <td class="col-stat" data-label="PH ganho"><span class="stat-pill">{p.ph_ganho}</span></td>
+                <td class="col-stat" data-label="Nível geral">
                   <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
                     {p.nivel_geral}
                     {p.subiu_nivel_geral && <span class="level-up-arrow">{"▲".repeat(p.subida_nivel_geral)}</span>}

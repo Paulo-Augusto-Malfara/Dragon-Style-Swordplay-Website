@@ -122,7 +122,7 @@
     {/each}
   </div>
 {:else if membros.length === 0}
-  <p class="admin-vazio">
+  <p class="vazio">
     {filtrando ? "Nenhum membro com esse nome ou nesse filtro." : "Nenhum membro cadastrado ainda."}
     {#if filtrando}
       <br /><button type="button" class="btn btn-sm btn-ghost" onclick={limpar}>Limpar busca e filtro</button>
@@ -168,13 +168,19 @@
 
   {#if totalPaginas > 1}
     <nav class="ranking-pagination" aria-label="Páginas da lista de membros">
-      <button type="button" class="btn btn-sm" disabled={pagina === 1} onclick={() => irPara(pagina - 1)}>
+      <button
+        type="button"
+        class="chip"
+        disabled={pagina === 1}
+        aria-label="Página anterior"
+        onclick={() => irPara(pagina - 1)}
+      >
         ‹
       </button>
       {#each Array.from({ length: totalPaginas }, (_, i) => i + 1) as p}
         <button
           type="button"
-          class="btn btn-sm{p === pagina ? ' btn-primary' : ''}"
+          class="chip{p === pagina ? ' ativo' : ''}"
           aria-current={p === pagina ? "page" : undefined}
           onclick={() => irPara(p)}
         >
@@ -183,8 +189,9 @@
       {/each}
       <button
         type="button"
-        class="btn btn-sm"
+        class="chip"
         disabled={pagina === totalPaginas}
+        aria-label="Próxima página"
         onclick={() => irPara(pagina + 1)}
       >
         ›

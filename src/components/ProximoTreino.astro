@@ -80,6 +80,6 @@ const { count: contagemConfirmados } = proximoTreino
       <ConfirmarPresenca idAgenda={proximoTreino.idAgenda} contagemInicial={contagemConfirmados ?? 0} client:load />
     </div>
   ) : (
-    <p class="dashboard-empty">Nenhum treino agendado no momento.</p>
+    <p class="vazio">Nenhum treino agendado no momento.</p>
   )
 }

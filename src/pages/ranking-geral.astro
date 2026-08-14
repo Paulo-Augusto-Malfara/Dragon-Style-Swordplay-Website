@@ -88,11 +88,13 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
   {totalPaginas > 1 && (
     <nav class="ranking-pagination" aria-label="Páginas do ranking">
       {pagina > 1 && (
-        <a class="btn btn-sm" href={`?sort=${sort}&page=${pagina - 1}`} rel="prev">‹</a>
+        <a class="chip" href={`?sort=${sort}&page=${pagina - 1}`} rel="prev" aria-label="Página anterior">
+          ‹
+        </a>
       )}
       {Array.from({ length: totalPaginas }, (_, idx) => idx + 1).map((p) => (
         <a
-          class={`btn btn-sm${p === pagina ? " btn-primary" : ""}`}
+          class:list={["chip", p === pagina && "ativo"]}
           href={`?sort=${sort}&page=${p}`}
           aria-current={p === pagina ? "page" : undefined}
         >
@@ -100,7 +102,9 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
         </a>
       ))}
       {pagina < totalPaginas && (
-        <a class="btn btn-sm" href={`?sort=${sort}&page=${pagina + 1}`} rel="next">›</a>
+        <a class="chip" href={`?sort=${sort}&page=${pagina + 1}`} rel="next" aria-label="Próxima página">
+          ›
+        </a>
       )}
     </nav>
   )}

@@ -41,7 +41,7 @@ const diaSemana = (d: string) =>
     ) : membro.isOrganizador ? (
       <AbrirTreino client:load />
     ) : (
-      <p class="admin-vazio">
+      <p class="vazio">
         Nenhum treino aberto no momento. Aguarde um organizador abrir um treino.
       </p>
     )
@@ -76,7 +76,7 @@ const diaSemana = (d: string) =>
         })}
       </ul>
     ) : (
-      <p class="admin-vazio">Nenhum treino finalizado ainda.</p>
+      <p class="vazio">Nenhum treino finalizado ainda.</p>
     )
   }
 </AdminShell>

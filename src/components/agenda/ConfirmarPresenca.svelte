@@ -112,9 +112,9 @@
     <details class="confirma-presenca-lista" bind:open={listaAberta} ontoggle={toggleLista}>
       <summary>Ver quem confirmou</summary>
       {#if carregandoLista}
-        <p class="dashboard-empty">Carregando...</p>
+        <p class="vazio">Carregando...</p>
       {:else if confirmados.length === 0}
-        <p class="dashboard-empty">Ninguém confirmou ainda.</p>
+        <p class="vazio">Ninguém confirmou ainda.</p>
       {:else}
         <ul class="confirma-presenca-membros">
           {#each confirmados as m}

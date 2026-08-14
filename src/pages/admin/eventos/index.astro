@@ -63,7 +63,7 @@ if (idsEventos.length > 0) {
     ) : membro.isOrganizador ? (
       <AbrirEvento eventosRecentes={historico ?? []} client:load />
     ) : (
-      <p class="admin-vazio">Nenhum evento aberto no momento. Aguarde um organizador abrir um evento.</p>
+      <p class="vazio">Nenhum evento aberto no momento. Aguarde um organizador abrir um evento.</p>
     )
   }
 
@@ -84,7 +84,7 @@ if (idsEventos.length > 0) {
       ))}
     </div>
   ) : (
-    <p class="admin-vazio">Nenhum evento finalizado ainda.</p>
+    <p class="vazio">Nenhum evento finalizado ainda.</p>
   )}
 </AdminShell>
 

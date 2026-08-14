@@ -1,0 +1,127 @@
+---
+/**
+ * As 8 faixas na ordem da progressão.
+ *
+ * Era uma tabela de 3 colunas escrita à mão dentro do .mdx, 8 linhas com a cor
+ * repetida em `style` inline. Tabela serve pra comparar valores entre linhas, e
+ * aqui não há o que comparar: cada faixa tem um número e ele só cresce. Vira
+ * linha, na mesma linguagem do ranking e das listas do painel, e some a rolagem
+ * lateral que a tabela criava no celular.
+ *
+ * Nome e cor saem de FAIXAS, então não existe mais lista de faixa escrita em
+ * dois lugares.
+ */
+import { FAIXAS } from "../lib/faixa";
+
+/**
+ * Espelha `dFaixas.nivel_minimo` no banco, que é a fonte da verdade de quem
+ * ganha qual faixa. Fica aqui, e não em lib/faixa.ts, porque isto é o texto de
+ * uma página de documentação e não entra em decisão nenhuma do site: nenhuma
+ * tela usa estes números pra classificar ninguém, quem faz isso é o banco.
+ *
+ * Se as faixas mudarem, muda no banco e aqui.
+ */
+const NIVEL_MINIMO = [1, 3, 7, 12, 18, 25, 35, 50];
+
+if (NIVEL_MINIMO.length !== FAIXAS.length) {
+  throw new Error(
+    `EscalaDeFaixas: ${FAIXAS.length} faixas e ${NIVEL_MINIMO.length} níveis. ` +
+      "Alguém mexeu em CORES (lib/faixa.ts) sem mexer aqui, e a escala sairia desalinhada.",
+  );
+}
+
+const ORDINAL = ["1ª", "2ª", "3ª", "4ª", "5ª", "6ª", "7ª", "8ª"];
+
+/**
+ * Nome na cor do texto, não na cor da faixa, nas duas pontas da escala: preta
+ * sobre o fundo escuro do site some, e branca já é a cor do texto. A bolinha
+ * ao lado continua mostrando a cor das duas.
+ */
+const NOME_SEM_COR = new Set(["Branca", "Preta"]);
+---
+
+<ol class="escala">
+  {
+    FAIXAS.map((faixa, i) => (
+      <li class="escala-linha">
+        <span class="escala-ordem">{ORDINAL[i]}</span>
+        <span class="escala-cor" style={`--cor:${faixa.cor}`} aria-hidden="true" />
+        <span class="escala-nome" style={NOME_SEM_COR.has(faixa.nome) ? undefined : `color:${faixa.cor}`}>
+          {faixa.nome}
+        </span>
+        <span class="escala-nivel">
+          a partir do nível <b>{NIVEL_MINIMO[i]}</b>
+        </span>
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  .escala {
+    list-style: none;
+    max-width: 560px;
+    margin: 0 0 1.5em;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .escala-linha {
+    display: grid;
+    grid-template-columns: 2.2em 14px minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+  }
+
+  .escala-ordem {
+    font-family: var(--ds-font-display);
+    font-size: 0.9rem;
+    color: var(--ds-text-5);
+  }
+
+  /* Bolinha, e não pílula: a cor é a faixa em si, não um rótulo. */
+  .escala-cor {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: var(--cor);
+  }
+
+  .escala-nome {
+    font-size: 0.95rem;
+  }
+
+  /* A frase inteira em vez de um cabeçalho de coluna: sem a tabela em volta,
+     um "50" sozinho não diz de quê. */
+  .escala-nivel {
+    font-size: 0.78rem;
+    color: var(--ds-text-5);
+    white-space: nowrap;
+  }
+
+  .escala-nivel b {
+    font-family: var(--ds-font-display);
+    font-size: 1rem;
+    color: var(--ds-gold);
+  }
+
+  @media (max-width: 420px) {
+    .escala-linha {
+      grid-template-columns: 2em 12px minmax(0, 1fr);
+      row-gap: 2px;
+    }
+
+    /* No celular estreito o "a partir do nível N" desce pra segunda linha,
+       alinhado com o nome, em vez de espremer os dois. */
+    .escala-nivel {
+      grid-column: 3;
+    }
+  }
+</style>

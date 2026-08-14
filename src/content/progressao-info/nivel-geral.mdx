@@ -4,6 +4,8 @@ prev: { href: "/equipamentos", label: "Equipamentos" }
 next: { href: "/ranking-geral", label: "Ranking Geral" }
 ---
 
+import EscalaDeFaixas from "../../components/EscalaDeFaixas.astro";
+
 <p>
   O Nível Geral serve para contabilizar a experiência total que um membro
   do Dragon Style possui. Serve também para progredir nas graduações. Logo
@@ -30,7 +32,7 @@ next: { href: "/ranking-geral", label: "Ranking Geral" }
 ## Como conferir meu progresso?
 
 <p>
-  Tudo isso fica na sua ficha: Nível Geral, Pontos de Honra, faixa atual,
+  Tudo isso fica no seu perfil: Nível Geral, Pontos de Honra, faixa atual,
   quanto falta para a próxima e cada classe com o nível e os treinos
   registrados. É a mesma informação que a organização usa, sem intermediário.
 </p>
@@ -40,7 +42,7 @@ next: { href: "/ranking-geral", label: "Ranking Geral" }
 <br />
 <p>
   <strong>Observações:</strong> é preciso entrar com o e-mail cadastrado no
-  grupo. Se a ficha não achar seu cadastro, fale com a organização.
+  grupo. Se o perfil não achar seu cadastro, fale com a organização.
 </p>
 
 ## Graduações
@@ -48,60 +50,8 @@ next: { href: "/ranking-geral", label: "Ranking Geral" }
 <p>
   As graduações se dão por faixas coloridas que ficam amarradas na cintura
   do membro, são 8 faixas no total, sendo a primeira conquistada ao se
-  tornar um membro veterano (nível geral 1). Confira abaixo a tabela
+  tornar um membro veterano (nível geral 1). Confira abaixo a escala
   completa:
 </p>
-<br />
-<div class="table-scroll">
-  <table class="ranking-tabela ranking-tabela--graduacao">
-    <thead>
-      <tr>
-        <th class="col-rank">#</th>
-        <th class="col-nome">Faixa</th>
-        <th class="col-stat">Nível Geral</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">1ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-branca)" /><span class="row-name">Branca</span></td>
-        <td class="col-stat"><span class="stat-pill">1</span></td>
-      </tr>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">2ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-amarela)" /><span class="row-name" style="color: var(--faixa-amarela)">Amarela</span></td>
-        <td class="col-stat"><span class="stat-pill">3</span></td>
-      </tr>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">3ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-azul-claro)" /><span class="row-name" style="color: var(--faixa-azul-claro)">Azul Claro</span></td>
-        <td class="col-stat"><span class="stat-pill">7</span></td>
-      </tr>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">4ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-laranja)" /><span class="row-name" style="color: var(--faixa-laranja)">Laranja</span></td>
-        <td class="col-stat"><span class="stat-pill">12</span></td>
-      </tr>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">5ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-verde)" /><span class="row-name" style="color: var(--faixa-verde)">Verde</span></td>
-        <td class="col-stat"><span class="stat-pill">18</span></td>
-      </tr>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">6ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-marrom)" /><span class="row-name" style="color: var(--faixa-marrom)">Marrom</span></td>
-        <td class="col-stat"><span class="stat-pill">25</span></td>
-      </tr>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">7ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-roxa)" /><span class="row-name" style="color: var(--faixa-roxa)">Roxa</span></td>
-        <td class="col-stat"><span class="stat-pill">35</span></td>
-      </tr>
-      <tr>
-        <td class="col-rank"><span class="rank-badge">8ª</span></td>
-        <td class="col-nome"><span class="belt-swatch" style="background: var(--faixa-preta)" /><span class="row-name">Preta</span></td>
-        <td class="col-stat"><span class="stat-pill">50</span></td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+
+<EscalaDeFaixas />

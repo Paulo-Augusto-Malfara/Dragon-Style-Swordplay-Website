@@ -48,7 +48,7 @@ export const menu: GrupoNav[] = [
     // acesso, e clicar só levava a uma tela de login negado. O caminho agora é
     // a ficha, que sabe quem está logado e só mostra o link pra quem é staff.
     label: "Área do Membro",
-    items: [{ href: "/dashboard", label: "Minha Ficha" }],
+    items: [{ href: "/dashboard", label: "Meu Perfil" }],
   },
   {
     // Estas três moraram só no rodapé desde 2026-08-13, pela razão certa: são

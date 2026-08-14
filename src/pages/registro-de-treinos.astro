@@ -42,16 +42,11 @@ const treinos = [...porTreino.entries()].sort((a, b) => b[1].data_treino.localeC
 
 <PageLayout
   title="Registro de Treinos"
+  description="Histórico dos treinos do Dragon Style, com presenças, classes e quem subiu de nível."
+  resumo="Os treinos já registrados: quem participou, em qual classe, e quem subiu de nível."
 >
-  <section>
-    <p>
-      Confira abaixo os últimos treinos registrados: quem participou, em
-      qual classe, e quem subiu de nível.
-    </p>
-    <br />
-  </section>
   {treinos.length === 0 ? (
-    <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
+    <p class="vazio">Nenhum treino registrado ainda.</p>
   ) : (
     <div class="tr-lista">
       {treinos.map(([idTreino, { data_treino, attendees }]) => (

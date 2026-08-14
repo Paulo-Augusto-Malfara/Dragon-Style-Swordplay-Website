@@ -315,7 +315,7 @@
     <h2>Como ficou <span class="contagem">{resumoLinhas.length}</span></h2>
   </div>
   <div class="table-scroll">
-    <table class="ranking-tabela ranking-tabela--treino-resumo tabela-admin">
+    <table class="ranking-tabela ranking-tabela--treino-resumo tabela-cartoes">
       <thead>
         <tr>
           <th class="col-nome">Nome</th>
@@ -505,10 +505,10 @@
       {/each}
     </div>
   {:else if presencas.length === 0}
-    <p class="admin-vazio">Ninguém registrado ainda. Busque o membro acima para começar.</p>
+    <p class="vazio">Ninguém registrado ainda. Busque o membro acima para começar.</p>
   {:else}
     <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--presencas tabela-admin">
+      <table class="ranking-tabela ranking-tabela--presencas tabela-cartoes">
         <thead>
           <tr>
             <th class="col-nome">Nome</th>

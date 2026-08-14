@@ -70,6 +70,11 @@
   --ds-gold-light: #ffdf91;
   --ds-gold-dim: rgba(232, 172, 70, 0.55);
   --ds-gold-wash: rgba(232, 172, 70, 0.06);
+  /* Prata e bronze do pódio. Moram aqui, e não soltos no RankingLista, porque
+     junto com o dourado eles são uma escala: mexer num sem olhar os outros dois
+     desmancha a leitura de 1º, 2º e 3º. */
+  --ds-prata: #c6ccd2;
+  --ds-bronze: #c08552;
   --ds-success: #5fa86b;
   /* Vermelho da paleta, não o `red` do navegador. Ele estava solto em cinco
      pontos dos regulamentos, gritando sobre o fundo escuro; este é o mesmo tom
@@ -1567,7 +1572,7 @@ p {
               cartão compacto, conteúdo à esquerda, ação à direita, quebra pra
               baixo quando falta largura.
    TABELA     continua <table> no desktop, onde comparar coluna é o ponto, e
-              vira cartão por registro no celular (ver .tabela-admin no fim do
+              vira cartão por registro no celular (ver .tabela-cartoes no fim do
               bloco das tabelas). Antes rolava de lado e o nome saía da tela.  */
 
 /* --- Botões --- */
@@ -2097,7 +2102,7 @@ p {
 
 /* --- Vazio --- */
 
-.admin-vazio {
+.vazio {
   max-width: 760px;
   margin: 0 auto 1em;
   padding: 1.8em 1.2em;
@@ -2480,15 +2485,6 @@ p {
   grid-template-columns: minmax(120px, 170px) auto auto auto;
 }
 
-/* ponytail: width:auto (not 100%) + no 1fr column lets this table shrink
-   to fit its 3 short columns instead of stretching across the page like
-   .graduacao-tabela's old width:90% did. */
-.ranking-tabela--graduacao {
-  width: auto;
-  max-width: 480px;
-  grid-template-columns: 64px minmax(120px, 1fr) auto;
-}
-
 /* tabelas pessoais do dashboard do membro (níveis por classe, histórico) --
    sem coluna de posição/avatar, só um rótulo à esquerda e pills à direita.
    Sem min-width: como classe/data são curtos, a tabela pode encolher livre
@@ -2564,7 +2560,7 @@ p {
    mesma grade de colunas de sempre. Os seletores repetem .ranking-tabela de
    propósito, pra ganhar de `.ranking-tabela .col-stat` na especificidade. */
 @media (max-width: 720px) {
-  .ranking-tabela.tabela-admin {
+  .ranking-tabela.tabela-cartoes {
     display: block;
     min-width: 0;
     margin: 0.8em auto 1em;
@@ -2573,17 +2569,17 @@ p {
     overflow: visible;
   }
 
-  .ranking-tabela.tabela-admin thead {
+  .ranking-tabela.tabela-cartoes thead {
     display: none;
   }
 
-  .ranking-tabela.tabela-admin tbody {
+  .ranking-tabela.tabela-cartoes tbody {
     display: flex;
     flex-direction: column;
     gap: 8px;
   }
 
-  .ranking-tabela.tabela-admin tbody tr {
+  .ranking-tabela.tabela-cartoes tbody tr {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: 2px 10px;
@@ -2593,7 +2589,7 @@ p {
     background: var(--ds-surface);
   }
 
-  .ranking-tabela.tabela-admin tbody td {
+  .ranking-tabela.tabela-cartoes tbody td {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -2605,7 +2601,7 @@ p {
   }
 
   /* O nome é o título do cartão, não mais uma célula. */
-  .ranking-tabela.tabela-admin tbody td:first-child {
+  .ranking-tabela.tabela-cartoes tbody td:first-child {
     grid-column: 1 / -1;
     justify-content: flex-start;
     padding: 0 0 7px;
@@ -2613,7 +2609,7 @@ p {
     border-bottom: 1px solid var(--ds-line);
   }
 
-  .ranking-tabela.tabela-admin tbody td[data-label]::before {
+  .ranking-tabela.tabela-cartoes tbody td[data-label]::before {
     content: attr(data-label);
     flex: none;
     font-size: 0.7rem;
@@ -2623,14 +2619,14 @@ p {
   }
 
   /* Ações ocupam a linha inteira embaixo, alinhadas à direita. */
-  .ranking-tabela.tabela-admin tbody td.col-acoes {
+  .ranking-tabela.tabela-cartoes tbody td.col-acoes {
     grid-column: 1 / -1;
     justify-content: flex-end;
     gap: 6px;
     padding-top: 8px;
   }
 
-  .ranking-tabela.tabela-admin tbody tr:hover td {
+  .ranking-tabela.tabela-cartoes tbody tr:hover td {
     background: none;
   }
 }
@@ -2864,17 +2860,6 @@ p {
   border-radius: 999px;
 }
 
-/* ponytail: o anel subiu de 0.3 pra 0.45 de branco. Ele é o único contorno da
-   faixa preta contra o fundo escuro — a 0.3 o selo dela praticamente sumia. */
-.belt-swatch {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.45);
-}
-
 /* badge circular da posição (#) */
 .rank-badge {
   display: inline-flex;
@@ -2890,25 +2875,6 @@ p {
   color: var(--golden-color);
   font-weight: 700;
   font-size: 0.8em;
-}
-
-.rank-row.rank-1 .rank-badge {
-  background: linear-gradient(135deg, #ffdf91, #e8ac46);
-  border-color: #ffdf91;
-  color: #151f28;
-  box-shadow: 0 0 10px rgba(232, 172, 70, 0.55);
-}
-
-.rank-row.rank-2 .rank-badge {
-  background: linear-gradient(135deg, #eaeaea, #b0b0b0);
-  border-color: #d6d6d6;
-  color: #151f28;
-}
-
-.rank-row.rank-3 .rank-badge {
-  background: linear-gradient(135deg, #dd9c62, #a6642f);
-  border-color: #dd9c62;
-  color: #1a1208;
 }
 
 /* avatar de iniciais junto ao nome */
@@ -3050,18 +3016,30 @@ p {
   margin: 0 auto 1.5em;
 }
 
+/* Paginação usa o mesmo chip da seleção de classe e do filtro de equipamentos:
+   escolher página é escolher, não é acionar. Aqui, sim, centralizada, porque
+   é uma fila curta de números e não uma lista de rótulos de larguras
+   diferentes. */
 .ranking-pagination {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
-  gap: 0.5em;
+  align-items: center;
+  gap: 6px;
   margin: 1.5em auto 2em;
 }
 
-.ranking-pagination .btn-sm {
-  min-width: 2.4em;
-  padding-left: 0.6em;
-  padding-right: 0.6em;
+/* Número em caixa quadrada: a pílula esticaria de acordo com o dígito e as
+   páginas 1 e 10 teriam larguras diferentes na mesma fila. */
+.ranking-pagination .chip {
+  min-width: 2.2em;
+  padding: 7px 9px;
+  text-align: center;
+}
+
+.ranking-pagination .chip[disabled] {
+  opacity: 0.35;
+  cursor: default;
 }
 
 @media (max-width: 560px) {
@@ -3096,12 +3074,6 @@ p {
 }
 
 /* ======== MEMBER DASHBOARD ======== */
-
-.dashboard-empty {
-  text-align: center;
-  width: auto;
-  color: var(--text-secondary-color);
-}
 
 /* o fio dourado continua sendo o fio dourado: quem carrega a faixa agora é a
    moldura do card (.faixa-borda), então tingir os dois seria redundante. */

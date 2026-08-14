@@ -27,18 +27,12 @@ const grupos = [
 
 <PageLayout
   title="Mural de Membros"
+  description="Todos os membros do Dragon Style com nível, faixa e pontos de honra."
+  resumo="Todo mundo do grupo com nível, faixa e pontos de honra, separado entre organizadores, staff e membros."
 >
-  <section>
-    <p>
-      No Mural de Membros é possível conferir todos os membros do Dragon
-      Style e seus respectivos níveis, faixa e pontos de honra, organizados
-      entre organizadores, staff, membros ativos e membros inativos.
-    </p>
-    <br />
-  </section>
 
   {grupos.length === 0 ? (
-    <p class="dashboard-empty">Nenhum membro veterano registrado ainda.</p>
+    <p class="vazio">Nenhum membro veterano registrado ainda.</p>
   ) : (
     grupos.map(({ titulo, lista }) => (
       <>

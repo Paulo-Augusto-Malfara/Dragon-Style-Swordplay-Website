@@ -47,7 +47,7 @@
 </script>
 
 {#if nome}
-  <a href="/dashboard" class="auth-avatar" aria-label={`Minha ficha, ${nome}`} title={nome}>
+  <a href="/dashboard" class="auth-avatar" aria-label={`Meu perfil, ${nome}`} title={nome}>
     {#if fotoUrl}
       <img src={fotoUrl} alt="" />
     {:else}

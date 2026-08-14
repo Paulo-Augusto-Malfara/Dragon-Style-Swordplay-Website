@@ -210,10 +210,10 @@
     {/each}
   </div>
 {:else if doacoes.length === 0}
-  <p class="admin-vazio">Nenhuma doação registrada ainda.</p>
+  <p class="vazio">Nenhuma doação registrada ainda.</p>
 {:else}
   <div class="table-scroll">
-    <table class="ranking-tabela ranking-tabela--doacoes tabela-admin">
+    <table class="ranking-tabela ranking-tabela--doacoes tabela-cartoes">
       <thead>
         <tr>
           <th class="col-nome">Membro</th>

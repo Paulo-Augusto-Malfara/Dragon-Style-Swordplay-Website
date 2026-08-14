@@ -79,7 +79,7 @@ const atual = classes.find(([nome]) => slug(nome) === pedida) ?? classes[0];
         />
       </section>
     ) : (
-      <p class="rk-vazio">
+      <p class="vazio">
         Nenhum treino registrado ainda. Assim que o primeiro treino for fechado, os
         rankings de classe aparecem aqui.
       </p>
@@ -92,15 +92,5 @@ const atual = classes.find(([nome]) => slug(nome) === pedida) ?? classes[0];
     margin: -0.4em 0 1em;
     font-size: 0.82rem;
     color: var(--ds-text-5);
-  }
-
-  .rk-vazio {
-    max-width: 900px;
-    margin: 2em auto;
-    padding: 1.2em;
-    border: 1px dashed var(--ds-line-strong);
-    border-radius: 12px;
-    color: var(--ds-text-4);
-    text-align: center;
   }
 </style>

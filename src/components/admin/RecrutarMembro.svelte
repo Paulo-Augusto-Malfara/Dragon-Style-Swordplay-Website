@@ -49,7 +49,7 @@
     if (!emailAparado) {
       const ok = await confirmar.pedir({
         titulo: "Cadastrar sem email?",
-        texto: "Sem email o membro entra no ranking e no mural, mas não consegue fazer login pra ver a própria ficha. Dá pra preencher depois, na edição.",
+        texto: "Sem email o membro entra no ranking e no mural, mas não consegue fazer login pra ver o próprio perfil. Dá pra preencher depois, na edição.",
         acao: "Cadastrar sem email",
       });
       if (!ok) return;

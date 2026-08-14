@@ -75,7 +75,7 @@
   </div>
 {:else}
   {#if proximos.length === 0}
-    <p class="admin-vazio">
+    <p class="vazio">
       Nenhum treino marcado daqui pra frente. Como o grupo não tem dia fixo, sem data aqui a
       página pública não tem o que mostrar.
     </p>
