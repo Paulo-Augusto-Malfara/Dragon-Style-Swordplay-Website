@@ -279,9 +279,10 @@ const { itens, colunas = 4 } = Astro.props;
   let meuId: string | null = null;
 
   function marcar() {
-    // O ClientRouter reescreve os atributos do <html> a cada navegação e leva o
-    // data-membro junto, então o valor fica guardado aqui depois da primeira
-    // vez e as páginas seguintes acendem sem esperar a consulta de novo.
+    // O ClientRouter troca os atributos do <html> pelos da página nova, que vem
+    // sem data-membro: quem recarimba a cada navegação é o AuthLink. O valor
+    // fica guardado aqui depois da primeira vez, então navegar de volta acende
+    // na hora, sem esperar a consulta de novo.
     meuId = document.documentElement.dataset.membro || meuId;
     if (!meuId) return;
 

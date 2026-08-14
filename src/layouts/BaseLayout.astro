@@ -73,7 +73,17 @@ const comTransicao = !/^\/(admin|auth)(\/|$)/.test(Astro.url.pathname);
     {comTransicao && <ClientRouter />}
   </head>
   <body>
-    <header>
+    {/*
+      transition:persist mantém ESTE elemento entre as páginas em vez de
+      trocá-lo por um igual. Sem isso o cabeçalho entra na troca de corpo do
+      ClientRouter e pisca a cada navegação, mesmo desenhando exatamente o
+      mesmo pixel: logo, busca e avatar são refeitos do zero toda vez.
+
+      Só o cabeçalho. O dock de baixo e a lateral marcam a página atual, e um
+      elemento persistido não é redesenhado: o destaque congelaria na página
+      onde a pessoa entrou.
+    */}
+    <header transition:persist>
       <Header />
     </header>
     <!-- A lateral e o conteúdo dividem uma linha no desktop. No celular .shell

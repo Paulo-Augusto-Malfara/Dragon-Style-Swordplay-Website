@@ -53,6 +53,7 @@
   /** id_classe → colocação da pessoa naquela classe. Ver `calcularRanks`. */
   let rankPorClasse = $state(new Map<number, { posicao: number; total: number }>());
   let historico = $state<any[]>([]);
+  let paginaPresencas = $state(1);
   let faixas = $state<{ nome_faixa: string; nivel_minimo: number }[]>([]);
 
   const displayName = $derived(apelido || nomeOficial);
@@ -116,6 +117,24 @@
 
   /** Classe que existe pra liberar o veterano, não pra disputar posição. */
   const CLASSE_BASICO = 11;
+
+  /**
+   * "Últimas presenças" é o que o título promete: as últimas.
+   *
+   * A lista inteira empurrava as conquistas pra fora da tela em quem treina há
+   * anos, e ninguém rola cinquenta linhas procurando a semana passada. Cinco por
+   * página, com a numeração do Ranking Geral, que é o mesmo gesto na mesma cara.
+   */
+  const PRESENCAS_POR_PAGINA = 5;
+  const totalPaginasPresencas = $derived(
+    Math.max(1, Math.ceil(historico.length / PRESENCAS_POR_PAGINA)),
+  );
+  const presencasDaPagina = $derived(
+    historico.slice(
+      (paginaPresencas - 1) * PRESENCAS_POR_PAGINA,
+      paginaPresencas * PRESENCAS_POR_PAGINA,
+    ),
+  );
 
   /**
    * A colocação da pessoa em cada classe que ela treina.
@@ -377,7 +396,24 @@
       <div class="ficha-topo">
         <AvatarUploader {fotoUrl} nome={displayName} savePhoto={saveMinhaFoto} />
         <div class="ficha-id">
-          <p class="ficha-nome">{displayName}</p>
+          <p class="ficha-nome">
+            {displayName}
+            <!-- O lápis fica colado no nome porque é o nome que ele edita. Como
+                 botão de texto lá embaixo, "editar apelido" obrigava a ler três
+                 rótulos pra descobrir qual mexia em quê. -->
+            <button
+              class="ficha-icone"
+              onclick={() => (editingApelido = true)}
+              aria-label="Editar apelido"
+              title="Editar apelido"
+            >
+              <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+                <path
+                  d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"
+                ></path>
+              </svg>
+            </button>
+          </p>
           {#if nomeFaixa}
             <p><span class="ficha-faixa">{nomeFaixa}</span></p>
           {/if}
@@ -385,6 +421,22 @@
             <p class="ficha-oficial">Nome oficial: {nomeOficial}</p>
           {/if}
         </div>
+
+        <!-- Sair mora no canto de cima, longe das ações que a pessoa realmente
+             veio fazer. É ícone, e não o botão de texto que já esteve aqui: era
+             largo o bastante pra cair em cima da foto no celular. -->
+        <button
+          class="ficha-icone ficha-sair"
+          onclick={logout}
+          aria-label="Sair da conta"
+          title="Sair da conta"
+        >
+          <svg viewBox="0 0 24 24" width="1em" height="1em" fill="currentColor" aria-hidden="true">
+            <path
+              d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"
+            ></path>
+          </svg>
+        </button>
       </div>
 
       <!-- Estado da fila. Sem isto a pessoa manda a foto, nada muda na tela e
@@ -432,13 +484,14 @@
       </div>
 
       {#if !editingApelido}
-        <div class="ficha-acoes">
-          <button class="btn btn-sm" onclick={() => (editingApelido = true)}>editar apelido</button>
-          {#if ehStaffOuMais}
-            <a href="/admin" class="btn btn-sm">painel administrativo</a>
-          {/if}
-          <button class="btn btn-sm" onclick={logout}>sair</button>
-        </div>
+        <!-- Sobrou uma ação de texto só, e ela ganhou o botão cheio do site (o
+             mesmo de "Quero treinar" na home) em vez do miúdo que dividia a
+             linha com "sair". Quem não é staff não vê barra nenhuma. -->
+        {#if ehStaffOuMais}
+          <div class="ficha-acoes">
+            <a href="/admin" class="btn">Painel administrativo</a>
+          </div>
+        {/if}
       {:else}
         <form class="ficha-apelido" onsubmit={saveApelido}>
           <input
@@ -534,7 +587,7 @@
            tela estreita, e o número do treino virou detalhe secundário porque
            ninguém procura presença por id. -->
       <ol class="ficha-presencas">
-        {#each historico as h}
+        {#each presencasDaPagina as h}
           <li>
             <span class="ficha-presenca-data">
               {new Date(h.data_treino + "T00:00:00").toLocaleDateString("pt-BR", {
@@ -549,6 +602,40 @@
           </li>
         {/each}
       </ol>
+
+      <!-- Mesmas classes globais do Ranking Geral. Lá são links, porque a
+           página inteira recarrega; aqui é botão, porque a lista já está toda
+           na memória e trocar de página não pede nada ao servidor. -->
+      {#if totalPaginasPresencas > 1}
+        <nav class="ranking-pagination" aria-label="Páginas das presenças">
+          <button
+            class="chip"
+            onclick={() => (paginaPresencas -= 1)}
+            disabled={paginaPresencas === 1}
+            aria-label="Página anterior"
+          >
+            ‹
+          </button>
+          {#each { length: totalPaginasPresencas } as _, i}
+            <button
+              class="chip"
+              class:ativo={paginaPresencas === i + 1}
+              onclick={() => (paginaPresencas = i + 1)}
+              aria-current={paginaPresencas === i + 1 ? "page" : undefined}
+            >
+              {i + 1}
+            </button>
+          {/each}
+          <button
+            class="chip"
+            onclick={() => (paginaPresencas += 1)}
+            disabled={paginaPresencas === totalPaginasPresencas}
+            aria-label="Próxima página"
+          >
+            ›
+          </button>
+        </nav>
+      {/if}
     {/if}
 
     <h2>Conquistas</h2>
@@ -652,10 +739,59 @@
   }
 
   .ficha-nome {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     font-family: var(--ds-font-display);
     font-size: 1.5rem;
     line-height: 1.15;
     color: var(--ds-gold-light);
+  }
+
+  /* Botão que é só o ícone: alvo de 34px, que é o mínimo que se acerta com o
+     dedo, mesmo o desenho tendo 16. Sem moldura parada, porque duas molduras
+     douradas ao redor da foto já seriam ruído; a borda aparece no toque. */
+  .ficha-icone {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ds-text-4);
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .ficha-icone:hover {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+    color: var(--ds-gold-light);
+  }
+
+  .ficha-icone:focus-visible {
+    outline: 2px solid var(--ds-gold-light);
+    outline-offset: 2px;
+  }
+
+  /* Encostado no topo da linha, não no meio dela: é o canto do cartão que ele
+     ocupa. Fora do fluxo do nome, então nome comprido não empurra nem cobre. */
+  .ficha-sair {
+    margin-left: auto;
+    align-self: flex-start;
+  }
+
+  .ficha-sair:hover {
+    border-color: rgba(192, 57, 43, 0.6);
+    background: rgba(192, 57, 43, 0.12);
+    color: #e57368;
   }
 
   /* Encolhe com o próprio texto: em bloco ele esticaria pela largura do card. */

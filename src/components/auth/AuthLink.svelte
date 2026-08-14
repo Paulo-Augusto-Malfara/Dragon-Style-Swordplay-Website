@@ -17,6 +17,25 @@
 
   const inicial = $derived((nome ?? "").trim().charAt(0).toUpperCase());
 
+  /* Quem precisar saber "sou eu?" no navegador lê do <html>, em vez de repetir
+   * a consulta abaixo. Hoje é o destaque da sua linha no ranking, que não pode
+   * vir montado do servidor: aquele HTML fica no cache de borda e é o mesmo pra
+   * todo visitante.
+   *
+   * Precisa ser recarimbado a cada navegação, e isso não é zelo: o ClientRouter
+   * troca os atributos do <html> pelos da página nova, que nasce sem este. Antes
+   * quem repunha era o próprio componente, que remontava junto com o cabeçalho;
+   * desde que o <header> virou transition:persist ele monta uma vez só, e sem
+   * este listener o ranking abre sem marcar ninguém. Defeito calado: nada
+   * quebra, só não acende. */
+  let idMembro: number | null = null;
+
+  function marcarNoHtml() {
+    if (idMembro == null) return;
+    document.documentElement.dataset.membro = String(idMembro);
+    document.dispatchEvent(new CustomEvent("ds:membro"));
+  }
+
   onMount(async () => {
     // ponytail: Header.astro (and this island) render on every page, including
     // the 40 pages that are prerendered at build time -- Astro SSRs a Svelte
@@ -40,14 +59,11 @@
       .eq("auth_user_id", session.user.id)
       .single();
 
-    /* Quem precisar saber "sou eu?" no navegador lê daqui, em vez de repetir
-     * esta consulta. Hoje é o destaque da sua linha no ranking, que não pode
-     * vir montado do servidor: aquele HTML fica no cache de borda e é o mesmo
-     * pra todo visitante. Este componente já roda em toda página e já pergunta
-     * isso pro avatar do cabeçalho, então sai de graça. */
+    // A consulta sai de graça: este componente já pergunta isso pro avatar.
     if (membro?.id_membro != null) {
-      document.documentElement.dataset.membro = String(membro.id_membro);
-      document.dispatchEvent(new CustomEvent("ds:membro"));
+      idMembro = membro.id_membro;
+      marcarNoHtml();
+      document.addEventListener("astro:page-load", marcarNoHtml);
     }
 
     nome = membro?.apelido || membro?.nome || "Minha conta";
