@@ -74,6 +74,7 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
     colunas={4}
     itens={paginaAtual.map((m, i) => ({
       posicao: inicio + i + 1,
+      idMembro: m.id_membro,
       nome: m.nome,
       fotoUrl: m.foto_url,
       nomeFaixa: m.nome_faixa,

@@ -68,6 +68,7 @@ const atual = classes.find(([nome]) => slug(nome) === pedida) ?? classes[0];
           colunas={2}
           itens={atual[1]!.map((m, i) => ({
             posicao: i + 1,
+            idMembro: m.id_membro,
             nome: m.nome,
             fotoUrl: m.foto_url,
             nomeFaixa: faixaPorMembro.get(m.id_membro),

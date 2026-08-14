@@ -61,8 +61,19 @@ const atual = Astro.url.pathname.replace(/\/$/, "") || "/";
 <script>
   // ponytail: only syncs aria-expanded for screen readers - the checkbox still
   // drives the show/hide via CSS, no behavior change for mouse/touch users
-  document.getElementById("nav-toggle")?.addEventListener("change", (e) => {
+  function sincronizar(e: Event) {
     const checkbox = e.currentTarget as HTMLInputElement;
     checkbox.setAttribute("aria-expanded", String(checkbox.checked));
-  });
+  }
+
+  // O ClientRouter troca o #nav-toggle a cada navegação, então religa a cada
+  // página. Chamado direto também porque /admin e /auth não têm ClientRouter,
+  // e lá o astro:page-load nunca dispara. Rodar duas vezes na primeira carga
+  // não duplica nada: o navegador ignora addEventListener com a mesma função.
+  function ligar() {
+    document.getElementById("nav-toggle")?.addEventListener("change", sincronizar);
+  }
+
+  ligar();
+  document.addEventListener("astro:page-load", ligar);
 </script>

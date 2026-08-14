@@ -4,6 +4,7 @@ import Footer from "../components/Footer.astro";
 import NavMenu from "../components/NavMenu.astro";
 import BottomNav from "../components/BottomNav.astro";
 import BuscaGlobal from "../components/BuscaGlobal.astro";
+import { ClientRouter } from "astro:transitions";
 import "../styles/global.css";
 
 interface Props {
@@ -13,6 +14,21 @@ interface Props {
 const { title, description = "Site do grupo Dragon Style Swordplay e Eventos." } = Astro.props;
 const canonicalURL = new URL(Astro.url.pathname, Astro.site);
 const ogImageURL = new URL("/assets/img/og-image.webp", Astro.site);
+
+/* Transição de página no site público, e só nele.
+ *
+ * O admin fica de fora de propósito. O ClientRouter troca o corpo do documento
+ * sem recarregar a página, e as ilhas Svelte de lá guardam coisa que precisa
+ * ser desfeita na saída: o TreinoAtivo mantém um canal de Realtime aberto e
+ * conta com onDestroy pra fechá-lo. Trocar o DOM por baixo dele arriscaria
+ * canal vazado e assinatura duplicada bem na tela em que três organizadores
+ * lançam presença ao mesmo tempo. O admin é ferramenta de trabalho, e ali
+ * confiabilidade vale mais que a transição.
+ *
+ * Quando o destino não tem ClientRouter, o Astro faz a navegação completa de
+ * sempre, então entrar e sair do admin continua funcionando sem nada especial.
+ */
+const comTransicao = !/^\/(admin|auth)(\/|$)/.test(Astro.url.pathname);
 ---
 
 <!doctype html>
@@ -54,6 +70,7 @@ const ogImageURL = new URL("/assets/img/og-image.webp", Astro.site);
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImageURL} />
     <title>{title} - Dragon Style Swordplay e Eventos</title>
+    {comTransicao && <ClientRouter />}
   </head>
   <body>
     <header>

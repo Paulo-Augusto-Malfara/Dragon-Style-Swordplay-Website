@@ -36,9 +36,19 @@
 
     const { data: membro } = await supabase
       .from("dMembros")
-      .select("nome, apelido, foto_url")
+      .select("id_membro, nome, apelido, foto_url")
       .eq("auth_user_id", session.user.id)
       .single();
+
+    /* Quem precisar saber "sou eu?" no navegador lê daqui, em vez de repetir
+     * esta consulta. Hoje é o destaque da sua linha no ranking, que não pode
+     * vir montado do servidor: aquele HTML fica no cache de borda e é o mesmo
+     * pra todo visitante. Este componente já roda em toda página e já pergunta
+     * isso pro avatar do cabeçalho, então sai de graça. */
+    if (membro?.id_membro != null) {
+      document.documentElement.dataset.membro = String(membro.id_membro);
+      document.dispatchEvent(new CustomEvent("ds:membro"));
+    }
 
     nome = membro?.apelido || membro?.nome || "Minha conta";
     fotoUrl = membro?.foto_url ?? null;

@@ -7,6 +7,12 @@
  * checkbox que o NavMenu já usa pra abrir/fechar. Um <label> alcança o input
  * por id de qualquer lugar do documento, então não precisa de JS nem de um
  * segundo mecanismo de abertura pra manter em sincronia.
+ *
+ * O `data-astro-prefetch="viewport"` é a exceção à estratégia `hover` do
+ * astro.config: toque não tem hover, e o dock é a navegação do app no celular.
+ * São quatro links, o dock está sempre visível, então os quatro destinos ficam
+ * buscados antes do toque. Sai barato porque /, /agenda e /resumo-das-classes
+ * são servidos do cache de borda (ver a regra de Cache-Control no vercel.json).
  */
 const caminho = Astro.url.pathname.replace(/\/$/, "") || "/";
 
@@ -45,6 +51,7 @@ const itens = [
         <a
           href={i.href}
           class="dock-item"
+          data-astro-prefetch="viewport"
           aria-current={i.ativo ? "page" : undefined}
         >
           <span class="dock-ponto" aria-hidden="true" />

@@ -14,7 +14,15 @@
  */
 ---
 
-<dialog id="busca-dialog" class="busca" aria-label="Buscar no site">
+{/*
+  transition:persist é o que mantém a busca viva entre navegações. O script
+  abaixo é um módulo: ele roda uma vez e guarda `dialogo`, `campo` e `lista` num
+  fechamento. Sem persistir, a troca de página do ClientRouter substituiria
+  esses três elementos e o script continuaria falando com os antigos, já fora do
+  documento: Ctrl+K abriria um <dialog> que ninguém vê. De brinde, o índice
+  baixado de /busca.json sobrevive à navegação e não é buscado de novo.
+*/}
+<dialog id="busca-dialog" class="busca" aria-label="Buscar no site" transition:persist>
   <form method="dialog" class="busca-topo">
     <span class="busca-lupa" aria-hidden="true"></span>
     <input
@@ -259,8 +267,12 @@
       desenhar();
     }
 
-    document.querySelectorAll("[data-abre-busca]").forEach((botao) => {
-      botao.addEventListener("click", abrir);
+    // Delegado no document, e não ligado botão a botão: o botão da lupa vive no
+    // cabeçalho, que é trocado a cada navegação do ClientRouter. Ligar no
+    // elemento deixaria a lupa morta da segunda página em diante.
+    document.addEventListener("click", (evento) => {
+      const alvo = (evento.target as HTMLElement | null)?.closest("[data-abre-busca]");
+      if (alvo) abrir();
     });
 
     campo.addEventListener("input", desenhar);

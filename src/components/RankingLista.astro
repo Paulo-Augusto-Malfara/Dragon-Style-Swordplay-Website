@@ -10,6 +10,8 @@ import { corDaFaixa } from "../lib/faixa";
  */
 export type Colocacao = {
   posicao: number;
+  /** Só pro navegador achar a sua linha. Ver o <script> no fim do arquivo. */
+  idMembro: number;
   nome: string;
   fotoUrl?: string | null;
   nomeFaixa?: string | null;
@@ -35,7 +37,10 @@ const { itens, colunas = 4 } = Astro.props;
 <ol class="rk" style={`--rk-colunas:${colunas}`}>
   {
     itens.map((item) => (
-      <li class:list={["rk-item", item.posicao <= 3 && `rk-podio rk-${item.posicao}`]}>
+      <li
+        class:list={["rk-item", item.posicao <= 3 && `rk-podio rk-${item.posicao}`]}
+        data-membro={item.idMembro}
+      >
         <span class="rk-pos">{item.posicao}</span>
 
         <span class="rk-quem">
@@ -228,4 +233,80 @@ const { itens, colunas = 4 } = Astro.props;
       font-size: 1.15rem;
     }
   }
+
+  /* "Esta linha é você".
+   *
+   * Anel por fora, e não troca de borda ou de fundo: assim ele soma ao pódio em
+   * vez de disputar com o dourado do primeiro lugar, e você se reconhece na
+   * lista sem que a leitura de quem está ganhando se perca. */
+  .rk-eu {
+    box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.22);
+  }
+
+  /* .rk-eu pode ficar escopado porque o <li> que recebe a classe já nasce
+     neste template, e já carrega o atributo de escopo do Astro. A pílula não:
+     ela é criada por JS, ver o bloco is:global logo abaixo. */
 </style>
+
+{/*
+  is:global é obrigatório aqui, não preferência, pelo mesmo motivo da busca: o
+  Astro escopa estilo carimbando um atributo nos elementos do TEMPLATE, e a
+  pílula nasce de document.createElement em tempo de execução, sem carimbo
+  nenhum. Escopada, ela sairia sem estilo e o defeito seria só visual, do tipo
+  que passa despercebido em revisão de código.
+*/}
+<style is:global>
+  /* A palavra existe porque cor sozinha não diz "você", e porque quem usa
+     leitor de tela também precisa da informação. */
+  .rk-eu-marca {
+    flex: none;
+    padding: 2px 7px;
+    border-radius: 999px;
+    border: 1px solid var(--ds-line-strong);
+    background: var(--ds-bg-alt);
+    font-size: 0.62rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ds-text-3);
+  }
+</style>
+
+<script>
+  /* O destaque da sua linha é aceso pelo navegador, nunca pelo servidor.
+   *
+   * O HTML do ranking fica 60s no cache de borda da Vercel e é entregue igual
+   * pra todo visitante. Se o destaque viesse pronto do servidor, a borda
+   * mostraria a linha de um membro marcada como sendo de outro. Ver a regra de
+   * Cache-Control no vercel.json e o teste que guarda isso.
+   *
+   * Quem descobre o id é o AuthLink, que já roda em toda página e já faz essa
+   * consulta pro avatar do cabeçalho. Aqui só se escuta o resultado, pra não
+   * existirem duas consultas perguntando a mesma coisa.
+   */
+  let meuId: string | null = null;
+
+  function marcar() {
+    // O ClientRouter reescreve os atributos do <html> a cada navegação e leva o
+    // data-membro junto, então o valor fica guardado aqui depois da primeira
+    // vez e as páginas seguintes acendem sem esperar a consulta de novo.
+    meuId = document.documentElement.dataset.membro || meuId;
+    if (!meuId) return;
+
+    for (const item of document.querySelectorAll<HTMLElement>(".rk-item")) {
+      // Comparado em JS em vez de interpolado num seletor: id não vem daqui,
+      // mas seletor montado com string é o tipo de coisa que envelhece mal.
+      if (item.dataset.membro !== meuId) continue;
+      if (item.querySelector(".rk-eu-marca")) continue; // já marcada
+
+      item.classList.add("rk-eu");
+      const marca = document.createElement("span");
+      marca.className = "rk-eu-marca";
+      marca.textContent = "você";
+      item.querySelector(".rk-quem")?.append(marca);
+    }
+  }
+
+  marcar(); // caso o AuthLink já tenha resolvido antes deste script rodar
+  document.addEventListener("ds:membro", marcar);
+  document.addEventListener("astro:page-load", marcar);
+</script>

@@ -40,6 +40,17 @@ export default defineConfig({
   // a server. Only /admin/* and the two Supabase-backed public pages opt in via
   // `export const prerender = false`. The adapter is still required for those.
   adapter: vercel(),
+  // O navegador busca o HTML do link antes do clique, então a navegação não
+  // espera a rede. Não é cache: a resposta é fresca, só chegou antes, e por
+  // isso vale também nas páginas SSR sem risco de mostrar dado velho.
+  //
+  // A estratégia é `hover` de propósito, e não `viewport`. Com `viewport` todo
+  // link visível vira um pedido, e como /, /agenda, os rankings e o mural são
+  // SSR, isso multiplicaria invocação de função na Vercel por visitante. O
+  // toque não tem hover, então o dock (que é a navegação do app no celular)
+  // marca `viewport` link a link no BottomNav: são cinco, e são justamente as
+  // telas entre as quais o pessoal fica pulando.
+  prefetch: { prefetchAll: true, defaultStrategy: "hover" },
   // expõe o dev server na rede local pra testar no celular sem digitar
   // `-- --host` toda vez. Só afeta `astro dev`; o build da Vercel ignora.
   server: { host: true },

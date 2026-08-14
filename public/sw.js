@@ -1,18 +1,34 @@
 /* Dragon Style - service worker
  *
- * HTML: network-first, cai pro cache só quando a rede falha (offline).
+ * HTML: rede primeiro, com prazo. Passou de LIMITE_MS sem resposta, entrega o
+ *   que houver em cache e deixa a rede terminar por fora pra atualizar.
  * Estático (css/js/img/fonte): cache-first, porque o Astro versiona o nome do arquivo.
  *
  * Nunca guarda em cache:
- *  - rotas privadas (ficha, admin, login), senão os dados de um membro ficariam
+ *  - rotas privadas (admin, login), senão os dados de um membro ficariam
  *    visíveis pro próximo que abrisse o app num aparelho compartilhado;
  *  - respostas do Supabase, que são cross-origin e não passam no teste type === 'basic'.
  */
-const VERSION = "ds-v1";
+const VERSION = "ds-v2";
 const OFFLINE = "/offline.html";
 
-// Casa com /dashboard, /admin/... e /auth/..., mas não com /agenda.
-const PRIVADO = /^\/(dashboard|admin|auth)(\/|$)/;
+// Quanto a tela espera a rede antes de aceitar o cache. Não é o tempo do
+// pedido: a rede continua correndo e o que ela trouxer entra no cache do mesmo
+// jeito. É só até quando vale a pena olhar pra uma tela parada.
+const LIMITE_MS = 2500;
+
+/* Casa com /admin/... e /auth/..., mas não com /agenda.
+ *
+ * /dashboard saiu daqui de propósito. Ele não tem `prerender = false`: o HTML é
+ * construído no build e não contém dado nenhum de membro, tudo vem do
+ * MemberDashboard.svelte depois, falando com o Supabase pelo navegador. Guardar
+ * essa casca não expõe nada em aparelho compartilhado, e faz a ficha abrir na
+ * hora em vez de esperar o HTML.
+ *
+ * /admin e /auth continuam fora, e não podem sair: aqueles são SSR de verdade,
+ * o dado vai dentro do HTML. Se um dia /dashboard ganhar `prerender = false`,
+ * ele volta pra cá junto. */
+const PRIVADO = /^\/(admin|auth)(\/|$)/;
 
 const CORE = [
   "/",
@@ -99,20 +115,51 @@ self.addEventListener("fetch", (e) => {
   if (url.origin !== self.location.origin) return; // Supabase, Vercel Live, etc.
   if (PRIVADO.test(url.pathname)) return; // deixa passar direto pra rede
 
-  const isDoc =
-    req.mode === "navigate" ||
-    (req.headers.get("accept") || "").includes("text/html");
+  /* Documento é tudo que não termina em extensão de arquivo estático.
+   *
+   * Antes isto era `req.mode === "navigate" || accept inclui text/html`, e o
+   * ClientRouter derrubaria os dois testes: ele troca de página com um `fetch`
+   * comum, que não tem mode "navigate" e manda `Accept: * / *`. Cada navegação
+   * cairia no ramo cache-first ali embaixo, e o HTML ficaria congelado no
+   * aparelho até a próxima troca de VERSION. Nada disso apareceria em
+   * desenvolvimento, onde o service worker é desinstalado de propósito.
+   *
+   * `.json` está fora da lista de propósito: /busca.json é dado, e cache-first
+   * nele deixaria o índice da busca velho.
+   */
+  const ARQUIVO =
+    /\.(css|m?js|png|jpe?g|webp|avif|gif|svg|ico|woff2?|ttf|webmanifest|xml|txt)$/i;
 
-  if (isDoc) {
+  if (!ARQUIVO.test(url.pathname)) {
+    const daRede = fetch(req).then((res) => {
+      const copia = res.clone();
+      caches.open(VERSION).then((c) => c.put(req, copia));
+      return res;
+    });
+    // A rede segue correndo mesmo depois de o cache já ter respondido, e o que
+    // ela trouxer atualiza o cache pra próxima vez. Este catch existe só pra
+    // essa corrida perdida não virar "unhandled rejection" no console.
+    daRede.catch(() => {});
+
+    // Sem isto, rede ruim deixa a tela parada até o navegador desistir sozinho,
+    // que é o que dá a sensação de travamento. Devolve undefined quando não há
+    // nada em cache ainda, e aí o passo seguinte volta a esperar a rede.
+    const prazo = new Promise((resolve) => setTimeout(resolve, LIMITE_MS)).then(() =>
+      caches.match(req),
+    );
+
     e.respondWith(
-      fetch(req)
-        .then((res) => {
-          const copia = res.clone();
-          caches.open(VERSION).then((c) => c.put(req, copia));
-          return res;
-        })
+      Promise.race([daRede, prazo])
+        .then((res) => res || daRede)
         .catch(() =>
-          caches.match(req).then((hit) => hit || caches.match(OFFLINE)),
+          caches.match(req).then((hit) => {
+            if (hit) return hit;
+            // A página de offline só serve pra quem está trocando de página.
+            // Devolver HTML pra um pedido de dado (o /busca.json) faria o
+            // `resposta.json()` estourar em vez de falhar limpo.
+            if (req.mode === "navigate") return caches.match(OFFLINE);
+            throw new Error("sem rede");
+          }),
         ),
     );
     return;
