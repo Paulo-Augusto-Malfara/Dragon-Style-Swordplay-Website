@@ -1547,51 +1547,216 @@ p {
 }
 
 
-/* ======== ADMIN PANEL ======== */
+/* ======== PAINEL ADMINISTRATIVO ========
+
+   O painel era a última parte do site ainda escrita nas variáveis antigas, e
+   isso aparecia: todo botão tinha a mesma borda dourada, então "editar",
+   "excluir" e "salvar" gritavam no mesmo volume; todo formulário era uma coluna
+   única de campos com 700px de largura, então no desktop sobrava metade da tela
+   vazia enquanto a agenda pedia oito rolagens; e toda lista era uma linha de
+   texto com botõezinhos no fim.
+
+   O sistema abaixo tem quatro peças, e elas valem pro painel inteiro:
+
+   BOTÃO      hierarquia de três níveis. Dourado cheio é a ação principal da
+              tela (uma por tela), fantasma é ação secundária, vermelho é
+              destrutivo. Antes os três eram a mesma borda dourada.
+   CAMPO      grade que se adapta: campo curto divide a linha, campo longo
+              ocupa a linha inteira via .campo-largo.
+   LINHA      a mesma linguagem das listas do site (ver RankingLista.astro):
+              cartão compacto, conteúdo à esquerda, ação à direita, quebra pra
+              baixo quando falta largura.
+   TABELA     continua <table> no desktop, onde comparar coluna é o ponto, e
+              vira cartão por registro no celular (ver .tabela-admin no fim do
+              bloco das tabelas). Antes rolava de lado e o nome saía da tela.  */
+
+/* --- Botões --- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.45em;
+  min-height: 2.7em;
+  padding: 0.55em 1.3em;
+  border-radius: 10px;
+  border: 1px solid var(--ds-gold-dim);
+  background: transparent;
+  color: var(--ds-gold);
+  font-family: "Bree Serif", sans-serif;
+  font-size: 0.92em;
+  line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--ds-gold-wash);
+  border-color: var(--ds-gold);
+  color: var(--ds-gold-light);
+}
+
+/* O anel de foco é do teclado, não do mouse: :focus-visible não dispara no
+   clique, então ninguém vê contorno ao clicar e quem navega por Tab nunca
+   perde de vista onde está. */
+.btn:focus-visible,
+.admin-form input:focus-visible,
+.admin-form select:focus-visible,
+.admin-form textarea:focus-visible {
+  outline: 2px solid var(--ds-gold-light);
+  outline-offset: 2px;
+}
+
+.btn:disabled,
+.btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--ds-gold);
+  border-color: var(--ds-gold);
+  color: #17202a;
+  font-weight: 400;
+}
+
+.btn-primary:hover {
+  background: var(--ds-gold-light);
+  border-color: var(--ds-gold-light);
+  color: #17202a;
+}
+
+/* Ação secundária: existe, dá pra achar, mas não disputa atenção com a
+   principal. É o que "editar", "trocar" e "cancelar" deviam ter sido sempre. */
+.btn-ghost {
+  border-color: var(--ds-line-strong);
+  color: var(--ds-text-2);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: var(--ds-font-body);
+}
+
+.btn-ghost:hover {
+  border-color: var(--ds-gold-dim);
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
+}
+
+.btn-sm {
+  min-height: 2.2em;
+  padding: 0.35em 0.85em;
+  font-size: 0.8em;
+  border-radius: 8px;
+}
+
+.btn-danger {
+  border-color: rgba(192, 57, 43, 0.6);
+  color: #e57368;
+  background: transparent;
+}
+
+.btn-danger:hover {
+  background: rgba(192, 57, 43, 0.15);
+  border-color: var(--ds-danger);
+  color: #f2a79e;
+}
+
+/* --- Formulário --- */
 
 .admin-form {
   display: flex;
   flex-direction: column;
-  gap: 1.2em;
-  max-width: 700px;
-  margin: 1.5em auto;
-  padding: 1.5em;
-  background: var(--secondary-color-opacity);
-  border: 1px solid var(--golden-color-opaco);
-  border-radius: 12px;
+  gap: 1.1em;
+  max-width: 760px;
+  margin: 0 auto 1.6em;
+  padding: clamp(1.1em, 3vw, 1.6em);
+  background: var(--ds-surface);
+  border: 1px solid var(--ds-line);
+  border-radius: var(--card-radius);
 }
 
-/* deixa o <form> de uma etapa (ex: RecrutarMembro) se comportar como se não
+/* Deixa o <form> de uma etapa (ex: RecrutarMembro) se comportar como se não
    existisse no layout, pra seus filhos participarem do flex/gap do .admin-form
-   pai em vez de ficarem presos num box sem gap */
+   pai em vez de ficarem presos num box sem gap. */
 .admin-form > form {
   display: contents;
 }
 
-.gold-title.card-titulo {
-  text-align: center;
-  font-size: 1.15em;
-  font-family: "Bree Serif", sans-serif;
+/* Título de bloco dentro do formulário. Fica alinhado à esquerda com um fio
+   dourado curto embaixo em vez de centralizado: formulário se lê de cima pra
+   baixo pela margem esquerda, e título centralizado quebra essa coluna. */
+.admin-form-titulo {
+  margin: 0;
+  font-family: var(--ds-font-display);
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--ds-gold-light);
+}
+
+.admin-form-titulo + .admin-form-nota {
+  margin-top: -0.7em;
+}
+
+.admin-form-nota {
+  margin: 0;
+  max-width: none;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ds-text-4);
+}
+
+/* A grade é o ganho de desktop: dois campos curtos por linha em vez de uma
+   coluna só. auto-fit + minmax faz a conta sozinho, então no celular vira
+   coluna única sem media query nenhuma. */
+.campos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
+  gap: 1em 1.1em;
+}
+
+.campo-largo {
+  grid-column: 1 / -1;
 }
 
 .admin-form label {
   display: flex;
   flex-direction: column;
   gap: 0.4em;
-  font-size: 0.95em;
-  color: var(--golden-color);
+  font-size: 0.78rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ds-text-3);
 }
 
-.admin-form label.label-center {
-  align-items: center;
-  text-align: center;
-}
 
 .admin-form label.checkbox {
   flex-direction: row;
   align-items: center;
   gap: 0.6em;
-  color: var(--text-primary-color);
+  font-size: 0.92rem;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--ds-text-2);
+  padding: 0.5em 0;
+}
+
+/* Texto de apoio embaixo do campo. Volta ao peso normal: o rótulo é caixa
+   alta, e uma explicação inteira em caixa alta não se lê. */
+.admin-form label small {
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.5;
+  color: var(--ds-text-4);
 }
 
 .admin-form input[type="text"],
@@ -1599,18 +1764,30 @@ p {
 .admin-form input[type="url"],
 .admin-form input[type="date"],
 .admin-form input[type="time"],
+.admin-form input[type="number"],
 .admin-form select,
 .admin-form textarea {
-  background: var(--box-primary-color);
-  border: 1px solid var(--border-dark-color-2);
-  border-radius: 6px;
-  color: var(--text-primary-color);
+  width: 100%;
+  min-height: 2.9em;
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 10px;
+  color: var(--ds-text-1);
   padding: 0.6em 0.8em;
-  font-family: inherit;
-  font-size: 1em;
-  transition: border-color 0.2s ease-in-out;
+  font-family: var(--ds-font-body);
+  font-size: 0.98rem;
+  letter-spacing: 0;
+  text-transform: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
   /* faz o ícone nativo do calendário/relógio aparecer claro no fundo escuro */
   color-scheme: dark;
+}
+
+.admin-form textarea {
+  line-height: 1.55;
+  resize: vertical;
 }
 
 .admin-form input[type="text"]:focus,
@@ -1618,119 +1795,189 @@ p {
 .admin-form input[type="url"]:focus,
 .admin-form input[type="date"]:focus,
 .admin-form input[type="time"]:focus,
+.admin-form input[type="number"]:focus,
 .admin-form select:focus,
 .admin-form textarea:focus {
-  border-color: var(--golden-color);
+  border-color: var(--ds-gold);
+  box-shadow: 0 0 0 3px var(--ds-gold-wash);
+  outline: none;
+}
+
+.admin-form input::placeholder,
+.admin-form textarea::placeholder {
+  color: var(--ds-text-5);
 }
 
 .admin-form input[type="checkbox"] {
-  accent-color: var(--golden-color);
-  width: 1.1em;
-  height: 1.1em;
+  accent-color: var(--ds-gold);
+  width: 1.15em;
+  height: 1.15em;
+  flex: none;
 }
 
-.btn {
-  display: inline-flex;
+/* Barra de ação do formulário. Fio em cima porque "salvar" encerra o
+   formulário: sem a separação, o botão parece só mais um campo. */
+.form-acoes {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
-  gap: 0.4em;
-  padding: 0.6em 1.4em;
-  border-radius: 8px;
-  border: 1px solid var(--golden-color);
-  background: transparent;
-  color: var(--golden-color);
-  font-family: "Bree Serif", sans-serif;
-  font-size: 0.95em;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  cursor: pointer;
-  text-decoration: none;
-  transition: all 0.2s ease-in-out;
+  gap: 0.6em;
+  margin-top: 0.2em;
+  padding-top: 1em;
+  border-top: 1px solid var(--ds-line);
 }
 
-.btn:hover {
-  background: var(--golden-color);
-  color: var(--primary-color);
-  box-shadow: 0 0 0.8em var(--golden-color-opaco);
+.form-acoes .btn {
+  flex: 1 1 auto;
+  max-width: 100%;
 }
 
-.btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
+@media (min-width: 620px) {
+  .form-acoes .btn {
+    flex: none;
+  }
 }
 
-.btn-primary {
-  background: var(--golden-color);
-  color: var(--primary-color);
+/* Bloco de ação destrutiva, longe do botão de salvar de propósito. */
+.zona-perigo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8em;
+  max-width: 760px;
+  margin: 0 auto 1.6em;
+  padding: 0.9em 1.1em;
+  border: 1px solid rgba(192, 57, 43, 0.35);
+  border-radius: var(--card-radius);
+  background: rgba(192, 57, 43, 0.06);
 }
 
-.btn-primary:hover {
-  background: transparent;
-  color: var(--golden-color);
+.zona-perigo p {
+  margin: 0;
+  max-width: 46ch;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--ds-text-3);
 }
 
-.btn-sm {
-  padding: 0.35em 0.9em;
-  font-size: 0.8em;
+/* --- Avisos --- */
+
+.admin-error,
+.admin-aviso,
+.admin-ok {
+  display: flex;
+  gap: 0.55em;
+  align-items: flex-start;
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0.7em 0.9em;
+  border: 1px solid;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  line-height: 1.5;
 }
 
-.btn-danger {
-  border-color: #c0392b;
-  color: #e57368;
+.admin-error {
+  border-color: rgba(192, 57, 43, 0.45);
+  background: rgba(192, 57, 43, 0.1);
+  color: #f0a79e;
 }
 
-.btn-danger:hover {
-  background: #c0392b;
-  color: var(--text-primary-color);
-  box-shadow: 0 0 0.8em rgba(192, 57, 43, 0.5);
+.admin-aviso {
+  border-color: var(--ds-gold-dim);
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
 }
+
+.admin-ok {
+  border-color: rgba(95, 168, 107, 0.45);
+  background: rgba(95, 168, 107, 0.1);
+  color: #9fd3a8;
+}
+
+/* --- Listas --- */
 
 .admin-list {
   list-style: none;
-  max-width: 700px;
-  margin: 1em auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 760px;
+  margin: 0 auto 1em;
+  padding: 0;
 }
 
 .admin-list li {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5em 0.8em;
   align-items: center;
-  padding: 0.8em 0;
-  border-bottom: 1px solid var(--border-dark-color-2);
+  gap: 8px 12px;
+  padding: 11px 14px;
+  border: 1px solid var(--ds-line);
+  border-radius: 12px;
+  background: var(--ds-surface);
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease;
 }
 
-.admin-list li > span {
-  flex: 1;
-  min-width: 60%;
-  color: var(--text-primary-color);
+.admin-list li:hover {
+  border-color: var(--ds-line-strong);
 }
 
-/* variante centralizada (ex: histórico de treinos com bolinha + texto) */
-.admin-list li.historico-item {
-  justify-content: center;
-}
-
-.admin-list li.historico-item > span {
-  flex: none;
-  min-width: 0;
-  color: var(--text-primary-color);
-}
-
-.historico-link {
+/* Linha inteira clicável (histórico de treinos). display:contents faz o <a>
+   sumir da caixa e os filhos dele participarem do flex do <li>. */
+.row-link {
   display: contents;
   color: inherit;
   text-decoration: none;
 }
 
-.admin-list li.historico-item:hover {
-  background: var(--secondary-color-opacity);
+.admin-list li:has(.row-link):hover {
+  border-color: var(--ds-gold-dim);
+  background: var(--ds-gold-wash);
   cursor: pointer;
 }
 
+.row-corpo {
+  flex: 1 1 190px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.row-titulo {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.95rem;
+  color: var(--ds-text-1);
+}
+
+/* Segunda linha da linha: números e etiquetas do registro. */
+.row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  font-size: 0.78rem;
+  color: var(--ds-text-4);
+}
+
+.row-acoes {
+  flex: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
 .admin-list-actions {
-  max-width: 700px;
+  max-width: 760px;
   margin: 0 auto 2em;
   display: flex;
   flex-wrap: wrap;
@@ -1738,69 +1985,213 @@ p {
   justify-content: center;
 }
 
-.admin-error {
-  color: #e57368;
-  width: auto;
+/* Cabeçalho de seção com contagem e ação do lado. Antes o "+ novo" ficava
+   solto embaixo da lista, longe do título que ele completa. */
+.admin-secao-cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  max-width: 760px;
+  margin: 1.8em auto 0.7em;
 }
+
+.admin-secao-cab h2 {
+  margin: 0;
+}
+
+.admin-secao-cab .contagem {
+  font-family: var(--ds-font-body);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: var(--ds-text-5);
+}
+
+/* --- Números do painel --- */
+
+.admin-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr));
+  gap: 10px;
+  margin: 0 0 1.6em;
+  padding: 0;
+  list-style: none;
+}
+
+.admin-stat {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 13px 15px;
+  border: 1px solid var(--ds-line);
+  border-radius: 12px;
+  background: var(--ds-surface);
+}
+
+.admin-stat-valor {
+  font-family: var(--ds-font-display);
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.05;
+  color: var(--ds-gold-light);
+}
+
+.admin-stat-rotulo {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--ds-text-5);
+}
+
+/* --- Carregando --- */
+
+/* Esqueleto no lugar de "Carregando...". A palavra não diz nada sobre o que
+   vem, e a lista aparecendo de uma vez empurra a página; o bloco cinza já
+   ocupa a altura final do conteúdo. */
+.esqueleto {
+  border-radius: 12px;
+  background: linear-gradient(
+    90deg,
+    var(--ds-surface) 25%,
+    var(--ds-surface-raised) 37%,
+    var(--ds-surface) 63%
+  );
+  background-size: 400% 100%;
+  animation: esqueleto-brilho 1.4s ease infinite;
+}
+
+.esqueleto-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 760px;
+  margin: 0 auto 1em;
+}
+
+.esqueleto-linha {
+  height: 58px;
+}
+
+.esqueleto-form {
+  height: 320px;
+  max-width: 760px;
+  margin: 0 auto 1.6em;
+}
+
+@keyframes esqueleto-brilho {
+  from {
+    background-position: 100% 50%;
+  }
+  to {
+    background-position: 0 50%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .esqueleto {
+    animation: none;
+  }
+}
+
+/* --- Vazio --- */
+
+.admin-vazio {
+  max-width: 760px;
+  margin: 0 auto 1em;
+  padding: 1.8em 1.2em;
+  border: 1px dashed var(--ds-line-strong);
+  border-radius: var(--card-radius);
+  text-align: center;
+  color: var(--ds-text-4);
+  font-size: 0.92rem;
+  line-height: 1.6;
+}
+
+/* --- Busca de membro --- */
 
 .membro-picker {
   position: relative;
   width: 100%;
-  max-width: 420px;
-  margin: 0 auto;
+  margin: 0;
 }
 
-.membro-picker input[type="text"] {
+.membro-picker input[type="text"],
+.membro-picker input[type="search"] {
   width: 100%;
-  background: var(--box-primary-color);
-  border: 1px solid var(--border-dark-color-2);
-  border-radius: 6px;
-  color: var(--text-primary-color);
-  padding: 0.6em 0.8em;
-  font-family: inherit;
-  font-size: 1em;
+  min-height: 2.9em;
+  background: var(--ds-bg-alt);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 10px;
+  color: var(--ds-text-1);
+  padding: 0.6em 0.9em;
+  font-family: var(--ds-font-body);
+  font-size: 0.98rem;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-.membro-picker input[type="text"]:focus {
-  border-color: var(--golden-color);
+.membro-picker input:focus {
+  border-color: var(--ds-gold);
+  box-shadow: 0 0 0 3px var(--ds-gold-wash);
+  outline: none;
+}
+
+.membro-picker input::placeholder {
+  color: var(--ds-text-5);
 }
 
 .membro-picker-results {
   position: absolute;
   z-index: 20;
-  top: calc(100% + 0.3em);
+  top: calc(100% + 0.35em);
   left: 0;
   right: 0;
   list-style: none;
   margin: 0;
-  padding: 0.3em 0;
-  max-height: 260px;
+  padding: 0.3em;
+  max-height: 300px;
   overflow-y: auto;
-  background: var(--secondary-color-opacity);
-  border: 1px solid var(--golden-color-opaco);
-  border-radius: 6px;
-  box-shadow: 0 0.4em 1em black;
+  background: var(--ds-surface-solid);
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 12px;
+  box-shadow: var(--card-shadow-alta);
 }
 
 .membro-picker-results li button {
   display: flex;
   align-items: center;
-  gap: 0.6em;
+  gap: 0.65em;
   width: 100%;
+  min-height: 2.9em;
   text-align: left;
-  padding: 0.5em 0.9em;
+  padding: 0.45em 0.6em;
+  border-radius: 8px;
   background: none;
   border: none;
-  color: var(--text-primary-color);
+  color: var(--ds-text-1);
   cursor: pointer;
   font-family: inherit;
   font-size: 0.95em;
 }
 
 .membro-picker-nome {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+/* aria-selected é a navegação por seta; :hover é o mouse. Os dois pintam
+   igual porque são a mesma ideia: "é este que vai entrar se você confirmar". */
+.membro-picker-results li button:hover,
+.membro-picker-results li button:focus-visible,
+.membro-picker-results li button[aria-selected="true"] {
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
+  outline: none;
 }
 
 .status-dot {
@@ -1821,23 +2212,141 @@ p {
   background: #f0776e;
 }
 
-.membro-picker-results li button:hover,
-.membro-picker-results li button:focus-visible {
-  background: var(--accent-soft, rgba(212, 175, 55, 0.12));
-  color: var(--golden-color);
-}
-
 .membro-picker-empty {
-  padding: 0.5em 0.9em;
-  color: var(--text-secondary-color);
+  padding: 0.6em 0.7em;
+  color: var(--ds-text-4);
   font-size: 0.9em;
 }
 
 .membro-picker-criar button {
-  color: var(--golden-color);
-  border-top: 1px solid var(--border-dark-color-2);
+  color: var(--ds-gold);
+  border-top: 1px solid var(--ds-line);
+  border-radius: 0 0 8px 8px;
 }
 
+/* Membro escolhido pro registro: cartão com avatar, nome e o botão de trocar.
+   Era um <p> com "Membro: Fulano" e um botão minúsculo no fim da frase. */
+.membro-escolhido {
+  display: flex;
+  align-items: center;
+  gap: 0.7em;
+  padding: 0.7em 0.9em;
+  border: 1px solid var(--ds-gold-dim);
+  border-radius: 12px;
+  background: var(--ds-gold-wash);
+}
+
+.membro-escolhido .row-corpo {
+  gap: 3px;
+}
+
+.membro-escolhido .row-titulo {
+  font-family: var(--ds-font-display);
+  font-size: 1rem;
+  color: var(--ds-gold-light);
+}
+
+/* Progresso de classe em casas contadas, não em barra contínua.
+
+   A barra ficava vazia justamente quando a pessoa acabou de subir de nível,
+   e vazio se lê como "não carregou". Aqui são quatro casas porque são quatro
+   treinos por nível de classe, e a próxima presença acende a próxima casa.
+   Mesma decisão já tomada na ficha do membro (ver .ficha-casas lá). */
+.nivel-progresso {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5em;
+  padding: 0.8em 0.9em;
+  border: 1px solid var(--ds-line);
+  border-radius: 12px;
+  background: var(--ds-bg-alt);
+}
+
+.nivel-progresso-info {
+  display: flex;
+  align-items: center;
+  gap: 0.6em;
+  font-size: 0.85rem;
+  color: var(--ds-text-3);
+}
+
+.casas {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.casas > li {
+  flex: 1;
+  height: 9px;
+  border-radius: 3px;
+  border: 1px solid var(--ds-line-strong);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.casas > li.cheia {
+  border-color: var(--ds-gold);
+  background: var(--ds-gold);
+}
+
+/* A casa que a presença atual vai acender. */
+.casas > li.proxima {
+  border-color: var(--ds-gold-dim);
+  background: var(--ds-gold-wash);
+}
+
+.nivel-progresso-aviso {
+  margin: 0;
+  max-width: none;
+  color: #9fd3a8;
+  font-weight: 500;
+  font-size: 0.85rem;
+}
+
+/* --- Etapas do cadastro de membro --- */
+
+/* Quatro telas em sequência sem dizer quantas são nem onde a pessoa está.
+   Isto é a régua: passo atual em dourado, passos vencidos com fio dourado. */
+.etapas {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.etapas > li {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ds-text-5);
+}
+
+.etapas > li::before {
+  content: "";
+  height: 3px;
+  border-radius: 999px;
+  background: var(--ds-line-strong);
+}
+
+.etapas > li.feita::before {
+  background: var(--ds-gold-deep);
+}
+
+.etapas > li.atual::before {
+  background: var(--ds-gold);
+}
+
+.etapas > li.atual {
+  color: var(--ds-gold-light);
+}
 /* ======== RANKING TABLES (LEADERBOARD) ======== */
 
 /* ponytail: <table>/<th>/<td> markup kept for accessibility, but table/
@@ -2036,6 +2545,94 @@ p {
   min-width: 560px;
   max-width: 780px;
   grid-template-columns: minmax(120px, 170px) auto auto auto auto auto;
+}
+
+/* ======== TABELAS DO ADMIN NO CELULAR ========
+
+   As tabelas públicas mantêm a largura mínima e deixam o celular arrastar de
+   lado. No painel isso não serve: quem registra presença está de pé, num
+   domingo, com uma mão no celular, e arrastar a tabela pro lado tira o nome
+   da pessoa da tela justamente enquanto se confere a linha dela.
+
+   Abaixo do tablet, portanto, cada <tr> vira um cartão: a primeira célula (o
+   nome) vira o título, e as outras viram pares rótulo/valor. O rótulo sai do
+   `data-label` de cada <td>, então quem adicionar coluna nova numa dessas
+   tabelas precisa adicionar o data-label junto, senão a célula aparece sem
+   dizer o que é.
+
+   A marcação não muda: continua <table>/<th>/<td>, e no desktop continua a
+   mesma grade de colunas de sempre. Os seletores repetem .ranking-tabela de
+   propósito, pra ganhar de `.ranking-tabela .col-stat` na especificidade. */
+@media (max-width: 720px) {
+  .ranking-tabela.tabela-admin {
+    display: block;
+    min-width: 0;
+    margin: 0.8em auto 1em;
+    border: none;
+    background: none;
+    overflow: visible;
+  }
+
+  .ranking-tabela.tabela-admin thead {
+    display: none;
+  }
+
+  .ranking-tabela.tabela-admin tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ranking-tabela.tabela-admin tbody tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 2px 10px;
+    padding: 11px 13px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+  }
+
+  .ranking-tabela.tabela-admin tbody td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 3px 0;
+    border: none;
+    white-space: normal;
+    text-align: left;
+  }
+
+  /* O nome é o título do cartão, não mais uma célula. */
+  .ranking-tabela.tabela-admin tbody td:first-child {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    padding: 0 0 7px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .ranking-tabela.tabela-admin tbody td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ds-text-5);
+  }
+
+  /* Ações ocupam a linha inteira embaixo, alinhadas à direita. */
+  .ranking-tabela.tabela-admin tbody td.col-acoes {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    gap: 6px;
+    padding-top: 8px;
+  }
+
+  .ranking-tabela.tabela-admin tbody tr:hover td {
+    background: none;
+  }
 }
 
 /* ======== AGENDA DE TREINOS (cards, endereço pode ser longo) ======== */
@@ -2370,51 +2967,11 @@ p {
   margin-left: 0.1em;
 }
 
-.membro-atual {
-  width: auto;
-  margin: 0;
-  text-align: left;
-  display: flex;
-  align-items: center;
-  gap: 0.6em;
-  flex-wrap: wrap;
-}
 
-.nivel-progresso {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4em;
-  margin: -0.3em 0 0.6em;
-}
 
-.nivel-progresso-info {
-  display: flex;
-  align-items: center;
-  gap: 0.6em;
-  font-size: 0.88em;
-  color: var(--text-secondary-color);
-}
 
-.nivel-progresso-barra {
-  height: 8px;
-  border-radius: 999px;
-  background: rgba(232, 172, 70, 0.12);
-  overflow: hidden;
-}
 
-.nivel-progresso-fill {
-  height: 100%;
-  background: var(--golden-color);
-  border-radius: 999px;
-  transition: width 0.2s ease;
-}
 
-.nivel-progresso-aviso {
-  margin: 0;
-  color: #4caf50;
-  font-weight: 700;
-  font-size: 0.88em;
-}
 
 .stat-pill-up .level-up-arrow {
   color: #1b5e20;

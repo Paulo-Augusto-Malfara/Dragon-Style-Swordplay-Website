@@ -155,6 +155,6 @@
     {#if status === "error"}
       <p class="admin-error">{errorMessage}</p>
     {/if}
-    <button type="button" class="btn btn-sm" onclick={trocarEmail}>Usar outro email</button>
+    <button type="button" class="btn btn-sm btn-ghost" onclick={trocarEmail}>Usar outro email</button>
   </form>
 {/if}

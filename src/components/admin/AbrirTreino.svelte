@@ -22,6 +22,16 @@
 
   const naoEDomingo = $derived(data !== "" && new Date(data + "T00:00:00").getDay() !== 0);
 
+  const diaDaSemana = $derived(
+    data === ""
+      ? ""
+      : new Date(data + "T00:00:00").toLocaleDateString("pt-BR", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+        })
+  );
+
   async function abrir() {
     abrindo = true;
     erro = "";
@@ -36,17 +46,33 @@
 </script>
 
 <div class="admin-form">
-  <label class="label-center">
-    Data do treino
-    <input type="date" bind:value={data} />
-  </label>
+  <p class="admin-form-titulo">Abrir treino de hoje</p>
+  <p class="admin-form-nota">
+    Com o treino aberto, qualquer organizador registra presença pelo celular, e o PH só é
+    distribuído quando ele for fechado.
+  </p>
+
+  <div class="campos">
+    <label>
+      Data do treino
+      <input type="date" bind:value={data} />
+      {#if diaDaSemana}<small>{diaDaSemana}</small>{/if}
+    </label>
+  </div>
+
   {#if naoEDomingo}
-    <p class="admin-error">⚠️ Essa data não é um domingo. Os treinos costumam ser aos domingos, confira antes de abrir.</p>
+    <p class="admin-aviso">
+      Essa data não é um domingo. Os treinos costumam ser aos domingos, confira antes de abrir.
+    </p>
   {/if}
-  <button type="button" class="btn btn-primary" onclick={abrir} disabled={abrindo}>
-    {abrindo ? "Abrindo..." : "Abrir treino"}
-  </button>
+
+  <div class="form-acoes">
+    <button type="button" class="btn btn-primary" onclick={abrir} disabled={abrindo}>
+      {abrindo ? "Abrindo..." : "Abrir treino"}
+    </button>
+  </div>
+
   {#if erro}
-    <p class="admin-error">{erro}</p>
+    <p class="admin-error" role="alert">{erro}</p>
   {/if}
 </div>

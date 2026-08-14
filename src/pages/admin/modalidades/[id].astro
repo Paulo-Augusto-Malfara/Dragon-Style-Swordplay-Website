@@ -9,7 +9,7 @@ const { id } = Astro.params;
 
 <AdminShell
   title={id === "new" ? "Nova modalidade" : "Editar modalidade"}
-  voltar={{ href: "/admin", label: "o painel" }}
+  voltar={{ href: "/admin/modalidades", label: "Modalidades" }}
 >
   <ModalidadeEditor id={id} client:load />
 </AdminShell>

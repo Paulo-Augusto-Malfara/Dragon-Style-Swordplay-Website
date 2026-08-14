@@ -3,6 +3,7 @@
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
   import RecrutarMembro from "./RecrutarMembro.svelte";
+  import ConfirmarAcao from "./ConfirmarAcao.svelte";
 
   interface Props {
     idTreino: number;
@@ -18,12 +19,16 @@
     { valor: "tabardo_modificado", label: "Tabardo Modificado" },
   ];
 
+  // Quantos treinos fecham um nível de classe. O número está aqui como
+  // constante porque a tela desenha as casas a partir dele.
+  const TREINOS_POR_NIVEL = 4;
+
   let classesMap = new Map<number, string>();
   let siglaMap = new Map<number, string>();
   let classesTodas = $state<{ id_classe: number; nome_classe: string }[]>([]);
   let classesDisponiveis = $state<{ id_classe: number; nome_classe: string }[]>([]);
 
-  let membroSelecionado = $state<{ id_membro: number; nome: string; nivel_geral?: number } | null>(null);
+  let membroSelecionado = $state<{ id_membro: number; nome: string; nivel_geral?: number; foto_url?: string | null } | null>(null);
   let criandoMembro = $state(false);
   let classeEscolhida = $state<number | null>(null);
   let torso = $state("nenhum");
@@ -31,20 +36,25 @@
   let adicionando = $state(false);
   let erroAdicionar = $state("");
   let nivelPorClasseMap = $state(new Map<number, { treinos_por_classe: number; nivel_por_classe: number }>());
+  let confirmar: ConfirmarAcao;
 
   function infoNivelClasse(idClasse: number) {
     const r = nivelPorClasseMap.get(idClasse);
     const treinos = r?.treinos_por_classe ?? 0;
     const nivel = r?.nivel_por_classe ?? 0;
-    const proximoNivelTreinos = (nivel + 1) * 4;
+    const proximoNivelTreinos = (nivel + 1) * TREINOS_POR_NIVEL;
     const faltam = proximoNivelTreinos - treinos;
-    return { treinos, nivel, proximoNivelTreinos, faltam, vaiSubir: faltam === 1 };
+    // As casas só aparecem se a conta de 4 treinos por nível bater com o
+    // nível que o banco devolveu. Quando não bate (regra antiga, ajuste
+    // manual), é melhor não desenhar nada do que desenhar progresso errado.
+    const casasConferem = Math.floor(treinos / TREINOS_POR_NIVEL) === nivel;
+    return { treinos, nivel, proximoNivelTreinos, faltam, casasConferem, vaiSubir: faltam === 1 };
   }
   let classeInfo = $derived(classeEscolhida !== null ? infoNivelClasse(classeEscolhida) : null);
 
   function labelClasse(c: { id_classe: number; nome_classe: string }) {
     const i = infoNivelClasse(c.id_classe);
-    return `${c.nome_classe} — Nível ${i.nivel} — ${i.treinos}/${i.proximoNivelTreinos}`;
+    return `${c.nome_classe}, nível ${i.nivel} (${i.treinos}/${i.proximoNivelTreinos})`;
   }
 
   let presencas = $state<any[]>([]);
@@ -57,7 +67,10 @@
   let dataTreinoResumo = $state<string | null>(null);
   let erroFinalizar = $state("");
   let reabrindo = $state(false);
-  let erroReabrir = $state("");
+  // Vale pros dois botões da zona de perigo do treino fechado: reabrir e
+  // excluir. O excluir avisava por alert(), que é a caixa do navegador de
+  // novo, e ainda por cima só depois de a ação ter falhado calada.
+  let erroAcao = $state("");
   let excluindo = $state(false);
 
   let channel: ReturnType<typeof supabase.channel> | null = null;
@@ -89,6 +102,7 @@
       nome: membrosMap.get(p.id_membro)?.nome ?? `#${p.id_membro}`,
       foto_url: membrosMap.get(p.id_membro)?.foto_url ?? null,
       sigla_classe: siglaMap.get(p.id_classe) ?? `#${p.id_classe}`,
+      nome_classe: classesMap.get(p.id_classe) ?? "",
       vestimenta: p.usou_camiseta || p.usou_tabardo,
     }));
     carregandoPresencas = false;
@@ -102,7 +116,9 @@
     nivelPorClasseMap = new Map((data ?? []).map((r) => [r.id_classe, r]));
     const treinosBasico = nivelPorClasseMap.get(11)?.treinos_por_classe ?? 0;
     const pool =
-      treinosBasico < 4 ? classesTodas.filter((c) => c.id_classe === 11) : classesTodas.filter((c) => c.id_classe !== 11);
+      treinosBasico < TREINOS_POR_NIVEL
+        ? classesTodas.filter((c) => c.id_classe === 11)
+        : classesTodas.filter((c) => c.id_classe !== 11);
     classesDisponiveis = [...pool].sort((a, b) => infoNivelClasse(a.id_classe).faltam - infoNivelClasse(b.id_classe).faltam);
     classeEscolhida = classesDisponiveis[0]?.id_classe ?? null;
   }
@@ -138,9 +154,15 @@
     await carregarPresencas();
   }
 
-  async function removerPresenca(idPresenca: number) {
-    if (!confirm("Remover esta presença? Essa ação corrige o cadastro, não pode ser desfeita.")) return;
-    await supabase.from("fPresencas").delete().eq("id_presenca", idPresenca);
+  async function removerPresenca(p: any) {
+    const ok = await confirmar.pedir({
+      titulo: `Remover a presença de ${p.nome}?`,
+      texto: "Serve pra corrigir lançamento errado. O PH deste treino sai junto e não volta.",
+      acao: "Remover",
+      perigo: true,
+    });
+    if (!ok) return;
+    await supabase.from("fPresencas").delete().eq("id_presenca", p.id_presenca);
     await carregarPresencas();
   }
 
@@ -180,7 +202,12 @@
   }
 
   async function finalizarTreino() {
-    if (!confirm("Finalizar este treino? Depois de finalizado não é possível registrar mais presenças.")) return;
+    const ok = await confirmar.pedir({
+      titulo: `Fechar o treino com ${presencas.length} ${presencas.length === 1 ? "presença" : "presenças"}?`,
+      texto: "É o fechamento que distribui o PH e sobe os níveis. Depois de fechado não dá pra registrar mais ninguém, só reabrir.",
+      acao: "Fechar treino",
+    });
+    if (!ok) return;
     finalizando = true;
     erroFinalizar = "";
     const { data, error } = await supabase.rpc("fechar_treino", { p_id_treino: idTreino });
@@ -194,13 +221,18 @@
   }
 
   async function reabrirTreino() {
-    if (!confirm("Reabrir este treino para edição? Ele volta ao estado aberto até você finalizar de novo.")) return;
+    const ok = await confirmar.pedir({
+      titulo: "Reabrir este treino?",
+      texto: "Ele volta ao estado aberto e aceita presença de novo, até você fechar outra vez.",
+      acao: "Reabrir",
+    });
+    if (!ok) return;
     reabrindo = true;
-    erroReabrir = "";
+    erroAcao = "";
     const { error } = await supabase.rpc("reabrir_treino", { p_id_treino: idTreino });
     reabrindo = false;
     if (error) {
-      erroReabrir = error.message;
+      erroAcao = error.message;
       return;
     }
     statusTreino = "aberto";
@@ -209,12 +241,18 @@
   }
 
   async function excluirTreino() {
-    if (!confirm("Excluir este treino permanentemente? Todas as presenças e o PH ganho nele serão apagados. Essa ação não pode ser desfeita.")) return;
+    const ok = await confirmar.pedir({
+      titulo: `Excluir o treino #${idTreino} de vez?`,
+      texto: "Apaga as presenças e todo o PH ganho nele. Os níveis de quem treinou caem junto, e não tem como desfazer.",
+      acao: "Excluir treino",
+      perigo: true,
+    });
+    if (!ok) return;
     excluindo = true;
     const { error } = await supabase.rpc("excluir_treino", { p_id_treino: idTreino });
     excluindo = false;
     if (error) {
-      alert(error.message);
+      erroAcao = error.message;
       return;
     }
     window.location.href = "/admin/treinos";
@@ -244,143 +282,199 @@
   });
 </script>
 
+<ConfirmarAcao bind:this={confirmar} />
+
 {#if statusTreino === null}
-  <p>Carregando...</p>
+  <div class="esqueleto esqueleto-form"></div>
 {:else if resumo}
   <div class="admin-form">
-    <p class="gold-title card-titulo">🏁 Treino finalizado!</p>
-    <p>
-      Treino #{idTreino}{#if dataTreinoResumo} — {new Date(dataTreinoResumo + "T00:00:00").toLocaleDateString("pt-BR")}{/if}
+    <p class="admin-ok">
+      Treino #{idTreino}{#if dataTreinoResumo}
+        de {new Date(dataTreinoResumo + "T00:00:00").toLocaleDateString("pt-BR")}{/if} fechado.
+      {presencas.length}
+      {presencas.length === 1 ? "presença registrada" : "presenças registradas"}, PH distribuído.
     </p>
-    <p>{presencas.length} presença(s) registrada(s).</p>
+
     {#if resumo.bonus_indicacao?.length > 0}
-      <p class="gold-title">Bônus de indicação:</p>
+      <p class="admin-form-titulo">Bônus de indicação</p>
       <ul class="admin-list">
         {#each resumo.bonus_indicacao as b}
-          <li><span>🏅 <strong>{b.nome}</strong> ganhou +{b.ph_ganho} PH — {b.detalhes}</span></li>
+          <li>
+            <div class="row-corpo">
+              <span class="row-titulo">{b.nome}</span>
+              <span class="row-meta">{b.detalhes}</span>
+            </div>
+            <span class="stat-pill">+{b.ph_ganho} PH</span>
+          </li>
         {/each}
       </ul>
     {/if}
-    <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--treino-resumo">
-        <thead>
+  </div>
+
+  <div class="admin-secao-cab">
+    <h2>Como ficou <span class="contagem">{resumoLinhas.length}</span></h2>
+  </div>
+  <div class="table-scroll">
+    <table class="ranking-tabela ranking-tabela--treino-resumo tabela-admin">
+      <thead>
+        <tr>
+          <th class="col-nome">Nome</th>
+          <th class="col-faixa">Classe</th>
+          <th class="col-stat">Vestimenta</th>
+          <th class="col-stat">Faixa</th>
+          <th class="col-stat">PH</th>
+          <th class="col-stat">Nível</th>
+        </tr>
+      </thead>
+      <tbody>
+        {#each resumoLinhas as p}
           <tr>
-            <th class="col-nome">Nome</th>
-            <th class="col-faixa">Classe</th>
-            <th class="col-stat">Vestimenta</th>
-            <th class="col-stat">Faixa</th>
-            <th class="col-stat">PH</th>
-            <th class="col-stat">Nível</th>
+            <td class="col-nome">
+              <span class="row-avatar">
+                {#if p.foto_url}
+                  <img src={p.foto_url} alt="" />
+                {:else}
+                  {p.nome.charAt(0).toUpperCase()}
+                {/if}
+              </span>
+              <span class="row-name">{p.nome}</span>
+            </td>
+            <td class="col-faixa" data-label="Classe">{p.sigla_classe}</td>
+            <td class="col-stat" data-label="Vestimenta">
+              <span class={`status-badge status-badge--${p.vestimenta ? "ativo" : "inativo"}`}>
+                {p.vestimenta ? "Sim" : "Não"}
+              </span>
+            </td>
+            <td class="col-stat" data-label="Faixa">
+              <span class={`status-badge status-badge--${p.usou_faixa ? "ativo" : "inativo"}`}>
+                {p.usou_faixa ? "Sim" : "Não"}
+              </span>
+            </td>
+            <td class="col-stat" data-label="PH"><span class="stat-pill">{p.ph_total}</span></td>
+            <td class="col-stat" data-label="Nível geral">
+              <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
+                {p.nivel_geral}
+                {#if p.subiu_nivel_geral}
+                  <span class="level-up-arrow">{"▲".repeat(p.subida_nivel_geral)}</span>
+                {/if}
+              </span>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {#each resumoLinhas as p}
-            <tr>
-              <td class="col-nome">
-                <span class="row-avatar">
-                  {#if p.foto_url}
-                    <img src={p.foto_url} alt="" />
-                  {:else}
-                    {p.nome.charAt(0).toUpperCase()}
-                  {/if}
-                </span>
-                <span class="row-name">{p.nome}</span>
-              </td>
-              <td class="col-faixa">{p.sigla_classe}</td>
-              <td class="col-stat">
-                <span class={`status-badge status-badge--${p.vestimenta ? "ativo" : "inativo"}`}>
-                  {p.vestimenta ? "Sim" : "Não"}
-                </span>
-              </td>
-              <td class="col-stat">
-                <span class={`status-badge status-badge--${p.usou_faixa ? "ativo" : "inativo"}`}>
-                  {p.usou_faixa ? "Sim" : "Não"}
-                </span>
-              </td>
-              <td class="col-stat"><span class="stat-pill">{p.ph_total}</span></td>
-              <td class="col-stat">
-                <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
-                  {p.nivel_geral}
-                  {#if p.subiu_nivel_geral}
-                    <span class="level-up-arrow">{"▲".repeat(p.subida_nivel_geral)}</span>
-                  {/if}
-                </span>
-              </td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
-    {#if souAdminSistema}
-      <div class="admin-list-actions">
-        <button type="button" class="btn" onclick={reabrirTreino} disabled={reabrindo}>
+        {/each}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="admin-list-actions">
+    <a href="/admin/treinos" class="btn btn-primary">Voltar para treinos</a>
+  </div>
+
+  {#if souAdminSistema}
+    <div class="zona-perigo">
+      <p>
+        Reabrir devolve o treino ao estado aberto pra corrigir presença. Excluir apaga o treino e
+        todo o PH que ele deu.
+      </p>
+      <div class="row-acoes">
+        <button type="button" class="btn btn-sm btn-ghost" onclick={reabrirTreino} disabled={reabrindo}>
           {reabrindo ? "Reabrindo..." : "Reabrir treino"}
         </button>
-        <button type="button" class="btn btn-danger" onclick={excluirTreino} disabled={excluindo}>
+        <button type="button" class="btn btn-sm btn-danger" onclick={excluirTreino} disabled={excluindo}>
           {excluindo ? "Excluindo..." : "Excluir treino"}
         </button>
       </div>
-      {#if erroReabrir}
-        <p class="admin-error">{erroReabrir}</p>
-      {/if}
+    </div>
+    {#if erroAcao}
+      <p class="admin-error" role="alert">{erroAcao}</p>
     {/if}
-    <a href="/admin/treinos" class="btn btn-primary">Voltar</a>
-  </div>
+  {/if}
 {:else}
   <div class="admin-form">
-    <p class="gold-title card-titulo">Registrar presença</p>
+    <p class="admin-form-titulo">Registrar presença</p>
 
     {#if membroSelecionado}
-      <p class="membro-atual"><strong>Membro:</strong> {membroSelecionado.nome} <button type="button" class="btn btn-sm" onclick={() => (membroSelecionado = null)}>trocar</button></p>
-      <p class="membro-atual"><span class="stat-pill">Nível Geral: {membroSelecionado.nivel_geral ?? 0}</span></p>
+      <div class="membro-escolhido">
+        <span class="row-avatar">
+          {#if membroSelecionado.foto_url}
+            <img src={membroSelecionado.foto_url} alt="" />
+          {:else}
+            {membroSelecionado.nome.charAt(0).toUpperCase()}
+          {/if}
+        </span>
+        <div class="row-corpo">
+          <span class="row-titulo">{membroSelecionado.nome}</span>
+          <span class="row-meta">Nível geral {membroSelecionado.nivel_geral ?? 0}</span>
+        </div>
+        <div class="row-acoes">
+          <button type="button" class="btn btn-sm btn-ghost" onclick={() => (membroSelecionado = null)}>
+            Trocar
+          </button>
+        </div>
+      </div>
 
-      <label>
-        Classe
-        <select bind:value={classeEscolhida}>
-          {#each classesDisponiveis as c}
-            <option value={c.id_classe}>{labelClasse(c)}</option>
-          {/each}
-        </select>
-      </label>
+      <div class="campos">
+        <label class="campo-largo">
+          Classe treinada
+          <select bind:value={classeEscolhida}>
+            {#each classesDisponiveis as c}
+              <option value={c.id_classe}>{labelClasse(c)}</option>
+            {/each}
+          </select>
+        </label>
+      </div>
 
       {#if classeInfo}
         <div class="nivel-progresso">
           <div class="nivel-progresso-info">
             <span class="stat-pill">Nível {classeInfo.nivel}</span>
-            <span>{classeInfo.treinos}/{classeInfo.proximoNivelTreinos} treinos</span>
+            <span>{classeInfo.treinos} de {classeInfo.proximoNivelTreinos} treinos</span>
           </div>
-          <div class="nivel-progresso-barra">
-            <div class="nivel-progresso-fill" style={`width: ${((classeInfo.treinos % 4) / 4) * 100}%`}></div>
-          </div>
+          {#if classeInfo.casasConferem}
+            <ol
+              class="casas"
+              aria-label={`${classeInfo.treinos % TREINOS_POR_NIVEL} de ${TREINOS_POR_NIVEL} treinos deste nível`}
+            >
+              {#each { length: TREINOS_POR_NIVEL } as _, i}
+                <li
+                  class:cheia={i < classeInfo.treinos % TREINOS_POR_NIVEL}
+                  class:proxima={i === classeInfo.treinos % TREINOS_POR_NIVEL}
+                ></li>
+              {/each}
+            </ol>
+          {/if}
           {#if classeInfo.vaiSubir}
             <p class="nivel-progresso-aviso">
-              🎉 {classeEscolhida === 11
-                ? "Essa presença torna o membro veterano!"
-                : `Essa presença sobe a classe para o nível ${classeInfo.nivel + 1}!`}
+              {classeEscolhida === 11
+                ? "Esta presença torna o membro veterano."
+                : `Esta presença sobe a classe para o nível ${classeInfo.nivel + 1}.`}
             </p>
           {/if}
         </div>
       {/if}
 
-      <label>
-        Vestimenta (torso)
-        <select bind:value={torso}>
-          {#each TORSO_OPCOES as o}
-            <option value={o.valor}>{o.label}</option>
-          {/each}
-        </select>
-      </label>
+      <div class="campos">
+        <label>
+          Vestimenta (torso)
+          <select bind:value={torso}>
+            {#each TORSO_OPCOES as o}
+              <option value={o.valor}>{o.label}</option>
+            {/each}
+          </select>
+        </label>
+      </div>
 
       <label class="checkbox">
         <input type="checkbox" bind:checked={usouFaixa} />
         Usou faixa
       </label>
 
-      <button type="button" class="btn btn-primary" onclick={adicionarPresenca} disabled={adicionando}>
-        {adicionando ? "Adicionando..." : "+ Adicionar presença"}
-      </button>
+      <div class="form-acoes">
+        <button type="button" class="btn btn-primary" onclick={adicionarPresenca} disabled={adicionando}>
+          {adicionando ? "Adicionando..." : "Adicionar presença"}
+        </button>
+      </div>
       {#if erroAdicionar}
-        <p class="admin-error">{erroAdicionar}</p>
+        <p class="admin-error" role="alert">{erroAdicionar}</p>
       {/if}
     {:else if criandoMembro}
       <RecrutarMembro
@@ -400,14 +494,21 @@
     {/if}
   </div>
 
-  <h2>Presenças registradas ({presencas.length})</h2>
+  <div class="admin-secao-cab">
+    <h2>Presenças <span class="contagem">{presencas.length}</span></h2>
+  </div>
+
   {#if carregandoPresencas}
-    <p>Carregando...</p>
+    <div class="esqueleto-lista">
+      {#each { length: 3 } as _}
+        <div class="esqueleto esqueleto-linha"></div>
+      {/each}
+    </div>
   {:else if presencas.length === 0}
-    <p class="dashboard-empty">Nenhuma presença registrada ainda.</p>
+    <p class="admin-vazio">Ninguém registrado ainda. Busque o membro acima para começar.</p>
   {:else}
     <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--presencas">
+      <table class="ranking-tabela ranking-tabela--presencas tabela-admin">
         <thead>
           <tr>
             <th class="col-nome">Nome</th>
@@ -431,21 +532,23 @@
                 </span>
                 <span class="row-name">{p.nome}</span>
               </td>
-              <td class="col-faixa">{p.sigla_classe}</td>
-              <td class="col-stat">
+              <td class="col-faixa" data-label="Classe">{p.sigla_classe}</td>
+              <td class="col-stat" data-label="Vestimenta">
                 <span class={`status-badge status-badge--${p.vestimenta ? "ativo" : "inativo"}`}>
                   {p.vestimenta ? "Sim" : "Não"}
                 </span>
               </td>
-              <td class="col-stat">
+              <td class="col-stat" data-label="Faixa">
                 <span class={`status-badge status-badge--${p.usou_faixa ? "ativo" : "inativo"}`}>
                   {p.usou_faixa ? "Sim" : "Não"}
                 </span>
               </td>
-              <td class="col-stat"><span class="stat-pill">{p.ph_ganho_treino}</span></td>
+              <td class="col-stat" data-label="PH"><span class="stat-pill">{p.ph_ganho_treino}</span></td>
               <td class="col-stat col-acoes">
                 {#if souAdminSistema}
-                  <button type="button" class="btn btn-sm btn-danger" onclick={() => removerPresenca(p.id_presenca)}>remover</button>
+                  <button type="button" class="btn btn-sm btn-danger" onclick={() => removerPresenca(p)}>
+                    Remover
+                  </button>
                 {/if}
               </td>
             </tr>
@@ -456,13 +559,53 @@
   {/if}
 
   {#if souAdminSistema}
-    <div class="admin-list-actions">
-      <button type="button" class="btn btn-danger" onclick={finalizarTreino} disabled={finalizando}>
-        {finalizando ? "Finalizando..." : "Finalizar treino"}
+    <!-- Fechar não é ação destrutiva, é o fim do trabalho do dia: é o
+         fechamento que distribui o PH. Estava em vermelho, no mesmo tom de
+         "excluir", e a confirmação já explica o que ele faz. -->
+    <div class="fechar-treino">
+      <p>
+        Fechar distribui o PH e sobe os níveis de quem treinou. Enquanto o treino estiver aberto,
+        ninguém consegue abrir outro.
+      </p>
+      <button type="button" class="btn btn-primary" onclick={finalizarTreino} disabled={finalizando || presencas.length === 0}>
+        {finalizando ? "Fechando..." : "Fechar treino"}
       </button>
     </div>
+    {#if presencas.length === 0}
+      <p class="admin-form-nota fechar-nota">Registre ao menos uma presença antes de fechar.</p>
+    {/if}
     {#if erroFinalizar}
-      <p class="admin-error">{erroFinalizar}</p>
+      <p class="admin-error" role="alert">{erroFinalizar}</p>
     {/if}
   {/if}
 {/if}
+
+<style>
+  .fechar-treino {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.8em;
+    max-width: 760px;
+    margin: 1.4em auto 0.6em;
+    padding: 1em 1.1em;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: var(--card-radius);
+    background: var(--ds-gold-wash);
+  }
+
+  .fechar-treino p {
+    margin: 0;
+    max-width: 44ch;
+    font-size: 0.86rem;
+    line-height: 1.5;
+    color: var(--ds-text-2);
+  }
+
+  .fechar-nota {
+    max-width: 760px;
+    margin: 0 auto 1.4em;
+    text-align: center;
+  }
+</style>

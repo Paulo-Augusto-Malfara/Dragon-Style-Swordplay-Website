@@ -1,0 +1,16 @@
+---
+import AdminShell from "../../../components/admin/AdminShell.astro";
+import AdminList from "../../../components/admin/AdminList.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+if (!membro.isOrganizador) return Astro.redirect("/admin");
+---
+
+<AdminShell
+  title="Modalidades"
+  resumo="As modalidades de treino que aparecem na página pública, com regras e mínimo de participantes."
+>
+  <AdminList kind="modalidades" client:load />
+</AdminShell>

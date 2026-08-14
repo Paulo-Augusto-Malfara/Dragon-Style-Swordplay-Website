@@ -72,50 +72,66 @@
 </script>
 
 <div class="admin-form">
+  <p class="admin-form-titulo">Abrir evento</p>
+  <p class="admin-form-nota">
+    Evento é participação de staff fora do treino. Com ele aberto, dá pra lançar quem esteve lá e
+    o PH sai quando for fechado.
+  </p>
+
   {#if eventosRecentes.length > 0}
+    <div class="campos">
+      <label class="campo-largo">
+        É outro dia de um evento que já aconteceu?
+        <select bind:value={idEventoPai} onchange={onEventoPaiChange}>
+          <option value="">Não, é um evento novo</option>
+          {#each eventosRecentes as e}
+            <option value={e.id_evento}>
+              {e.nome_evento}, {e.cidade} ({new Date(e.data_evento + "T00:00:00").toLocaleDateString("pt-BR")})
+            </option>
+          {/each}
+        </select>
+        <small>Escolhendo um, o nome, a cidade, a data e o número do dia já vêm preenchidos.</small>
+      </label>
+    </div>
+  {/if}
+
+  <div class="campos">
+    <label class="campo-largo">
+      Nome do evento
+      <input type="text" bind:value={nome} />
+    </label>
     <label>
-      2º dia de um evento já feito? (opcional)
-      <select bind:value={idEventoPai} onchange={onEventoPaiChange}>
-        <option value="">Não — evento novo</option>
-        {#each eventosRecentes as e}
-          <option value={e.id_evento}>
-            {e.nome_evento} — {e.cidade} ({new Date(e.data_evento + "T00:00:00").toLocaleDateString("pt-BR")})
-          </option>
+      Data
+      <input type="date" bind:value={data} />
+    </label>
+    <label>
+      Dia do evento
+      <select bind:value={numeroDia}>
+        {#each Array.from({ length: 10 }, (_, i) => i + 1) as n}
+          <option value={n}>Dia {n}</option>
         {/each}
       </select>
     </label>
-  {/if}
-  <label>
-    Nome do evento
-    <input type="text" bind:value={nome} />
-  </label>
-  <label>
-    Data
-    <input type="date" bind:value={data} />
-  </label>
-  <label>
-    Dia do evento
-    <select bind:value={numeroDia}>
-      {#each Array.from({ length: 10 }, (_, i) => i + 1) as n}
-        <option value={n}>Dia {n}</option>
-      {/each}
-    </select>
-  </label>
-  <label>
-    Cidade
-    <input type="text" bind:value={cidade} />
-  </label>
-  <label>
-    Tipo de evento
-    <select bind:value={tipoRegra}>
-      <option value={9}>Staff Evento Externo (4 PH base)</option>
-      <option value={10}>Staff Evento do Grupo (2 PH base)</option>
-    </select>
-  </label>
-  <button type="button" class="btn btn-primary" onclick={abrir} disabled={abrindo}>
-    {abrindo ? "Abrindo..." : "Abrir evento"}
-  </button>
+    <label>
+      Cidade
+      <input type="text" bind:value={cidade} />
+    </label>
+    <label class="campo-largo">
+      Tipo de evento
+      <select bind:value={tipoRegra}>
+        <option value={9}>Staff em evento externo (4 PH base)</option>
+        <option value={10}>Staff em evento do grupo (2 PH base)</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="form-acoes">
+    <button type="button" class="btn btn-primary" onclick={abrir} disabled={abrindo}>
+      {abrindo ? "Abrindo..." : "Abrir evento"}
+    </button>
+  </div>
+
   {#if erro}
-    <p class="admin-error">{erro}</p>
+    <p class="admin-error" role="alert">{erro}</p>
   {/if}
 </div>

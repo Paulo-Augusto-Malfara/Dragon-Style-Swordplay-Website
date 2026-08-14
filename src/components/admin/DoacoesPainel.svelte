@@ -1,11 +1,14 @@
 <script lang="ts">
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
+  import ConfirmarAcao from "./ConfirmarAcao.svelte";
 
   interface Props {
     podeEditar: boolean;
   }
   const { podeEditar }: Props = $props();
+
+  const LIMITE = 30;
 
   let membroSelecionado = $state<{ id_membro: number; nome: string } | null>(null);
   let valor = $state("");
@@ -13,33 +16,51 @@
   let erro = $state("");
 
   let doacoes = $state<any[]>([]);
+  let totalGeral = $state(0);
+  let quantasDoacoes = $state(0);
   let loading = $state(true);
+  let confirmar: ConfirmarAcao;
 
   let editandoId = $state<number | null>(null);
   let editValor = $state("");
   let editData = $state("");
 
+  const real = (v: number) =>
+    v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 2 });
+
   async function carregar() {
     loading = true;
-    const { data: linhas } = await supabase
-      .from("fDoacoes")
-      .select("id_doacao, id_membro, valor, data_doacao")
-      .order("data_doacao", { ascending: false })
-      .limit(30);
+    const [{ data: linhas }, { data: todas }] = await Promise.all([
+      supabase
+        .from("fDoacoes")
+        .select("id_doacao, id_membro, valor, data_doacao")
+        .order("data_doacao", { ascending: false })
+        .limit(LIMITE),
+      // A soma do grupo inteiro é o número que se vem conferir aqui, e ela
+      // não sai das 30 últimas linhas.
+      supabase.from("fDoacoes").select("id_membro, valor"),
+    ]);
+
     const rows = linhas ?? [];
+    const todasDoacoes = todas ?? [];
+    totalGeral = todasDoacoes.reduce((s, d) => s + Number(d.valor), 0);
+    quantasDoacoes = todasDoacoes.length;
+
+    const totalPorMembro = new Map<number, number>();
+    for (const d of todasDoacoes) {
+      totalPorMembro.set(d.id_membro, (totalPorMembro.get(d.id_membro) ?? 0) + Number(d.valor));
+    }
+
     const ids = [...new Set(rows.map((d) => d.id_membro))];
     let membrosPorId = new Map<number, { nome: string; foto_url: string | null }>();
-    let totalPorMembro = new Map<number, number>();
     if (ids.length > 0) {
-      const [{ data: membros }, { data: todasDoacoes }] = await Promise.all([
-        supabase.from("dMembros").select("id_membro, nome, foto_url").in("id_membro", ids),
-        supabase.from("fDoacoes").select("id_membro, valor").in("id_membro", ids),
-      ]);
+      const { data: membros } = await supabase
+        .from("dMembros")
+        .select("id_membro, nome, foto_url")
+        .in("id_membro", ids);
       membrosPorId = new Map((membros ?? []).map((m) => [m.id_membro, m]));
-      for (const d of todasDoacoes ?? []) {
-        totalPorMembro.set(d.id_membro, (totalPorMembro.get(d.id_membro) ?? 0) + Number(d.valor));
-      }
     }
+
     doacoes = rows.map((d) => ({
       ...d,
       nome: membrosPorId.get(d.id_membro)?.nome ?? `#${d.id_membro}`,
@@ -57,7 +78,10 @@
 
   async function salvarEdicao(id: number) {
     const valorNumero = Number(editValor.replace(",", "."));
-    if (!valorNumero || valorNumero <= 0 || !editData) return;
+    if (!valorNumero || valorNumero <= 0 || !editData) {
+      erro = "Informe uma data e um valor maior que zero.";
+      return;
+    }
     const { error } = await supabase.rpc("editar_doacao", {
       p_id_doacao: id,
       p_valor: valorNumero,
@@ -67,12 +91,19 @@
       erro = error.message;
       return;
     }
+    erro = "";
     editandoId = null;
     await carregar();
   }
 
   async function excluir(d: any) {
-    if (!confirm(`Excluir a doação de R$ ${Number(d.valor).toFixed(2)} de ${d.nome}?`)) return;
+    const ok = await confirmar.pedir({
+      titulo: `Excluir a doação de ${real(Number(d.valor))}?`,
+      texto: `Lançada em nome de ${d.nome}. O valor sai do total do grupo e do mural público.`,
+      acao: "Excluir",
+      perigo: true,
+    });
+    if (!ok) return;
     const { error } = await supabase.rpc("excluir_doacao", { p_id_doacao: d.id_doacao });
     if (error) {
       erro = error.message;
@@ -103,39 +134,86 @@
     await carregar();
   }
 
+  const dataCurta = (d: string) =>
+    new Date(d + "T00:00:00").toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+
   carregar();
 </script>
 
-<div class="admin-form">
-  <p class="gold-title">Registrar doação</p>
-  {#if membroSelecionado}
-    <div style="display:flex; align-items:center; justify-content:space-between; gap:0.8em;">
-      <span><strong>Membro:</strong> {membroSelecionado.nome}</span>
-      <button type="button" class="btn btn-sm" onclick={() => (membroSelecionado = null)}>trocar</button>
+<ConfirmarAcao bind:this={confirmar} />
+
+<ul class="admin-stats">
+  <li class="admin-stat">
+    <span class="admin-stat-valor">{loading ? "..." : real(totalGeral)}</span>
+    <span class="admin-stat-rotulo">Total arrecadado</span>
+  </li>
+  <li class="admin-stat">
+    <span class="admin-stat-valor">{loading ? "..." : quantasDoacoes}</span>
+    <span class="admin-stat-rotulo">Doações lançadas</span>
+  </li>
+</ul>
+
+{#if podeEditar}
+  <div class="admin-form">
+    <p class="admin-form-titulo">Registrar doação</p>
+    <p class="admin-form-nota">A data é a de hoje. Para lançar em outro dia, registre e depois edite.</p>
+
+    {#if membroSelecionado}
+      <div class="membro-escolhido">
+        <div class="row-corpo">
+          <span class="row-titulo">{membroSelecionado.nome}</span>
+        </div>
+        <div class="row-acoes">
+          <button type="button" class="btn btn-sm btn-ghost" onclick={() => (membroSelecionado = null)}>
+            Trocar
+          </button>
+        </div>
+      </div>
+    {:else}
+      <MembroPicker placeholder="Buscar quem doou..." onSelect={(m) => (membroSelecionado = m)} />
+    {/if}
+
+    <div class="campos">
+      <label>
+        Valor
+        <input type="text" inputmode="decimal" bind:value={valor} placeholder="0,00" />
+        <small>Em reais, com vírgula.</small>
+      </label>
     </div>
-  {:else}
-    <MembroPicker placeholder="Buscar membro..." onSelect={(m) => (membroSelecionado = m)} />
-  {/if}
-  <label>
-    Valor (R$)
-    <input type="text" inputmode="decimal" bind:value={valor} placeholder="0,00" />
-  </label>
-  <button type="button" class="btn btn-primary" onclick={registrar} disabled={salvando}>
-    {salvando ? "Registrando..." : "Registrar doação"}
-  </button>
-  {#if erro}
-    <p class="admin-error">{erro}</p>
-  {/if}
+
+    <div class="form-acoes">
+      <button type="button" class="btn btn-primary" onclick={registrar} disabled={salvando}>
+        {salvando ? "Registrando..." : "Registrar doação"}
+      </button>
+    </div>
+
+    {#if erro}
+      <p class="admin-error" role="alert">{erro}</p>
+    {/if}
+  </div>
+{:else if erro}
+  <p class="admin-error" role="alert">{erro}</p>
+{/if}
+
+<div class="admin-secao-cab">
+  <h2>Últimas doações {#if !loading}<span class="contagem">{doacoes.length}</span>{/if}</h2>
 </div>
 
-<h2>Doações registradas</h2>
 {#if loading}
-  <p>Carregando...</p>
+  <div class="esqueleto-lista">
+    {#each { length: 4 } as _}
+      <div class="esqueleto esqueleto-linha"></div>
+    {/each}
+  </div>
 {:else if doacoes.length === 0}
-  <p class="dashboard-empty">Nenhuma doação registrada ainda.</p>
+  <p class="admin-vazio">Nenhuma doação registrada ainda.</p>
 {:else}
   <div class="table-scroll">
-    <table class="ranking-tabela ranking-tabela--doacoes">
+    <table class="ranking-tabela ranking-tabela--doacoes tabela-admin">
       <thead>
         <tr>
           <th class="col-nome">Membro</th>
@@ -151,7 +229,7 @@
             <td class="col-nome">
               <span class="row-avatar">
                 {#if d.foto_url}
-                  <img src={d.foto_url} alt="" />
+                  <img src={d.foto_url} alt="" loading="lazy" />
                 {:else}
                   {d.nome.charAt(0).toUpperCase()}
                 {/if}
@@ -159,27 +237,35 @@
               <span class="row-name">{d.nome}</span>
             </td>
             {#if podeEditar && editandoId === d.id_doacao}
-              <td class="col-faixa"><input type="date" bind:value={editData} /></td>
-              <td class="col-stat"><input type="text" inputmode="decimal" bind:value={editValor} style="width:5em;" /></td>
-              <td class="col-stat"><span class="stat-pill">R$ {d.total.toFixed(2)}</span></td>
+              <td class="col-faixa" data-label="Data">
+                <input type="date" bind:value={editData} />
+              </td>
+              <td class="col-stat" data-label="Valor">
+                <input type="text" inputmode="decimal" bind:value={editValor} class="edit-valor" />
+              </td>
+              <td class="col-stat" data-label="Total doado">
+                <span class="stat-pill">{real(d.total)}</span>
+              </td>
               <td class="col-stat col-acoes">
-                <button type="button" class="btn btn-sm btn-primary" onclick={() => salvarEdicao(d.id_doacao)}>salvar</button>
-                <button type="button" class="btn btn-sm" onclick={() => (editandoId = null)}>cancelar</button>
+                <button type="button" class="btn btn-sm btn-primary" onclick={() => salvarEdicao(d.id_doacao)}>
+                  Salvar
+                </button>
+                <button type="button" class="btn btn-sm btn-ghost" onclick={() => (editandoId = null)}>
+                  Cancelar
+                </button>
               </td>
             {:else}
-              <td class="col-faixa">
-                {new Date(d.data_doacao + "T00:00:00").toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "2-digit",
-                })}
+              <td class="col-faixa" data-label="Data">{dataCurta(d.data_doacao)}</td>
+              <td class="col-stat" data-label="Valor">
+                <span class="stat-pill">{real(Number(d.valor))}</span>
               </td>
-              <td class="col-stat"><span class="status-badge status-badge--agendado">R$ {Number(d.valor).toFixed(2)}</span></td>
-              <td class="col-stat"><span class="stat-pill">R$ {d.total.toFixed(2)}</span></td>
+              <td class="col-stat" data-label="Total doado">
+                <span class="total-membro">{real(d.total)}</span>
+              </td>
               <td class="col-stat col-acoes">
                 {#if podeEditar}
-                  <button type="button" class="btn btn-sm" onclick={() => editar(d)}>editar</button>
-                  <button type="button" class="btn btn-sm btn-danger" onclick={() => excluir(d)}>excluir</button>
+                  <button type="button" class="btn btn-sm btn-ghost" onclick={() => editar(d)}>Editar</button>
+                  <button type="button" class="btn btn-sm btn-danger" onclick={() => excluir(d)}>Excluir</button>
                 {/if}
               </td>
             {/if}
@@ -189,3 +275,37 @@
     </table>
   </div>
 {/if}
+
+<style>
+  /* O valor da doação é o dado da linha, e o total do membro é contexto. Os
+     dois eram pílula dourada e disputavam o olho; agora só o valor é. */
+  .total-membro {
+    font-size: 0.85rem;
+    color: var(--ds-text-4);
+  }
+
+  .edit-valor {
+    width: 100%;
+    max-width: 7em;
+    min-height: 2.2em;
+    padding: 0.3em 0.5em;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 8px;
+    background: var(--ds-bg-alt);
+    color: var(--ds-text-1);
+    font-family: var(--ds-font-body);
+    font-size: 0.9rem;
+  }
+
+  td input[type="date"] {
+    min-height: 2.2em;
+    padding: 0.3em 0.5em;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 8px;
+    background: var(--ds-bg-alt);
+    color: var(--ds-text-1);
+    font-family: var(--ds-font-body);
+    font-size: 0.85rem;
+    color-scheme: dark;
+  }
+</style>

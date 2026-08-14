@@ -83,56 +83,93 @@
 
   const naoEDomingo = $derived(dataTreino !== "" && new Date(dataTreino + "T00:00:00").getDay() !== 0);
 
+  const diaDaSemana = $derived(
+    dataTreino === ""
+      ? ""
+      : new Date(dataTreino + "T00:00:00").toLocaleDateString("pt-BR", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+        })
+  );
+
   if (!isNew) load();
 </script>
 
 {#if statusReq === "loading"}
-  <p>Carregando...</p>
+  <div class="esqueleto esqueleto-form"></div>
 {:else}
   <form class="admin-form" onsubmit={save}>
-    <label>
-      Data
-      <input type="date" bind:value={dataTreino} required />
-    </label>
+    <p class="admin-form-titulo">Quando</p>
+
+    <div class="campos">
+      <label>
+        Data
+        <input type="date" bind:value={dataTreino} required />
+        {#if diaDaSemana}<small>{diaDaSemana}</small>{/if}
+      </label>
+      <label>
+        Começa
+        <input type="time" bind:value={horarioInicio} required />
+      </label>
+      <label>
+        Termina
+        <input type="time" bind:value={horarioTermino} />
+        <small>Opcional.</small>
+      </label>
+    </div>
+
     {#if naoEDomingo}
-      <p class="admin-error">⚠️ Essa data não é um domingo. Os treinos costumam ser aos domingos, confira antes de salvar.</p>
+      <p class="admin-aviso">
+        Essa data não é um domingo. Os treinos costumam ser aos domingos, confira antes de salvar.
+      </p>
     {/if}
-    <label>
-      Horário de início
-      <input type="time" bind:value={horarioInicio} required />
-    </label>
-    <label>
-      Horário de término (opcional)
-      <input type="time" bind:value={horarioTermino} />
-    </label>
-    <label>
-      Cidade
-      <input type="text" bind:value={cidade} required />
-    </label>
-    <label>
-      Local
-      <input type="text" bind:value={local} required />
-    </label>
-    <label>
-      Endereço (opcional)
-      <input type="text" bind:value={endereco} />
-    </label>
-    <label>
-      Link do Google Maps (opcional)
-      <input type="url" bind:value={linkMaps} placeholder="https://maps.app.goo.gl/..." />
-    </label>
-    <label>
-      Status
-      <select bind:value={status}>
-        <option value="agendado">Agendado</option>
-        <option value="cancelado">Cancelado</option>
-      </select>
-    </label>
-    <button type="submit" class="btn btn-primary" disabled={statusReq === "saving"}>
-      {statusReq === "saving" ? "Salvando..." : "Salvar"}
-    </button>
+
+    <p class="admin-form-titulo">Onde</p>
+
+    <div class="campos">
+      <label>
+        Local
+        <input type="text" bind:value={local} required />
+      </label>
+      <label>
+        Cidade
+        <input type="text" bind:value={cidade} required />
+      </label>
+      <label class="campo-largo">
+        Endereço
+        <input type="text" bind:value={endereco} />
+        <small>Opcional. Aparece na agenda pública, embaixo do local.</small>
+      </label>
+      <label class="campo-largo">
+        Link do Google Maps
+        <input type="url" bind:value={linkMaps} placeholder="https://maps.app.goo.gl/..." />
+        <small>Opcional. É o que faz aparecer o botão "como chegar".</small>
+      </label>
+    </div>
+
+    <p class="admin-form-titulo">Situação</p>
+
+    <div class="campos">
+      <label>
+        Status
+        <select bind:value={status}>
+          <option value="agendado">Agendado</option>
+          <option value="cancelado">Cancelado</option>
+        </select>
+        <small>Cancelado mantém a data na agenda, marcada como desmarcada.</small>
+      </label>
+    </div>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn btn-primary" disabled={statusReq === "saving"}>
+        {statusReq === "saving" ? "Salvando..." : isNew ? "Marcar treino" : "Salvar alterações"}
+      </button>
+      <a href="/admin/agenda" class="btn btn-ghost">Cancelar</a>
+    </div>
+
     {#if statusReq === "error"}
-      <p class="admin-error">{errorMessage}</p>
+      <p class="admin-error" role="alert">{errorMessage}</p>
     {/if}
   </form>
 {/if}

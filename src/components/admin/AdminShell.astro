@@ -12,6 +12,10 @@
  *
  * A lista de seções vive aqui e não em cada página porque as permissões são as
  * mesmas nas cinco, e duplicar a condição é como uma delas fica pra trás.
+ *
+ * A barra ficou grudada no topo: dentro de um treino aberto a lista de
+ * presenças passa de trinta linhas, e trocar de seção exigia rolar tudo de
+ * volta. Mesmo tratamento que a barra de classes do ranking já tinha.
  */
 import BaseLayout from "../../layouts/BaseLayout.astro";
 
@@ -32,6 +36,8 @@ const secoes = [
   { href: "/admin/eventos", label: "Eventos", ver: true },
   { href: "/admin/agenda", label: "Agenda", ver: membro.isOrganizador },
   { href: "/admin/doacoes", label: "Doações", ver: membro.isAdminSistema },
+  { href: "/admin/posts", label: "Novidades", ver: membro.isOrganizador },
+  { href: "/admin/modalidades", label: "Modalidades", ver: membro.isOrganizador },
 ].filter((s) => s.ver);
 
 // Marca a seção mesmo estando numa página filha, tipo /admin/treinos/12.
@@ -56,8 +62,17 @@ const naSecao = (href: string) => atual === href || atual.startsWith(href + "/")
       </div>
     </nav>
 
-    <header class="pagina-cab">
-      {voltar && <a class="admin-voltar" href={voltar.href}>Voltar para {voltar.label}</a>}
+    <header class="pagina-cab admin-cab">
+      {
+        voltar && (
+          <a class="admin-voltar" href={voltar.href}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+              <path d="M15.5 4 7 12l8.5 8 1.4-1.4L9.8 12l7.1-6.6z" />
+            </svg>
+            {voltar.label}
+          </a>
+        )
+      }
       <h1>{title}</h1>
       {resumo && <p class="pagina-resumo">{resumo}</p>}
     </header>
@@ -67,12 +82,18 @@ const naSecao = (href: string) => atual === href || atual.startsWith(href + "/")
 </BaseLayout>
 
 <style>
+  /* Grudada abaixo do cabeçalho do site. O fundo é opaco de propósito: com
+     fundo translúcido a lista passa por baixo e as duas se leem juntas. */
   .admin-topo {
+    position: sticky;
+    top: var(--ds-header-h);
+    z-index: 5;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     margin-bottom: 18px;
-    padding-bottom: 10px;
+    padding: 10px 0;
+    background: var(--ds-bg);
     border-bottom: 1px solid var(--ds-line);
   }
 
@@ -80,10 +101,15 @@ const naSecao = (href: string) => atual === href || atual.startsWith(href + "/")
     flex: none;
     font-family: var(--ds-font-display);
     font-size: 0.82rem;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.12em;
     color: var(--ds-gold);
     text-decoration: none;
+  }
+
+  .admin-marca[aria-current="page"] {
+    color: var(--ds-gold-light);
   }
 
   /* Rola de lado no celular. Com wrap, cinco seções viravam duas linhas e
@@ -93,6 +119,8 @@ const naSecao = (href: string) => atual === href || atual.startsWith(href + "/")
     gap: 6px;
     overflow-x: auto;
     scrollbar-width: none;
+    /* Respiro pro anel de foco não ser cortado pelo overflow. */
+    padding: 3px 0;
   }
 
   .admin-secoes::-webkit-scrollbar {
@@ -101,7 +129,10 @@ const naSecao = (href: string) => atual === href || atual.startsWith(href + "/")
 
   .admin-secao {
     flex: none;
-    padding: 6px 12px;
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
     border: 1px solid var(--ds-line-strong);
     border-radius: 999px;
     font-size: 0.84rem;
@@ -125,10 +156,30 @@ const naSecao = (href: string) => atual === href || atual.startsWith(href + "/")
     color: var(--ds-gold-light);
   }
 
+  /* O cabeçalho da página de admin é mais apertado que o das páginas de
+     conteúdo: aqui embaixo dele vem trabalho, não leitura. */
+  .admin-cab {
+    margin-bottom: 1.2rem;
+    padding-bottom: 0.9rem;
+  }
+
   .admin-voltar {
-    display: block;
-    margin-bottom: 6px;
-    font-size: 0.84rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 8px;
+    font-size: 0.82rem;
     color: var(--ds-text-3);
+    text-decoration: none;
+  }
+
+  .admin-voltar:hover {
+    color: var(--ds-gold-light);
+  }
+
+  @media (max-width: 560px) {
+    .admin-topo {
+      top: 0;
+    }
   }
 </style>

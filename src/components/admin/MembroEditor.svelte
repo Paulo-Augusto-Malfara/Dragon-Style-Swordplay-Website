@@ -1,6 +1,7 @@
 <script lang="ts">
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
+  import ConfirmarAcao from "./ConfirmarAcao.svelte";
 
   interface Props {
     id: string;
@@ -20,6 +21,7 @@
 
   let status = $state<"loading" | "idle" | "saving" | "saved" | "error">("loading");
   let errorMessage = $state("");
+  let confirmar: ConfirmarAcao;
 
   async function load() {
     const { data, error } = await supabase
@@ -80,8 +82,13 @@
   }
 
   async function excluirMembro() {
-    if (!confirm(`Ocultar ${nome}? Ele vai sumir do login, mural e rankings.`)) return;
-    if (!confirm("Essa ação não pode ser desfeita facilmente. Confirma?")) return;
+    const ok = await confirmar.pedir({
+      titulo: `Ocultar ${nome}?`,
+      texto: "Some do login, do mural e dos rankings. O histórico de treinos continua no banco, mas voltar atrás exige mexer no banco direto.",
+      acao: "Ocultar membro",
+      perigo: true,
+    });
+    if (!ok) return;
     const { error } = await supabase.from("dMembros").update({ oculto: true }).eq("id_membro", id);
     if (error) {
       errorMessage = error.message;
@@ -90,80 +97,120 @@
     window.location.href = "/admin/membros";
   }
 
+  const dataCurta = (d: string) =>
+    new Date(d + "T00:00:00").toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "2-digit",
+    });
+
   load();
 </script>
 
+<ConfirmarAcao bind:this={confirmar} />
+
 {#if status === "loading"}
-  <p>Carregando...</p>
+  <div class="esqueleto esqueleto-form"></div>
 {:else}
   <form class="admin-form" onsubmit={save}>
-    <label>
-      Nome
-      <input type="text" bind:value={nome} required />
-    </label>
+    <p class="admin-form-titulo">Cadastro</p>
 
-    <label>
-      Email (usado pro login)
-      <input type="email" bind:value={email} placeholder="sem email vinculado" />
-    </label>
+    <div class="campos">
+      <label>
+        Nome
+        <input type="text" bind:value={nome} required />
+      </label>
+
+      <label>
+        Email
+        <input type="email" bind:value={email} placeholder="sem email vinculado" />
+        <small>É por ele que o membro entra no site. Sem email, não tem login.</small>
+      </label>
+
+      <label class="campo-largo">
+        Nível de acesso
+        <select bind:value={authLevel}>
+          <option value={1}>Nível 1, admin do sistema</option>
+          <option value={2}>Nível 2, organizador</option>
+          <option value={3}>Nível 3, staff</option>
+          <option value={4}>Nível 4, membro comum</option>
+        </select>
+        <small>
+          Organizador abre treino, evento e agenda. Admin do sistema também edita cadastro, lança
+          doação e fecha treino.
+        </small>
+      </label>
+    </div>
 
     <label class="checkbox">
       <input type="checkbox" bind:checked={statusAtivo} />
-      Ativo (aparece na seção "Membros Ativos" do mural)
+      Membro ativo (aparece na seção "Membros Ativos" do mural)
     </label>
 
-    <label>
-      Nível de acesso
-      <select bind:value={authLevel}>
-        <option value={1}>1 — Admin do sistema</option>
-        <option value={2}>2 — Organizador</option>
-        <option value={3}>3 — Staff</option>
-        <option value={4}>4 — Membro comum</option>
-      </select>
-    </label>
+    <p class="admin-form-titulo">Padrinho</p>
+    <p class="admin-form-nota">Quem indicou este membro ganha bônus de PH quando ele treina.</p>
 
-    <div>
-      <p class="gold-title">Padrinho</p>
-      {#if padrinho && !trocandoPadrinho}
-        <p>
-          {padrinho.nome}
-          <button type="button" class="btn btn-sm" onclick={() => (trocandoPadrinho = true)}>trocar</button>
-          <button type="button" class="btn btn-sm" onclick={() => (padrinho = null)}>remover</button>
-        </p>
-      {:else}
-        <MembroPicker
-          placeholder="Buscar padrinho..."
-          excludeId={Number(id)}
-          onSelect={(m) => {
-            padrinho = m;
-            trocandoPadrinho = false;
-          }}
-        />
+    {#if padrinho && !trocandoPadrinho}
+      <div class="membro-escolhido">
+        <div class="row-corpo">
+          <span class="row-titulo">{padrinho.nome}</span>
+        </div>
+        <div class="row-acoes">
+          <button type="button" class="btn btn-sm btn-ghost" onclick={() => (trocandoPadrinho = true)}>
+            Trocar
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost" onclick={() => (padrinho = null)}>
+            Remover
+          </button>
+        </div>
+      </div>
+    {:else}
+      <MembroPicker
+        placeholder="Buscar padrinho..."
+        excludeId={Number(id)}
+        onSelect={(m) => {
+          padrinho = m;
+          trocandoPadrinho = false;
+        }}
+      />
+      {#if trocandoPadrinho}
+        <button type="button" class="btn btn-sm btn-ghost" onclick={() => (trocandoPadrinho = false)}>
+          Manter o padrinho atual
+        </button>
       {/if}
+    {/if}
+
+    <div class="form-acoes">
+      <button type="submit" class="btn btn-primary" disabled={status === "saving"}>
+        {status === "saving" ? "Salvando..." : "Salvar alterações"}
+      </button>
+      <a href="/admin/membros" class="btn btn-ghost">Cancelar</a>
     </div>
 
-    <button type="submit" class="btn btn-primary" disabled={status === "saving"}>
-      {status === "saving" ? "Salvando..." : "Salvar"}
-    </button>
     {#if status === "error"}
-      <p class="admin-error">{errorMessage}</p>
+      <p class="admin-error" role="alert">{errorMessage}</p>
     {/if}
   </form>
 
-  {#if !oculto}
-    <div class="admin-list-actions">
-      <button type="button" class="btn btn-danger" onclick={excluirMembro}>Ocultar / excluir membro</button>
-    </div>
+  {#if oculto}
+    <p class="admin-aviso">Este membro está oculto: não aparece no login, no mural nem nos rankings.</p>
   {:else}
-    <p class="admin-error">Este membro já está oculto (excluído).</p>
+    <div class="zona-perigo">
+      <p>
+        Ocultar tira {nome} do login, do mural e dos rankings, sem apagar o histórico de treinos.
+      </p>
+      <button type="button" class="btn btn-danger" onclick={excluirMembro}>Ocultar membro</button>
+    </div>
   {/if}
 
-  <h2>Níveis por Classe</h2>
+  <div class="admin-secao-cab">
+    <h2>Níveis por classe <span class="contagem">{porClasse.length}</span></h2>
+  </div>
   {#if porClasse.length === 0}
-    <p class="dashboard-empty">Nenhum treino registrado ainda.</p>
+    <p class="admin-vazio">Nenhum treino registrado ainda.</p>
   {:else}
     <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--dashboard">
+      <table class="ranking-tabela ranking-tabela--dashboard tabela-admin">
         <thead>
           <tr>
             <th class="col-nome">Classe</th>
@@ -175,8 +222,8 @@
           {#each porClasse as c}
             <tr>
               <td class="col-nome">{c.nome_classe}</td>
-              <td class="col-stat"><span class="stat-pill">{c.nivel_por_classe}</span></td>
-              <td class="col-stat"><span class="stat-pill">{c.treinos_por_classe}</span></td>
+              <td class="col-stat" data-label="Nível"><span class="stat-pill">{c.nivel_por_classe}</span></td>
+              <td class="col-stat" data-label="Treinos"><span class="stat-pill">{c.treinos_por_classe}</span></td>
             </tr>
           {/each}
         </tbody>
@@ -184,12 +231,14 @@
     </div>
   {/if}
 
-  <h2>Histórico de Presença</h2>
+  <div class="admin-secao-cab">
+    <h2>Histórico de presença <span class="contagem">{historico.length}</span></h2>
+  </div>
   {#if historico.length === 0}
-    <p class="dashboard-empty">Nenhuma presença registrada ainda.</p>
+    <p class="admin-vazio">Nenhuma presença registrada ainda.</p>
   {:else}
     <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--historico">
+      <table class="ranking-tabela ranking-tabela--historico tabela-admin">
         <thead>
           <tr>
             <th class="col-rank">Nº Treino</th>
@@ -202,15 +251,9 @@
           {#each historico as h}
             <tr>
               <td class="col-rank"><span class="rank-badge">{h.id_treino}</span></td>
-              <td class="col-nome">
-                {new Date(h.data_treino + "T00:00:00").toLocaleDateString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "2-digit",
-                })}
-              </td>
-              <td class="col-faixa">{h.nome_classe}</td>
-              <td class="col-stat"><span class="stat-pill">{h.ph_ganho_treino}</span></td>
+              <td class="col-nome" data-label="Data">{dataCurta(h.data_treino)}</td>
+              <td class="col-faixa" data-label="Classe">{h.nome_classe}</td>
+              <td class="col-stat" data-label="PH ganho"><span class="stat-pill">{h.ph_ganho_treino}</span></td>
             </tr>
           {/each}
         </tbody>

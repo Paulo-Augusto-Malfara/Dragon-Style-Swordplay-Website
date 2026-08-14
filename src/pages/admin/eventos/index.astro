@@ -63,11 +63,14 @@ if (idsEventos.length > 0) {
     ) : membro.isOrganizador ? (
       <AbrirEvento eventosRecentes={historico ?? []} client:load />
     ) : (
-      <p class="dashboard-empty">Nenhum evento aberto no momento. Aguarde um organizador abrir um evento.</p>
+      <p class="admin-vazio">Nenhum evento aberto no momento. Aguarde um organizador abrir um evento.</p>
     )
   }
 
-  <h2>Histórico</h2>
+  <div class="admin-secao-cab">
+    <h2>Eventos fechados <span class="contagem">{historico?.length ?? 0}</span></h2>
+  </div>
+
   {historico && historico.length > 0 ? (
     <div class="modalidades modalidades-grid treinos-grid">
       {historico.map((e) => (
@@ -81,7 +84,7 @@ if (idsEventos.length > 0) {
       ))}
     </div>
   ) : (
-    <p class="dashboard-empty">Nenhum evento finalizado ainda.</p>
+    <p class="admin-vazio">Nenhum evento finalizado ainda.</p>
   )}
 </AdminShell>
 

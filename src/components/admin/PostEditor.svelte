@@ -14,6 +14,24 @@
   let status = $state<"idle" | "loading" | "saving" | "saved" | "error">(isNew ? "idle" : "loading");
   let errorMessage = $state("");
 
+  // O slug vira a âncora da novidade dentro de /novidades, e digitar
+  // "primeiro-treino-de-2026" à mão convida a erro de acento e espaço. Aqui
+  // ele sai do título enquanto ninguém tiver mexido no campo, e para de
+  // seguir no primeiro toque.
+  let slugManual = $state(false);
+
+  const paraSlug = (t: string) =>
+    t
+      .normalize("NFD")
+      .replace(/[̀-ͯ]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "");
+
+  function onTitulo() {
+    if (isNew && !slugManual) slug = paraSlug(title);
+  }
+
   async function load() {
     const { data, error } = await supabase.from("posts").select("*").eq("id", id).single();
     if (error) {
@@ -47,37 +65,53 @@
       return;
     }
     status = "saved";
-    window.location.href = "/admin";
+    window.location.href = "/admin/posts";
   }
 
   if (!isNew) load();
 </script>
 
 {#if status === "loading"}
-  <p>Carregando...</p>
+  <div class="esqueleto esqueleto-form"></div>
 {:else}
   <form class="admin-form" onsubmit={save}>
-    <label>
-      Slug
-      <input type="text" bind:value={slug} required pattern="[a-z0-9-]+" />
-    </label>
-    <label>
-      Título
-      <input type="text" bind:value={title} required />
-    </label>
-    <label>
-      Corpo (HTML)
-      <textarea bind:value={body} rows="16" required></textarea>
-    </label>
+    <div class="campos">
+      <label class="campo-largo">
+        Título
+        <input type="text" bind:value={title} oninput={onTitulo} required />
+      </label>
+      <label class="campo-largo">
+        Endereço da novidade
+        <input
+          type="text"
+          bind:value={slug}
+          oninput={() => (slugManual = true)}
+          required
+          pattern="[a-z0-9-]+"
+        />
+        <small>Só letras minúsculas, números e hífen. É a âncora do link: /novidades#{slug || "..."}</small>
+      </label>
+      <label class="campo-largo">
+        Texto
+        <textarea bind:value={body} rows="16" required></textarea>
+        <small>Aceita HTML: &lt;p&gt; para parágrafo, &lt;strong&gt; para negrito, &lt;a href&gt; para link.</small>
+      </label>
+    </div>
+
     <label class="checkbox">
       <input type="checkbox" bind:checked={isPublished} />
-      Publicado
+      Publicada (aparece na home pra qualquer visitante)
     </label>
-    <button type="submit" class="btn btn-primary" disabled={status === "saving"}>
-      {status === "saving" ? "Salvando..." : "Salvar"}
-    </button>
+
+    <div class="form-acoes">
+      <button type="submit" class="btn btn-primary" disabled={status === "saving"}>
+        {status === "saving" ? "Salvando..." : isNew ? "Criar novidade" : "Salvar alterações"}
+      </button>
+      <a href="/admin/posts" class="btn btn-ghost">Cancelar</a>
+    </div>
+
     {#if status === "error"}
-      <p class="admin-error">{errorMessage}</p>
+      <p class="admin-error" role="alert">{errorMessage}</p>
     {/if}
   </form>
 {/if}

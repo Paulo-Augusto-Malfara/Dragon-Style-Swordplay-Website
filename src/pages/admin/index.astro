@@ -1,6 +1,5 @@
 ---
 import AdminShell from "../../components/admin/AdminShell.astro";
-import AdminList from "../../components/admin/AdminList.svelte";
 import { createSupabaseServerClient } from "../../lib/supabase-server";
 
 export const prerender = false;
@@ -8,10 +7,20 @@ export const prerender = false;
 const { membro } = Astro.locals;
 const supabase = createSupabaseServerClient(Astro.cookies, Astro.request);
 
+// Data de hoje no fuso do Brasil, não em UTC: o servidor da Vercel roda em
+// UTC, e das 21h em diante lá já é o dia seguinte -- o "próximo treino"
+// pularia o treino de hoje à noite. en-CA é o atalho pra sair YYYY-MM-DD.
+const hojeBR = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+const inicioDoAno = hojeBR.slice(0, 4) + "-01-01";
+
 // O hub era uma lista de cinco links. O que faltava era justamente o que se
 // abre o painel pra saber: tem alguma coisa em aberto agora? Treino esquecido
 // aberto trava o registro de presença de todo mundo até alguém fechar.
-const [treino, evento] = await Promise.all([
+//
+// E, junto disso, os quatro números que respondem "como está o grupo" sem
+// precisar entrar em seção nenhuma. Todas as consultas são contagem (head:
+// true não traz linha, só o total) ou uma linha só.
+const [treino, evento, ativos, treinosDoAno, proximo] = await Promise.all([
   supabase
     .from("fTreinos")
     .select("id_treino, data_treino, status")
@@ -22,12 +31,42 @@ const [treino, evento] = await Promise.all([
     .select("id_evento, nome_evento, cidade")
     .eq("status", "aberto")
     .maybeSingle(),
+  supabase
+    .from("dMembros")
+    .select("id_membro", { count: "exact", head: true })
+    .eq("status_ativo", true)
+    .eq("oculto", false),
+  supabase
+    .from("fTreinos")
+    .select("id_treino", { count: "exact", head: true })
+    .eq("status", "finalizado")
+    .gte("data_treino", inicioDoAno),
+  supabase
+    .from("fAgendaTreinos")
+    .select("data_treino, cidade")
+    .eq("status", "agendado")
+    .gte("data_treino", hojeBR)
+    .order("data_treino")
+    .limit(1)
+    .maybeSingle(),
 ]);
+
+const dataBR = (d: string) =>
+  new Date(d + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+
+const numeros = [
+  { valor: ativos.count ?? 0, rotulo: "Membros ativos" },
+  { valor: treinosDoAno.count ?? 0, rotulo: `Treinos em ${hojeBR.slice(0, 4)}` },
+  {
+    valor: proximo.data ? dataBR(proximo.data.data_treino) : "—",
+    rotulo: proximo.data ? `Próximo, ${proximo.data.cidade}` : "Nada na agenda",
+  },
+];
 
 const emAberto = [
   treino.data && {
     href: `/admin/treinos/${treino.data.id_treino}`,
-    tipo: "Treino",
+    tipo: "Treino em andamento",
     titulo:
       treino.data.status === "aguardando_data"
         ? `Treino #${treino.data.id_treino}, aguardando data`
@@ -36,7 +75,7 @@ const emAberto = [
   },
   evento.data && {
     href: `/admin/eventos/${evento.data.id_evento}`,
-    tipo: "Evento",
+    tipo: "Evento em andamento",
     titulo: `${evento.data.nome_evento}, ${evento.data.cidade}`,
     acao: "Registrar participantes e fechar",
   },
@@ -52,10 +91,30 @@ const atalhos = [
   ...(membro.isAdminSistema
     ? [{ href: "/admin/doacoes", label: "Doações", desc: "Lançar e conferir as doações." }]
     : []),
+  // Novidades e Modalidades eram duas listas soltas no fim do hub. Como
+  // seção, entram na mesma grade e a tela inicial volta a ser só uma escolha
+  // de para onde ir.
+  ...(membro.isOrganizador
+    ? [
+        { href: "/admin/posts", label: "Novidades", desc: "Escrever e publicar avisos na home." },
+        { href: "/admin/modalidades", label: "Modalidades", desc: "Regras e mínimo de participantes." },
+      ]
+    : []),
 ];
 ---
 
 <AdminShell title="Painel Administrativo" resumo={`Logado como ${membro.nome}.`}>
+  <ul class="admin-stats">
+    {
+      numeros.map((n) => (
+        <li class="admin-stat">
+          <span class="admin-stat-valor">{n.valor}</span>
+          <span class="admin-stat-rotulo">{n.rotulo}</span>
+        </li>
+      ))
+    }
+  </ul>
+
   {
     emAberto.length > 0 && (
       <section class="hub-aberto">
@@ -64,7 +123,7 @@ const atalhos = [
           {emAberto.map((i) => (
             <li>
               <a href={i.href}>
-                <span class="hub-tipo">{i.tipo} em andamento</span>
+                <span class="hub-tipo">{i.tipo}</span>
                 <span class="hub-titulo">{i.titulo}</span>
                 <span class="hub-acao">{i.acao}</span>
               </a>
@@ -89,17 +148,6 @@ const atalhos = [
     }
   </ul>
 
-  {
-    membro.isOrganizador && (
-      <>
-        <h2>Novidades</h2>
-        <AdminList kind="posts" client:load />
-
-        <h2>Modalidades</h2>
-        <AdminList kind="modalidades" client:load />
-      </>
-    )
-  }
 </AdminShell>
 
 <style>
@@ -124,7 +172,7 @@ const atalhos = [
     height: 100%;
     padding: 14px 16px;
     border: 1px solid var(--ds-line);
-    border-radius: 10px;
+    border-radius: 12px;
     background: var(--ds-surface);
     text-decoration: none;
     transition:
@@ -166,4 +214,5 @@ const atalhos = [
     line-height: 1.5;
     color: var(--ds-text-3);
   }
+
 </style>
