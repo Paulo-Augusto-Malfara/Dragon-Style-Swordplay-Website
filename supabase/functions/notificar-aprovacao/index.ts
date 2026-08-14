@@ -7,8 +7,14 @@
  * Postgres. Como notificação perdida não é falha de segurança (a fila continua
  * lá, e o painel mostra a contagem), não vale essa máquina toda.
  *
- * O que impede virar canal de spam: a função confere no banco que quem chamou
- * REALMENTE tem algo pendente. Sem pendência, nada é enviado.
+ * Duas travas impedem isso de virar canal de spam, e são travas diferentes:
+ *
+ * 1. Quem chamou precisa REALMENTE ter algo pendente no banco. Isso barra quem
+ *    não tem pendência nenhuma.
+ * 2. A última notificação precisa ter saído há mais de JANELA_MIN minutos. Isso
+ *    barra a repetição de quem TEM pendência, que a trava 1 sozinha deixava
+ *    passar: bastava chamar a função em sequência enquanto a foto não fosse
+ *    aprovada pra fazer o celular de quem administra apitar sem parar.
  */
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "jsr:@supabase/supabase-js@2";
@@ -21,6 +27,12 @@ const CHAVE_ANON = Deno.env.get("SUPABASE_ANON_KEY")!;
 const VAPID_PUBLICA = Deno.env.get("VAPID_PUBLICA")!;
 const VAPID_PRIVADA = Deno.env.get("VAPID_PRIVADA")!;
 const VAPID_CONTATO = Deno.env.get("VAPID_CONTATO") ?? "mailto:papito.paulo@gmail.com";
+
+// Quanto tempo tem que passar entre duas notificações disparadas pelo mesmo
+// membro. Dez minutos é folgado pro caso legítimo (mandar foto e depois apelido
+// vira um aviso só, e a fila continua aparecendo no painel de qualquer jeito) e
+// apertado o bastante pra repetição não incomodar ninguém.
+const JANELA_MIN = 10;
 
 Deno.serve(async (req) => {
   const CORS = cors(req);
@@ -55,13 +67,23 @@ Deno.serve(async (req) => {
   // Só notifica se quem pediu tem mesmo algo na fila.
   const { data: quem } = await admin
     .from("dMembros")
-    .select("nome, apelido, foto_pendente_em, apelido_pendente")
+    .select("id_membro, nome, apelido, foto_pendente_em, apelido_pendente, aprovacao_notificada_em")
     .eq("auth_user_id", user.id)
     .single();
 
   if (!quem) return responde({ erro: "Membro não encontrado" }, 404);
   if (!quem.foto_pendente_em && !quem.apelido_pendente) {
     return responde({ ok: true, enviados: 0, motivo: "nada pendente" }, 200);
+  }
+
+  // A janela é conferida aqui, e não no navegador, porque quem chama esta
+  // função é o cliente e nada do que ele diz vale como limite. Responde 200:
+  // pro membro não é erro nenhum, o pedido dele está na fila do mesmo jeito.
+  if (quem.aprovacao_notificada_em) {
+    const desde = (Date.now() - new Date(quem.aprovacao_notificada_em).getTime()) / 60000;
+    if (desde < JANELA_MIN) {
+      return responde({ ok: true, enviados: 0, motivo: "avisado há pouco" }, 200);
+    }
   }
 
   const oque =
@@ -90,6 +112,21 @@ Deno.serve(async (req) => {
   if (!inscricoes || inscricoes.length === 0) {
     return responde({ ok: true, enviados: 0, motivo: "nenhum aparelho inscrito" }, 200);
   }
+
+  /* Marca ANTES de enviar, de propósito.
+   *
+   * Marcando depois, duas chamadas disparadas ao mesmo tempo passariam as duas
+   * pela janela, que é justamente o caso que se quer fechar. O preço é que uma
+   * falha no envio custa uma notificação perdida, e isso é aceitável: a fila
+   * continua no banco e o painel mostra a contagem, então ninguém deixa de ser
+   * atendido, só deixa de ser cutucado.
+   *
+   * Fica depois da checagem de inscrições pra não gastar a janela de 10 minutos
+   * quando não há nem aparelho pra receber. */
+  await admin
+    .from("dMembros")
+    .update({ aprovacao_notificada_em: new Date().toISOString() })
+    .eq("id_membro", quem.id_membro);
 
   webpush.setVapidDetails(VAPID_CONTATO, VAPID_PUBLICA, VAPID_PRIVADA);
 

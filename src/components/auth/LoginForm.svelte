@@ -4,10 +4,20 @@
   }
   const { redirectPath = "/" }: Props = $props();
 
-  // ponytail: client-side cooldown so reloading/resubmitting the form can't be
-  // used to spam OTP emails at a target address. Supabase also rate-limits
-  // this server-side; this is just an extra, cheap layer.
-  const RESEND_COOLDOWN_SECONDS = 30;
+  /* A espera é do servidor, e aqui ela só é mostrada.
+   *
+   * Quem barra pedido repetido de código é o Supabase: `/auth/v1/otp` tem uma
+   * janela de 60 segundos desde o último pedido, mais 360 códigos por hora no
+   * projeto e 360 verificações por hora por IP. Nada disso pode ser contornado
+   * pelo navegador, e é bom que seja assim, porque esta contagem aqui mora no
+   * sessionStorage e some numa aba anônima.
+   *
+   * Estava em 30, metade do que o servidor exige: o botão liberava, a pessoa
+   * clicava e levava um erro dizendo pra esperar mais. O número tem que ser o
+   * mesmo dos dois lados, senão a tela promete o que o servidor recusa. Se um
+   * dia esse limite for mudado no painel (Authentication > Rate Limits), mude
+   * aqui junto. */
+  const RESEND_COOLDOWN_SECONDS = 60;
   const COOLDOWN_STORAGE_KEY = "ds-otp-last-sent-at";
 
   let email = $state("");
