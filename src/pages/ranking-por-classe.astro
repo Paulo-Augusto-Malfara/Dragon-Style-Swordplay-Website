@@ -2,6 +2,7 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
 import RankingLista from "../components/RankingLista.astro";
+import { VERSOES, versaoDaUrl, type Versao } from "../lib/ranking-versao";
 
 export const prerender = false;
 
@@ -11,14 +12,22 @@ const { data } = await supabasePublic
   .neq("id_classe", 11) // Básico is a veterano gate, not a rankable class
   .order("treinos_por_classe", { ascending: false });
 
-// a faixa é por membro, não por classe, e v_ranking_por_classe não a carrega —
-// mesmo padrão de Map que ranking-geral.astro usa pros totais por membro
+// a faixa é por membro, não por classe, e v_ranking_por_classe não a carrega.
+// Mesmo padrão de Map que ranking-geral.astro usa pros totais por membro.
+// O status_ativo vem carona na mesma consulta pelo mesmo motivo: a view por
+// classe também não tem essa coluna, e uma segunda ida ao banco só pra buscá-la
+// seria trabalho repetido.
 const { data: faixas } = await supabasePublic
   .from("v_ranking_nivel_geral")
-  .select("id_membro, nome_faixa");
+  .select("id_membro, nome_faixa, status_ativo");
 const faixaPorMembro = new Map<number, string | null>(
   (faixas ?? []).map((f) => [f.id_membro, f.nome_faixa])
 );
+const idsAtivos = new Set<number>(
+  (faixas ?? []).filter((f) => f.status_ativo).map((f) => f.id_membro)
+);
+
+const versao: Versao = versaoDaUrl(Astro.url);
 
 const porClasse = new Map<string, typeof data>();
 for (const row of data ?? []) {
@@ -37,17 +46,45 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
 // clique, quando não havia âncora nenhuma pra casar.
 const pedida = Astro.url.searchParams.get("classe");
 const atual = classes.find(([nome]) => slug(nome) === pedida) ?? classes[0];
+
+// O corte por versão é feito aqui, na classe já escolhida, e não lá em cima no
+// agrupamento: filtrando antes, uma classe sem nenhum membro na ativa sumiria
+// da fila de botões, e o mesmo botão existiria ou não conforme a versão. A
+// lista de classes é a mesma nas duas; o que muda é quem aparece dentro dela.
+const linhas =
+  versao === "legado"
+    ? (atual?.[1] ?? [])
+    : (atual?.[1] ?? []).filter((m) => idsAtivos.has(m.id_membro));
+
+const href = (p: { classe?: string; versao?: Versao }) =>
+  `?classe=${p.classe ?? (atual ? slug(atual[0]) : "")}&versao=${p.versao ?? versao}`;
 ---
 
 <PageLayout
   title="Ranking por Classe"
   description="O ranking de cada uma das classes do Dragon Style, por treinos registrados."
-  resumo="Cada classe tem o seu ranking, ordenado por treinos registrados. Escolha a classe que quer ver."
+  resumo="Cada classe tem o seu ranking, ordenado por treinos registrados. Escolha entre ver só quem está na ativa ou o clã inteiro, e a classe que quer ver."
 >
+  <nav class="rk-versoes" aria-label="Versão do ranking">
+    {Object.entries(VERSOES).map(([key, { label, dica }]) => (
+      <a
+        class:list={["chip", key === versao && "ativo"]}
+        href={href({ versao: key as Versao })}
+        title={`${label} (${dica})`}
+        aria-current={key === versao ? "page" : undefined}
+      >
+        {label}
+      </a>
+    ))}
+  </nav>
+  <p class="rk-versao-dica">
+    {VERSOES[versao].label}: {VERSOES[versao].dica}.
+  </p>
+
   <nav class="chips" aria-label="Escolher a classe">
     {classes.map(([nomeClasse]) => (
       <a
-        href={`?classe=${slug(nomeClasse)}`}
+        href={href({ classe: slug(nomeClasse) })}
         class:list={["chip", nomeClasse === atual?.[0] && "ativo"]}
         aria-current={nomeClasse === atual?.[0] ? "page" : undefined}
       >
@@ -61,12 +98,18 @@ const atual = classes.find(([nome]) => slug(nome) === pedida) ?? classes[0];
       <section class="ranking-classe">
         <h2>{atual[0]}</h2>
         <p class="rk-conta">
-          {atual[1]!.length} {atual[1]!.length === 1 ? "membro" : "membros"} com treino
-          registrado nesta classe
+          {linhas.length} {linhas.length === 1 ? "membro" : "membros"}
+          {versao === "ativa" ? " na ativa" : ""} com treino registrado nesta classe
         </p>
+        {linhas.length === 0 && (
+          <p class="vazio">
+            Nenhum membro na ativa treinou esta classe. Veja a versão Legado para o
+            histórico completo dela.
+          </p>
+        )}
         <RankingLista
           colunas={2}
-          itens={atual[1]!.map((m, i) => ({
+          itens={linhas.map((m, i) => ({
             posicao: i + 1,
             idMembro: m.id_membro,
             nome: m.nome,

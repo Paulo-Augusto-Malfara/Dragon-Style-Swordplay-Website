@@ -3093,6 +3093,31 @@ p {
    Alinhada à esquerda, e não centralizada: com dez classes a última linha
    ficava com um chip sozinho no meio da tela, e o começo de cada linha
    mudava de lugar. Mesmo motivo dos títulos das páginas. */
+/* Na Ativa x Legado, nos dois rankings.
+ *
+ * Fica acima dos chips de ordenação e, ao contrário deles, NÃO gruda no topo:
+ * dois elementos sticky com o mesmo `top` se sobrepõem, e o de baixo cobriria
+ * o de cima. Grudado continua só o que se usa rolando a lista, que é o
+ * critério de ordem; a versão se escolhe uma vez, no começo.
+ *
+ * Reusa `.chip` de propósito: é a mesma natureza de escolha dos filtros de
+ * classe e de ordenação, então deve ter a mesma aparência. */
+.rk-versoes {
+  display: flex;
+  gap: 8px;
+  margin: 0 0 0.55em;
+}
+
+/* A explicação da versão escolhida fica sempre visível, e não só no `title`
+   dos botões: no celular não existe passar o mouse, e é lá que a maioria lê o
+   ranking. O `title` continua nos dois botões porque no desktop ele responde
+   a outra pergunta, a de o que tem do lado que ainda não foi aberto. */
+.rk-versao-dica {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ds-text-5);
+}
+
 .chips {
   position: sticky;
   top: var(--ds-header-h);

@@ -2,6 +2,7 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
 import RankingLista from "../components/RankingLista.astro";
+import { VERSOES, versaoDaUrl, type Versao } from "../lib/ranking-versao";
 
 export const prerender = false;
 
@@ -27,11 +28,17 @@ for (const row of porClasse ?? []) {
   );
 }
 
-const ranking = (rankingRaw ?? []).map((m) => ({
-  ...m,
-  nivel_classe_total: nivelClassePorMembro.get(m.id_membro) ?? 0,
-  treinos_total: treinosPorMembro.get(m.id_membro) ?? 0,
-}));
+const versao: Versao = versaoDaUrl(Astro.url);
+
+// O corte por versão vem antes da ordenação e da paginação, senão a colocação
+// numerada e a conta de páginas descreveriam uma lista maior do que a exibida.
+const ranking = (rankingRaw ?? [])
+  .filter((m) => versao === "legado" || m.status_ativo)
+  .map((m) => ({
+    ...m,
+    nivel_classe_total: nivelClassePorMembro.get(m.id_membro) ?? 0,
+    treinos_total: treinosPorMembro.get(m.id_membro) ?? 0,
+  }));
 
 const SORTS = {
   geral: { label: "Nível Geral", key: "nivel_geral" },
@@ -52,18 +59,46 @@ const pagina = Number.isFinite(paginaPedida)
   : 1;
 const inicio = (pagina - 1) * PAGE_SIZE;
 const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
+
+// Três parâmetros que se cruzam: trocar um não pode apagar os outros dois.
+// Trocar de versão ou de critério omite a página de propósito, porque a lista
+// nova tem outro tamanho e a página 6 da antiga pode nem existir.
+const href = (p: { sort?: SortKey; versao?: Versao; page?: number }) => {
+  const q = new URLSearchParams({
+    sort: p.sort ?? sort,
+    versao: p.versao ?? versao,
+  });
+  if (p.page && p.page > 1) q.set("page", String(p.page));
+  return `?${q}`;
+};
 ---
 
 <PageLayout
   title="Ranking Geral"
   description="O ranking de todos os membros do Dragon Style por nível geral, nível de classe, treinos e pontos de honra."
-  resumo="Todo mundo que treina, em ordem. Toque em um critério para reordenar a lista."
+  resumo="Quem treina, em ordem. Escolha entre ver só quem está na ativa ou o clã inteiro, e toque em um critério para reordenar a lista."
 >
+  <nav class="rk-versoes" aria-label="Versão do ranking">
+    {Object.entries(VERSOES).map(([key, { label, dica }]) => (
+      <a
+        class:list={["chip", key === versao && "ativo"]}
+        href={href({ versao: key as Versao })}
+        title={`${label} (${dica})`}
+        aria-current={key === versao ? "page" : undefined}
+      >
+        {label}
+      </a>
+    ))}
+  </nav>
+  <p class="rk-versao-dica">
+    {VERSOES[versao].label}: {VERSOES[versao].dica}.
+  </p>
+
   <nav class="chips" aria-label="Ordenar ranking">
     {Object.entries(SORTS).map(([key, { label }]) => (
       <a
         class:list={["chip", key === sort && "ativo"]}
-        href={`?sort=${key}`}
+        href={href({ sort: key as SortKey })}
         aria-current={key === sort ? "page" : undefined}
       >
         {label}
@@ -89,21 +124,21 @@ const paginaAtual = ranking.slice(inicio, inicio + PAGE_SIZE);
   {totalPaginas > 1 && (
     <nav class="ranking-pagination" aria-label="Páginas do ranking">
       {pagina > 1 && (
-        <a class="chip" href={`?sort=${sort}&page=${pagina - 1}`} rel="prev" aria-label="Página anterior">
+        <a class="chip" href={href({ page: pagina - 1 })} rel="prev" aria-label="Página anterior">
           ‹
         </a>
       )}
       {Array.from({ length: totalPaginas }, (_, idx) => idx + 1).map((p) => (
         <a
           class:list={["chip", p === pagina && "ativo"]}
-          href={`?sort=${sort}&page=${p}`}
+          href={href({ page: p })}
           aria-current={p === pagina ? "page" : undefined}
         >
           {p}
         </a>
       ))}
       {pagina < totalPaginas && (
-        <a class="chip" href={`?sort=${sort}&page=${pagina + 1}`} rel="next" aria-label="Próxima página">
+        <a class="chip" href={href({ page: pagina + 1 })} rel="next" aria-label="Próxima página">
           ›
         </a>
       )}
