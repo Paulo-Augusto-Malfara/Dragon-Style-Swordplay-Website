@@ -13,12 +13,8 @@
    */
   import { onMount } from "svelte";
   import { corDaFaixa } from "../lib/faixa";
-  import {
-    CLASSE_BASICO,
-    calcularRanks,
-    slugDaClasse,
-    versaoDoRank,
-  } from "../lib/rank-classe";
+  import { CLASSE_BASICO, calcularRanks, slugDaClasse } from "../lib/rank-classe";
+  import { VERSOES, versaoDaUrl, type Versao } from "../lib/ranking-versao";
 
   // Import dinâmico pelo mesmo motivo do MemberDashboard: um import de topo
   // faria `createBrowserClient()` rodar na passada de SSR e derrubar o build
@@ -48,7 +44,7 @@
   let minhasClasses = $state<Linha[]>([]);
   let ranks = $state(new Map<number, { posicao: number; total: number }>());
   /** Em qual leitura do ranking essa colocação foi medida. */
-  let versaoRank = $state<"ativa" | "legado">("ativa");
+  let versaoRank = $state<Versao>("ativa");
 
   /** A lista inteira só é pedida uma vez, e é ela que dá as colocações. */
   let todasPromise: Promise<Linha[]> | undefined;
@@ -127,9 +123,23 @@
           if (aBasico !== bBasico) return aBasico ? 1 : -1;
           return b.treinos_por_classe - a.treinos_por_classe;
         });
+      /**
+       * A base da colocação é a leitura que a PÁGINA está mostrando, lida da
+       * URL na hora do clique: se a lista atrás da janela é "Na Ativa", a
+       * colocação da janela também é, senão os dois números se contradizem na
+       * mesma tela. O Mural não tem o parâmetro e cai no padrão, que é "ativa".
+       *
+       * A exceção é quem não está na ativa: ele não existe nessa base, e medi-lo
+       * contra ela daria uma colocação numa lista que não o contém. Aí vale o
+       * Legado, que é onde ele de fato aparece. Nas duas páginas de ranking isso
+       * nunca acontece, porque a versão "Na Ativa" já não mostra membro inativo
+       * (nem o olhinho dele); acontece no Mural, que tem um grupo inteiro de
+       * Membros Inativos. É por isso que a base fica escrita na tela.
+       */
       const souAtivo = !!geral.data?.status_ativo;
-      ranks = calcularRanks(minhasClasses, todas, ativos, souAtivo);
-      versaoRank = versaoDoRank(souAtivo);
+      const daPagina = versaoDaUrl(new URL(window.location.href));
+      versaoRank = daPagina === "ativa" && !souAtivo ? "legado" : daPagina;
+      ranks = calcularRanks(minhasClasses, todas, ativos, versaoRank === "ativa");
       status = "pronto";
     } catch (e) {
       // Promessa que falhou não fica guardada, senão o próximo clique repete o
@@ -231,7 +241,14 @@
       </div>
     </div>
 
-    <h3 class="pf-sec">Classes</h3>
+    <h3 class="pf-sec">
+      Classes
+      <!-- Contra quem a colocação foi medida. Sem isto, a mesma pessoa aberta
+           do Mural e do Ranking mostraria dois números sem explicação na tela. -->
+      {#if ranks.size > 0}
+        <span class="pf-base">colocação: {VERSOES[versaoRank].label}</span>
+      {/if}
+    </h3>
     {#if minhasClasses.length === 0}
       <p class="pf-aviso">Nenhum treino registrado ainda.</p>
     {:else}
@@ -252,7 +269,7 @@
                 class:podio-2={rank.posicao === 2}
                 class:podio-3={rank.posicao === 3}
                 href={`/ranking-por-classe?classe=${slugDaClasse(c.nome_classe)}&versao=${versaoRank}`}
-                title={`Colocação em ${c.nome_classe} (${versaoRank === "ativa" ? "Na Ativa" : "Legado"})`}
+                title={`Colocação em ${c.nome_classe} (${VERSOES[versaoRank].label})`}
               >
                 <strong>{rank.posicao}º</strong> de {rank.total}
               </a>
@@ -437,10 +454,22 @@
   }
 
   .pf-sec {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 10px;
     margin: 1.2em 0 0.5em;
     font-family: var(--ds-font-display);
     font-size: 1rem;
     color: var(--ds-gold);
+  }
+
+  .pf-base {
+    font-family: inherit;
+    font-size: 0.7rem;
+    font-weight: 400;
+    color: var(--ds-text-5);
   }
 
   .pf-classes {
