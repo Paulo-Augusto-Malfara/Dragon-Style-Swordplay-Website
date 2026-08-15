@@ -129,13 +129,17 @@ const atalhos = [
   { href: "/admin/treinos", label: "Treinos", desc: "Abrir treino, registrar presença, ver histórico." },
   { href: "/admin/eventos", label: "Eventos", desc: "Abrir evento e lançar participação." },
   ...(membro.isOrganizador
-    ? [{ href: "/admin/agenda", label: "Agenda", desc: "Marcar os próximos treinos." }]
+    ? [
+        { href: "/admin/agenda", label: "Agenda", desc: "Marcar os próximos treinos." },
+        {
+          href: "/admin/doacoes",
+          label: "Doações",
+          desc: membro.isAdminSistema ? "Lançar e conferir as doações." : "Conferir as doações do grupo.",
+        },
+      ]
     : []),
   ...(membro.isAdminSistema
-    ? [
-        { href: "/admin/doacoes", label: "Doações", desc: "Lançar e conferir as doações." },
-        { href: "/admin/moderacao", label: "Aprovações", desc: "Foto e apelido esperando liberação." },
-      ]
+    ? [{ href: "/admin/moderacao", label: "Aprovações", desc: "Foto e apelido esperando liberação." }]
     : []),
   // Novidades e Modalidades eram duas listas soltas no fim do hub. Como
   // seção, entram na mesma grade e a tela inicial volta a ser só uma escolha

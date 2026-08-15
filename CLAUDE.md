@@ -12,6 +12,36 @@ Rules:
 
 - Small tag/pill/badge components (`.status-badge`, `.stat-pill`, and any new one styled the same way) must always size to their own content — never stretch to fill a parent. When adding a new CSS rule that targets a generic tag like `span` inside a container (e.g. `.some-list li span`), scope it to the direct child (`.some-list li > span`), not a bare descendant selector — a bare descendant selector also matches badges/pills nested deeper inside that span and stretches them. This has caused a visible bug more than once (e.g. the "Inativo" badge in `MembrosList.svelte` inheriting `flex:1; min-width:60%` meant for the outer row `<span>`).
 
+## Níveis de permissão (revisado em 15/08/2026)
+
+`auth_level` no `dMembros`. O middleware barra quem está acima de 3 ou `oculto`.
+
+| Nível | Quem | Função no banco | Prop no site |
+|---|---|---|---|
+| 1 | Admin do sistema | `is_admin_sistema()` | `isAdminSistema` |
+| 2 | Organizador | `is_organizador()` **e `is_admin()`** | `isOrganizador` |
+| 3 | Staff | `is_staff()` | (só entrar no painel) |
+| 4+ / nulo | Membro | — | não entra |
+
+**`is_admin()` NÃO é o admin do sistema: é nível ≤ 2, idêntica a
+`is_organizador()`.** É nome histórico e metade das policies usa ele. Em policy
+nova prefira `is_organizador()`, que diz o que faz. As quatro funções têm
+`comment` no banco dizendo isso.
+
+Quem faz o quê hoje:
+
+- **Staff (3)**: registra e corrige presença de treino e de evento, cadastra
+  membro novo (a RLS só deixa criar com nível ≥ 4). Não abre, não fecha, não
+  edita membro.
+- **Organizador (2)**: o do staff, mais abrir treino e evento, fechar evento,
+  agenda, novidades, modalidades, e **conferir** doações (sem lançar).
+- **Admin do sistema (1)**: tudo. Único que fecha, reabre e exclui treino,
+  edita membro, lança/edita/exclui doação e mexe na fila de aprovações.
+
+Regra ao mexer numa tela do painel: **a trava da página filha tem que repetir a
+do índice**. Já aconteceu de `/admin/posts/[id]` e `/admin/modalidades/[id]`
+abrirem pra quem a lista escondia, e o erro só aparecer no salvar.
+
 ## claude-in-chrome usage
 
 Don't open/screenshot the site with claude-in-chrome unprompted. The user runs `npm run dev` himself and watches localhost live (PC and phone) — he checks visual/UI changes on his own. Only use claude-in-chrome when: the user explicitly asks in that turn, a large/whole-feature review he requested calls for it, or there's a genuine need with no other way to verify — and even then, ask for authorization first (yes, even in auto mode) before opening the browser.

@@ -36,7 +36,9 @@ const secoes = [
   { href: "/admin/treinos", label: "Treinos", ver: true },
   { href: "/admin/eventos", label: "Eventos", ver: true },
   { href: "/admin/agenda", label: "Agenda", ver: membro.isOrganizador },
-  { href: "/admin/doacoes", label: "Doações", ver: membro.isAdminSistema },
+  // Organizador confere, só o admin do sistema lança: por isso a seção aparece
+  // pros dois e o painel dentro dela é que muda (ver podeEditar).
+  { href: "/admin/doacoes", label: "Doações", ver: membro.isOrganizador },
   { href: "/admin/posts", label: "Novidades", ver: membro.isOrganizador },
   { href: "/admin/modalidades", label: "Modalidades", ver: membro.isOrganizador },
 ].filter((s) => s.ver);
