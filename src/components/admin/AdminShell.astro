@@ -182,5 +182,13 @@ const naSecao = (href: string) => atual === href || atual.startsWith(href + "/")
     .admin-topo {
       top: 0;
     }
+
+    /* O painel é uma tela de trabalho, não de leitura: aqui a largura vale
+       mais que a margem. Sobra o respiro do <main>, que já afasta o cartão da
+       borda. Fica só no admin de propósito, as páginas públicas continuam com
+       a margem de leitura delas. */
+    .pagina {
+      padding-inline: 4px;
+    }
   }
 </style>

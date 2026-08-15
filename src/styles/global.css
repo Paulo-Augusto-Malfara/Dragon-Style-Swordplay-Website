@@ -1741,6 +1741,17 @@ p {
   border-radius: var(--card-radius);
 }
 
+/* No celular o respiro lateral deste cartão é largura que some duas vezes: uma
+   de cada lado, e é dentro dele que ficam as grades de dois por linha do
+   registro de presença. O vertical continua igual, que é o que separa uma
+   pergunta da outra; só o lateral encolhe, e ainda sobra folga suficiente pra
+   o conteúdo não encostar na borda. */
+@media (max-width: 480px) {
+  .admin-form {
+    padding-inline: 0.72rem;
+  }
+}
+
 /* Deixa o <form> de uma etapa (ex: RecrutarMembro) se comportar como se não
    existisse no layout, pra seus filhos participarem do flex/gap do .admin-form
    pai em vez de ficarem presos num box sem gap. */
