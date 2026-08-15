@@ -742,7 +742,7 @@
       Avisaram que vinham e ainda não foram registrados. O nome vai pro formulário acima; o PH só
       conta depois que você escolher a classe e confirmar.
     </p>
-    <ul class="admin-list">
+    <ul class="admin-list confirmados-lista">
       {#each confirmadosPendentes as c}
         <li>
           <span class="row-avatar">
@@ -911,6 +911,19 @@
     margin: -0.4em 0 0.8em;
   }
 
+  /* Uma linha por confirmado. O .row-corpo da lista padrão tem base de 190px,
+     que somada ao avatar e ao botão não cabe em tela estreita: o botão caía
+     pra uma segunda linha e dobrava a altura de um item que só tem um nome e
+     um "Registrar". Aqui o nome cede espaço (base 0 e reticências, que ele já
+     tem) em vez de a linha quebrar. */
+  .confirmados-lista > li {
+    flex-wrap: nowrap;
+  }
+
+  .confirmados-lista > li > .row-corpo {
+    flex-basis: 0;
+  }
+
   /* Grade em vez da fila que quebra sozinha: em fila, "Nenhum" ficava do
      tamanho da palavra e o quarto botão sobrava numa segunda linha, deixando
      alvos de tamanhos diferentes num formulário que é tocado com o polegar.
@@ -952,13 +965,25 @@
   /* Mesma grade dos cartões de "Minhas classes" do Meu Perfil, encolhida: aqui
      não cabe colocação nem "N treinos" por extenso, porque o alvo é duas
      colunas no celular sem rolar a tela inteira pra achar a classe. */
+  /* Duas colunas fixas no celular, não auto-fill. Medido: dentro do .admin-form
+     o auto-fill(140px) dá duas colunas de 340px de viewport pra cima, mas em
+     320px sobra 283px de grade e ele desiste, desenhando uma coluna só. E
+     320px é o que um S21 FE reporta com a escala de tela ampliada do Samsung.
+     Fixar em duas entrega o que a tela precisa, que é comparar classes lado a
+     lado; de 560px pra cima volta a caber quantas couberem. */
   .classes-grade {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
     margin: 0;
     padding: 0;
     list-style: none;
+  }
+
+  @media (min-width: 560px) {
+    .classes-grade {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
   }
 
   .classe-card {
@@ -966,7 +991,7 @@
     flex-direction: column;
     gap: 5px;
     width: 100%;
-    padding: 9px 11px 10px;
+    padding: 8px 9px 9px;
     border: 1px solid var(--ds-line);
     border-radius: 12px;
     background: var(--ds-surface);
@@ -1016,7 +1041,7 @@
 
   .cc-nome {
     font-family: var(--ds-font-display);
-    font-size: 0.92rem;
+    font-size: 0.88rem;
     line-height: 1.1;
     color: var(--ds-text-2);
   }
