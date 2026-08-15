@@ -233,13 +233,56 @@ linha de base conhecida.
 completou os níveis pra fechar 18 treinos de Lanceiro. É intencional, fica.
 Se aparecer numa auditoria futura, não é bug.
 
-**Os 17 casos de Básico.** Ficaram pra uma segunda passada. Valem 1 nível no
-máximo. Vale lembrar que o Davigol com 5 Básicos na planilha foi o próprio
-usuário que corrigiu pra 4 na época, então ali o banco está certo e a planilha
-errada.
+**Os casos de Básico.** Investigados a fundo e **deixados como estão de
+propósito**. Ver a seção abaixo; não reabra sem ler.
 
 **IDs 164/165/166/170** continuam em `fMarcoZero` em vez de `fPresencas`. Não é
 erro de valor, só de lugar, e não muda ranking.
+
+---
+
+## O Básico: por que fica como está
+
+Investigado em 14/08/2026 a pedido do usuário. Conclusão: **o erro que ele
+queria eliminar já não existe no banco, e ir além dele não é confiável.**
+
+### O `-2` nunca chegou no banco
+
+A planilha tem 32 quedas de Básico. Tirando uma limpeza em bloco de 31/07/2022
+(13 pessoas de uma vez, padrão diferente e aparentemente intencional), sobram
+**14 eventos de "4 → 2"**, todos em membro ausente, um por aba, marchando em
+ordem alfabética decrescente. Mesma assinatura do Cavaleiro fantasma: o `-2` é
+lixo da mesma fórmula quebrada, não correção.
+
+Os 14 são Sandro, Neni, Moon, Mike (Votu), Oculto2, Marcos Antônio, Jonsanto,
+Hyan, Hieraco, Guilherme (Amigo Sandro), Giovana, Gabriel Olian, Gabriel (Amigo
+Letícia) e Flavio Bosqueti. **Todos estão com Básico 4 no banco.** A importação
+capturou o estado anterior ao `-2` em todos eles, então não há o que corrigir.
+
+### Reconstruir o Básico não é confiável
+
+Foi tentado: marco inicial pós-limpeza, mais lançamentos manuais das abas de
+input, mais presenças de Básico efetivamente marcadas, ignorando alteração em
+membro ausente.
+
+A reconstrução passou no teste do teto (só Moon e Davigol acima de 4, e o
+Davigol com 5 é o erro que o próprio usuário já tinha corrigido na mão, ou seja,
+ela reproduziu sozinha um erro conhecido).
+
+Mas **reprovou no teste que importa**: aplicá-la deixaria 18 membros com classe
+avançada sem os 4 Básicos que destravam a classe. João Victor ficaria com 36
+treinos avançados e 2 Básicos, Ivan com 21 e 2, Isaac com 13 e 2. Impossível
+pela regra do próprio grupo.
+
+O motivo é estrutural. No Cavaleiro o fantasma tinha impressão digital: sempre
+o valor 8, sempre em quem nunca teve uma única presença de Cavaleiro, uma
+vítima por aba. Dava pra isolar com certeza. No Básico, **um lançamento manual
+legítimo e o fantasma são a mesma coisa nos dados**: "membro ausente teve o
+Básico alterado numa aba". A planilha não guarda nada que separe os dois.
+
+Decisão: fica como está. Mexer trocaria um erro pequeno e conhecido por 18
+inconsistências novas. Se alguém quiser reabrir isso, vai precisar de fonte
+externa, não da planilha.
 
 ### E a planilha?
 
