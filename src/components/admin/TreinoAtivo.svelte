@@ -641,7 +641,10 @@
                 <span class="cc-topo">
                   <span class="cc-nome">{c.nome_classe}</span>
                   {#if c.id_classe === ultimaClasse}
-                    <span class="cc-tag">Repetir</span>
+                    <span class="cc-tag" title="Repetir: foi o último treino desta classe">
+                      <span class="cc-tag-palavra">Repetir</span>
+                      <span class="cc-tag-icone" aria-hidden="true">↻</span>
+                    </span>
                   {/if}
                 </span>
                 <span class="cc-linha">
@@ -1037,6 +1040,39 @@
     line-height: 1.5;
     color: var(--ds-text-4);
     white-space: nowrap;
+  }
+
+  .cc-tag-icone {
+    display: none;
+  }
+
+  /* Medido no cartão de 129px do celular: sobram 109px por dentro e só
+     "Espadachim" come 88 deles. A palavra "Repetir" não cabe ao lado nem
+     encolhida a 0,54rem, ela quebraria a linha e faria aquele cartão crescer
+     sozinho. Então no celular o mesmo aviso vira o símbolo de repetição, que
+     cabe em qualquer nome com folga; da tela média pra cima a palavra volta.
+     O title carrega a explicação nos dois casos. */
+  @media (max-width: 480px) {
+    .cc-tag {
+      padding: 1px 5px;
+      font-size: 0.62rem;
+    }
+
+    .cc-tag-palavra {
+      display: none;
+    }
+
+    .cc-tag-icone {
+      display: inline;
+    }
+
+    .cc-nome {
+      font-size: 0.82rem;
+    }
+
+    .classe-card {
+      padding-inline: 8px;
+    }
   }
 
   .classe-card.ativo .cc-tag {
