@@ -165,13 +165,15 @@ Notas:
   somou 8, ele *sobrescreveu* o valor com 8. Por isso o delta deles é 7 e 6.
 - **Gabriel (Amigo Letícia, ID 148)** foi atingido na planilha mas a
   importação não trouxe o Cavaleiro. Está certo por acidente.
-- **Rafael Castelo (ID 64)** é o único que merece uma segunda olhada. Mesma
-  assinatura, mas o valor foi 5 e não 8, e ele estava presente como Cavaleiro
-  naquele dia. Se você lembrar que ele entrou com bagagem de Cavaleiro, o 5
-  pode ser um lançamento manual legítimo.
+- **Rafael Castelo (ID 64)** era o único caso duvidoso: mesma assinatura, mas o
+  valor foi 5 e não 8, e ele estava presente como Cavaleiro naquele dia.
+  **Confirmado pelo usuário como erro**, entrou na correção e voltou pra 1.
 - **Pedro Bortuluzi (ID 29)** e **Guilherme (Amigo Sandro, ID 44)** foram
   atingidos em abas de input manual, não de treino. O padrão é idêntico ao
-  dos outros, mas em tese alguém *poderia* ter lançado ali de propósito.
+  dos outros, e o usuário mandou corrigir junto.
+- **Luke (ID 17)** teve um segundo ajuste depois, sem relação com o fantasma:
+  o bloco pré-sistema dele foi refeito a pedido do usuário. Ver abaixo, o
+  nível final dele é 9 e não 8.
 
 ### Efeito no ranking
 
@@ -182,12 +184,10 @@ delas pra cima.
 
 ---
 
----
-
 ## O que foi corrigido em 14/08/2026
 
-Duas migrações aplicadas, `corrige_cavaleiro_fantasma_marco_zero` e
-`restaura_marco_zero_arthur_romero`.
+Três migrações aplicadas: `corrige_cavaleiro_fantasma_marco_zero`,
+`restaura_marco_zero_arthur_romero` e `ajusta_pre_sistema_luke`.
 
 ### Feito
 
@@ -211,7 +211,8 @@ total de PH da tabela não se mexeu: 1809 antes, 1809 depois.
 | PH total | 1809 | 1810 |
 
 Níveis: Luke 10 → 8, Leandro 8 → 6, Hieraco 6 → 4, Marquinho "Rato" 4 → 2,
-Gabriel Barreto 3 → 1, Rafael Castelo 2 → 1.
+Gabriel Barreto 3 → 1, Rafael Castelo 2 → 1. (O Luke subiu depois pra 9 por
+causa do ajuste de pré-sistema, mais abaixo.)
 
 **Arthur Romero.** Marco zero recriado com Cavaleiro 1 (+ 1 PH), Espadachim 2 e
 Básico 4. A presença dele de 11/01/2026 estava lançada como Básico só porque o
@@ -223,9 +224,35 @@ exige treino `aberto` e o treino 74 está `finalizado`. Reabrir um treino fechad
 só por isso sairia mais caro que a correção. O `ph_ganho_treino` era 0, sem
 torso e sem faixa, então a troca não mexeu em PH.
 
-Conferido depois de tudo: 0 linhas zeradas, 0 órfãs, e **ninguém no grupo passa
-do teto de 4 Básicos**. `get_advisors(security)` sem item novo em relação à
-linha de base conhecida.
+**Luke: o bloco pré-sistema.** Ajuste separado, pedido do usuário, sem relação
+com o fantasma. A carga da aba `10072022` (os treinos 1 a 11, que nunca viraram
+linha em `fTreinos`) registrava Arqueiro 1, Viking 5, Básico 4. O correto é
+Arqueiro 5, Guerreiro 5, Básico 4.
+
+O detalhe que quase estragou a conta: **o marco zero do Luke não é só o
+pré-sistema.** Ele carrega também 10 presenças reais da era da planilha, 8 de
+Arqueiro e 2 de Hoplita entre março e agosto de 2025, que também nunca viraram
+treino em `fTreinos`. Por isso o Arqueiro do marco zero era 9, e não 1. Trocar
+a linha inteira pelos números novos apagaria essas 10 presenças e derrubaria o
+Luke pro nível 7. Só o bloco pré-sistema foi trocado.
+
+| | Antes | Depois |
+|---|---|---|
+| Marco zero | Arqueiro 9, Hoplita 2, Viking 5, Básico 4 | Arqueiro 13, Guerreiro 5, Hoplita 2, Básico 4 |
+| No site | Arq 22, Cav 8, Hopl 3, Vik 5, Bás 4 | Arq 26, Guer 5, Hopl 3, Bás 4 |
+| Nível | 8 | **9** |
+
+O Arqueiro 13 é 5 do pré-sistema mais as 8 presenças de 2025. O Viking saiu de
+vez porque ele não tem nenhuma presença de Viking em `fPresencas`. Os 33 PH
+ficaram na linha do Arqueiro, que permaneceu.
+
+Conferido depois de tudo: 295 linhas, PH total 1810, 0 linha zerada, 0 órfã, e
+**ninguém no grupo passa do teto de 4 Básicos**. `get_advisors(security)` sem
+item novo em relação à linha de base conhecida.
+
+Uma armadilha de leitura, pra quem for auditar PH: o `ph_total` da
+`v_ranking_nivel_geral` soma três fontes, `fMarcoZero` + `fPresencas` + `fPH`.
+O Luke, por exemplo, tem 33 + 14 + 30 = 77, não os 47 das duas primeiras.
 
 ### Deliberadamente não feito
 
