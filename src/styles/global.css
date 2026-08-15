@@ -2958,6 +2958,14 @@ p {
   border: 1px solid var(--ds-gold-dim);
 }
 
+/* Treino aberto agora: é o único estado da agenda em que alguém do painel tem
+   trabalho pendente, então usa o mesmo dourado vivo dos avisos de ação. */
+.status-badge--andamento {
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
+  border: 1px solid var(--ds-gold);
+}
+
 .status-badge--ativo {
   background: #0e2a1c;
   color: #4fd18b;

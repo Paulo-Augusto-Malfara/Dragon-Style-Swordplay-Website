@@ -19,6 +19,18 @@ const { data } = await supabasePublic
 
 const proximosTreinos = data ?? [];
 
+/* Estar amarrado a um treino não quer dizer que ele aconteceu: o vínculo nasce
+ * quando o treino ABRE. Sem esta conferência a agenda anunciava "já aconteceu"
+ * enquanto o treino ainda estava sendo lançado, e não voltava atrás quando um
+ * treino fechado era reaberto pra correção. A v_treinos_publicos só lista
+ * treino finalizado, e é a única leitura de treino que o visitante alcança:
+ * a fTreinos é fechada pra quem não é staff. */
+const idsTreino = proximosTreinos.map((t) => t.id_treino).filter((id): id is number => id != null);
+const { data: fechados } = idsTreino.length
+  ? await supabasePublic.from("v_treinos_publicos").select("id_treino").in("id_treino", idsTreino)
+  : { data: [] };
+const treinoFechado = new Set((fechados ?? []).map((t) => t.id_treino));
+
 // Contagem inicial de confirmações por treino, pra não piscar "0" antes do
 // componente client-side carregar.
 const idsAgenda = proximosTreinos.map((t) => t.id_agenda);
@@ -89,8 +101,13 @@ const textoFaltam = (dias: number) => {
                   status a mais seria uma segunda fonte pra mesma verdade. */}
               {t.status !== "agendado" ? (
                 <p class="ag-cancelado">Este treino foi cancelado.</p>
-              ) : t.id_treino != null ? (
+              ) : treinoFechado.has(t.id_treino) ? (
                 <p class="ag-realizado">Este treino já aconteceu.</p>
+              ) : t.id_treino != null ? (
+                /* Aberto no painel, ainda não fechado. Não diz "acontecendo
+                   agora" porque o treino pode ter sido aberto na véspera: o
+                   que mudou pra quem lê é que não dá mais pra confirmar. */
+                <p class="ag-realizado">As confirmações deste treino foram encerradas.</p>
               ) : (
                 <ConfirmarPresenca
                   idAgenda={t.id_agenda}

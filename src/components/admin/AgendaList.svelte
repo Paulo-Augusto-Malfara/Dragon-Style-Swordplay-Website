@@ -15,7 +15,9 @@
     loading = true;
     const { data, error } = await supabase
       .from("fAgendaTreinos")
-      .select("id_agenda, data_treino, horario_inicio, horario_termino, cidade, local, status, id_treino")
+      .select(
+        "id_agenda, data_treino, horario_inicio, horario_termino, cidade, local, status, id_treino, fTreinos(status)"
+      )
       .order("data_treino");
     erro = error?.message ?? "";
     itens = data ?? [];
@@ -56,13 +58,25 @@
   /* A agenda não guarda "realizado", e nem deve: quem sabe se o treino
    * aconteceu é o vínculo com fTreinos, preenchido pela abrir_treino. Um status
    * a mais seria uma segunda fonte pra mesma verdade, livre pra divergir, e o
-   * editor de agenda ainda sobrescreveria o valor ao salvar. */
+   * editor de agenda ainda sobrescreveria o valor ao salvar.
+   *
+   * Mas o vínculo sozinho não basta: ele nasce quando o treino ABRE e nunca é
+   * desfeito, então a agenda dizia "realizado" desde o momento em que alguém
+   * abria o treino, e continuava dizendo depois de reabrir um treino fechado.
+   * Quem responde é o status do treino do outro lado do vínculo. */
   const rotulo = (i: any) =>
-    i.status !== "agendado" ? "cancelado" : i.id_treino != null ? "realizado" : "agendado";
+    i.status !== "agendado"
+      ? "cancelado"
+      : i.fTreinos?.status === "finalizado"
+        ? "realizado"
+        : i.id_treino != null
+          ? "andamento"
+          : "agendado";
 
   const ROTULOS: Record<string, string> = {
     agendado: "Agendado",
     cancelado: "Cancelado",
+    andamento: "Em andamento",
     realizado: "Realizado",
   };
 
