@@ -2,6 +2,13 @@
   import { onMount } from "svelte";
   import LoginForm from "../auth/LoginForm.svelte";
   import AvatarUploader from "./AvatarUploader.svelte";
+  import { corDaFaixa } from "../../lib/faixa";
+  import {
+    CLASSE_BASICO,
+    calcularRanks,
+    slugDaClasse,
+    versaoDoRank,
+  } from "../../lib/rank-classe";
 
   // ponytail: dynamic import, not a top-level one -- this component is used
   // inside dashboard.astro, a fully static page. A static import evaluates
@@ -52,6 +59,8 @@
   let porClasse = $state<any[]>([]);
   /** id_classe → colocação da pessoa naquela classe. Ver `calcularRanks`. */
   let rankPorClasse = $state(new Map<number, { posicao: number; total: number }>());
+  /** Em qual leitura do ranking essa colocação foi medida. */
+  let versaoRank = $state<"ativa" | "legado">("ativa");
   let historico = $state<any[]>([]);
   let paginaPresencas = $state(1);
   let faixas = $state<{ nome_faixa: string; nivel_minimo: number }[]>([]);
@@ -71,6 +80,19 @@
    */
   const totalTreinos = $derived(
     porClasse.reduce((soma, c) => soma + (c.treinos_por_classe ?? 0), 0),
+  );
+
+  /**
+   * A soma dos níveis de classe, que é a coluna "Classe" do Ranking Geral.
+   *
+   * Pula o Básico pelo mesmo motivo que o ranking pula: ele é gate de veterano,
+   * não classe pra disputar. Somando ele aqui, a ficha mostraria um número
+   * maior do que a linha da própria pessoa no ranking.
+   */
+  const nivelClasseTotal = $derived(
+    porClasse
+      .filter((c) => c.id_classe !== CLASSE_BASICO)
+      .reduce((soma, c) => soma + (c.nivel_por_classe ?? 0), 0),
   );
 
   /**
@@ -115,9 +137,6 @@
    */
   const TREINOS_POR_NIVEL = 4;
 
-  /** Classe que existe pra liberar o veterano, não pra disputar posição. */
-  const CLASSE_BASICO = 11;
-
   /**
    * "Últimas presenças" é o que o título promete: as últimas.
    *
@@ -135,39 +154,6 @@
       paginaPresencas * PRESENCAS_POR_PAGINA,
     ),
   );
-
-  /**
-   * A colocação da pessoa em cada classe que ela treina.
-   *
-   * Vem da mesma view do Ranking por Classe, e a conta é feita aqui porque a
-   * view não guarda posição: ela é uma lista, e quem numera é quem ordena. São
-   * ~360 linhas de duas colunas, então puxar a classe inteira sai mais barato
-   * que uma consulta de contagem por classe.
-   *
-   * Empate divide a posição (dois em 3º, ninguém em 4º), que é como ranking de
-   * competição sempre se comportou. A página do Ranking por Classe numera pela
-   * ordem do array e nesse caso mostraria 3 e 4; a diferença só aparece com
-   * empate, e inventar desempate aqui seria pior: a pessoa veria uma colocação
-   * que nenhum critério visível na tela explica.
-   */
-  function calcularRanks(todos: { id_classe: number; treinos_por_classe: number }[]) {
-    const mapa = new Map<number, { posicao: number; total: number }>();
-    for (const minha of porClasse) {
-      if (minha.id_classe === CLASSE_BASICO) continue;
-      const daClasse = todos.filter((t) => t.id_classe === minha.id_classe);
-      if (daClasse.length === 0) continue;
-      mapa.set(minha.id_classe, {
-        posicao:
-          daClasse.filter((t) => t.treinos_por_classe > minha.treinos_por_classe).length + 1,
-        total: daClasse.length,
-      });
-    }
-    return mapa;
-  }
-
-  /** Mesma regra de `slug` em ranking-por-classe.astro: é o que a URL de lá lê. */
-  const slugDaClasse = (nome: string) =>
-    nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
   function progressoDaClasse(c: any) {
     const treinos = c.treinos_por_classe ?? 0;
@@ -231,10 +217,13 @@
       apelidoPendente = membro.apelido_pendente;
       apelidoRecusaMotivo = membro.apelido_recusa_motivo;
 
-      const [geral, classes, todasAsClasses, historia, escala] = await Promise.all([
+      const [geral, classes, todasAsClasses, ativos, historia, escala] = await Promise.all([
         supabase.from("v_ranking_nivel_geral").select("*").eq("id_membro", membro.id_membro).single(),
         supabase.from("v_ranking_por_classe").select("*").eq("id_membro", membro.id_membro),
-        supabase.from("v_ranking_por_classe").select("id_classe, treinos_por_classe"),
+        supabase.from("v_ranking_por_classe").select("id_membro, id_classe, treinos_por_classe"),
+        // A view por classe não carrega `status_ativo`, e a colocação é medida
+        // na base "Na Ativa". Mesmo par de consultas que o Ranking por Classe faz.
+        supabase.from("v_ranking_nivel_geral").select("id_membro, status_ativo"),
         supabase
           .from("v_historico_presencas")
           .select("*")
@@ -254,14 +243,23 @@
       phTotal = geral.data?.ph_total ?? 0;
       // Básico (id_classe 11) always last, everything else by most-trained first.
       porClasse = (classes.data ?? []).sort((a, b) => {
-        const aBasico = a.id_classe === 11;
-        const bBasico = b.id_classe === 11;
+        const aBasico = a.id_classe === CLASSE_BASICO;
+        const bBasico = b.id_classe === CLASSE_BASICO;
         if (aBasico !== bBasico) return aBasico ? 1 : -1;
         return b.treinos_por_classe - a.treinos_por_classe;
       });
       // Colocação é enfeite informativo, igual à escala de faixas: se a consulta
       // falhar, some a linha do rank e o cartão continua inteiro.
-      rankPorClasse = calcularRanks(todasAsClasses.data ?? []);
+      const souAtivo = !!geral.data?.status_ativo;
+      rankPorClasse = calcularRanks(
+        porClasse,
+        todasAsClasses.data ?? [],
+        new Set<number>(
+          (ativos.data ?? []).filter((m) => m.status_ativo).map((m) => m.id_membro),
+        ),
+        souAtivo,
+      );
+      versaoRank = versaoDoRank(souAtivo);
       historico = historia.data ?? [];
       // A escala de faixas é enfeite informativo: se falhar, some a barra de
       // progresso e o resto da ficha continua de pé.
@@ -414,8 +412,20 @@
               </svg>
             </button>
           </p>
-          {#if nomeFaixa}
-            <p><span class="ficha-faixa">{nomeFaixa}</span></p>
+          <!-- Traço de cor, o mesmo do ranking e da janela de perfil, no lugar
+               da pílula dourada que escrevia o nome: a faixa é um atributo da
+               pessoa e não deve competir de tamanho com o nome dela. Quem não
+               enxerga a cor continua tendo o nome no title e no leitor de tela. -->
+          {#if corDaFaixa(nomeFaixa)}
+            <p>
+              <span
+                class="ficha-faixa"
+                style={`--faixa:${corDaFaixa(nomeFaixa)}`}
+                title={`Faixa ${nomeFaixa}`}
+              >
+                <span class="sr-only">Faixa {nomeFaixa}</span>
+              </span>
+            </p>
           {/if}
           {#if apelido}
             <p class="ficha-oficial">Nome oficial: {nomeOficial}</p>
@@ -472,6 +482,10 @@
         <div class="ficha-stat">
           <span class="label">Nível Geral</span>
           <span class="value">{nivelGeral}</span>
+        </div>
+        <div class="ficha-stat">
+          <span class="label">Nível de Classe</span>
+          <span class="value">{nivelClasseTotal}</span>
         </div>
         <div class="ficha-stat">
           <span class="label">Pontos de Honra</span>
@@ -556,8 +570,8 @@
                 class:podio-1={rank.posicao === 1}
                 class:podio-2={rank.posicao === 2}
                 class:podio-3={rank.posicao === 3}
-                href={`/ranking-por-classe?classe=${slugDaClasse(c.nome_classe)}`}
-                title={`Sua colocação em ${c.nome_classe}`}
+                href={`/ranking-por-classe?classe=${slugDaClasse(c.nome_classe)}&versao=${versaoRank}`}
+                title={`Sua colocação em ${c.nome_classe} (${versaoRank === "ativa" ? "Na Ativa" : "Legado"})`}
               >
                 <strong>{rank.posicao}º</strong> de {rank.total}
               </a>
@@ -794,15 +808,14 @@
     color: #e57368;
   }
 
-  /* Encolhe com o próprio texto: em bloco ele esticaria pela largura do card. */
+  /* Mesma caixinha do .rk-faixa e do .pf-faixa. */
   .ficha-faixa {
     display: inline-block;
-    padding: 3px 10px;
-    border: 1px solid var(--ds-gold-dim);
-    border-radius: 999px;
-    background: var(--ds-gold-wash);
-    font-size: 0.76rem;
-    color: var(--ds-gold-light);
+    width: 32px;
+    height: 11px;
+    border-radius: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: var(--faixa);
   }
 
   .ficha-oficial {
@@ -812,8 +825,8 @@
 
   .ficha-stats {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
 
   .ficha-stat {
@@ -821,14 +834,14 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    padding: 12px 8px;
+    padding: 12px 6px;
     border: 1px solid var(--ds-line);
     border-radius: 12px;
     background: var(--ds-bg);
   }
 
   .ficha-stat .label {
-    font-size: 0.68rem;
+    font-size: 0.64rem;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.06em;
@@ -1060,6 +1073,25 @@
 
     .ficha-id {
       align-items: center;
+    }
+
+    /* Os quatro numa linha só, igual à janela de perfil: quem cede é o tamanho
+       do rótulo, não a quantidade de colunas. */
+    .ficha-stats {
+      gap: 5px;
+    }
+
+    .ficha-stat {
+      padding: 9px 3px;
+    }
+
+    .ficha-stat .label {
+      font-size: 0.52rem;
+      letter-spacing: 0.02em;
+    }
+
+    .ficha-stat .value {
+      font-size: 1.25rem;
     }
   }
 </style>

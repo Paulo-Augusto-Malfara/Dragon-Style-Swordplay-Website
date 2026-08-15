@@ -2,7 +2,9 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
 import RankingLista from "../components/RankingLista.astro";
+import PerfilRapido from "../components/PerfilRapido.svelte";
 import { VERSOES, versaoDaUrl, type Versao } from "../lib/ranking-versao";
+import { slugDaClasse } from "../lib/rank-classe";
 
 export const prerender = false;
 
@@ -36,7 +38,6 @@ for (const row of data ?? []) {
 }
 
 const classes = [...porClasse.entries()].sort(([a], [b]) => a.localeCompare(b));
-const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
 // Uma classe por vez, escolhida pela URL, no mesmo padrão do ?sort= do Ranking
 // Geral. Antes as dez seções vinham todas no HTML e o CSS escondia nove com
@@ -45,7 +46,7 @@ const slug = (nome: string) => nome.normalize("NFD").replace(/[̀-ͯ]/g, "").toL
 // troca. Daí a rolagem estranha, e daí a página em branco antes do primeiro
 // clique, quando não havia âncora nenhuma pra casar.
 const pedida = Astro.url.searchParams.get("classe");
-const atual = classes.find(([nome]) => slug(nome) === pedida) ?? classes[0];
+const atual = classes.find(([nome]) => slugDaClasse(nome) === pedida) ?? classes[0];
 
 // O corte por versão é feito aqui, na classe já escolhida, e não lá em cima no
 // agrupamento: filtrando antes, uma classe sem nenhum membro na ativa sumiria
@@ -57,7 +58,7 @@ const linhas =
     : (atual?.[1] ?? []).filter((m) => idsAtivos.has(m.id_membro));
 
 const href = (p: { classe?: string; versao?: Versao }) =>
-  `?classe=${p.classe ?? (atual ? slug(atual[0]) : "")}&versao=${p.versao ?? versao}`;
+  `?classe=${p.classe ?? (atual ? slugDaClasse(atual[0]) : "")}&versao=${p.versao ?? versao}`;
 ---
 
 <PageLayout
@@ -84,7 +85,7 @@ const href = (p: { classe?: string; versao?: Versao }) =>
   <nav class="chips" aria-label="Escolher a classe">
     {classes.map(([nomeClasse]) => (
       <a
-        href={href({ classe: slug(nomeClasse) })}
+        href={href({ classe: slugDaClasse(nomeClasse) })}
         class:list={["chip", nomeClasse === atual?.[0] && "ativo"]}
         aria-current={nomeClasse === atual?.[0] ? "page" : undefined}
       >
@@ -129,6 +130,7 @@ const href = (p: { classe?: string; versao?: Versao }) =>
       </p>
     )
   }
+  <PerfilRapido client:idle />
 </PageLayout>
 
 <style>

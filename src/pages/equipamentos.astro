@@ -144,8 +144,8 @@ const chave = (s: string) =>
 
   {
     itens.map((i) => (
-      <dialog id={`d-${i.id}`} class="eq-dialog">
-        <form method="dialog">
+      <dialog id={`d-${i.id}`} class="eq-dialog barra-fina">
+        <form method="dialog" class="eq-barra">
           <button class="eq-fechar" aria-label="Fechar">
             ✕
           </button>
@@ -536,6 +536,11 @@ const chave = (s: string) =>
   /* ======== DETALHE ======== */
 
   .eq-dialog {
+    /* O `* { margin: 0 }` do reset apaga o `margin: auto` que a folha do
+       navegador usa pra centralizar diálogo modal, e a caixa nascia grudada no
+       alto e na esquerda. Terceira vez que isso morde neste site, depois do
+       #busca-dialog e do ConfirmarAcao. */
+    margin: auto;
     width: min(560px, calc(100vw - 24px));
     max-height: 86vh;
     padding: 20px;
@@ -549,10 +554,19 @@ const chave = (s: string) =>
     background: rgba(4, 7, 10, 0.72);
   }
 
+  /* Era um botão `absolute` no canto: dentro de uma caixa que rola, absolute
+     rola junto, e o fechar sumia assim que a pessoa descia pra ler as medidas.
+     Barra grudada no topo resolve, e o sticky só vale a rolagem inteira porque
+     ela é filha direta do <dialog>. */
+  .eq-barra {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    justify-content: flex-end;
+  }
+
   .eq-fechar {
-    position: absolute;
-    top: 12px;
-    right: 12px;
     width: 32px;
     height: 32px;
     border: 1px solid var(--ds-line-strong);

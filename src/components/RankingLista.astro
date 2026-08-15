@@ -1,5 +1,6 @@
 ---
 import { corDaFaixa } from "../lib/faixa";
+import Icon from "./Icon.astro";
 
 /**
  * Uma colocação do ranking.
@@ -27,9 +28,15 @@ interface Props {
   itens: Colocacao[];
   /** Quantas métricas cabem lado a lado no desktop. Mantém as colunas retas. */
   colunas?: number;
+  /**
+   * O olhinho que abre a janela de perfil. Ligado por padrão porque cada linha
+   * de ranking é uma pessoa; o Mural de Doações desliga, que lá cada linha é
+   * uma doação e a mesma pessoa repete.
+   */
+  perfil?: boolean;
 }
 
-const { itens, colunas = 4 } = Astro.props;
+const { itens, colunas = 4, perfil = true } = Astro.props;
 const comPosicao = itens.some((i) => i.posicao != null);
 ---
 
@@ -40,7 +47,10 @@ const comPosicao = itens.some((i) => i.posicao != null);
   arrastar a tabela e perder o nome de vista. Aqui as métricas quebram para
   a segunda linha sozinhas quando falta largura, e nada sai da tela.
 */}
-<ol class:list={["rk", !comPosicao && "rk--sem-pos"]} style={`--rk-colunas:${colunas}`}>
+<ol
+  class:list={["rk", !comPosicao && "rk--sem-pos", perfil && "rk--perfil"]}
+  style={`--rk-colunas:${colunas}`}
+>
   {
     itens.map((item) => (
       <li
@@ -80,6 +90,22 @@ const comPosicao = itens.some((i) => i.posicao != null);
             </span>
           ))}
         </span>
+
+        {/*
+          HTML puro, sem script próprio: quem escuta o clique é a ilha do
+          PerfilRapido, uma por página, pelo `data-perfil`. Ver o componente.
+        */}
+        {perfil && (
+          <button
+            type="button"
+            class="rk-olho"
+            data-perfil={item.idMembro}
+            aria-label={`Ver perfil de ${item.nome}`}
+            title={`Ver perfil de ${item.nome}`}
+          >
+            <Icon name="eye" />
+          </button>
+        )}
       </li>
     ))
   }
@@ -116,6 +142,52 @@ const comPosicao = itens.some((i) => i.posicao != null);
 
   .rk--sem-pos .rk-metricas {
     grid-column: 1;
+  }
+
+  /* O olhinho ganha uma coluna própria, e ela só existe quando ele existe: uma
+     trilha vazia continuaria cobrando o `gap` de 12px na direita da lista de
+     doações, que não tem botão nenhum. Mesma armadilha das colunas fixas do
+     .ranking-tabela, que já custou linha desalinhada uma vez. */
+  .rk--perfil .rk-item {
+    grid-template-columns: 34px 1fr auto;
+  }
+
+  .rk--perfil.rk--sem-pos .rk-item {
+    grid-template-columns: 1fr auto;
+  }
+
+  /* Última trilha, seja ela a 3ª ou a 4ª, e sempre na primeira linha: no
+     celular as métricas descem pra segunda e o botão não pode descer junto. */
+  .rk-olho {
+    grid-row: 1;
+    grid-column: -2 / -1;
+    align-self: center;
+    display: grid;
+    place-items: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ds-text-5);
+    font-size: 1.05rem;
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .rk-olho:hover {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+    color: var(--ds-gold-light);
+  }
+
+  .rk-olho:focus-visible {
+    outline: 2px solid var(--ds-gold-light);
+    outline-offset: 2px;
   }
 
   .rk-pos {
@@ -231,6 +303,14 @@ const comPosicao = itens.some((i) => i.posicao != null);
 
     .rk--sem-pos .rk-item {
       grid-template-columns: minmax(0, 1fr) auto;
+    }
+
+    .rk--perfil .rk-item {
+      grid-template-columns: 40px minmax(0, 1fr) auto auto;
+    }
+
+    .rk--perfil.rk--sem-pos .rk-item {
+      grid-template-columns: minmax(0, 1fr) auto auto;
     }
 
     .rk-metricas {

@@ -2,6 +2,7 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
 import RankingLista from "../components/RankingLista.astro";
+import PerfilRapido from "../components/PerfilRapido.svelte";
 import { VERSOES, versaoDaUrl, type Versao } from "../lib/ranking-versao";
 
 export const prerender = false;
@@ -144,4 +145,5 @@ const href = (p: { sort?: SortKey; versao?: Versao; page?: number }) => {
       )}
     </nav>
   )}
+  <PerfilRapido client:idle />
 </PageLayout>

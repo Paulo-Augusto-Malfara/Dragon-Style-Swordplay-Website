@@ -3118,6 +3118,32 @@ p {
   color: var(--ds-text-5);
 }
 
+/* ======== BARRA DE ROLAGEM FINA ======== */
+
+/* A barra padrão do Chrome no Windows é clara e grossa, e vira o elemento de
+   maior contraste de qualquer caixa escura que role, competindo com o conteúdo.
+   A lateral do menu já resolvia isso na mão; virou classe quando as janelas de
+   perfil e de equipamento precisaram do mesmo. É global de propósito: o estilo
+   escopado do Astro e o do Svelte não alcançam pseudo-elemento de barra sem
+   `:global`, e três cópias da mesma regra é como isto começou. */
+.barra-fina {
+  scrollbar-width: thin;
+  scrollbar-color: var(--ds-line-strong) transparent;
+}
+
+.barra-fina::-webkit-scrollbar {
+  width: 6px;
+}
+
+.barra-fina::-webkit-scrollbar-thumb {
+  border-radius: 3px;
+  background: var(--ds-line-strong);
+}
+
+.barra-fina::-webkit-scrollbar-track {
+  background: transparent;
+}
+
 .chips {
   position: sticky;
   top: var(--ds-header-h);

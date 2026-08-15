@@ -2,6 +2,8 @@
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
 import { corDaFaixa } from "../lib/faixa";
+import Icon from "../components/Icon.astro";
+import PerfilRapido from "../components/PerfilRapido.svelte";
 
 export const prerender = false;
 
@@ -41,6 +43,17 @@ const grupos = [
         <section class="grid-mural">
           {lista.map((m) => (
             <div class="mural-card">
+              {/* Canto de cima, fora do fluxo da coluna centralizada: no meio
+                  ele empurraria a foto e o nome pra baixo em trinta cartões. */}
+              <button
+                type="button"
+                class="mural-olho"
+                data-perfil={m.id_membro}
+                aria-label={`Ver perfil de ${m.nome}`}
+                title={`Ver perfil de ${m.nome}`}
+              >
+                <Icon name="eye" />
+              </button>
               <p class="mural-avatar">
                 {m.foto_url ? <img src={m.foto_url} alt="" /> : m.nome.charAt(0).toUpperCase()}
               </p>
@@ -62,4 +75,45 @@ const grupos = [
       </>
     ))
   )}
+  <PerfilRapido client:idle />
 </PageLayout>
+
+<style>
+  /* O cartão inteiro é flex centralizado (ver .grid-mural > div no global.css),
+     então o botão sai do fluxo pra não mexer no que já está de pé. */
+  .mural-card {
+    position: relative;
+  }
+
+  .mural-olho {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    background: transparent;
+    color: var(--ds-text-5);
+    font-size: 1rem;
+    cursor: pointer;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .mural-olho:hover {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+    color: var(--ds-gold-light);
+  }
+
+  .mural-olho:focus-visible {
+    outline: 2px solid var(--ds-gold-light);
+    outline-offset: 2px;
+  }
+</style>
