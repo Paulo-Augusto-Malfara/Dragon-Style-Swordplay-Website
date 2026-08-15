@@ -15,8 +15,8 @@
   const TORSO_OPCOES = [
     { valor: "nenhum", label: "Nenhum" },
     { valor: "camiseta", label: "Camiseta DS" },
-    { valor: "tabardo_oficial", label: "Tabardo Oficial" },
-    { valor: "tabardo_modificado", label: "Tabardo Modificado" },
+    { valor: "tabardo_oficial", label: "Tabard Oficial" },
+    { valor: "tabardo_modificado", label: "Tabard Modificado" },
   ];
 
   // Quantos treinos fecham um nível de classe. O número está aqui como
@@ -61,6 +61,10 @@
   /** null = lançando presença nova; um id = corrigindo aquela linha. */
   let idPresencaEditando = $state<number | null>(null);
   let nivelPorClasseMap = $state(new Map<number, { treinos_por_classe: number; nivel_por_classe: number }>());
+  /** id_classe → data do treino mais recente da pessoa naquela classe. */
+  let ultimaData = $state(new Map<number, string>());
+  /** A classe do último treino da pessoa, a que ganha a tag. */
+  let ultimaClasse = $state<number | null>(null);
   let confirmar: ConfirmarAcao;
 
   function infoNivelClasse(idClasse: number) {
@@ -76,11 +80,6 @@
     return { treinos, nivel, proximoNivelTreinos, faltam, casasConferem, vaiSubir: faltam === 1 };
   }
   let classeInfo = $derived(classeEscolhida !== null ? infoNivelClasse(classeEscolhida) : null);
-
-  function labelClasse(c: { id_classe: number; nome_classe: string }) {
-    const i = infoNivelClasse(c.id_classe);
-    return `${c.nome_classe}, nível ${i.nivel} (${i.treinos}/${i.proximoNivelTreinos})`;
-  }
 
   let presencas = $state<any[]>([]);
   let carregandoPresencas = $state(true);
@@ -165,17 +164,45 @@
   }
 
   async function checarElegibilidade(idMembro: number) {
-    const { data } = await supabase
-      .from("v_ranking_por_classe")
-      .select("id_classe, treinos_por_classe, nivel_por_classe")
-      .eq("id_membro", idMembro);
+    const [{ data }, { data: anteriores }] = await Promise.all([
+      supabase
+        .from("v_ranking_por_classe")
+        .select("id_classe, treinos_por_classe, nivel_por_classe")
+        .eq("id_membro", idMembro),
+      /* Por data do treino, não por id: os treinos antigos foram cadastrados
+       * depois e têm id maior que a data deles, então ordenar por id apontaria
+       * a classe errada como "a última". Fora o treino de agora, senão editar
+       * uma presença faria ela ser o próprio último treino. */
+      supabase
+        .from("fPresencas")
+        .select("id_classe, fTreinos(data_treino)")
+        .eq("id_membro", idMembro)
+        .neq("id_treino", idTreino),
+    ]);
     nivelPorClasseMap = new Map((data ?? []).map((r) => [r.id_classe, r]));
+
+    const datas = new Map<number, string>();
+    for (const p of (anteriores ?? []) as any[]) {
+      const d = p.fTreinos?.data_treino;
+      // Data em ISO (AAAA-MM-DD) compara direito como texto.
+      if (d && d > (datas.get(p.id_classe) ?? "")) datas.set(p.id_classe, d);
+    }
+    ultimaData = datas;
+    ultimaClasse = [...datas].sort((a, b) => b[1].localeCompare(a[1]))[0]?.[0] ?? null;
+
     const treinosBasico = nivelPorClasseMap.get(11)?.treinos_por_classe ?? 0;
     const pool =
       treinosBasico < TREINOS_POR_NIVEL
         ? classesTodas.filter((c) => c.id_classe === 11)
         : classesTodas.filter((c) => c.id_classe !== 11);
-    classesDisponiveis = [...pool].sort((a, b) => infoNivelClasse(a.id_classe).faltam - infoNivelClasse(b.id_classe).faltam);
+    classesDisponiveis = [...pool].sort((a, b) => {
+      const perto = infoNivelClasse(a.id_classe).faltam - infoNivelClasse(b.id_classe).faltam;
+      if (perto !== 0) return perto;
+      // Empate em quanto falta: ganha a treinada mais recentemente, que é o
+      // caso comum de "repetir o último treino". Classe nunca treinada fica
+      // com "" e cai pro fim do próprio empate.
+      return (ultimaData.get(b.id_classe) ?? "").localeCompare(ultimaData.get(a.id_classe) ?? "");
+    });
     classeEscolhida = classesDisponiveis[0]?.id_classe ?? null;
   }
 
@@ -578,44 +605,59 @@
         </div>
       </div>
 
-      <div class="campos">
-        <label class="campo-largo">
-          Classe treinada
-          <select bind:value={classeEscolhida}>
-            {#each classesDisponiveis as c}
-              <option value={c.id_classe}>{labelClasse(c)}</option>
-            {/each}
-          </select>
-        </label>
-      </div>
+      <!-- Cartão por classe, não <select>. Isto é preenchido em pé, no celular,
+           com o membro esperando na frente: o select pedia três toques e ainda
+           escondia dentro da roda do sistema justamente o que faz escolher, o
+           quanto falta pra subir. Os cartões vêm ordenados do mais perto do
+           próximo nível pro mais longe (ver classesDisponiveis), que é a ordem
+           em que a pessoa quer ouvir: "você está a um treino de Arqueiro". -->
+      <fieldset class="escolha">
+        <legend>Classe treinada</legend>
+        <ul class="classes-grade">
+          {#each classesDisponiveis as c}
+            {@const i = infoNivelClasse(c.id_classe)}
+            <li>
+              <button
+                type="button"
+                class="classe-card"
+                class:ativo={classeEscolhida === c.id_classe}
+                class:perto={i.vaiSubir}
+                aria-pressed={classeEscolhida === c.id_classe}
+                onclick={() => (classeEscolhida = c.id_classe)}
+              >
+                <span class="cc-topo">
+                  <span class="cc-nome">{c.nome_classe}</span>
+                  {#if c.id_classe === ultimaClasse}
+                    <span class="cc-tag">Repetir</span>
+                  {/if}
+                </span>
+                <span class="cc-linha">
+                  <span class="cc-nivel">Nível {i.nivel}</span>
+                  <span class="cc-treinos">{i.treinos}/{i.proximoNivelTreinos}</span>
+                </span>
+                {#if i.casasConferem}
+                  <ol class="casas casas--mini" aria-hidden="true">
+                    {#each { length: TREINOS_POR_NIVEL } as _, k}
+                      <li
+                        class:cheia={k < i.treinos % TREINOS_POR_NIVEL}
+                        class:proxima={k === i.treinos % TREINOS_POR_NIVEL &&
+                          classeEscolhida === c.id_classe}
+                      ></li>
+                    {/each}
+                  </ol>
+                {/if}
+              </button>
+            </li>
+          {/each}
+        </ul>
+      </fieldset>
 
-      {#if classeInfo}
-        <div class="nivel-progresso">
-          <div class="nivel-progresso-info">
-            <span class="stat-pill">Nível {classeInfo.nivel}</span>
-            <span>{classeInfo.treinos} de {classeInfo.proximoNivelTreinos} treinos</span>
-          </div>
-          {#if classeInfo.casasConferem}
-            <ol
-              class="casas"
-              aria-label={`${classeInfo.treinos % TREINOS_POR_NIVEL} de ${TREINOS_POR_NIVEL} treinos deste nível`}
-            >
-              {#each { length: TREINOS_POR_NIVEL } as _, i}
-                <li
-                  class:cheia={i < classeInfo.treinos % TREINOS_POR_NIVEL}
-                  class:proxima={i === classeInfo.treinos % TREINOS_POR_NIVEL}
-                ></li>
-              {/each}
-            </ol>
-          {/if}
-          {#if classeInfo.vaiSubir}
-            <p class="nivel-progresso-aviso">
-              {classeEscolhida === 11
-                ? "Esta presença torna o membro veterano."
-                : `Esta presença sobe a classe para o nível ${classeInfo.nivel + 1}.`}
-            </p>
-          {/if}
-        </div>
+      {#if classeInfo?.vaiSubir}
+        <p class="nivel-progresso-aviso">
+          {classeEscolhida === 11
+            ? "Esta presença torna o membro veterano."
+            : `Esta presença sobe a classe para o nível ${classeInfo.nivel + 1}.`}
+        </p>
       {/if}
 
       <!-- Quatro opções viram quatro alvos, não um <select>. Isso é lançado no
@@ -624,8 +666,8 @@
            cabe inteira na tela. A faixa segue a mesma ideia, porque a caixinha
            de marcar tem alvo de 13px e aqui o dedo é o ponteiro. -->
       <fieldset class="escolha">
-        <legend>Vestimenta (torso)</legend>
-        <div class="escolha-opcoes">
+        <legend>Vestimenta</legend>
+        <div class="escolha-opcoes torso-grade">
           {#each TORSO_OPCOES as o}
             <button
               type="button"
@@ -637,15 +679,13 @@
               {o.label}
             </button>
           {/each}
-        </div>
-      </fieldset>
-
-      <fieldset class="escolha">
-        <legend>Faixa</legend>
-        <div class="escolha-opcoes">
+          <!-- A faixa mora aqui e não num grupo próprio: é vestimenta também, e
+               uma legenda inteira pra um botão só custava uma seção a mais de
+               rolagem numa tela que se preenche em pé. Atravessa a grade porque
+               não é a quinta opção de torso, é um liga-desliga solto. -->
           <button
             type="button"
-            class="chip"
+            class="chip faixa-toggle"
             class:ativo={usouFaixa}
             aria-pressed={usouFaixa}
             onclick={() => (usouFaixa = !usouFaixa)}
@@ -869,5 +909,144 @@
 
   .confirmados-nota {
     margin: -0.4em 0 0.8em;
+  }
+
+  /* Grade em vez da fila que quebra sozinha: em fila, "Nenhum" ficava do
+     tamanho da palavra e o quarto botão sobrava numa segunda linha, deixando
+     alvos de tamanhos diferentes num formulário que é tocado com o polegar.
+     Aqui são quatro caixas iguais, 2x2 no celular e 4 numa linha quando cabe.
+     A regra vale só dentro desta grade: chip solto continua do tamanho do
+     próprio texto. */
+  .torso-grade {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    /* Todas as linhas da altura da mais alta: "Tabard Modificado" pode quebrar
+       em duas linhas na tela estreita, e sem isto só a caixa dele cresceria. */
+    grid-auto-rows: 1fr;
+    gap: 8px;
+  }
+
+  @media (min-width: 560px) {
+    .torso-grade {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .torso-grade > .chip {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 7px 10px;
+    /* O .chip solto é nowrap porque vive numa fila que rola de lado. Aqui a
+       largura é da grade, então quebrar é o certo: sem isto o rótulo longo
+       vazaria pra fora da caixa. */
+    white-space: normal;
+    text-align: center;
+  }
+
+  .torso-grade > .faixa-toggle {
+    grid-column: 1 / -1;
+    margin-top: 2px;
+  }
+
+  /* Mesma grade dos cartões de "Minhas classes" do Meu Perfil, encolhida: aqui
+     não cabe colocação nem "N treinos" por extenso, porque o alvo é duas
+     colunas no celular sem rolar a tela inteira pra achar a classe. */
+  .classes-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .classe-card {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    width: 100%;
+    padding: 9px 11px 10px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  /* Quem está a um treino de subir ganha um fio dourado antes de ser tocada:
+     é a resposta visual da pergunta que o staff faz em voz alta no treino. */
+  .classe-card.perto {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .classe-card.ativo {
+    border-color: var(--ds-gold);
+    background: var(--ds-gold-wash);
+  }
+
+  .cc-topo {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 3px 6px;
+  }
+
+  /* Encolhe pro próprio texto e encosta na direita: nunca esticar num cartão
+     de 140px. */
+  .cc-tag {
+    flex: none;
+    align-self: center;
+    margin-left: auto;
+    padding: 1px 6px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 999px;
+    font-size: 0.6rem;
+    line-height: 1.5;
+    color: var(--ds-text-4);
+    white-space: nowrap;
+  }
+
+  .classe-card.ativo .cc-tag {
+    border-color: var(--ds-gold-dim);
+    color: var(--ds-gold-light);
+  }
+
+  .cc-nome {
+    font-family: var(--ds-font-display);
+    font-size: 0.92rem;
+    line-height: 1.1;
+    color: var(--ds-text-2);
+  }
+
+  .classe-card.ativo .cc-nome {
+    color: var(--ds-gold-light);
+  }
+
+  .cc-linha {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .cc-nivel {
+    font-size: 0.74rem;
+    color: var(--ds-gold);
+  }
+
+  .cc-treinos {
+    font-size: 0.72rem;
+    color: var(--ds-text-5);
+  }
+
+  .casas--mini {
+    gap: 3px;
+  }
+
+  .casas--mini > li {
+    height: 6px;
   }
 </style>
