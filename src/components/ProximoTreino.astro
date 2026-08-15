@@ -15,38 +15,50 @@ const capitalizar = (s: string) => s.charAt(0).toUpperCase() + s.slice(1).replac
 // esconder o treino de hoje mais cedo do que deveria.
 const hojeBrasil = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
 
+/* Antes o card pulava qualquer data já amarrada a um treino, e com isso o
+ * treino que está acontecendo sumia da home no dia dele, dando lugar ao de
+ * daqui a uma semana. Quem chega na home no domingo quer ver justamente o de
+ * hoje. Então o aberto fica, marcado como em andamento; quem sai da frente é
+ * só o já fechado, que não é o próximo de ninguém. Três candidatos bastam pra
+ * pular os fechados do dia sem uma segunda ida ao banco. */
 const { data: agendaData } = await supabasePublic
   .from("fAgendaTreinos")
-  .select("id_agenda, data_treino, horario_inicio, horario_termino, local, link_maps")
+  .select("id_agenda, data_treino, horario_inicio, horario_termino, local, link_maps, id_treino")
   .gte("data_treino", hojeBrasil)
   .eq("status", "agendado")
-  // Treino já aberto pelo organizador deixa de ser "o próximo": a agenda passa
-  // a apontar pro treino do dia, e o card iria convidar a confirmar presença
-  // num treino que já está rolando.
-  .is("id_treino", null)
   .order("data_treino")
   .order("horario_inicio")
-  .limit(1)
-  .maybeSingle();
+  .limit(3);
 
-const proximoTreino = agendaData
+const candidatos = agendaData ?? [];
+const idsTreino = candidatos.map((a) => a.id_treino).filter((id): id is number => id != null);
+// A v_treinos_publicos só lista treino finalizado, e é a única leitura de
+// treino que o visitante alcança: a fTreinos é fechada pra quem não é staff.
+const { data: fechados } = idsTreino.length
+  ? await supabasePublic.from("v_treinos_publicos").select("id_treino").in("id_treino", idsTreino)
+  : { data: [] };
+const treinoFechado = new Set((fechados ?? []).map((t) => t.id_treino));
+const escolhida = candidatos.find((a) => a.id_treino == null || !treinoFechado.has(a.id_treino)) ?? null;
+
+const proximoTreino = escolhida
   ? (() => {
-      const d = new Date(agendaData.data_treino + "T00:00:00");
+      const d = new Date(escolhida.data_treino + "T00:00:00");
       return {
         diaSemana: capitalizar(d.toLocaleDateString("pt-BR", { weekday: "short" })),
         dia: String(d.getDate()).padStart(2, "0"),
         mes: capitalizar(d.toLocaleDateString("pt-BR", { month: "short" })),
-        horario: agendaData.horario_termino
-          ? `${agendaData.horario_inicio.slice(0, 5)} – ${agendaData.horario_termino.slice(0, 5)}`
-          : agendaData.horario_inicio.slice(0, 5),
-        local: agendaData.local,
-        linkMaps: agendaData.link_maps as string | null,
-        idAgenda: agendaData.id_agenda as number,
+        horario: escolhida.horario_termino
+          ? `${escolhida.horario_inicio.slice(0, 5)} – ${escolhida.horario_termino.slice(0, 5)}`
+          : escolhida.horario_inicio.slice(0, 5),
+        local: escolhida.local,
+        linkMaps: escolhida.link_maps as string | null,
+        idAgenda: escolhida.id_agenda as number,
+        emAndamento: escolhida.id_treino != null,
       };
     })()
   : null;
 
-const { count: contagemConfirmados } = proximoTreino
+const { count: contagemConfirmados } = proximoTreino && !proximoTreino.emAndamento
   ? await supabasePublic
       .from("fAgendaConfirmacoes")
       .select("id_confirmacao", { count: "exact", head: true })
@@ -63,7 +75,10 @@ const { count: contagemConfirmados } = proximoTreino
         <div class="mon">{proximoTreino.mes}</div>
       </div>
       <div class="treino-info">
-        <h3>Treino Aberto</h3>
+        <h3>
+          Treino Aberto
+          {proximoTreino.emAndamento && <span class="status-badge status-badge--andamento">Em andamento</span>}
+        </h3>
         <div class="treino-meta">
           <span>
             <Icon name="clock" />
@@ -81,7 +96,11 @@ const { count: contagemConfirmados } = proximoTreino
           </span>
         </div>
       </div>
-      <ConfirmarPresenca idAgenda={proximoTreino.idAgenda} contagemInicial={contagemConfirmados ?? 0} client:load />
+      {proximoTreino.emAndamento ? (
+        <p class="treino-encerrado">As confirmações deste treino foram encerradas.</p>
+      ) : (
+        <ConfirmarPresenca idAgenda={proximoTreino.idAgenda} contagemInicial={contagemConfirmados ?? 0} client:load />
+      )}
     </div>
   ) : (
     <p class="vazio">Nenhum treino agendado no momento.</p>
