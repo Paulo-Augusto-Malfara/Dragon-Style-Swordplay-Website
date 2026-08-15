@@ -541,7 +541,19 @@
               </span>
               <span class="row-name">{p.nome}</span>
             </td>
-            <td class="col-faixa" data-label="Classe">{p.sigla_classe}</td>
+            <!-- A classe também sobe de nível no fechamento, e até agora só
+                 dizia a sigla: quem subiu de Sicário via o número geral mudar
+                 sem saber de onde veio. Mesma pastilha do nível geral, mesma
+                 seta. -->
+            <td class="col-faixa" data-label="Classe">
+              <span class={`stat-pill ${p.subiu_nivel_classe ? "stat-pill-up" : ""}`}>
+                {p.sigla_classe}
+                {p.nivel_classe}
+                {#if p.subiu_nivel_classe}
+                  <span class="level-up-arrow">▲</span>
+                {/if}
+              </span>
+            </td>
             <td class="col-stat" data-label="Vestimenta">
               <span class={`status-badge status-badge--${p.vestimenta ? "ativo" : "inativo"}`}>
                 {p.vestimenta ? "Sim" : "Não"}
@@ -553,7 +565,7 @@
               </span>
             </td>
             <td class="col-stat" data-label="PH"><span class="stat-pill">{p.ph_total}</span></td>
-            <td class="col-stat" data-label="Nível geral">
+            <td class="col-stat col-nivel-geral" data-label="Geral">
               <span class={`stat-pill ${p.subiu_nivel_geral ? "stat-pill-up" : ""}`}>
                 {p.nivel_geral}
                 {#if p.subiu_nivel_geral}

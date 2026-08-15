@@ -2771,6 +2771,68 @@ p {
     grid-area: 3 / 1;
   }
 
+  /* O resumo do treino fechado segue o mesmo cartão da tela de presenças, com
+     uma diferença: ali a linha do nome reserva espaço pros dois ícones de
+     ação, aqui pro nível geral. Ele é o resultado do treino pra aquela pessoa,
+     a única coisa da linha que mudou por causa do que acabou de acontecer, e
+     estava no rodapé do cartão, embaixo de tudo. Sai do fluxo pelo mesmo
+     motivo de lá: a divisória do título continua atravessando o cartão. */
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody tr {
+    position: relative;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  /* A reserva à direita é medida pelo pior caso do nível geral: o rótulo, dois
+     dígitos e a seta de quem subiu. Nome comprido (e tem membro com 39
+     caracteres) é cortado aqui pelo overflow do .row-name, que é o que impede
+     ele de passar por baixo da pastilha, já que ela está fora do fluxo. */
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody td:first-child {
+    grid-column: 1 / -1;
+    min-height: 34px;
+    padding-right: 124px;
+  }
+
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody td.col-nivel-geral {
+    position: absolute;
+    top: 10px;
+    right: 13px;
+    gap: 6px;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody td[data-label] {
+    justify-content: center;
+    gap: 6px;
+  }
+
+  /* Respiro menor dentro da pastilha só aqui: a de classe passou a carregar
+     sigla, nível e seta, e com o padrão ela vazava da metade do cartão (são
+     127px por metade num celular de 320px). Medido: "CAV 6 ▲" cabe, e só um
+     nível de classe de dois dígitos, que ninguém tem nem perto, encostaria. */
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody .stat-pill {
+    padding-inline: 8px;
+  }
+
+  /* Classe sobre PH numa coluna, vestimenta sobre faixa na outra, pelo mesmo
+     motivo da tabela de presenças: cada coluna com uma pergunta só. Na ordem
+     em que as células nascem elas cairiam em diagonal. */
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody td:nth-child(2) {
+    grid-area: 2 / 1;
+  }
+
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody td:nth-child(3) {
+    grid-area: 2 / 2;
+  }
+
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody td:nth-child(4) {
+    grid-area: 3 / 2;
+  }
+
+  .ranking-tabela--treino-resumo.tabela-cartoes tbody td:nth-child(5) {
+    grid-area: 3 / 1;
+  }
+
   .ranking-tabela.tabela-cartoes tbody tr:hover td {
     background: none;
   }
