@@ -3355,6 +3355,116 @@ p {
   }
 }
 
+/* ======== CARTÕES DE CLASSE (padrão do Meu Perfil) ========
+
+   Um cartão por classe, com nome, nível, treinos e as casinhas do que falta
+   pro próximo nível. Nasceu na ficha do membro e saiu de lá pra cá quando a
+   terceira tela pediu o mesmo desenho (a edição de membro no painel): eram
+   duas cópias do mesmo bloco em componentes diferentes, e a terceira seria
+   uma cópia que envelhece sozinha.
+
+   A janela do olhinho (.pf-classes, no PerfilRapido) segue com a sua própria:
+   é diálogo, e lá os espaçamentos foram apertados de propósito. */
+
+.classes-cartoes {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
+  gap: 10px;
+  margin: 0 0 0.4em;
+  padding: 0;
+  list-style: none;
+}
+
+.classes-cartoes > li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 2px 10px;
+  padding: 14px 16px;
+  border: 1px solid var(--ds-line);
+  border-radius: 13px;
+  background: var(--ds-surface);
+}
+
+.classe-cartao-nome {
+  font-family: var(--ds-font-display);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.classe-cartao-nivel {
+  justify-self: end;
+  font-size: 0.78rem;
+  color: var(--ds-gold);
+}
+
+.classe-cartao-treinos {
+  font-size: 0.76rem;
+  color: var(--ds-text-4);
+}
+
+/* Segundo lugar de importância no cartão, atrás do nível: por isso número
+   claro com o "de N" apagado, e nada de dourado, que aqui é a cor do nível. */
+.classe-cartao-rank {
+  justify-self: end;
+  font-size: 0.72rem;
+  color: var(--ds-text-5);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.classe-cartao-rank strong {
+  font-family: var(--ds-font-display);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--ds-text-2);
+}
+
+.classe-cartao-rank:hover strong,
+.classe-cartao-rank:focus-visible strong {
+  color: var(--ds-gold);
+}
+
+/* Ouro, prata e bronze, os mesmos do Ranking. Depois do :hover de propósito:
+   no pódio a cor da colocação é informação, não estado de ponteiro, e trocá-la
+   ao passar o mouse apagaria justamente o que ali interessa. */
+.classe-cartao-rank.podio-1 strong {
+  color: var(--ds-gold-light);
+}
+
+.classe-cartao-rank.podio-2 strong {
+  color: var(--ds-prata);
+}
+
+.classe-cartao-rank.podio-3 strong {
+  color: var(--ds-bronze);
+}
+
+/* Uma casa por treino que falta, não uma barra contínua: barra fica vazia
+   justamente quando a pessoa acabou de subir de nível, e vazio se lê como
+   "não carregou". */
+.classe-cartao-casas {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 3px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.classe-cartao-casas > li {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  border: 1px solid var(--ds-line-strong);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.classe-cartao-casas > li.cheia {
+  border-color: var(--ds-gold);
+  background: var(--ds-gold);
+}
+
 /* ======== MEMBER DASHBOARD ======== */
 
 /* o fio dourado continua sendo o fio dourado: quem carrega a faixa agora é a

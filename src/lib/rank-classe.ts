@@ -3,6 +3,30 @@ import type { Versao } from "./ranking-versao";
 /** Classe que existe pra liberar o veterano, não pra disputar posição. */
 export const CLASSE_BASICO = 11;
 
+/** Quantos treinos valem um nível de classe. */
+export const TREINOS_POR_NIVEL = 4;
+
+/**
+ * Quanto falta pro próximo nível daquela classe, em casinhas.
+ *
+ * Confere contra o `nivel_por_classe` que veio do banco antes de responder: se
+ * a regra mudar lá e a constante daqui ficar velha, some a barra em vez de
+ * desenhar um progresso errado. Errar calado é pior do que não mostrar.
+ *
+ * Mora aqui pelo mesmo motivo de `calcularRanks`: três telas desenham esses
+ * quadradinhos (Meu Perfil, a janela do olhinho e a edição de membro), e três
+ * cópias da mesma conta divergem sem ninguém perceber.
+ */
+export function progressoDaClasse(c: {
+  treinos_por_classe?: number | null;
+  nivel_por_classe?: number | null;
+}) {
+  const treinos = c.treinos_por_classe ?? 0;
+  const nivel = c.nivel_por_classe ?? 0;
+  if (Math.floor(treinos / TREINOS_POR_NIVEL) !== nivel) return null;
+  return { andados: treinos % TREINOS_POR_NIVEL, total: TREINOS_POR_NIVEL };
+}
+
 /** O mínimo de `v_ranking_por_classe` que a colocação precisa. */
 export type LinhaClasse = {
   id_membro: number;

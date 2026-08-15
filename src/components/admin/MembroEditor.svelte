@@ -2,6 +2,7 @@
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
   import ConfirmarAcao from "./ConfirmarAcao.svelte";
+  import { CLASSE_BASICO, progressoDaClasse } from "../../lib/rank-classe";
 
   interface Props {
     id: string;
@@ -9,6 +10,11 @@
   const { id }: Props = $props();
 
   let nome = $state("");
+  let apelido = $state("");
+  // O apelido que estava salvo quando a tela abriu: só mexe na fila de
+  // moderação se o admin realmente trocar o valor.
+  let apelidoOriginal = "";
+  let apelidoPendente = $state<string | null>(null);
   let email = $state("");
   let statusAtivo = $state(true);
   let authLevel = $state(4);
@@ -26,7 +32,7 @@
   async function load() {
     const { data, error } = await supabase
       .from("dMembros")
-      .select("nome, email, status_ativo, auth_level, oculto, indicado_por")
+      .select("nome, apelido, apelido_pendente, email, status_ativo, auth_level, oculto, indicado_por")
       .eq("id_membro", id)
       .single();
     if (error) {
@@ -35,6 +41,9 @@
       return;
     }
     nome = data.nome;
+    apelido = data.apelido ?? "";
+    apelidoOriginal = apelido;
+    apelidoPendente = data.apelido_pendente;
     email = data.email ?? "";
     statusAtivo = data.status_ativo;
     authLevel = data.auth_level;
@@ -49,8 +58,8 @@
       supabase.from("v_historico_presencas").select("*").eq("id_membro", id).order("data_treino", { ascending: false }),
     ]);
     porClasse = (classes.data ?? []).sort((a, b) => {
-      const aBasico = a.id_classe === 11;
-      const bBasico = b.id_classe === 11;
+      const aBasico = a.id_classe === CLASSE_BASICO;
+      const bBasico = b.id_classe === CLASSE_BASICO;
       if (aBasico !== bBasico) return aBasico ? 1 : -1;
       return b.treinos_por_classe - a.treinos_por_classe;
     });
@@ -62,16 +71,27 @@
   async function save(e: SubmitEvent) {
     e.preventDefault();
     status = "saving";
-    const { error } = await supabase
-      .from("dMembros")
-      .update({
-        nome,
-        email: email.trim() || null,
-        status_ativo: statusAtivo,
-        auth_level: authLevel,
-        indicado_por: padrinho?.id_membro ?? null,
-      })
-      .eq("id_membro", id);
+    const campos: Record<string, unknown> = {
+      nome,
+      email: email.trim() || null,
+      status_ativo: statusAtivo,
+      auth_level: authLevel,
+      indicado_por: padrinho?.id_membro ?? null,
+    };
+
+    // Apelido escrito daqui já vem moderado, quem edita cadastro é o mesmo
+    // nível que aprova a fila. Então o mesmo desfecho de aprovar_apelido:
+    // grava, carimba a data e limpa o pedido que estava esperando. Só quando
+    // muda, senão salvar o email de alguém derrubaria o pedido dele.
+    if (apelido.trim() !== apelidoOriginal.trim()) {
+      campos.apelido = apelido.trim() || null;
+      campos.apelido_atualizado_em = new Date().toISOString();
+      campos.apelido_pendente = null;
+      campos.apelido_pendente_em = null;
+      campos.apelido_recusa_motivo = null;
+    }
+
+    const { error } = await supabase.from("dMembros").update(campos).eq("id_membro", id);
     if (error) {
       status = "error";
       errorMessage = error.message;
@@ -119,6 +139,18 @@
       <label>
         Nome
         <input type="text" bind:value={nome} required />
+      </label>
+
+      <label>
+        Apelido
+        <input type="text" bind:value={apelido} maxlength="50" placeholder="sem apelido" />
+        <small>
+          É por ele que o site chama a pessoa em todo lugar. Vazio, volta a mostrar o nome.
+          {#if apelidoPendente}
+            Tem "{apelidoPendente}" esperando aprovação: salvar um apelido aqui tira o pedido da
+            fila.
+          {/if}
+        </small>
       </label>
 
       <label>
@@ -209,26 +241,31 @@
   {#if porClasse.length === 0}
     <p class="vazio">Nenhum treino registrado ainda.</p>
   {:else}
-    <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--dashboard tabela-cartoes">
-        <thead>
-          <tr>
-            <th class="col-nome">Classe</th>
-            <th class="col-stat">Nível</th>
-            <th class="col-stat">Treinos</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each porClasse as c}
-            <tr>
-              <td class="col-nome">{c.nome_classe}</td>
-              <td class="col-stat" data-label="Nível"><span class="stat-pill">{c.nivel_por_classe}</span></td>
-              <td class="col-stat" data-label="Treinos"><span class="stat-pill">{c.treinos_por_classe}</span></td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
+    <!-- Os mesmos cartões do Meu Perfil, e não a tabela de três colunas que
+         estava aqui: cada linha é uma classe, não uma comparação entre elas,
+         e a tabela pedia rolagem lateral no celular pra ler dois números. -->
+    <ul class="classes-cartoes">
+      {#each porClasse as c}
+        {@const progresso = progressoDaClasse(c)}
+        <li>
+          <span class="classe-cartao-nome">{c.nome_classe}</span>
+          <span class="classe-cartao-nivel">Nível {c.nivel_por_classe}</span>
+          <span class="classe-cartao-treinos">
+            {c.treinos_por_classe === 1 ? "1 treino" : `${c.treinos_por_classe} treinos`}
+          </span>
+          {#if progresso}
+            <ol
+              class="classe-cartao-casas"
+              aria-label={`${progresso.andados} de ${progresso.total} treinos para o nível ${c.nivel_por_classe + 1}`}
+            >
+              {#each { length: progresso.total } as _, i}
+                <li class:cheia={i < progresso.andados}></li>
+              {/each}
+            </ol>
+          {/if}
+        </li>
+      {/each}
+    </ul>
   {/if}
 
   <div class="admin-secao-cab">

@@ -13,7 +13,7 @@
    */
   import { onMount } from "svelte";
   import { corDaFaixa } from "../lib/faixa";
-  import { CLASSE_BASICO, calcularRanks, slugDaClasse } from "../lib/rank-classe";
+  import { CLASSE_BASICO, calcularRanks, progressoDaClasse, slugDaClasse } from "../lib/rank-classe";
   import { VERSOES, versaoDaUrl, type Versao } from "../lib/ranking-versao";
 
   // Import dinâmico pelo mesmo motivo do MemberDashboard: um import de topo
@@ -25,8 +25,6 @@
     return supabasePromise;
   }
 
-  /** Quantos treinos valem um nível de classe. Igual ao MemberDashboard. */
-  const TREINOS_POR_NIVEL = 4;
   /** Últimas presenças não entram: ver o comentário no fim do template. */
 
   type Linha = {
@@ -68,15 +66,6 @@
       .filter((c) => c.id_classe !== CLASSE_BASICO)
       .reduce((soma, c) => soma + (c.nivel_por_classe ?? 0), 0),
   );
-
-  function progressoDaClasse(c: Linha) {
-    const treinos = c.treinos_por_classe ?? 0;
-    const nivel = c.nivel_por_classe ?? 0;
-    // Se a regra mudar no banco e a constante daqui ficar velha, some a barra
-    // em vez de desenhar um progresso errado.
-    if (Math.floor(treinos / TREINOS_POR_NIVEL) !== nivel) return null;
-    return { andados: treinos % TREINOS_POR_NIVEL, total: TREINOS_POR_NIVEL };
-  }
 
   async function abrir(id: number) {
     status = "carregando";
@@ -252,19 +241,21 @@
     {#if minhasClasses.length === 0}
       <p class="pf-aviso">Nenhum treino registrado ainda.</p>
     {:else}
-      <ul class="pf-classes">
+      <!-- Os mesmos cartões do Meu Perfil (.classes-cartoes, no global.css).
+           A classe extra só aperta os espaçamentos: aqui é diálogo. -->
+      <ul class="classes-cartoes pf-classes">
         {#each minhasClasses as c}
           {@const progresso = progressoDaClasse(c)}
           {@const rank = ranks.get(c.id_classe)}
           <li>
-            <span class="pf-classe-nome">{c.nome_classe}</span>
-            <span class="pf-classe-nivel">Nível {c.nivel_por_classe}</span>
-            <span class="pf-classe-treinos">
+            <span class="classe-cartao-nome">{c.nome_classe}</span>
+            <span class="classe-cartao-nivel">Nível {c.nivel_por_classe}</span>
+            <span class="classe-cartao-treinos">
               {c.treinos_por_classe === 1 ? "1 treino" : `${c.treinos_por_classe} treinos`}
             </span>
             {#if rank}
               <a
-                class="pf-classe-rank"
+                class="classe-cartao-rank"
                 class:podio-1={rank.posicao === 1}
                 class:podio-2={rank.posicao === 2}
                 class:podio-3={rank.posicao === 3}
@@ -276,7 +267,7 @@
             {/if}
             {#if progresso}
               <ol
-                class="pf-casas"
+                class="classe-cartao-casas"
                 aria-label={`${progresso.andados} de ${progresso.total} treinos para o nível ${c.nivel_por_classe + 1}`}
               >
                 {#each { length: progresso.total } as _, i}
@@ -475,92 +466,40 @@
     color: var(--ds-text-5);
   }
 
+  /* Só o aperto do diálogo. O desenho do cartão é o do global.css: uma janela
+     de 520px que ainda tem Conquistas embaixo não pode gastar o mesmo respiro
+     de uma página inteira. */
   .pf-classes {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 8px;
     margin: 0;
-    padding: 0;
-    list-style: none;
   }
 
   .pf-classes > li {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: baseline;
-    gap: 2px 10px;
     padding: 12px 14px;
-    border: 1px solid var(--ds-line);
-    border-radius: 13px;
-    background: var(--ds-surface);
   }
 
-  .pf-classe-nome {
-    font-family: var(--ds-font-display);
+  .pf-classes .classe-cartao-nome {
     font-size: 0.95rem;
-    font-weight: 600;
   }
 
-  .pf-classe-nivel {
-    justify-self: end;
+  .pf-classes .classe-cartao-nivel {
     font-size: 0.76rem;
-    color: var(--ds-gold);
   }
 
-  .pf-classe-treinos {
+  .pf-classes .classe-cartao-treinos {
     font-size: 0.74rem;
-    color: var(--ds-text-4);
   }
 
-  .pf-classe-rank {
-    justify-self: end;
+  .pf-classes .classe-cartao-rank {
     font-size: 0.7rem;
-    color: var(--ds-text-5);
-    text-decoration: none;
-    white-space: nowrap;
   }
 
-  .pf-classe-rank strong {
-    font-family: var(--ds-font-display);
+  .pf-classes .classe-cartao-rank strong {
     font-size: 0.8rem;
-    font-weight: 700;
-    color: var(--ds-text-2);
   }
 
-  /* Ouro, prata e bronze, os mesmos do ranking. Depois do :hover de propósito,
-     igual à ficha própria: no pódio a cor é informação, não estado de ponteiro. */
-  .pf-classe-rank.podio-1 strong {
-    color: var(--ds-gold-light);
-  }
-
-  .pf-classe-rank.podio-2 strong {
-    color: var(--ds-prata);
-  }
-
-  .pf-classe-rank.podio-3 strong {
-    color: var(--ds-bronze);
-  }
-
-  .pf-casas {
-    grid-column: 1 / -1;
-    display: flex;
-    gap: 3px;
-    margin: 6px 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .pf-casas > li {
-    flex: 1;
-    height: 6px;
-    border-radius: 3px;
-    border: 1px solid var(--ds-line-strong);
-    background: rgba(255, 255, 255, 0.04);
-  }
-
-  .pf-casas > li.cheia {
-    border-color: var(--ds-gold);
-    background: var(--ds-gold);
+  .pf-classes .classe-cartao-casas {
+    margin-top: 6px;
   }
 
   /* Os quatro números continuam numa linha só no celular, e quem cede é o

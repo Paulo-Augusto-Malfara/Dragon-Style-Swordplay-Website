@@ -6,6 +6,7 @@
   import {
     CLASSE_BASICO,
     calcularRanks,
+    progressoDaClasse,
     slugDaClasse,
     versaoDoRank,
   } from "../../lib/rank-classe";
@@ -131,15 +132,6 @@
   });
 
   /**
-   * Quantos treinos valem um nível de classe.
-   *
-   * Confere contra o `nivel_por_classe` que vem do banco antes de desenhar: se
-   * a regra mudar lá e este número ficar velho, os quadradinhos somem em vez de
-   * mostrar um progresso errado. Errar calado é pior do que não mostrar.
-   */
-  const TREINOS_POR_NIVEL = 4;
-
-  /**
    * "Últimas presenças" é o que o título promete: as últimas.
    *
    * A lista inteira empurrava as conquistas pra fora da tela em quem treina há
@@ -157,12 +149,6 @@
     ),
   );
 
-  function progressoDaClasse(c: any) {
-    const treinos = c.treinos_por_classe ?? 0;
-    const nivel = c.nivel_por_classe ?? 0;
-    if (Math.floor(treinos / TREINOS_POR_NIVEL) !== nivel) return null;
-    return { andados: treinos % TREINOS_POR_NIVEL, total: TREINOS_POR_NIVEL };
-  }
 
   async function load() {
     try {
@@ -590,21 +576,21 @@
       <!-- Era tabela de três colunas. Vira grade de cartões porque a tabela
            obrigava rolagem lateral no celular pra ler três números curtos, e
            porque cada linha é uma classe, não uma comparação entre elas. -->
-      <ul class="ficha-classes">
+      <ul class="classes-cartoes">
         {#each porClasse as c}
           {@const progresso = progressoDaClasse(c)}
           {@const rank = rankPorClasse.get(c.id_classe)}
           <li>
-            <span class="ficha-classe-nome">{c.nome_classe}</span>
-            <span class="ficha-classe-nivel">Nível {c.nivel_por_classe}</span>
-            <span class="ficha-classe-treinos">
+            <span class="classe-cartao-nome">{c.nome_classe}</span>
+            <span class="classe-cartao-nivel">Nível {c.nivel_por_classe}</span>
+            <span class="classe-cartao-treinos">
               {c.treinos_por_classe === 1 ? "1 treino" : `${c.treinos_por_classe} treinos`}
             </span>
             <!-- A colocação divide a linha dos treinos, que estava vazia à
                  direita, então o cartão não cresce um pixel. -->
             {#if rank}
               <a
-                class="ficha-classe-rank"
+                class="classe-cartao-rank"
                 class:podio-1={rank.posicao === 1}
                 class:podio-2={rank.posicao === 2}
                 class:podio-3={rank.posicao === 3}
@@ -616,7 +602,7 @@
             {/if}
             {#if progresso}
               <ol
-                class="ficha-casas ficha-casas--classe"
+                class="classe-cartao-casas"
                 aria-label={`${progresso.andados} de ${progresso.total} treinos para o nível ${c.nivel_por_classe + 1}`}
               >
                 {#each { length: progresso.total } as _, i}
@@ -1012,97 +998,15 @@
     background: var(--ds-gold);
   }
 
-  .ficha-casas--classe {
-    grid-column: 1 / -1;
-    margin-top: 8px;
-    gap: 3px;
-  }
-
-  .ficha-casas--classe > li {
-    height: 6px;
-  }
-
   /* ======== CLASSES E PRESENÇAS ======== */
 
-  .ficha-classes,
+  /* Os cartões de classe moram no global.css (.classes-cartoes): o desenho
+     nasceu aqui, mas hoje a edição de membro do painel usa o mesmo. */
+
   .ficha-presencas {
     margin: 0 0 0.4em;
     padding: 0;
     list-style: none;
-  }
-
-  .ficha-classes {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 10px;
-  }
-
-  .ficha-classes > li {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    align-items: baseline;
-    gap: 2px 10px;
-    padding: 14px 16px;
-    border: 1px solid var(--ds-line);
-    border-radius: 13px;
-    background: var(--ds-surface);
-  }
-
-  .ficha-classe-nome {
-    font-family: var(--ds-font-display);
-    font-size: 1rem;
-    font-weight: 600;
-  }
-
-  .ficha-classe-nivel {
-    justify-self: end;
-    font-size: 0.78rem;
-    color: var(--ds-gold);
-  }
-
-  .ficha-classe-treinos {
-    font-size: 0.76rem;
-    color: var(--ds-text-4);
-  }
-
-  /* Segundo lugar de importância no cartão, atrás do nível: por isso número
-     claro com o "de N" apagado, e nada de dourado, que aqui é a cor do nível. */
-  .ficha-classe-rank {
-    justify-self: end;
-    font-size: 0.72rem;
-    color: var(--ds-text-5);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-
-  .ficha-classe-rank strong {
-    font-family: var(--ds-font-display);
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: var(--ds-text-2);
-  }
-
-  .ficha-classe-rank:hover strong,
-  .ficha-classe-rank:focus-visible strong {
-    color: var(--ds-gold);
-  }
-
-  /* Ouro, prata e bronze, os mesmos do Ranking. Depois do :hover de propósito:
-     no pódio a cor da colocação é informação, não estado de ponteiro, e trocá-la
-     ao passar o mouse apagaria justamente o que ali interessa. */
-  .ficha-classe-rank.podio-1 strong {
-    color: var(--ds-gold-light);
-  }
-
-  .ficha-classe-rank.podio-2 strong {
-    color: var(--ds-prata);
-  }
-
-  .ficha-classe-rank.podio-3 strong {
-    color: var(--ds-bronze);
-  }
-
-  .ficha-presencas {
     border: 1px solid var(--ds-line);
     border-radius: 14px;
     overflow: hidden;
