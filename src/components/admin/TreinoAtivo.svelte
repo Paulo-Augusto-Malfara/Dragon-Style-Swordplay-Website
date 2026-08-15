@@ -231,6 +231,19 @@
     await checarElegibilidade(m.id_membro);
   }
 
+  function subirParaFormulario() {
+    document.querySelector(".admin-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  /* Quem confirmou na agenda está lá embaixo, depois do formulário e da lista
+   * de presenças: tocar em "Registrar" preenchia o nome numa tela que a pessoa
+   * não estava vendo, e ela ainda tinha que rolar pra cima pra achar a classe.
+   * Agora a tela vai junto. */
+  function irParaFormulario(m: { id_membro: number; nome: string; foto_url: string | null }) {
+    selecionarMembro(m);
+    subirParaFormulario();
+  }
+
   /* Editar reusa o formulário de cima em vez de abrir campos dentro da linha.
    * A linha é estreita, e no celular ela é um cartão: caberia mal, e ainda
    * duplicaria a lista de classes, as casas de progresso e a validação de
@@ -257,7 +270,7 @@
     classeEscolhida = p.id_classe;
     torso = torsoDaPresenca(p);
     usouFaixa = p.usou_faixa;
-    document.querySelector(".admin-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    subirParaFormulario();
   }
 
   function cancelarEdicao() {
@@ -738,10 +751,6 @@
     <div class="admin-secao-cab">
       <h2>Confirmaram na agenda <span class="contagem">{confirmadosPendentes.length}</span></h2>
     </div>
-    <p class="admin-form-nota confirmados-nota">
-      Avisaram que vinham e ainda não foram registrados. O nome vai pro formulário acima; o PH só
-      conta depois que você escolher a classe e confirmar.
-    </p>
     <ul class="admin-list confirmados-lista">
       {#each confirmadosPendentes as c}
         <li>
@@ -759,7 +768,7 @@
             <button
               type="button"
               class="btn btn-sm btn-primary"
-              onclick={() => selecionarMembro(c)}
+              onclick={() => irParaFormulario(c)}
             >
               Registrar
             </button>
@@ -905,10 +914,6 @@
     max-width: 760px;
     margin: 0 auto 1.4em;
     text-align: center;
-  }
-
-  .confirmados-nota {
-    margin: -0.4em 0 0.8em;
   }
 
   /* Uma linha por confirmado. O .row-corpo da lista padrão tem base de 190px,
