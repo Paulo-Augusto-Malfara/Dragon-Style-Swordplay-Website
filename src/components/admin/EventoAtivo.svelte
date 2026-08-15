@@ -2,6 +2,7 @@
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
   import ConfirmarAcao from "./ConfirmarAcao.svelte";
+  import { nomeExibido, nomeOficialSeDiferente } from "../../lib/nome";
 
   interface Props {
     idEvento: number;
@@ -53,18 +54,22 @@
 
     const linhas = pres ?? [];
     const ids = [...new Set(linhas.map((p) => p.id_membro))];
-    let membrosMap = new Map<number, { nome: string; foto_url: string | null }>();
+    let membrosMap = new Map<
+      number,
+      { nome: string; apelido: string | null; foto_url: string | null }
+    >();
     if (ids.length > 0) {
       const { data: membros } = await supabase
         .from("dMembros")
-        .select("id_membro, nome, foto_url")
+        .select("id_membro, nome, apelido, foto_url")
         .in("id_membro", ids);
       membrosMap = new Map((membros ?? []).map((m) => [m.id_membro, m]));
     }
 
     presencas = linhas.map((p) => ({
       ...p,
-      nome: membrosMap.get(p.id_membro)?.nome ?? `#${p.id_membro}`,
+      nome: nomeExibido(membrosMap.get(p.id_membro)) || `#${p.id_membro}`,
+      nome_oficial: nomeOficialSeDiferente(membrosMap.get(p.id_membro)),
       foto_url: membrosMap.get(p.id_membro)?.foto_url ?? null,
     }));
     carregandoPresencas = false;
@@ -128,7 +133,7 @@
     resumo = data;
     const { data: registros } = await supabase
       .from("v_registro_eventos")
-      .select("nome, foto_url, ph_ganho, nivel_geral, subiu_nivel_geral, subida_nivel_geral")
+      .select("nome, nome_oficial, foto_url, ph_ganho, nivel_geral, subiu_nivel_geral, subida_nivel_geral")
       .eq("id_evento", idEvento);
     participantesResumo = registros ?? [];
   }
@@ -170,7 +175,10 @@
                   {p.nome.charAt(0).toUpperCase()}
                 {/if}
               </span>
-              <span class="row-name">{p.nome}</span>
+              <span class="row-name">
+                {p.nome}
+                {#if p.nome_oficial && p.nome_oficial !== p.nome}<small>{p.nome_oficial}</small>{/if}
+              </span>
             </td>
             <td class="col-stat" data-label="PH ganho"><span class="stat-pill">{p.ph_ganho}</span></td>
             <td class="col-stat" data-label="Nível geral">
@@ -270,6 +278,7 @@
           </span>
           <div class="row-corpo">
             <span class="row-titulo">{p.nome}</span>
+            {#if p.nome_oficial}<span class="row-meta">{p.nome_oficial}</span>{/if}
           </div>
           <span class="stat-pill">+{p.ph_ganho} PH</span>
           {#if souAdminSistema}
@@ -306,6 +315,14 @@
 {/if}
 
 <style>
+  /* Apelido em cima, nome do cadastro embaixo, só quando são diferentes. */
+  .row-name small {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--ds-text-5);
+  }
+
   .fechar-evento {
     display: flex;
     flex-wrap: wrap;

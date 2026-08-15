@@ -46,6 +46,8 @@
   let fotoRecusaMotivo = $state<string | null>(null);
   let apelidoPendente = $state<string | null>(null);
   let apelidoRecusaMotivo = $state<string | null>(null);
+  /** "foto" ou "apelido" enquanto a baixa do aviso está indo ao banco. */
+  let descartando = $state<string | null>(null);
   let editingApelido = $state(false);
   let apelidoInput = $state("");
   let savingApelido = $state(false);
@@ -298,6 +300,19 @@
     editingApelido = false;
   }
 
+  /* Dá baixa no aviso de recusa. Passa pelo banco porque o membro não escreve
+   * no próprio cadastro (o UPDATE da dMembros é do admin do sistema), e sem
+   * isso o X só apagaria o aviso até a próxima vez que a página carregasse. */
+  async function descartarRecusa(tipo: "foto" | "apelido") {
+    descartando = tipo;
+    const supabase = await getSupabase();
+    const { error } = await supabase.rpc("descartar_recusa", { p_tipo: tipo });
+    descartando = null;
+    if (error) return;
+    if (tipo === "foto") fotoRecusaMotivo = null;
+    else apelidoRecusaMotivo = null;
+  }
+
   function cancelApelido() {
     editingApelido = false;
     apelidoInput = apelido ?? "";
@@ -465,14 +480,37 @@
               continua te mostrando como {apelido || nomeOficial}.
             </li>
           {/if}
+          <!-- O aviso de recusa é o único que não sai sozinho: o "em análise"
+               some quando alguém decide, mas a recusa ficava no perfil para
+               sempre. Depois de lido, a pessoa dá baixa nele. -->
           {#if fotoRecusaMotivo}
             <li class="recusado">
-              <strong>Foto recusada.</strong> {fotoRecusaMotivo}
+              <span><strong>Foto recusada.</strong> {fotoRecusaMotivo}</span>
+              <button
+                type="button"
+                class="descartar"
+                onclick={() => descartarRecusa("foto")}
+                disabled={descartando === "foto"}
+                aria-label="Dispensar o aviso de foto recusada"
+                title="Dispensar aviso"
+              >
+                ✕
+              </button>
             </li>
           {/if}
           {#if apelidoRecusaMotivo}
             <li class="recusado">
-              <strong>Apelido recusado.</strong> {apelidoRecusaMotivo}
+              <span><strong>Apelido recusado.</strong> {apelidoRecusaMotivo}</span>
+              <button
+                type="button"
+                class="descartar"
+                onclick={() => descartarRecusa("apelido")}
+                disabled={descartando === "apelido"}
+                aria-label="Dispensar o aviso de apelido recusado"
+                title="Dispensar aviso"
+              >
+                ✕
+              </button>
             </li>
           {/if}
         </ul>
@@ -689,7 +727,35 @@
   }
 
   .ficha-moderacao .recusado {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
     border-color: var(--ds-danger);
+  }
+
+  /* O X fica no alto à direita e não desce com o texto: o motivo pode ter duas
+     linhas, e um botão centralizado num aviso alto flutua no meio do nada. */
+  .descartar {
+    flex: none;
+    margin: -2px -4px 0 auto;
+    padding: 2px 6px;
+    border: none;
+    border-radius: 6px;
+    background: none;
+    color: var(--ds-text-5);
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .descartar:hover,
+  .descartar:focus-visible {
+    color: var(--ds-text-2);
+  }
+
+  .descartar:disabled {
+    opacity: 0.4;
+    cursor: default;
   }
 
   /* Este bloco saiu do global.css. Era o único lugar do site que usava as

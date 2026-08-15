@@ -38,12 +38,18 @@
     const de = (pagina - 1) * POR_PAGINA;
     let query = supabase
       .from("v_ranking_nivel_geral")
-      .select("id_membro, nome, foto_url, nivel_geral, auth_level, status_ativo", { count: "exact" })
+      .select("id_membro, nome, nome_oficial, foto_url, nivel_geral, auth_level, status_ativo", {
+        count: "exact",
+      })
       .order("status_ativo", { ascending: false })
       .order("nome")
       .range(de, de + POR_PAGINA - 1);
 
-    if (termo.trim().length >= 2) query = query.ilike("nome", `%${termo.trim()}%`);
+    // Busca pelos dois nomes: agora que a lista mostra o apelido, procurar
+    // pelo nome do cadastro não podia deixar de achar a pessoa. A vírgula e os
+    // parênteses saem porque são a pontuação do próprio filtro do PostgREST.
+    const t = termo.trim().replace(/[(),]/g, " ");
+    if (t.length >= 2) query = query.or(`nome.ilike.%${t}%,nome_oficial.ilike.%${t}%`);
     if (filtro === "ativos") query = query.eq("status_ativo", true);
     if (filtro === "inativos") query = query.eq("status_ativo", false);
     if (filtro === "organizadores") query = query.lte("auth_level", 2);
@@ -150,6 +156,9 @@
         <div class="row-corpo">
           <span class="row-titulo">{m.nome}</span>
           <span class="row-meta">
+            {#if m.nome_oficial && m.nome_oficial !== m.nome}
+              <span class="nome-oficial">{m.nome_oficial}</span>
+            {/if}
             <span class="stat-pill">Nvl {m.nivel_geral}</span>
             <span>{NIVEIS[m.auth_level] ?? "Membro"}</span>
             {#if !m.status_ativo}
@@ -201,6 +210,12 @@
 {/if}
 
 <style>
+  /* O nome do cadastro ao lado dos números da linha: a lista mostra o apelido,
+     e no painel a pessoa precisa ser identificada, não só reconhecida. */
+  .nome-oficial {
+    color: var(--ds-text-5);
+  }
+
   /* Busca, filtro e cadastro na mesma linha: são as três coisas que se faz ao
      abrir esta tela, e o botão de cadastrar estava lá embaixo, depois de
      cinquenta linhas de lista. */

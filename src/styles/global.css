@@ -2284,6 +2284,14 @@ p {
   white-space: nowrap;
 }
 
+/* O nome do cadastro embaixo do apelido, na busca do painel: é aqui que quem
+   registra presença confirma que achou a pessoa certa, e apelido sozinho não
+   identifica ninguém numa lista de 170. */
+.picker-oficial {
+  display: block;
+  color: var(--ds-text-5);
+}
+
 /* aria-selected é a navegação por seta; :hover é o mouse. Os dois pintam
    igual porque são a mesma ideia: "é este que vai entrar se você confirmar". */
 .membro-picker-results li button:hover,

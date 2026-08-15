@@ -2,6 +2,7 @@
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
   import ConfirmarAcao from "./ConfirmarAcao.svelte";
+  import { nomeExibido, nomeOficialSeDiferente } from "../../lib/nome";
 
   interface Props {
     podeEditar: boolean;
@@ -52,18 +53,22 @@
     }
 
     const ids = [...new Set(rows.map((d) => d.id_membro))];
-    let membrosPorId = new Map<number, { nome: string; foto_url: string | null }>();
+    let membrosPorId = new Map<
+      number,
+      { nome: string; apelido: string | null; foto_url: string | null }
+    >();
     if (ids.length > 0) {
       const { data: membros } = await supabase
         .from("dMembros")
-        .select("id_membro, nome, foto_url")
+        .select("id_membro, nome, apelido, foto_url")
         .in("id_membro", ids);
       membrosPorId = new Map((membros ?? []).map((m) => [m.id_membro, m]));
     }
 
     doacoes = rows.map((d) => ({
       ...d,
-      nome: membrosPorId.get(d.id_membro)?.nome ?? `#${d.id_membro}`,
+      nome: nomeExibido(membrosPorId.get(d.id_membro)) || `#${d.id_membro}`,
+      nome_oficial: nomeOficialSeDiferente(membrosPorId.get(d.id_membro)),
       foto_url: membrosPorId.get(d.id_membro)?.foto_url ?? null,
       total: totalPorMembro.get(d.id_membro) ?? Number(d.valor),
     }));
@@ -234,7 +239,10 @@
                   {d.nome.charAt(0).toUpperCase()}
                 {/if}
               </span>
-              <span class="row-name">{d.nome}</span>
+              <span class="row-name">
+                {d.nome}
+                {#if d.nome_oficial}<small>{d.nome_oficial}</small>{/if}
+              </span>
             </td>
             {#if podeEditar && editandoId === d.id_doacao}
               <td class="col-faixa" data-label="Data">
@@ -277,6 +285,15 @@
 {/if}
 
 <style>
+  /* Apelido em cima, nome do cadastro embaixo: no painel a pessoa precisa ser
+     identificada, não só reconhecida. Só aparece quando são diferentes. */
+  .row-name small {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--ds-text-5);
+  }
+
   /* O valor da doação é o dado da linha, e o total do membro é contexto. Os
      dois eram pílula dourada e disputavam o olho; agora só o valor é. */
   .total-membro {

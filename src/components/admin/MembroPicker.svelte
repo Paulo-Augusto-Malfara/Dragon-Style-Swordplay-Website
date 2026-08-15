@@ -43,8 +43,13 @@
     buscando = true;
     let query = supabase
       .from("v_ranking_nivel_geral")
-      .select("id_membro, nome, foto_url, nivel_geral, status_ativo")
-      .ilike("nome", `%${termo.trim()}%`)
+      .select("id_membro, nome, nome_oficial, foto_url, nivel_geral, status_ativo")
+      // Pelos dois nomes: a lista mostra o apelido, mas quem digita o nome do
+      // cadastro tem que achar a pessoa do mesmo jeito. Vírgula e parênteses
+      // saem porque são a pontuação do filtro do PostgREST.
+      .or(
+        `nome.ilike.%${termo.trim().replace(/[(),]/g, " ")}%,nome_oficial.ilike.%${termo.trim().replace(/[(),]/g, " ")}%`,
+      )
       .order("status_ativo", { ascending: false })
       .order("nome")
       .limit(10);
@@ -135,7 +140,12 @@
                   {m.nome.charAt(0).toUpperCase()}
                 {/if}
               </span>
-              <span class="membro-picker-nome">{m.nome} <small>Nvl {m.nivel_geral}</small></span>
+              <span class="membro-picker-nome">
+                {m.nome} <small>Nvl {m.nivel_geral}</small>
+                {#if m.nome_oficial && m.nome_oficial !== m.nome}
+                  <small class="picker-oficial">{m.nome_oficial}</small>
+                {/if}
+              </span>
               <span class="status-dot {m.status_ativo ? 'status-dot--ativo' : 'status-dot--inativo'}"
               ></span>
             </button>

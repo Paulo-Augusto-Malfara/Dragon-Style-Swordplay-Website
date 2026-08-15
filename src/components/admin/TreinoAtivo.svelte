@@ -4,6 +4,7 @@
   import MembroPicker from "./MembroPicker.svelte";
   import RecrutarMembro from "./RecrutarMembro.svelte";
   import ConfirmarAcao from "./ConfirmarAcao.svelte";
+  import { nomeExibido, nomeOficialSeDiferente } from "../../lib/nome";
 
   interface Props {
     idTreino: number;
@@ -88,7 +89,9 @@
    * é quem avisou que vinha, pra o staff não ter que digitar o nome de novo.
    * Quem confirmou e faltou simplesmente nunca sai desta lista. O vínculo
    * agenda↔treino é feito pela abrir_treino, casando por data. */
-  let confirmados = $state<{ id_membro: number; nome: string; foto_url: string | null }[]>([]);
+  let confirmados = $state<
+    { id_membro: number; nome: string; nome_oficial: string | null; foto_url: string | null }[]
+  >([]);
 
   // Filtra na tela em vez de refazer a consulta a cada presença lançada: é a
   // mesma pessoa, só mudou de lado.
@@ -132,15 +135,23 @@
 
     const linhas = pres ?? [];
     const ids = [...new Set(linhas.map((p) => p.id_membro))];
-    let membrosMap = new Map<number, { nome: string; foto_url: string | null }>();
+    let membrosMap = new Map<number, { nome: string; apelido: string | null; foto_url: string | null }>();
     if (ids.length > 0) {
-      const { data: membros } = await supabase.from("dMembros").select("id_membro, nome, foto_url").in("id_membro", ids);
+      const { data: membros } = await supabase
+        .from("dMembros")
+        .select("id_membro, nome, apelido, foto_url")
+        .in("id_membro", ids);
       membrosMap = new Map((membros ?? []).map((m) => [m.id_membro, m]));
     }
 
     presencas = linhas.map((p) => ({
       ...p,
-      nome: membrosMap.get(p.id_membro)?.nome ?? `#${p.id_membro}`,
+      // O mesmo apelido-antes-do-nome das views. Não é só estética: o resumo do
+      // treino fechado casa estas linhas com as da v_registro_treinos pelo
+      // nome, e se um lado dissesse apelido e o outro nome oficial, o cartão
+      // perderia foto e classe de quem tem apelido.
+      nome: nomeExibido(membrosMap.get(p.id_membro)) || `#${p.id_membro}`,
+      nome_oficial: nomeOficialSeDiferente(membrosMap.get(p.id_membro)),
       foto_url: membrosMap.get(p.id_membro)?.foto_url ?? null,
       sigla_classe: siglaMap.get(p.id_classe) ?? `#${p.id_classe}`,
       nome_classe: classesMap.get(p.id_classe) ?? "",
@@ -158,7 +169,7 @@
     if (!agenda) return;
     const { data } = await supabase
       .from("v_agenda_confirmacoes")
-      .select("id_membro, nome, foto_url")
+      .select("id_membro, nome, nome_oficial, foto_url")
       .eq("id_agenda", agenda.id_agenda);
     confirmados = data ?? [];
   }
@@ -340,8 +351,11 @@
     let nomesBonus = new Map<number, string>();
     if (dadosBonus.length > 0) {
       const ids = [...new Set(dadosBonus.map((b: any) => b.id_membro))];
-      const { data: membrosBonus } = await supabase.from("dMembros").select("id_membro, nome").in("id_membro", ids);
-      nomesBonus = new Map((membrosBonus ?? []).map((m) => [m.id_membro, m.nome]));
+      const { data: membrosBonus } = await supabase
+        .from("dMembros")
+        .select("id_membro, nome, apelido")
+        .in("id_membro", ids);
+      nomesBonus = new Map((membrosBonus ?? []).map((m) => [m.id_membro, nomeExibido(m)]));
     }
     const bonusPorMembro = new Map<number, number>();
     for (const b of dadosBonus) {
@@ -778,6 +792,9 @@
           </span>
           <div class="row-corpo">
             <span class="row-titulo">{c.nome}</span>
+            {#if c.nome_oficial && c.nome_oficial !== c.nome}
+              <span class="row-meta">{c.nome_oficial}</span>
+            {/if}
           </div>
           <div class="row-acoes">
             <button
@@ -829,7 +846,10 @@
                     {p.nome.charAt(0).toUpperCase()}
                   {/if}
                 </span>
-                <span class="row-name">{p.nome}</span>
+                <span class="row-name">
+                  {p.nome}
+                  {#if p.nome_oficial}<small>{p.nome_oficial}</small>{/if}
+                </span>
               </td>
               <td class="col-faixa" data-label="Classe">{p.sigla_classe}</td>
               <td class="col-stat" data-label="Vestimenta">
@@ -980,6 +1000,16 @@
   .torso-grade > .faixa-toggle {
     grid-column: 1 / -1;
     margin-top: 2px;
+  }
+
+  /* O painel mostra o apelido como todo mundo, mas guarda o nome do cadastro
+     embaixo: aqui a pessoa precisa ser identificada numa lista de 170, não só
+     reconhecida. Só aparece quando os dois são diferentes. */
+  .row-name small {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--ds-text-5);
   }
 
   /* Mesma grade dos cartões de "Minhas classes" do Meu Perfil, encolhida: aqui
