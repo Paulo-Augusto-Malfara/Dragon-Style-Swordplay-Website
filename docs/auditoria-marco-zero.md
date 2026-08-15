@@ -186,8 +186,9 @@ delas pra cima.
 
 ## O que foi corrigido em 14/08/2026
 
-Três migrações aplicadas: `corrige_cavaleiro_fantasma_marco_zero`,
-`restaura_marco_zero_arthur_romero` e `ajusta_pre_sistema_luke`.
+Quatro migrações aplicadas: `corrige_cavaleiro_fantasma_marco_zero`,
+`restaura_marco_zero_arthur_romero`, `ajusta_pre_sistema_luke` e
+`bonus_veterano_milokos_lanceiro`.
 
 ### Feito
 
@@ -246,9 +247,20 @@ O Arqueiro 13 é 5 do pré-sistema mais as 8 presenças de 2025. O Viking saiu d
 vez porque ele não tem nenhuma presença de Viking em `fPresencas`. Os 33 PH
 ficaram na linha do Arqueiro, que permaneceu.
 
-Conferido depois de tudo: 295 linhas, PH total 1810, 0 linha zerada, 0 órfã, e
-**ninguém no grupo passa do teto de 4 Básicos**. `get_advisors(security)` sem
-item novo em relação à linha de base conhecida.
+**Milokos: bônus de veterano.** Não é correção de erro, é concessão do usuário.
+O pré-sistema dele (aba `10072022`) tinha só Básico 4, sem nenhuma classe
+avançada, o que foi conferido antes: ele fechou os 4 Básicos em 2022 e só voltou
+a treinar classe avançada em junho de 2024. Por ser veterano antigo, ganhou 2
+níveis de bônus, que na moeda da tabela são 8 treinos, colocados em Lanceiro.
+
+Somado por cima, não substituindo: os 2 de Lanceiro que ele já tinha no marco
+zero são presenças reais de 30/06/2024 e 14/07/2024. Ficou 2 + 8 = 10, e o nível
+foi de 7 pra 9.
+
+Conferido depois de tudo: 295 linhas, PH total 1810, 0 linha zerada, 0 negativa,
+0 duplicata de (membro, classe), e **ninguém no grupo passa do teto de 4
+Básicos**. `get_advisors(security)` sem item novo em relação à linha de base
+conhecida.
 
 Uma armadilha de leitura, pra quem for auditar PH: o `ph_total` da
 `v_ranking_nivel_geral` soma três fontes, `fMarcoZero` + `fPresencas` + `fPH`.
