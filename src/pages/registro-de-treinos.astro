@@ -1,15 +1,10 @@
 ---
 import PageLayout from "../layouts/PageLayout.astro";
 import TreinoCard from "../components/TreinoCard.astro";
+import Paginacao from "../components/Paginacao.astro";
 import { supabasePublic } from "../lib/supabase-public";
 
 export const prerender = false;
-
-const { data: registros } = await supabasePublic
-  .from("v_registro_treinos")
-  .select("*")
-  .order("data_treino", { ascending: false })
-  .limit(200);
 
 interface Registro {
   id_treino: number;
@@ -24,20 +19,50 @@ interface Registro {
   subiu_nivel_classe: boolean;
 }
 
-const porTreino = new Map<number, { data_treino: string; attendees: Registro[] }>();
+const POR_PAGINA = 10;
+const pedida = Math.max(1, Number(Astro.url.searchParams.get("pagina")) || 1);
+
+// v_registro_treinos tem uma linha por presença, não por treino: cortar em 200
+// linhas derrubava pela metade o treino que caía na borda (o 71 aparecia com 2
+// de 17 presentes) e sumia com todos os anteriores. A página de treinos sai da
+// v_treinos_publicos, que é uma linha por treino, e só então se buscam as
+// presenças desses 10.
+const { data: treinos, count } = await supabasePublic
+  .from("v_treinos_publicos")
+  .select("id_treino, data_treino", { count: "exact" })
+  .order("data_treino", { ascending: false })
+  .order("id_treino", { ascending: false })
+  .range((pedida - 1) * POR_PAGINA, pedida * POR_PAGINA - 1);
+
+const totalPaginas = Math.max(1, Math.ceil((count ?? 0) / POR_PAGINA));
+const pagina = Math.min(pedida, totalPaginas);
+const daPagina = treinos ?? [];
+
+// ?pagina=9 numa lista de 2 páginas: sem isso a tela diz "nenhum treino
+// registrado ainda", que é mentira, e sem link nenhum pra voltar.
+if (daPagina.length === 0 && pedida > 1) return Astro.redirect("/registro-de-treinos");
+
+const { data: registros } = daPagina.length
+  ? await supabasePublic
+      .from("v_registro_treinos")
+      .select("*")
+      .in(
+        "id_treino",
+        daPagina.map((t) => t.id_treino),
+      )
+  : { data: [] };
+
+const porTreino = new Map<number, Registro[]>();
 for (const r of (registros ?? []) as Registro[]) {
-  if (!porTreino.has(r.id_treino)) {
-    porTreino.set(r.id_treino, { data_treino: r.data_treino, attendees: [] });
-  }
-  porTreino.get(r.id_treino)!.attendees.push(r);
+  if (!porTreino.has(r.id_treino)) porTreino.set(r.id_treino, []);
+  porTreino.get(r.id_treino)!.push(r);
 }
-for (const grupo of porTreino.values()) {
-  grupo.attendees.sort((a, b) => {
+for (const attendees of porTreino.values()) {
+  attendees.sort((a, b) => {
     if (a.subiu_nivel_geral !== b.subiu_nivel_geral) return a.subiu_nivel_geral ? -1 : 1;
     return b.nivel_geral - a.nivel_geral;
   });
 }
-const treinos = [...porTreino.entries()].sort((a, b) => b[1].data_treino.localeCompare(a[1].data_treino));
 ---
 
 <PageLayout
@@ -45,15 +70,26 @@ const treinos = [...porTreino.entries()].sort((a, b) => b[1].data_treino.localeC
   description="Histórico dos treinos do Dragon Style, com presenças, classes e quem subiu de nível."
   resumo="Os treinos já registrados: quem participou, em qual classe, e quem subiu de nível."
 >
-  {treinos.length === 0 ? (
+  {daPagina.length === 0 ? (
     <p class="vazio">Nenhum treino registrado ainda.</p>
   ) : (
     <div class="tr-lista">
-      {treinos.map(([idTreino, { data_treino, attendees }]) => (
-        <TreinoCard idTreino={idTreino} dataTreino={data_treino} attendees={attendees} />
+      {daPagina.map((t) => (
+        <TreinoCard
+          idTreino={t.id_treino}
+          dataTreino={t.data_treino}
+          attendees={porTreino.get(t.id_treino) ?? []}
+        />
       ))}
     </div>
   )}
+
+  <Paginacao
+    pagina={pagina}
+    totalPaginas={totalPaginas}
+    base="/registro-de-treinos"
+    rotulo="Páginas do registro de treinos"
+  />
 </PageLayout>
 
 <style>

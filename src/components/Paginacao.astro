@@ -1,0 +1,63 @@
+---
+interface Props {
+  pagina: number;
+  totalPaginas: number;
+  /** Caminho da página, sem query. Ex.: "/registro-de-treinos" */
+  base: string;
+  /** Para o leitor de tela saber de que lista são as páginas. */
+  rotulo: string;
+}
+const { pagina, totalPaginas, base, rotulo } = Astro.props;
+
+// Mesma fila de chips da lista de membros e do dashboard, só que em links, que
+// aqui a página é servida pelo servidor. O visual e a posição são os mesmos.
+const href = (n: number) => (n <= 1 ? base : `${base}?pagina=${n}`);
+const paginas = Array.from({ length: totalPaginas }, (_, i) => i + 1);
+---
+
+{
+  totalPaginas > 1 && (
+    <nav class="ranking-pagination" aria-label={rotulo}>
+      {pagina === 1 ? (
+        <span class="chip" aria-disabled="true">
+          ‹
+        </span>
+      ) : (
+        <a class="chip" href={href(pagina - 1)} rel="prev" aria-label="Página anterior">
+          ‹
+        </a>
+      )}
+
+      {paginas.map((p) =>
+        p === pagina ? (
+          <span class="chip ativo" aria-current="page">
+            {p}
+          </span>
+        ) : (
+          <a class="chip" href={href(p)}>
+            {p}
+          </a>
+        ),
+      )}
+
+      {pagina === totalPaginas ? (
+        <span class="chip" aria-disabled="true">
+          ›
+        </span>
+      ) : (
+        <a class="chip" href={href(pagina + 1)} rel="next" aria-label="Próxima página">
+          ›
+        </a>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  /* O equivalente ao [disabled] dos botões: em link, quem faz o papel é o
+     aria-disabled, porque <a> não aceita disabled. */
+  .chip[aria-disabled="true"] {
+    opacity: 0.35;
+    cursor: default;
+  }
+</style>

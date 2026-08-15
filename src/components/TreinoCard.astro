@@ -42,7 +42,9 @@ const subiram = attendees.filter((r) => r.subiu_nivel_geral).length;
       {attendees.length}
       {attendees.length === 1 ? " presente" : " presentes"}
       {subiram > 0 && (
-        <span class="tr-subiu">{subiram === 1 ? "1 subiu" : `${subiram} subiram`}</span>
+        <span class="tr-subiu">
+          {subiram === 1 ? "1 subiu de nível" : `${subiram} subiram de nível`}
+        </span>
       )}
     </span>
   </summary>
@@ -53,6 +55,17 @@ const subiram = attendees.filter((r) => r.subiu_nivel_geral).length;
     arrastar de lado pra chegar na coluna que responde isso.
   */}
   <ul class="tr-presentes">
+    {/*
+      Os dois números só se explicam uma vez, no alto da lista: repetir "geral"
+      e "classe" em cada linha seria dizer vinte vezes o que muda zero vez.
+    */}
+    <li class="tr-cab">
+      <span class="tr-cab-rotulo">Nível</span>
+      <span class="tr-niveis">
+        <span class="tr-cab-col">Geral</span>
+        <span class="tr-cab-col">Classe</span>
+      </span>
+    </li>
     {attendees.map((r) => (
       <li>
         <span class="tr-avatar">
@@ -163,6 +176,23 @@ const subiram = attendees.filter((r) => r.subiu_nivel_geral).length;
     gap: 10px;
     padding: 9px 0;
     border-top: 1px solid var(--ds-line);
+  }
+
+  /* Cabeçalho da lista: mesma caixa dos números embaixo (34px de largura, 8px
+     de folga dos lados) pra cada rótulo cair em cima da sua coluna. */
+  .tr-cab {
+    justify-content: space-between;
+    padding: 7px 0 4px;
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ds-text-5);
+  }
+
+  .tr-cab-col {
+    min-width: 34px;
+    padding: 0 8px;
+    text-align: center;
   }
 
   .tr-avatar {

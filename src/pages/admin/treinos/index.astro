@@ -1,6 +1,7 @@
 ---
 import AdminShell from "../../../components/admin/AdminShell.astro";
 import AbrirTreino from "../../../components/admin/AbrirTreino.svelte";
+import Paginacao from "../../../components/Paginacao.astro";
 import { createSupabaseServerClient } from "../../../lib/supabase-server";
 
 export const prerender = false;
@@ -14,12 +15,25 @@ const { data: aberto } = await supabase
   .in("status", ["aberto", "aguardando_data"])
   .maybeSingle();
 
-const { data: historico } = await supabase
+const POR_PAGINA = 10;
+const pedida = Math.max(1, Number(Astro.url.searchParams.get("pagina")) || 1);
+
+const { data: historico, count: totalFechados } = await supabase
   .from("fTreinos")
-  .select("id_treino, data_treino, status, fPresencas(count)")
+  .select("id_treino, data_treino, status, fPresencas(count)", { count: "exact" })
   .eq("status", "finalizado")
   .order("data_treino", { ascending: false })
-  .limit(20);
+  // Desempate estável: sem ele, dois treinos na mesma data podem trocar de
+  // ordem entre uma página e outra, e aí um some e o outro aparece duas vezes.
+  .order("id_treino", { ascending: false })
+  .range((pedida - 1) * POR_PAGINA, pedida * POR_PAGINA - 1);
+
+const totalPaginas = Math.max(1, Math.ceil((totalFechados ?? 0) / POR_PAGINA));
+const pagina = Math.min(pedida, totalPaginas);
+
+// Página fora do intervalo (?pagina=9 de 2): volta pra primeira em vez de
+// mostrar uma lista vazia sem link nenhum de saída.
+if (pedida > totalPaginas) return Astro.redirect("/admin/treinos");
 
 const dataBR = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("pt-BR");
 const diaSemana = (d: string) =>
@@ -48,7 +62,7 @@ const diaSemana = (d: string) =>
   }
 
   <div class="admin-secao-cab">
-    <h2>Treinos fechados <span class="contagem">{historico?.length ?? 0}</span></h2>
+    <h2>Treinos fechados <span class="contagem">{totalFechados ?? 0}</span></h2>
   </div>
 
   {
@@ -79,6 +93,13 @@ const diaSemana = (d: string) =>
       <p class="vazio">Nenhum treino finalizado ainda.</p>
     )
   }
+
+  <Paginacao
+    pagina={pagina}
+    totalPaginas={totalPaginas}
+    base="/admin/treinos"
+    rotulo="Páginas dos treinos fechados"
+  />
 </AdminShell>
 
 <style>

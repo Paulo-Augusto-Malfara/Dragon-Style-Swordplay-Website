@@ -31,6 +31,16 @@ usuário** em vez de operar no projeto que apareceu.
 
 ## Supabase MCP write policy
 
-The `supabase` MCP server in `.mcp.json` stays at `read_only=false` permanently — don't toggle it back to `true` after a migration, and don't ask the user to flip it before one. Instead, always ask an explicit, clear question in chat before running `apply_migration`, `execute_sql` for anything beyond a plain `SELECT`, or any other DB write — every single time, even in Auto Mode, even if the conversation already implied it. A yes covers only that one action. After any migration, run `get_advisors(type:"security")` and compare against the known baseline (7 intentional `SECURITY DEFINER` views, RPCs intentionally exposed to anon/authenticated by design, leaked password protection warning pre-existing) — flag only genuinely new items.
+The `supabase` MCP server in `.mcp.json` stays at `read_only=false` permanently — don't toggle it back to `true` after a migration, and don't ask the user to flip it before one. Instead, always ask an explicit, clear question in chat before running `apply_migration`, `execute_sql` for anything beyond a plain `SELECT`, or any other DB write — every single time, even in Auto Mode, even if the conversation already implied it. A yes covers only that one action. After any migration, run `get_advisors(type:"security")` and compare against the known baseline (8 intentional `SECURITY DEFINER` views, RPCs intentionally exposed to anon/authenticated by design, leaked password protection warning pre-existing) — flag only genuinely new items.
+
+Baseline auditada em 15/08/2026, item a item: as 8 views (`v_registro_treinos`,
+`v_treinos_publicos`, `v_registro_eventos`, `v_ranking_nivel_geral`,
+`v_ranking_por_classe`, `v_historico_doacoes`, `v_agenda_confirmacoes`) só
+publicam o que o site já mostra e filtram `not m.oculto`; a oitava,
+`v_historico_presencas`, se limita sozinha por `auth.uid()`. Nenhuma expõe
+email, telegram_id ou auth_user_id. As 25 funções `SECURITY DEFINER` têm
+guarda interna (`is_admin`, `is_staff`, `is_organizador`, `current_membro_id` ou
+`auth.uid()`); o anônimo só alcança os cinco booleanos sem argumento, que
+respondem falso pra ele. Refazer essa varredura de tempos em tempos.
 
 Auth: "Allow new users to sign up" is **off** (since 2026-08-14). Nobody self-registers; a new member has to be invited from the Supabase dashboard, and the `on_auth_user_created_claim_membro` trigger links them to `dMembros` by email. Don't "fix" a login that returns `signup_disabled` by turning signups back on — that error is the intended answer for an email with no user.
