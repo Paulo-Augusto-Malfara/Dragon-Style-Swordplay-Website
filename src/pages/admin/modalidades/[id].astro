@@ -5,6 +5,11 @@ import ModalidadeEditor from "../../../components/admin/ModalidadeEditor.svelte"
 export const prerender = false;
 
 const { id } = Astro.params;
+
+// Mesma trava do /admin/modalidades, que o índice tinha e o editor não: quem
+// não é organizador chegava aqui pela URL e só descobria no salvar.
+const { membro } = Astro.locals;
+if (!membro.isOrganizador) return Astro.redirect("/admin");
 ---
 
 <AdminShell

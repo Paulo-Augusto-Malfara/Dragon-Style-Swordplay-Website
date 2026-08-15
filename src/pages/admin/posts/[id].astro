@@ -5,6 +5,12 @@ import PostEditor from "../../../components/admin/PostEditor.svelte";
 export const prerender = false;
 
 const { id } = Astro.params;
+
+// Mesma trava do /admin/posts. Sem ela a lista escondia a seção do staff, mas
+// o editor abria por URL: o banco recusava a gravação depois, o que é a tela
+// abrindo pra dar erro no fim.
+const { membro } = Astro.locals;
+if (!membro.isOrganizador) return Astro.redirect("/admin");
 ---
 
 <AdminShell
