@@ -10,6 +10,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 /* ---------- 1. Cache no aparelho: a regex do service worker ---------- */
 
@@ -113,7 +114,11 @@ function astrosPublicos(dir) {
 
 const suspeitos = [];
 for (const raiz of ["src/pages", "src/layouts", "src/components"]) {
-  for (const arquivo of astrosPublicos(new URL(`../${raiz}`, import.meta.url).pathname.slice(1))) {
+  // fileURLToPath e não .pathname.slice(1): no Windows o pathname vem
+  // "/C:/Users/..." e cortar a primeira barra acerta, mas no Linux vira
+  // "home/user/...", um caminho relativo que não existe. O teste rodava só na
+  // máquina de quem escreveu, e falhava em sessão na nuvem e em CI.
+  for (const arquivo of astrosPublicos(fileURLToPath(new URL(`../${raiz}`, import.meta.url)))) {
     if (LEITURA_DE_SESSAO.test(readFileSync(arquivo, "utf8"))) suspeitos.push(arquivo);
   }
 }
