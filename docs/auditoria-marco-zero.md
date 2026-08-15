@@ -102,12 +102,13 @@ banco 4 / real 0), Jonjon (ID 96, banco 4 / real 0 nessa classe),
 Pedro Luiz (ID 52, banco 4 / real 0), Miguel (ID 87, banco 4 / real 1),
 José Affini (ID 111, banco 4 / real 1).
 
-### Os 4 criados depois
+### Os 4 criados depois: estão certos onde estão
 
 IDs 164 (João Vitor de Paula), 165 (Joaquim), 166 (Beny) e 170 (José Zanato)
-têm linha de marco zero mas não existem na planilha. São membros novos —
-provavelmente presenças lançadas como marco zero em vez de `fPresencas`.
-Não é erro de valor, só de lugar.
+têm linha de marco zero mas não aparecem na planilha. Numa primeira leitura
+pareceu presença lançada no lugar errado. **Não é.** Ver a seção
+"Por que os IDs 164/165/166/170 não saem da `fMarcoZero`" no fim deste
+documento.
 
 ---
 
@@ -275,8 +276,9 @@ Se aparecer numa auditoria futura, não é bug.
 **Os casos de Básico.** Investigados a fundo e **deixados como estão de
 propósito**. Ver a seção abaixo; não reabra sem ler.
 
-**IDs 164/165/166/170** continuam em `fMarcoZero` em vez de `fPresencas`. Não é
-erro de valor, só de lugar, e não muda ranking.
+**IDs 164/165/166/170** continuam em `fMarcoZero`, e é ali que eles devem ficar.
+Chegou a ser listado como pendência neste relatório por engano; ver a seção
+própria mais abaixo.
 
 ---
 
@@ -323,8 +325,45 @@ Decisão: fica como está. Mexer trocaria um erro pequeno e conhecido por 18
 inconsistências novas. Se alguém quiser reabrir isso, vai precisar de fonte
 externa, não da planilha.
 
-### E a planilha?
+---
 
-**O bug continua vivo na `[Lista de Presença].xlsx`.** A correção foi só no
-banco. Se novas abas forem criadas lá, a faixa de fórmula vai continuar
-carimbando `Cavaleiro = 8` no próximo membro da fila alfabética.
+## Por que os IDs 164/165/166/170 não saem da `fMarcoZero`
+
+Estes quatro chegaram a ser listados como pendência aqui, com a ideia de que
+eram presenças gravadas no lugar errado e que bastava movê-las pra
+`fPresencas`. **Estava errado, e mover seria pior que deixar.**
+
+`fTreinos` começa no treino **68, de 31/08/2025**. A planilha parou no Torneio
+de Inverno, **24/08/2025**. Não há buraco entre as duas: o sistema pegou onde a
+planilha largou. Os Básicos que esses quatro têm no marco zero são de treinos
+anteriores a 31/08/2025, que **não existem nem vão existir como linha em
+`fTreinos`** — eles simplesmente não entraram na planilha, que já tinha parado
+de receber gente nova no fim.
+
+Mover exigiria inventar linhas de treino antigas (vetado pelo usuário numa
+sessão anterior) ou pendurar as presenças nos treinos 68 a 71, onde eles já têm
+presença real, contando dobrado.
+
+E essas linhas não são decorativas, elas sustentam a regra do sistema:
+
+> **João Vitor de Paula (164)** tem marco zero Básico 2, mais Básico nos treinos
+> 68 e 69, e **Lanceiro no treino 70**. A RPC `registrar_presenca_treino` só
+> libera classe avançada com 4 Básicos fechados. Ele chegou nos 4 exatamente no
+> treino 69 (2 do marco zero + 2 lançados), e foi por isso que o sistema aceitou
+> o Lanceiro no 70. Sem a linha de marco zero, ele teria 2 Básicos e aquele
+> lançamento teria sido recusado.
+
+Os outros três seguem a mesma lógica: Joaquim 1 + 2 = 3 Básicos, Beny 2 + 1 = 3,
+José Zanato 3 + 1 = 4. Todos coerentes com "treinou um pouco antes do sistema
+existir", que é exatamente para o que a `fMarcoZero` serve.
+
+Com isso, **a lista de pendências desta auditoria fica zerada.**
+
+---
+
+## E a planilha?
+
+**O bug continua vivo na `[Lista de Presença].xlsx`**, mas o usuário aposentou o
+arquivo em 14/08/2026: o app cobre o lançamento agora. Se por algum motivo abas
+novas voltarem a ser criadas lá, a faixa de fórmula vai continuar carimbando
+`Cavaleiro = 8` no próximo membro da fila alfabética.
