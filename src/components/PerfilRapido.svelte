@@ -437,20 +437,23 @@
     background: var(--ds-bg);
   }
 
+  /* Número dourado em Cinzel, rótulo apagado embaixo: é como o .rk-valor do
+     ranking e o .mural-numeros do mural desenham a mesma coisa. Aqui estava ao
+     contrário, rótulo dourado em caixa alta e número na fonte do corpo, e era
+     isso que destoava do resto do site. */
   .pf-stat .label {
-    font-size: 0.6rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    font-size: 0.64rem;
+    letter-spacing: 0.04em;
     text-align: center;
-    color: var(--ds-gold);
+    color: var(--ds-text-4);
   }
 
   .pf-stat .value {
+    font-family: var(--ds-font-display);
     font-size: 1.35rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: var(--ds-text-1);
+    color: var(--ds-gold);
   }
 
   .pf-sec {
@@ -573,8 +576,8 @@
     }
 
     .pf-stat .label {
-      font-size: 0.52rem;
-      letter-spacing: 0.02em;
+      font-size: 0.56rem;
+      letter-spacing: 0.01em;
     }
 
     .pf-stat .value {

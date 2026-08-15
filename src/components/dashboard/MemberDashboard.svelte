@@ -840,20 +840,23 @@
     background: var(--ds-bg);
   }
 
+  /* Número dourado em Cinzel, rótulo apagado embaixo: é como o .rk-valor do
+     ranking e o .mural-numeros do mural desenham a mesma coisa. Aqui estava ao
+     contrário, rótulo dourado em caixa alta e número na fonte do corpo, e era
+     isso que destoava do resto do site. */
   .ficha-stat .label {
-    font-size: 0.64rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
+    font-size: 0.68rem;
+    letter-spacing: 0.04em;
     text-align: center;
-    color: var(--ds-gold);
+    color: var(--ds-text-4);
   }
 
   .ficha-stat .value {
-    font-size: 1.7rem;
+    font-family: var(--ds-font-display);
+    font-size: 1.6rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
-    color: var(--ds-text-1);
+    color: var(--ds-gold);
   }
 
   .ficha-acoes,
@@ -863,6 +866,13 @@
     gap: 8px;
     padding-top: 4px;
     border-top: 1px solid var(--ds-line);
+  }
+
+  /* Sobrou uma ação só nessa barra, e encostada à esquerda ela parecia ter
+     perdido a companheira. Vale só aqui: no formulário do apelido o campo
+     cresce e ocupa a linha, então centralizar não muda nada. */
+  .ficha-acoes {
+    justify-content: center;
   }
 
   .ficha-apelido input {
@@ -1086,8 +1096,8 @@
     }
 
     .ficha-stat .label {
-      font-size: 0.52rem;
-      letter-spacing: 0.02em;
+      font-size: 0.56rem;
+      letter-spacing: 0.01em;
     }
 
     .ficha-stat .value {
