@@ -8,7 +8,7 @@
  * coubesse.
  */
 import PageLayout from "../layouts/PageLayout.astro";
-import Accordion from "../components/Accordion.astro";
+import ModalidadeDetalhe from "../components/ModalidadeDetalhe.astro";
 import { supabasePublic } from "../lib/supabase-public";
 
 export const prerender = false;
@@ -18,13 +18,22 @@ const { data } = await supabasePublic
   .select("*")
   .order("id");
 
-const modalidades = (data ?? []).map((m) => ({
-  ...m,
+const modalidades = (data ?? []).map((m) => {
   // Coluna do banco, editável no painel. Antes isto era lido por heurística do
   // texto dos requisitos; zero segue significando "não informado", e nesse caso
   // a modalidade aparece em todos os filtros em vez de sumir de todos.
-  minimo: m.min_participantes ?? 0,
-}));
+  const minimo = m.min_participantes ?? 0;
+  return {
+    ...m,
+    minimo,
+    // A linha fechada resume a modalidade: quantas pessoas e o formato. Duas
+    // etiquetas, não todas, porque as primeiras do banco são as que dizem o
+    // formato ("2 Times", "Duelo 1x1"); o resto aparece inteiro na janela.
+    resumo: [minimo ? `${minimo}+ pessoas` : null, ...(m.tags ?? []).slice(0, 2)]
+      .filter(Boolean)
+      .join(" · "),
+  };
+});
 
 // As faixas saem do próprio acervo, não de uma lista chutada: se um dia entrar
 // uma modalidade de 30 pessoas, a faixa "20+" continua correta sem ninguém
@@ -64,30 +73,44 @@ const faixas = [
   </section>
 
   <section>
-    <div class="modalidades modalidades-grid" id="mod-grade">
+    <ul class="mod-grade" id="mod-grade">
       {
         modalidades.map((m) => (
-          <div class="mod-item" data-minimo={m.minimo}>
-            <Accordion
-              id={m.slug}
-              title={m.title}
-              minimo={m.minimo}
-              tags={m.tags ?? []}
-              descricao={m.description}
-              objetivo={m.objective}
-              pontuacao={m.scoring_respawn}
-              requisitos={m.requirements}
-              variacoes={m.variations}
-            />
-          </div>
+          <li class="mod-item" data-minimo={m.minimo}>
+            {/* Link pro #slug, sem script: quem abre a janela é o BaseLayout,
+                olhando o hash. É o mesmo caminho do resultado da busca. */}
+            <a class="mod-card" href={`#${m.slug}`}>
+              <span class="mod-nome">{m.title}</span>
+              {m.resumo && <span class="mod-resumo">{m.resumo}</span>}
+              <span class="mod-mais">Ver regras →</span>
+            </a>
+          </li>
         ))
       }
-    </div>
+    </ul>
     <p class="mod-vazio" id="mod-vazio" hidden>
       Nenhuma modalidade para esse número. Toque em <strong>Todas</strong> para
       ver o acervo inteiro.
     </p>
   </section>
+
+  {/* Fora da grade de propósito: o filtro esconde o <li>, e um <dialog> dentro
+      de um pai com `display: none` não abre nem indo pelo #hash. */}
+  {
+    modalidades.map((m) => (
+      <ModalidadeDetalhe
+        id={m.slug}
+        title={m.title}
+        minimo={m.minimo}
+        tags={m.tags ?? []}
+        descricao={m.description}
+        objetivo={m.objective}
+        pontuacao={m.scoring_respawn}
+        requisitos={m.requirements}
+        variacoes={m.variations}
+      />
+    ))
+  }
 </PageLayout>
 
 <style>
@@ -152,15 +175,62 @@ const faixas = [
     color: var(--ds-text-5);
   }
 
+  /* ======== GRADE ======== */
+
+  /* Mesma grade do catálogo de equipamentos e do de classes, com a coluna um
+     pouco mais larga porque aqui o card é texto, sem imagem pra dar altura. */
+  .mod-grade {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(215px, 1fr));
+    gap: 12px;
+  }
+
   .mod-item[hidden] {
     display: none;
   }
 
-  /* Aberta, a modalidade toma a linha inteira. Espremida numa coluna do grid a
-     descrição virava uma tira de cinco palavras por linha, com a outra coluna
-     vazia ao lado. */
-  .mod-item:has(.md[open]) {
-    grid-column: 1 / -1;
+  .mod-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    height: 100%;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface-solid);
+    text-decoration: none;
+    transition:
+      border-color 0.15s,
+      transform 0.15s;
+  }
+
+  .mod-card:hover,
+  .mod-card:focus-visible {
+    border-color: var(--ds-gold-dim);
+    transform: translateY(-2px);
+  }
+
+  .mod-nome {
+    font-family: var(--ds-font-display);
+    font-size: clamp(1.05rem, 0.95rem + 0.5vw, 1.2rem);
+    line-height: 1.2;
+    color: var(--ds-text-1);
+  }
+
+  .mod-resumo {
+    font-size: 0.78rem;
+    color: var(--ds-text-4);
+  }
+
+  /* No rodapé do card pra todos alinharem na mesma altura, como em /classes. */
+  .mod-mais {
+    margin-top: auto;
+    padding-top: 10px;
+    font-size: 0.76rem;
+    color: var(--ds-gold-light);
   }
 
   .mod-vazio {

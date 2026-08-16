@@ -102,5 +102,108 @@ const comTransicao = !/^\/(admin|auth)(\/|$)/.test(Astro.url.pathname);
     </footer>
     <BottomNav />
     <BuscaGlobal />
+    <script>
+  /**
+   * As duas regras que valem pra toda janela do site.
+   *
+   * 1. O `#hash` da URL abre a janela correspondente. É isso que faz a busca
+   *    global entregar o card certo em vez de largar a pessoa no catálogo: o
+   *    resultado aponta pra /equipamentos#espada-media e a janela abre sozinha.
+   *    De brinde, o card vira link compartilhável e o cartão do catálogo pode
+   *    ser um <a href="#slug"> comum, sem script nenhum por página.
+   *
+   * 2. Clicar fora fecha. O <dialog> nativo não faz isso sozinho, e era a
+   *    reclamação: só o X fechava.
+   *
+   * Mora aqui, e não em cada página, porque três catálogos já precisavam do
+   * mesmo, e porque o listener de clique é delegado no document: ele sobrevive
+   * à troca de corpo do ClientRouter, que substituiria qualquer listener preso
+   * a um elemento da página.
+   */
+  function janelaDoHash() {
+    const alvo = location.hash.slice(1);
+    if (!alvo) return null;
+    return document.querySelector<HTMLDialogElement>(
+      `dialog[data-hash="${CSS.escape(alvo)}"]`,
+    );
+  }
+
+  function sincronizarComHash() {
+    const janela = janelaDoHash();
+    // Fechar as outras é o que faz o botão "voltar" do celular fechar a janela:
+    // ele desfaz o #hash, e sem isto a caixa continuaria aberta sobre a página.
+    for (const aberta of document.querySelectorAll<HTMLDialogElement>(
+      "dialog[data-hash][open]",
+    )) {
+      if (aberta !== janela) aberta.close();
+    }
+    if (janela && !janela.open) janela.showModal();
+  }
+
+  sincronizarComHash();
+  // hashchange cobre chegar de fora com o link pronto; astro:page-load cobre a
+  // navegação do ClientRouter, que não recarrega o módulo; popstate cobre o
+  // voltar do navegador.
+  addEventListener("hashchange", sincronizarComHash);
+  addEventListener("popstate", sincronizarComHash);
+  document.addEventListener("astro:page-load", sincronizarComHash);
+
+  /* O clique no card, tratado à mão.
+   *
+   * Um <a href="#slug"> comum não basta com o ClientRouter no ar: ele
+   * intercepta o clique e troca a URL por history.pushState, e pushState NÃO
+   * dispara hashchange. O hash aparecia na barra de endereço e a janela não
+   * abria. Fase de captura porque é a única forma garantida de rodar antes do
+   * listener do ClientRouter, que desiste ao ver o defaultPrevented.
+   *
+   * Só intercepta âncora que aponta pra uma janela: o sumário das páginas e
+   * qualquer outro link com # continuam rolando como sempre.
+   */
+  document.addEventListener(
+    "click",
+    (evento) => {
+      const link = (evento.target as HTMLElement | null)?.closest?.("a[href^='#']");
+      const destino = link?.getAttribute("href")?.slice(1);
+      if (!destino) return;
+      const janela = document.querySelector<HTMLDialogElement>(
+        `dialog[data-hash="${CSS.escape(destino)}"]`,
+      );
+      if (!janela) return;
+      evento.preventDefault();
+      // O pushState é o que faz o voltar do celular fechar a janela.
+      history.pushState(null, "", `#${destino}`);
+      sincronizarComHash();
+    },
+    true,
+  );
+
+  document.addEventListener("click", (evento) => {
+    const janela = evento.target;
+    if (!(janela instanceof HTMLDialogElement) || !janela.open) return;
+    // O alvo do clique também é o <dialog> quando se acerta o padding dele, e
+    // aí a caixa não pode fechar. Só fecha fora do retângulo, que é o backdrop.
+    const r = janela.getBoundingClientRect();
+    const fora =
+      evento.clientX < r.left ||
+      evento.clientX > r.right ||
+      evento.clientY < r.top ||
+      evento.clientY > r.bottom;
+    if (fora) janela.close();
+  });
+
+  // Fechou: o hash tem que sair da URL, senão clicar no MESMO card de novo não
+  // muda o hash, não dispara hashchange e a janela nunca mais abre.
+  // `close` não borbulha, por isso a fase de captura.
+  document.addEventListener(
+    "close",
+    (evento) => {
+      const janela = evento.target as HTMLDialogElement;
+      if (janela.dataset?.hash && location.hash.slice(1) === janela.dataset.hash) {
+        history.replaceState(null, "", location.pathname + location.search);
+      }
+    },
+    true,
+  );
+  </script>
   </body>
 </html>

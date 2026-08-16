@@ -6,8 +6,8 @@
  * console: o card só some do filtro, ou o clique abre nada. Este teste pega os
  * dois casos.
  *
- * O caso que mais preocupa é o clique morto: o card aponta pro dialog por id, e
- * se um id divergir o usuário clica e não acontece nada, calado.
+ * O caso que mais preocupa é o clique morto: o card aponta pro dialog pelo
+ * #hash, e se um id divergir o usuário clica e não acontece nada, calado.
  */
 import { readFileSync } from "node:fs";
 
@@ -36,9 +36,13 @@ for (const [i, it] of itens.entries()) {
   }
 }
 
-// Clique morto: todo card tem que ter o dialog correspondente na página.
-const alvos = [...HTML.matchAll(/data-abre="([^"]+)"/g)].map((m) => m[1]);
-const dialogs = new Set([...HTML.matchAll(/<dialog id="d-([^"]+)"/g)].map((m) => m[1]));
+// Clique morto: todo card tem que ter o dialog correspondente na página. Quem
+// abre é o BaseLayout, casando o #hash da URL com o data-hash do <dialog>, então
+// é esse par que precisa bater.
+const alvos = [...HTML.matchAll(/<a class="eq-card"[^>]*href="#([^"]+)"/g)].map((m) => m[1]);
+const dialogs = new Set(
+  [...HTML.matchAll(/<dialog[^>]*data-hash="([^"]+)"/g)].map((m) => m[1]),
+);
 for (const a of alvos) if (!dialogs.has(a)) erros.push(`card "${a}" abre um dialog que não existe`);
 if (alvos.length !== dialogs.size) {
   erros.push(`${alvos.length} cards para ${dialogs.size} dialogs`);

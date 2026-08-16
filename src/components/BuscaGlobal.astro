@@ -277,6 +277,14 @@
 
     campo.addEventListener("input", desenhar);
 
+    // Escolher um resultado fecha a busca. Sem isto, um resultado que só muda o
+    // #hash da página atual (o card de um equipamento, estando em
+    // /equipamentos) abriria a janela POR BAIXO da busca, que continuaria em
+    // cima cobrindo justamente o que a pessoa pediu.
+    lista.addEventListener("click", (evento) => {
+      if ((evento.target as HTMLElement).closest("a")) dialogo!.close();
+    });
+
     campo.addEventListener("keydown", (evento) => {
       if (evento.key === "ArrowDown") {
         evento.preventDefault();
@@ -287,7 +295,10 @@
       } else if (evento.key === "Enter") {
         evento.preventDefault();
         const alvo = visiveis[ativo];
-        if (alvo) location.href = alvo.href;
+        if (alvo) {
+          dialogo!.close();
+          location.href = alvo.href;
+        }
       }
     });
 

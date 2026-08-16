@@ -3244,6 +3244,60 @@ p {
   background: transparent;
 }
 
+/* ======== JANELA ========
+ *
+ * A casca de todo <dialog> de conteúdo do site: equipamento, modalidade e
+ * classe. Era a mesma receita copiada por página, e a cópia já tinha começado a
+ * divergir. O que ela resolve, e que qualquer janela nova precisa:
+ *
+ * - `margin: auto`, porque o `* { margin: 0 }` do reset apaga o que a folha do
+ *   navegador usa pra centralizar diálogo modal, e a caixa nasce grudada no
+ *   canto superior esquerdo. Já mordeu quatro vezes neste site.
+ * - a barra de fechar é `sticky` e filha DIRETA do dialog: dentro da caixa que
+ *   rola, um botão `absolute` rola junto e some assim que a pessoa desce.
+ *
+ * Some `.barra-fina` no elemento pra barra de rolagem discreta.
+ */
+.janela {
+  margin: auto;
+  width: min(560px, calc(100vw - 24px));
+  max-height: 86vh;
+  padding: 20px;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 14px;
+  background: var(--ds-bg-alt);
+  color: var(--ds-text-2);
+}
+
+/* A ficha da classe é uma grade de duas colunas e o corpo é texto corrido de
+   página inteira: nos 560px padrão as duas coisas ficam espremidas. */
+.janela--larga {
+  width: min(760px, calc(100vw - 24px));
+}
+
+.janela::backdrop {
+  background: rgba(4, 7, 10, 0.72);
+}
+
+.janela-barra {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.janela-fechar {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--ds-line-strong);
+  border-radius: 50%;
+  background: var(--ds-surface-solid);
+  color: var(--ds-text-2);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
 .chips {
   position: sticky;
   top: var(--ds-header-h);

@@ -1,0 +1,185 @@
+---
+/**
+ * A modalidade inteira, numa janela.
+ *
+ * Era um <details> que abria dentro da grade e empurrava o resto da lista pra
+ * baixo, o que no celular significava perder de vista o que se estava
+ * comparando. Numa janela o texto tem a largura toda e a lista não se mexe.
+ *
+ * O card que abre esta janela mora em /modalidades: aqui só o conteúdo, porque
+ * <dialog> dentro de um item de grade escondido por filtro não abre (o
+ * `display: none` do pai vale mesmo pro top layer).
+ */
+interface Props {
+  id: string;
+  title: string;
+  /** Quantas pessoas a modalidade exige. Zero significa "não informado". */
+  minimo?: number;
+  tags?: string[];
+  descricao: string[];
+  objetivo: string[];
+  pontuacao: string[];
+  requisitos: string[];
+  variacoes?: string[];
+}
+const {
+  id,
+  title,
+  minimo = 0,
+  tags = [],
+  descricao,
+  objetivo,
+  pontuacao,
+  requisitos,
+  variacoes = [],
+} = Astro.props;
+
+const blocos = [
+  { rotulo: "Como vence", itens: objetivo },
+  { rotulo: "Pontuação e respawn", itens: pontuacao },
+  { rotulo: "Precisa de", itens: requisitos },
+].filter((b) => b.itens?.length);
+
+/** Tira o "- " que o texto do banco usa pra marcar item de lista. */
+const limpar = (linha: string) => linha.replace(/^\s*-\s*/, "");
+---
+
+<dialog data-hash={id} class="janela barra-fina md-janela">
+  <form method="dialog" class="janela-barra">
+    <button class="janela-fechar" aria-label="Fechar">✕</button>
+  </form>
+
+  <p class="eyebrow">Modalidade</p>
+  <h2>{title}</h2>
+  {
+    (minimo > 0 || tags.length > 0) && (
+      <p class="md-etiquetas">
+        {minimo > 0 && <span class="md-etiqueta md-etiqueta--gente">{minimo}+ pessoas</span>}
+        {tags.map((t) => (
+          <span class="md-etiqueta">{t}</span>
+        ))}
+      </p>
+    )
+  }
+
+  {descricao?.map((p) => <p class="md-desc">{limpar(p)}</p>)}
+
+  {
+    blocos.length > 0 && (
+      <div class="md-grade">
+        {blocos.map((b) => (
+          <div class="md-bloco">
+            <span class="md-bloco-rotulo">{b.rotulo}</span>
+            <ul>
+              {b.itens.map((i) => (
+                <li>{limpar(i)}</li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    )
+  }
+
+  {
+    variacoes.length > 0 && (
+      <div class="md-variacoes">
+        <span class="md-bloco-rotulo">Variações</span>
+        <ul>
+          {variacoes.map((v) => (
+            <li>{limpar(v)}</li>
+          ))}
+        </ul>
+      </div>
+    )
+  }
+</dialog>
+
+<style>
+  .md-janela h2 {
+    margin: 2px 0 10px;
+    font-size: 1.5rem;
+  }
+
+  /* As etiquetas ficam todas aqui dentro; no card cabem só as duas primeiras. */
+  .md-etiquetas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    width: 100%;
+    margin: 0 0 14px;
+  }
+
+  /* Encolhe com o próprio texto, nunca estica na linha. */
+  .md-etiqueta {
+    padding: 3px 10px;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 999px;
+    font-size: 0.72rem;
+    color: var(--ds-text-3);
+  }
+
+  .md-etiqueta--gente {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+    color: var(--ds-gold-light);
+  }
+
+  .md-desc {
+    width: 100%;
+    margin: 0 0 14px;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    color: var(--ds-text-2);
+  }
+
+  .md-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+
+  .md-bloco {
+    padding: 13px 15px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: rgba(11, 16, 22, 0.4);
+  }
+
+  .md-bloco-rotulo {
+    display: block;
+    margin-bottom: 7px;
+    font-family: var(--ds-font-display);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ds-gold-deep);
+  }
+
+  .md-bloco ul,
+  .md-variacoes ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    line-height: 1.55;
+    color: var(--ds-text-2);
+  }
+
+  /* Variação é exceção à regra, não mais uma regra: a barra dourada à esquerda
+     diz isso sem precisar escrever "atenção". */
+  .md-variacoes {
+    padding: 13px 16px;
+    border-left: 2px solid var(--ds-gold);
+    background: var(--ds-gold-wash);
+  }
+
+  .md-variacoes .md-bloco-rotulo {
+    color: var(--ds-gold);
+  }
+</style>

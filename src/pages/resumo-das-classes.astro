@@ -12,12 +12,13 @@
 import { getCollection } from "astro:content";
 import PageLayout from "../layouts/PageLayout.astro";
 import CatalogoLinks from "../components/CatalogoLinks.astro";
+import ClasseFicha from "../components/ClasseFicha.astro";
 
 const classes = (await getCollection("classes")).sort((a, b) =>
   a.data.title.localeCompare(b.data.title, "pt-BR"),
 );
 
-// O href sai da coleção, então renomear um arquivo nunca deixa link quebrado.
+// O slug sai da coleção, então renomear um arquivo nunca deixa link quebrado.
 const slugDe = Object.fromEntries(classes.map((c) => [c.data.title, c.id]));
 
 const guia = [
@@ -70,7 +71,7 @@ const sistema = [
               {g.nomes.map((n, i) => (
                 <>
                   {i > 0 && ", "}
-                  <a href={`/${slugDe[n]}`}>{n}</a>
+                  <a href={`#${slugDe[n]}`}>{n}</a>
                 </>
               ))}
             </dd>
@@ -90,7 +91,10 @@ const sistema = [
     {
       classes.map((c) => (
         <li>
-          <a class="cl-card" href={`/${c.id}`}>
+          {/* Link pro #slug, não pra página: quem abre a janela é o BaseLayout,
+              olhando o hash. A página da classe continua existindo, e o link
+              pra ela está no rodapé da janela. */}
+          <a class="cl-card" href={`#${c.id}`}>
             <img src={c.data.image} alt={c.data.imageAlt} loading="lazy" />
             <span class="cl-nome">{c.data.title}</span>
             <span class="cl-resumo">{c.data.resumo}</span>
@@ -108,6 +112,30 @@ const sistema = [
   </ul>
 
   <CatalogoLinks titulo="Sobre o sistema de classes" itens={sistema} />
+
+  {
+    classes.map((c) => (
+      <dialog data-hash={c.id} class="janela janela--larga barra-fina cl-janela">
+        <form method="dialog" class="janela-barra">
+          <button class="janela-fechar" aria-label="Fechar">
+            ✕
+          </button>
+        </form>
+        <p class="eyebrow">Classe</p>
+        <h2>{c.data.title}</h2>
+        <p class="cl-janela-resumo">{c.data.resumo}</p>
+
+        <ClasseFicha slug={c.id} />
+
+        <p class="cl-janela-rodape">
+          <a class="links-de-texto" href={`/${c.id}`}>
+            Abrir a página do {c.data.title}
+          </a>{" "}
+          para guardar o link ou mandar pro grupo.
+        </p>
+      </dialog>
+    ))
+  }
 </PageLayout>
 
 <style>
@@ -266,6 +294,34 @@ const sistema = [
     background: var(--ds-gold-wash);
     font-size: 0.66rem;
     color: var(--ds-gold-light);
+  }
+
+  /* ======== JANELA DA CLASSE ======== */
+
+  /* A casca (tamanho, borda, backdrop, barra de fechar) é `.janela`, no
+     global.css; a ficha e o corpo são do ClasseFicha. Aqui só o cabeçalho e o
+     rodapé da janela. */
+
+  .cl-janela h2 {
+    margin: 2px 0 6px;
+    font-size: 1.5rem;
+  }
+
+  .cl-janela-resumo {
+    width: 100%;
+    margin: 0 0 16px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--ds-text-3);
+  }
+
+  .cl-janela-rodape {
+    width: 100%;
+    margin: 22px 0 0;
+    padding-top: 14px;
+    border-top: 1px solid var(--ds-line);
+    font-size: 0.86rem;
+    color: var(--ds-text-4);
   }
 
   @media (max-width: 560px) {

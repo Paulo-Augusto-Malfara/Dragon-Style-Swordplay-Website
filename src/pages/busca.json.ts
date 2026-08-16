@@ -28,16 +28,24 @@ export const GET: APIRoute = async () => {
     }
   }
 
+  // Classe, equipamento e modalidade são todos um #hash dentro do catálogo, e
+  // não uma rota: o BaseLayout abre a janela daquele item ao ver o hash. Assim
+  // a busca entrega o card aberto em vez de largar a pessoa na lista, que era o
+  // ponto de ter busca num manual que se consulta em pé, no meio do treino.
   const classes = await getCollection("classes");
   for (const c of classes) {
-    itens.push({ label: c.data.title, grupo: "Classe", href: `/${c.id}` });
+    itens.push({
+      label: c.data.title,
+      grupo: "Classe",
+      href: `/resumo-das-classes#${c.id}`,
+    });
   }
 
-  // O equipamento é uma âncora dentro do catálogo, não uma rota própria: é lá
-  // que ele fica ao lado dos concorrentes, que é o ponto do catálogo.
   const categorias = await getCollection("equipamentos");
   for (const cat of categorias) {
-    for (const item of cat.data.itens) {
+    // `oculto` não é desenhado no catálogo, então não tem janela pra abrir: o
+    // resultado levaria a um hash que não casa com nada.
+    for (const item of cat.data.itens.filter((i) => !i.oculto)) {
       itens.push({
         label: item.nome,
         grupo: "Equipamento",

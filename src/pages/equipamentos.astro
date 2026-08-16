@@ -124,14 +124,17 @@ const chave = (s: string) =>
           data-busca={chave([i.nome, i.catNome, ...i.classes].join(" "))}
           data-classes={i.classes.map(chave).join(" ")}
         >
-          <button type="button" class="eq-card" data-abre={i.id}>
+          {/* Link pro #id, não botão com script: quem abre a janela é o
+              BaseLayout, olhando o hash. Assim o mesmo caminho serve o clique
+              no card, o resultado da busca global e o link colado no grupo. */}
+          <a class="eq-card" href={`#${i.id}`}>
             <img src={i.img} alt={i.nome} loading="lazy" />
             <span class="eq-cat">{i.catNome}</span>
             <span class="eq-nome">{i.nome}</span>
             <span class="eq-medida">{i.medida}</span>
             <span class="eq-classes">{i.classes.join(", ") || "Todas as classes"}</span>
             {i.selo && <span class="eq-selo">{i.selo}</span>}
-          </button>
+          </a>
         </li>
       ))
     }
@@ -144,9 +147,9 @@ const chave = (s: string) =>
 
   {
     itens.map((i) => (
-      <dialog id={`d-${i.id}`} class="eq-dialog barra-fina">
-        <form method="dialog" class="eq-barra">
-          <button class="eq-fechar" aria-label="Fechar">
+      <dialog id={`d-${i.id}`} data-hash={i.id} class="janela barra-fina eq-dialog">
+        <form method="dialog" class="janela-barra">
+          <button class="janela-fechar" aria-label="Fechar">
             ✕
           </button>
         </form>
@@ -271,13 +274,6 @@ const chave = (s: string) =>
     selMaos.value = "";
     for (const c of chips) c.classList.toggle("ativo", c.dataset.cat === "");
     aplicar();
-  });
-
-  grade.addEventListener("click", (e) => {
-    const botao = (e.target as HTMLElement).closest<HTMLElement>("[data-abre]");
-    if (!botao) return;
-    const dlg = document.getElementById(`d-${botao.dataset.abre}`);
-    (dlg as HTMLDialogElement | null)?.showModal();
   });
 </script>
 
@@ -469,9 +465,7 @@ const chave = (s: string) =>
     border-radius: 10px;
     background: var(--ds-surface-solid);
     color: inherit;
-    font-family: inherit;
-    text-align: left;
-    cursor: pointer;
+    text-decoration: none;
     transition:
       border-color 0.15s,
       transform 0.15s;
@@ -535,47 +529,8 @@ const chave = (s: string) =>
 
   /* ======== DETALHE ======== */
 
-  .eq-dialog {
-    /* O `* { margin: 0 }` do reset apaga o `margin: auto` que a folha do
-       navegador usa pra centralizar diálogo modal, e a caixa nascia grudada no
-       alto e na esquerda. Terceira vez que isso morde neste site, depois do
-       #busca-dialog e do ConfirmarAcao. */
-    margin: auto;
-    width: min(560px, calc(100vw - 24px));
-    max-height: 86vh;
-    padding: 20px;
-    border: 1px solid var(--ds-line-strong);
-    border-radius: 14px;
-    background: var(--ds-bg-alt);
-    color: var(--ds-text-2);
-  }
-
-  .eq-dialog::backdrop {
-    background: rgba(4, 7, 10, 0.72);
-  }
-
-  /* Era um botão `absolute` no canto: dentro de uma caixa que rola, absolute
-     rola junto, e o fechar sumia assim que a pessoa descia pra ler as medidas.
-     Barra grudada no topo resolve, e o sticky só vale a rolagem inteira porque
-     ela é filha direta do <dialog>. */
-  .eq-barra {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .eq-fechar {
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--ds-line-strong);
-    border-radius: 50%;
-    background: var(--ds-surface-solid);
-    color: var(--ds-text-2);
-    font-size: 0.9rem;
-    cursor: pointer;
-  }
+  /* A casca da janela (tamanho, borda, backdrop, barra de fechar) é `.janela`,
+     no global.css. Aqui fica só o que é do equipamento. */
 
   .eq-dialog img {
     width: 100%;
