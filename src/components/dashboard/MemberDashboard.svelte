@@ -5,7 +5,9 @@
   import { corDaFaixa } from "../../lib/faixa";
   import {
     CLASSE_BASICO,
+    basicoConcluido,
     calcularRanks,
+    classesVisiveis,
     progressoDaClasse,
     slugDaClasse,
     versaoDoRank,
@@ -97,6 +99,17 @@
       .filter((c) => c.id_classe !== CLASSE_BASICO)
       .reduce((soma, c) => soma + (c.nivel_por_classe ?? 0), 0),
   );
+
+  /**
+   * O Básico sai da grade assim que existe classe oficial treinada (ver
+   * `classesVisiveis`): ele não anda mais e não disputa colocação com ninguém.
+   * Quem diz que ele foi feito é o selo "Veterano" embaixo da faixa.
+   *
+   * Os quatro treinos continuam contados em "Treinos" e o nível dele continua
+   * dentro do Nível Geral: sai da grade, não da conta.
+   */
+  const veterano = $derived(porClasse.some(basicoConcluido));
+  const classesNaGrade = $derived(classesVisiveis(porClasse));
 
   /**
    * A próxima graduação e o quanto falta pra ela.
@@ -428,6 +441,16 @@
               </span>
             </p>
           {/if}
+          <!-- Fica embaixo da faixa e não vira cartão de classe: o Básico
+               fechado não anda mais, e o que interessa dele daqui em diante é
+               só esta palavra. -->
+          {#if veterano}
+            <p>
+              <span class="status-badge status-badge--veterano" title="Concluiu os treinos do Básico">
+                Veterano
+              </span>
+            </p>
+          {/if}
           {#if apelido}
             <p class="ficha-oficial">Nome oficial: {nomeOficial}</p>
           {/if}
@@ -568,7 +591,7 @@
     {/if}
 
     <h2>Minhas classes</h2>
-    {#if porClasse.length === 0}
+    {#if classesNaGrade.length === 0}
       <p class="ficha-aviso">
         Nenhum treino registrado ainda. Depois do seu primeiro treino a classe aparece aqui.
       </p>
@@ -577,7 +600,7 @@
            obrigava rolagem lateral no celular pra ler três números curtos, e
            porque cada linha é uma classe, não uma comparação entre elas. -->
       <ul class="classes-cartoes">
-        {#each porClasse as c}
+        {#each classesNaGrade as c}
           {@const progresso = progressoDaClasse(c)}
           {@const rank = rankPorClasse.get(c.id_classe)}
           <li>
@@ -802,6 +825,14 @@
     flex-direction: column;
     gap: 4px;
     min-width: 0;
+  }
+
+  /* A regra global `p { width: 90%; margin: auto }` centraliza todo parágrafo
+     solto do site, e aqui isso jogava faixa, selo e nome oficial 7px pra
+     dentro em relação ao nome, que escapa dela. O empilhamento já é do flex. */
+  .ficha-id > p {
+    width: auto;
+    margin: 0;
   }
 
   .ficha-nome {

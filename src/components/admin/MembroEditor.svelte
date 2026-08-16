@@ -2,7 +2,12 @@
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
   import ConfirmarAcao from "./ConfirmarAcao.svelte";
-  import { CLASSE_BASICO, progressoDaClasse } from "../../lib/rank-classe";
+  import {
+    CLASSE_BASICO,
+    basicoConcluido,
+    classesVisiveis,
+    progressoDaClasse,
+  } from "../../lib/rank-classe";
 
   interface Props {
     id: string;
@@ -24,6 +29,12 @@
 
   let porClasse = $state<any[]>([]);
   let historico = $state<any[]>([]);
+
+  // O Básico sai da grade quando já há classe oficial treinada, igual às duas
+  // telas de perfil (ver `classesVisiveis`). Aqui não existe faixa pra
+  // pendurar o selo embaixo, então ele vai no título da seção.
+  const veterano = $derived(porClasse.some(basicoConcluido));
+  const classesNaGrade = $derived(classesVisiveis(porClasse));
 
   // Cinco por página, o mesmo da ficha: quem treina há anos empurrava a tela
   // inteira pra baixo, e ninguém rola cinquenta linhas procurando a semana
@@ -251,16 +262,23 @@
   {/if}
 
   <div class="admin-secao-cab">
-    <h2>Níveis por classe <span class="contagem">{porClasse.length}</span></h2>
+    <h2>
+      Níveis por classe <span class="contagem">{classesNaGrade.length}</span>
+      {#if veterano}
+        <span class="status-badge status-badge--veterano" title="Concluiu os treinos do Básico">
+          Veterano
+        </span>
+      {/if}
+    </h2>
   </div>
-  {#if porClasse.length === 0}
+  {#if classesNaGrade.length === 0}
     <p class="vazio">Nenhum treino registrado ainda.</p>
   {:else}
     <!-- Os mesmos cartões do Meu Perfil, e não a tabela de três colunas que
          estava aqui: cada linha é uma classe, não uma comparação entre elas,
          e a tabela pedia rolagem lateral no celular pra ler dois números. -->
     <ul class="classes-cartoes">
-      {#each porClasse as c}
+      {#each classesNaGrade as c}
         {@const progresso = progressoDaClasse(c)}
         <li>
           <span class="classe-cartao-nome">{c.nome_classe}</span>

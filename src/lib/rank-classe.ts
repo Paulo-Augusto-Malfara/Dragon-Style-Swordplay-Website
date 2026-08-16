@@ -7,6 +7,20 @@ export const CLASSE_BASICO = 11;
 export const TREINOS_POR_NIVEL = 4;
 
 /**
+ * O Básico já foi fechado, e daí em diante ele não anda mais.
+ *
+ * Fechar os quatro treinos é o que libera as dez classes oficiais, e a partir
+ * dali o Básico some da tela de registro de presença: os quatro treinos ficam
+ * lá parados pra sempre, o nível dele nunca passa de 1. Por isso o cartão
+ * dessa classe encolhe, em vez de continuar mostrando barra de progresso e
+ * contagem que não vão mudar nunca.
+ */
+export const basicoConcluido = (c: {
+  id_classe: number;
+  nivel_por_classe?: number | null;
+}) => c.id_classe === CLASSE_BASICO && (c.nivel_por_classe ?? 0) >= 1;
+
+/**
  * Quanto falta pro próximo nível daquela classe, em casinhas.
  *
  * Confere contra o `nivel_por_classe` que veio do banco antes de responder: se
@@ -18,13 +32,34 @@ export const TREINOS_POR_NIVEL = 4;
  * cópias da mesma conta divergem sem ninguém perceber.
  */
 export function progressoDaClasse(c: {
+  id_classe: number;
   treinos_por_classe?: number | null;
   nivel_por_classe?: number | null;
 }) {
+  // Básico fechado não tem próximo nível pra desenhar. E a conta daria uma
+  // barra VAZIA (4 % 4 é zero), que se lê como "nenhum treino ainda" em quem
+  // acabou de terminar.
+  if (basicoConcluido(c)) return null;
   const treinos = c.treinos_por_classe ?? 0;
   const nivel = c.nivel_por_classe ?? 0;
   if (Math.floor(treinos / TREINOS_POR_NIVEL) !== nivel) return null;
   return { andados: treinos % TREINOS_POR_NIVEL, total: TREINOS_POR_NIVEL };
+}
+
+/**
+ * As classes que aparecem na grade.
+ *
+ * O Básico só sai da grade quando a pessoa treina alguma classe oficial, e não
+ * no instante em que fecha os quatro treinos: quem fechou e ainda não escolheu
+ * classe ficaria com a grade vazia, e a única coisa que ele treinou na vida
+ * sumiria da tela. Como só dá pra treinar classe oficial com o Básico fechado,
+ * a presença de qualquer outra classe já prova que ele foi concluído.
+ */
+export function classesVisiveis<
+  T extends { id_classe: number; nivel_por_classe?: number | null },
+>(classes: T[]): T[] {
+  const temOficial = classes.some((c) => c.id_classe !== CLASSE_BASICO);
+  return temOficial ? classes.filter((c) => !basicoConcluido(c)) : classes;
 }
 
 /** O mínimo de `v_ranking_por_classe` que a colocação precisa. */

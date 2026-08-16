@@ -2974,6 +2974,17 @@ p {
   border: 1px solid var(--ds-gold);
 }
 
+/* Fechou os quatro treinos do Básico. É o mesmo dourado apagado do
+   "Realizado" da agenda, que é o tom de etapa vencida: não é aviso nem estado
+   pendente, é uma marca que a pessoa carrega. Ele existe pra que o Básico
+   possa sumir da grade de classes sem levar junto a informação de que aquilo
+   já foi feito. */
+.status-badge--veterano {
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
+  border: 1px solid var(--ds-gold-dim);
+}
+
 .status-badge--ativo {
   background: #0e2a1c;
   color: #4fd18b;

@@ -13,7 +13,14 @@
    */
   import { onMount } from "svelte";
   import { corDaFaixa } from "../lib/faixa";
-  import { CLASSE_BASICO, calcularRanks, progressoDaClasse, slugDaClasse } from "../lib/rank-classe";
+  import {
+    CLASSE_BASICO,
+    basicoConcluido,
+    calcularRanks,
+    classesVisiveis,
+    progressoDaClasse,
+    slugDaClasse,
+  } from "../lib/rank-classe";
   import { VERSOES, versaoDaUrl, type Versao } from "../lib/ranking-versao";
 
   // Import dinâmico pelo mesmo motivo do MemberDashboard: um import de topo
@@ -66,6 +73,15 @@
       .filter((c) => c.id_classe !== CLASSE_BASICO)
       .reduce((soma, c) => soma + (c.nivel_por_classe ?? 0), 0),
   );
+
+  /**
+   * O Básico sai da grade quando já há classe oficial treinada, igual à ficha
+   * própria (ver `classesVisiveis`): quem diz que ele foi feito é o selo
+   * "Veterano" embaixo da faixa. Os quatro treinos continuam nos totais aqui
+   * de cima.
+   */
+  const veterano = $derived(minhasClasses.some(basicoConcluido));
+  const classesNaGrade = $derived(classesVisiveis(minhasClasses));
 
   async function abrir(id: number) {
     status = "carregando";
@@ -208,6 +224,15 @@
             </span>
           </p>
         {/if}
+        <!-- Embaixo da faixa, igual à ficha própria: é o que sobra do Básico
+             depois que ele sai da grade de classes. -->
+        {#if veterano}
+          <p>
+            <span class="status-badge status-badge--veterano" title="Concluiu os treinos do Básico">
+              Veterano
+            </span>
+          </p>
+        {/if}
       </div>
     </div>
 
@@ -238,13 +263,13 @@
         <span class="pf-base">colocação: {VERSOES[versaoRank].label}</span>
       {/if}
     </h3>
-    {#if minhasClasses.length === 0}
+    {#if classesNaGrade.length === 0}
       <p class="pf-aviso">Nenhum treino registrado ainda.</p>
     {:else}
       <!-- Os mesmos cartões do Meu Perfil (.classes-cartoes, no global.css).
            A classe extra só aperta os espaçamentos: aqui é diálogo. -->
       <ul class="classes-cartoes pf-classes">
-        {#each minhasClasses as c}
+        {#each classesNaGrade as c}
           {@const progresso = progressoDaClasse(c)}
           {@const rank = ranks.get(c.id_classe)}
           <li>
@@ -390,6 +415,15 @@
     flex-direction: column;
     gap: 5px;
     min-width: 0;
+  }
+
+  /* A regra global `p { width: 90%; margin: auto }` centraliza todo parágrafo
+     solto do site, e aqui isso jogava a faixa e o selo 7px pra dentro em
+     relação ao nome, que é um h2 e escapa dela. O empilhamento já é do flex,
+     então largura e margem não têm o que fazer. */
+  .pf-id > p {
+    width: auto;
+    margin: 0;
   }
 
   .pf-nome {
