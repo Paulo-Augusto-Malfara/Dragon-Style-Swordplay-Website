@@ -3465,6 +3465,67 @@ p {
   background: var(--ds-gold);
 }
 
+/* ======== LISTA DE PRESENÇAS (padrão do Meu Perfil) ========
+
+   Lista, não tabela: data, classe e ganho cabem numa linha só até em tela
+   estreita, e a tabela pedia rolagem lateral pra ler três coisas curtas.
+   Mesmo caminho dos cartões de classe: nasceu na ficha do membro e veio pra
+   cá quando a edição de membro do painel passou a usar o mesmo desenho.
+
+   O número do treino (.presenca-treino) só aparece no painel: na ficha da
+   própria pessoa ele é ruído, e no painel é o que amarra a linha ao registro
+   de treinos. */
+
+.presencas-lista {
+  margin: 0 0 0.4em;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--ds-line);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.presencas-lista > li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--ds-surface);
+  font-size: 0.88rem;
+}
+
+.presencas-lista > li + li {
+  border-top: 1px solid var(--ds-line);
+}
+
+/* Largura mínima, não fixa: a ficha mostra dia/mês e o painel mostra o ano
+   junto, e nos dois casos todas as linhas têm o mesmo formato, então a coluna
+   alinha sozinha. */
+.presenca-data {
+  flex: none;
+  min-width: 46px;
+  font-family: var(--ds-font-display);
+  font-size: 0.82rem;
+  color: var(--ds-gold);
+}
+
+.presenca-classe {
+  flex: 1;
+  min-width: 0;
+}
+
+.presenca-treino,
+.presenca-ganho {
+  flex: none;
+  font-size: 0.78rem;
+  color: var(--ds-text-4);
+}
+
+.presenca-treino {
+  font-size: 0.74rem;
+  color: var(--ds-text-5);
+}
+
 /* ======== MEMBER DASHBOARD ======== */
 
 /* o fio dourado continua sendo o fio dourado: quem carrega a faixa agora é a

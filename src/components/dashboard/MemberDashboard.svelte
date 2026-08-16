@@ -624,17 +624,17 @@
       <!-- Lista, não tabela: data, classe e ganho cabem numa linha só até em
            tela estreita, e o número do treino virou detalhe secundário porque
            ninguém procura presença por id. -->
-      <ol class="ficha-presencas">
+      <ol class="presencas-lista">
         {#each presencasDaPagina as h}
           <li>
-            <span class="ficha-presenca-data">
+            <span class="presenca-data">
               {new Date(h.data_treino + "T00:00:00").toLocaleDateString("pt-BR", {
                 day: "2-digit",
                 month: "2-digit",
               })}
             </span>
-            <span class="ficha-presenca-classe">{h.nome_classe}</span>
-            <span class="ficha-presenca-ganho">
+            <span class="presenca-classe">{h.nome_classe}</span>
+            <span class="presenca-ganho">
               {h.ph_ganho_treino > 0 ? `+${h.ph_ganho_treino} PH` : "presença"}
             </span>
           </li>
@@ -1000,49 +1000,9 @@
 
   /* ======== CLASSES E PRESENÇAS ======== */
 
-  /* Os cartões de classe moram no global.css (.classes-cartoes): o desenho
-     nasceu aqui, mas hoje a edição de membro do painel usa o mesmo. */
-
-  .ficha-presencas {
-    margin: 0 0 0.4em;
-    padding: 0;
-    list-style: none;
-    border: 1px solid var(--ds-line);
-    border-radius: 14px;
-    overflow: hidden;
-  }
-
-  .ficha-presencas > li {
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 12px 16px;
-    background: var(--ds-surface);
-    font-size: 0.88rem;
-  }
-
-  .ficha-presencas > li + li {
-    border-top: 1px solid var(--ds-line);
-  }
-
-  .ficha-presenca-data {
-    flex: none;
-    width: 46px;
-    font-family: var(--ds-font-display);
-    font-size: 0.82rem;
-    color: var(--ds-gold);
-  }
-
-  .ficha-presenca-classe {
-    flex: 1;
-    min-width: 0;
-  }
-
-  .ficha-presenca-ganho {
-    flex: none;
-    font-size: 0.78rem;
-    color: var(--ds-text-4);
-  }
+  /* Os cartões de classe (.classes-cartoes) e a lista de presenças
+     (.presencas-lista) moram no global.css: o desenho nasceu aqui, mas hoje a
+     edição de membro do painel usa os mesmos. */
 
   @media (max-width: 420px) {
     .ficha-topo {

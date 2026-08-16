@@ -25,6 +25,21 @@
   let porClasse = $state<any[]>([]);
   let historico = $state<any[]>([]);
 
+  // Cinco por página, o mesmo da ficha: quem treina há anos empurrava a tela
+  // inteira pra baixo, e ninguém rola cinquenta linhas procurando a semana
+  // passada.
+  const PRESENCAS_POR_PAGINA = 5;
+  let paginaPresencas = $state(1);
+  const totalPaginasPresencas = $derived(
+    Math.max(1, Math.ceil(historico.length / PRESENCAS_POR_PAGINA)),
+  );
+  const presencasDaPagina = $derived(
+    historico.slice(
+      (paginaPresencas - 1) * PRESENCAS_POR_PAGINA,
+      paginaPresencas * PRESENCAS_POR_PAGINA,
+    ),
+  );
+
   let status = $state<"loading" | "idle" | "saving" | "saved" | "error">("loading");
   let errorMessage = $state("");
   let confirmar: ConfirmarAcao;
@@ -274,27 +289,55 @@
   {#if historico.length === 0}
     <p class="vazio">Nenhuma presença registrada ainda.</p>
   {:else}
-    <div class="table-scroll">
-      <table class="ranking-tabela ranking-tabela--historico tabela-cartoes">
-        <thead>
-          <tr>
-            <th class="col-rank">Nº Treino</th>
-            <th class="col-nome">Data</th>
-            <th class="col-faixa">Classe</th>
-            <th class="col-stat">PH Ganho</th>
-          </tr>
-        </thead>
-        <tbody>
-          {#each historico as h}
-            <tr>
-              <td class="col-rank"><span class="rank-badge">{h.id_treino}</span></td>
-              <td class="col-nome" data-label="Data">{dataCurta(h.data_treino)}</td>
-              <td class="col-faixa" data-label="Classe">{h.nome_classe}</td>
-              <td class="col-stat" data-label="PH ganho"><span class="stat-pill">{h.ph_ganho_treino}</span></td>
-            </tr>
-          {/each}
-        </tbody>
-      </table>
-    </div>
+    <!-- A mesma lista do Meu Perfil, com o número do treino a mais: aqui ele é
+         o que amarra a linha ao registro de treinos. -->
+    <ol class="presencas-lista">
+      {#each presencasDaPagina as h}
+        <li>
+          <span class="presenca-data">{dataCurta(h.data_treino)}</span>
+          <span class="presenca-classe">{h.nome_classe}</span>
+          <span class="presenca-treino">#{h.id_treino}</span>
+          <span class="presenca-ganho">
+            {h.ph_ganho_treino > 0 ? `+${h.ph_ganho_treino} PH` : "presença"}
+          </span>
+        </li>
+      {/each}
+    </ol>
+
+    <!-- Botão e não link, igual à ficha: a lista inteira já está na memória, e
+         trocar de página não pede nada ao servidor. -->
+    {#if totalPaginasPresencas > 1}
+      <nav class="ranking-pagination" aria-label="Páginas das presenças">
+        <button
+          type="button"
+          class="chip"
+          onclick={() => (paginaPresencas -= 1)}
+          disabled={paginaPresencas === 1}
+          aria-label="Página anterior"
+        >
+          ‹
+        </button>
+        {#each { length: totalPaginasPresencas } as _, i}
+          <button
+            type="button"
+            class="chip"
+            class:ativo={paginaPresencas === i + 1}
+            onclick={() => (paginaPresencas = i + 1)}
+            aria-current={paginaPresencas === i + 1 ? "page" : undefined}
+          >
+            {i + 1}
+          </button>
+        {/each}
+        <button
+          type="button"
+          class="chip"
+          onclick={() => (paginaPresencas += 1)}
+          disabled={paginaPresencas === totalPaginasPresencas}
+          aria-label="Próxima página"
+        >
+          ›
+        </button>
+      </nav>
+    {/if}
   {/if}
 {/if}
