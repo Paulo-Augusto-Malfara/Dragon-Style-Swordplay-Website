@@ -1,0 +1,186 @@
+---
+import AdminShell from "../../../components/admin/AdminShell.astro";
+import AbrirTorneio from "../../../components/admin/AbrirTorneio.svelte";
+import Paginacao from "../../../components/Paginacao.astro";
+import { createSupabaseServerClient } from "../../../lib/supabase-server";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+const supabase = createSupabaseServerClient(Astro.cookies, Astro.request);
+
+// Ao contrário do treino, aqui é lista e não um só: dois torneios em paralelo
+// não atrapalham um ao outro, então o índice mostra todos os que estão de pé.
+const { data: abertos } = await supabase
+  .from("fTorneios")
+  .select("id_torneio, nome, data_torneio, tipo, tamanho_equipe, formato, status, fTorneioEquipes(count)")
+  .in("status", ["inscricao", "em_andamento"])
+  .order("data_torneio", { ascending: false })
+  .order("id_torneio", { ascending: false });
+
+const POR_PAGINA = 10;
+const pedida = Math.max(1, Number(Astro.url.searchParams.get("pagina")) || 1);
+
+const { data: historico, count: totalFechados } = await supabase
+  .from("fTorneios")
+  .select("id_torneio, nome, data_torneio, tipo, tamanho_equipe, formato, fTorneioEquipes(count)", {
+    count: "exact",
+  })
+  .eq("status", "finalizado")
+  .order("data_torneio", { ascending: false })
+  // Desempate estável, mesma razão do índice de treinos: sem ele dois torneios
+  // na mesma data trocam de ordem entre uma página e outra, e aí um some e o
+  // outro aparece duas vezes.
+  .order("id_torneio", { ascending: false })
+  .range((pedida - 1) * POR_PAGINA, pedida * POR_PAGINA - 1);
+
+const totalPaginas = Math.max(1, Math.ceil((totalFechados ?? 0) / POR_PAGINA));
+const pagina = Math.min(pedida, totalPaginas);
+
+if (pedida > totalPaginas) return Astro.redirect("/admin/torneios");
+
+const dataBR = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("pt-BR");
+
+const FORMATOS: Record<string, string> = {
+  eliminatoria: "Eliminatória simples",
+  suico: "Suíço",
+  todos_contra_todos: "Todos contra todos",
+};
+
+const descricao = (t: { tipo: string; tamanho_equipe: number; formato: string }) =>
+  t.tipo === "classes"
+    ? `Por classe, 1x1, ${FORMATOS[t.formato]}`
+    : `Aberto, ${t.tamanho_equipe}x${t.tamanho_equipe}, ${FORMATOS[t.formato]}`;
+
+const inscritos = (t: any) => t.fTorneioEquipes?.[0]?.count ?? 0;
+---
+
+<AdminShell
+  title="Torneios"
+  resumo="Chave, placar e campeão. O organizador abre e fecha, o staff lança o resultado das partidas."
+>
+  {
+    abertos && abertos.length > 0 && (
+      <ul class="torneios-abertos">
+        {abertos.map((t) => (
+          <li>
+            <a class="torneio-aberto" href={`/admin/torneios/${t.id_torneio}`}>
+              <span class="ta-tipo">
+                {t.status === "inscricao" ? "Inscrições abertas" : "Torneio em andamento"}
+              </span>
+              <span class="ta-titulo">{t.nome}</span>
+              <span class="ta-acao">
+                {descricao(t)}, {dataBR(t.data_torneio)}
+                {" · "}
+                {inscritos(t)} inscrito{inscritos(t) === 1 ? "" : "s"}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  {
+    membro.isOrganizador ? (
+      <AbrirTorneio client:load />
+    ) : (
+      !abertos?.length && (
+        <p class="vazio">
+          Nenhum torneio aberto no momento. Aguarde um organizador abrir um torneio.
+        </p>
+      )
+    )
+  }
+
+  <div class="admin-secao-cab">
+    <h2>Torneios encerrados <span class="contagem">{totalFechados ?? 0}</span></h2>
+  </div>
+
+  {
+    historico && historico.length > 0 ? (
+      <ul class="admin-list">
+        {historico.map((t) => (
+          <li>
+            <a href={`/admin/torneios/${t.id_torneio}`} class="row-link">
+              <span class="rank-badge">{t.id_torneio}</span>
+              <span class="row-corpo">
+                <span class="row-titulo">{t.nome}</span>
+                <span class="row-meta">
+                  <span>{dataBR(t.data_torneio)}</span>
+                  <span>{descricao(t)}</span>
+                  <span>
+                    {inscritos(t)} inscrito{inscritos(t) === 1 ? "" : "s"}
+                  </span>
+                </span>
+              </span>
+              <span class="row-acoes ver-torneio">Ver</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p class="vazio">Nenhum torneio encerrado ainda.</p>
+    )
+  }
+
+  <Paginacao
+    pagina={pagina}
+    totalPaginas={totalPaginas}
+    base="/admin/torneios"
+    rotulo="Páginas dos torneios encerrados"
+  />
+</AdminShell>
+
+<style>
+  .torneios-abertos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0 0 8px;
+    padding: 0;
+    list-style: none;
+  }
+
+  /* Mesmo cartão do "Treino em andamento": é a coisa da tela que alguém
+     precisa resolver hoje. */
+  .torneio-aberto {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 14px 16px;
+    border: 1px solid var(--ds-gold-dim);
+    border-radius: 12px;
+    background: var(--ds-gold-wash);
+    text-decoration: none;
+  }
+
+  .ta-tipo {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ds-gold);
+  }
+
+  .ta-titulo {
+    font-family: var(--ds-font-display);
+    font-size: 1.02rem;
+    color: var(--ds-gold-light);
+  }
+
+  .ta-acao {
+    font-size: 0.86rem;
+    color: var(--ds-text-3);
+  }
+
+  .ver-torneio {
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ds-text-5);
+  }
+
+  .admin-list li:hover .ver-torneio {
+    color: var(--ds-gold-light);
+  }
+</style>

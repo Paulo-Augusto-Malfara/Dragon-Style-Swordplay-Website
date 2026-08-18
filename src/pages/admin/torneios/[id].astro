@@ -1,0 +1,22 @@
+---
+import AdminShell from "../../../components/admin/AdminShell.astro";
+import TorneioAtivo from "../../../components/admin/TorneioAtivo.svelte";
+
+export const prerender = false;
+
+const { membro } = Astro.locals;
+const { id } = Astro.params;
+
+// A trava da página filha repete a do índice: staff entra, e o que ele pode
+// fazer aqui dentro é o componente que decide pelas props. Quem decide de
+// verdade são as RPCs, que checam a permissão de novo no banco.
+---
+
+<AdminShell title={`Torneio #${id}`} voltar={{ href: "/admin/torneios", label: "Torneios" }}>
+  <TorneioAtivo
+    idTorneio={Number(id)}
+    souOrganizador={membro.isOrganizador}
+    souAdminSistema={membro.isAdminSistema}
+    client:load
+  />
+</AdminShell>

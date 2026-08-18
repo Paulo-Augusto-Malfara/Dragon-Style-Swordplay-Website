@@ -26,6 +26,97 @@ limpa e a sequência de 14/08 fechou tanto a auditoria dos dados
 históricos quanto o ciclo de janela de perfil. O próximo passo é o que o
 usuário pedir.
 
+## Sistema de torneios (18/08)
+
+Seção nova do painel, em `/admin/torneios`. Dois tipos: **aberto** (1x1,
+2x2 ou 3x3, chave única) e **de classes** (1x1, uma chave por classe,
+para premiar o vencedor de cada uma). Três formatos: eliminatória
+simples, eliminatória dupla, suíço e todos contra todos.
+
+O que foi decidido e por quê:
+
+- **Sem PH.** O torneio não toca `fPH`, nível de classe nem ranking.
+  Premiação ficou explicitamente para depois; entra como regra nova em
+  `dRegrasPH` mais um lançamento dentro do `fechar_torneio`, sem mexer
+  em nada do que já existe.
+- **Eliminatória dupla entrou depois**, no mesmo dia, e custou uma coluna
+  de rota do perdedor (`proxima_derrota`) mais uma função no motor. Duas
+  decisões dela merecem registro. A primeira: **partida que provadamente
+  teria menos de dois participantes é descartada**, e a rota de quem
+  passaria por ali aponta direto pro destino seguinte. Os byes da
+  primeira rodada não geram perdedor, então sem isso o começo da
+  repescagem viraria uma fileira de partidas de um lado só, que ninguém
+  consegue lançar porque não têm placar. A segunda: **a final de
+  desempate não nasce com a chave.** Na hora de montar não dá pra saber
+  se vai ser precisa, e ela só existe se quem veio da repescagem vencer a
+  grande final. A tela gera sob demanda e a `fechar_torneio` recusa
+  fechar enquanto falta, que é a mesma trava dupla do resto.
+- **Uma pessoa é uma equipe de um integrante.** O 1x1 não tem caminho
+  próprio, o que deixa um único código de partida em vez de dois quase
+  iguais.
+- **`melhor_de` na partida, não numa tabela de fases.** Uma tabela a
+  menos, e dá para corrigir uma partida isolada sem mexer na chave.
+- **O melhor de N não é perguntado na abertura**, e sim na hora de gerar
+  a chave: é aí que o organizador está olhando a lista de inscritos, que
+  é o que faz decidir entre melhor de 3 e melhor de 5.
+
+Arquivos: `src/lib/torneio.ts` (motor puro),
+`scripts/test-torneio.mjs` (no `npm test`),
+`src/pages/admin/torneios/{index,[id]}.astro`,
+`src/components/admin/{AbrirTorneio,TorneioAtivo}.svelte`.
+
+Testado ponta a ponta contra o banco de verdade, num torneio descartável
+apagado no fim: bye nascendo decidido e avançando sozinho, melhor de N
+fechando no ponto certo, recusa de placar acima do máximo, recusa de
+correção quando a partida seguinte já andou, recusa de lançamento em
+torneio fechado, a trava dupla do fechamento e o cascade do excluir.
+
+Depois disso, a mesma coisa foi refeita pelo navegador, no painel logado,
+com 5 membros reais em duas classes: abrir, inscrever pela caixa de
+busca, gerar chave, lançar placar, reabrir, corrigir fora de ordem
+(recusado com a mensagem certa na tela), corrigir na ordem, fechar e
+excluir. A passada pelo navegador achou quatro defeitos que o teste de
+banco não pegava, todos corrigidos: `"Viking,Final"` sem espaço (o
+Svelte come o espaço solto no fim de um bloco `{#if}`), `"Faltam 1
+partida"` sem concordância, a partida que espera escondendo quem já
+estava classificado nela, e o botão de tirar ponto continuando clicável
+com o torneio fechado (o banco recusava, mas a tela oferecia).
+
+Vale a lição geral: **o teste de banco não substitui a passada pela
+tela**. Nenhum dos quatro aparecia em SQL.
+
+A eliminatória dupla ganhou os dois testes na mesma medida. No motor,
+`scripts/test-torneio.mjs` joga a chave inteira de 2, 3, 5, 6, 8, 11 e 16
+equipes e cobra a promessa do formato: `2n - 2` partidas jogadas, campeão
+sem nenhuma derrota e **todo mundo mais com exatamente duas**. É a
+asserção que pega bye mal encaixado, rota de perdedor trocada e partida
+fantasma de uma vez só. No banco, um torneio descartável de 4 equipes
+provou o resto: o perdedor descendo pra repescagem em vez de sumir, a
+recusa de fechar com o desempate faltando, e o campeão saindo certo
+depois do desempate.
+
+A passada pelo navegador foi feita logo depois, com 5 membros reais num
+torneio aberto 1x1: 11 partidas geradas (8 pra jogar mais 3 byes,
+exatamente o previsto), a repescagem recebendo cada perdedor na hora, a
+partida vazia do começo da repescagem sumindo da tela como devia, o
+bloco da final de desempate aparecendo sozinho quando a repescagem
+venceu a grande final, e o **campeão saindo como o vencedor do
+desempate**, que é o caso que a regra antiga de campeão errava. Dessa vez
+não apareceu defeito nenhum de tela. O torneio foi excluído no fim e as
+quatro tabelas voltaram a zero.
+
+Existe um **manual para os organizadores** publicado como artifact, com
+os dois tipos, os quatro formatos, a tabela de quantas partidas cada um
+pede e o passo a passo. Ele registra também a regra de combate que não
+mora no código: no torneio por classe todo mundo luta no nível 1 da
+classe, sem o bônus de nível 3.
+
+**Falta**: a tela pública de acompanhamento ao vivo. O modelo já nasceu
+pronto pra ela, com `fTorneios` e `fTorneioPartidas` na publication
+`supabase_realtime`. O caminho é uma `v_torneios_publicos` no molde das
+views que já existem (só torneio fora de `inscricao`, filtrando
+`not m.oculto`) mais uma página pública assinando o mesmo canal.
+
 ## O que mudou desde a última escrita deste arquivo (27/07 → 15/08)
 
 Este arquivo tinha parado em 27/07, descrevendo a landing e a

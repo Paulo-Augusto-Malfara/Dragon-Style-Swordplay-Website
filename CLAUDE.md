@@ -31,12 +31,56 @@ nova prefira `is_organizador()`, que diz o que faz. As quatro funções têm
 Quem faz o quê hoje:
 
 - **Staff (3)**: registra e corrige presença de treino e de evento, cadastra
-  membro novo (a RLS só deixa criar com nível ≥ 4). Não abre, não fecha, não
-  edita membro.
+  membro novo (a RLS só deixa criar com nível ≥ 4), e no torneio inscreve
+  participante e lança placar de partida. Não abre, não fecha, não edita membro.
 - **Organizador (2)**: o do staff, mais abrir treino e evento, fechar evento,
-  agenda, novidades, modalidades, e **conferir** doações (sem lançar).
+  abrir torneio, gerar as chaves e fechar torneio, agenda, novidades,
+  modalidades, e **conferir** doações (sem lançar).
 - **Admin do sistema (1)**: tudo. Único que fecha, reabre e exclui treino,
-  edita membro, lança/edita/exclui doação e mexe na fila de aprovações.
+  reabre e exclui torneio, edita membro, lança/edita/exclui doação e mexe na
+  fila de aprovações.
+
+## Torneios
+
+Quatro tabelas (`fTorneios`, `fTorneioEquipes`, `fTorneioIntegrantes`,
+`fTorneioPartidas`) e nove RPCs, todas criadas em 18/08/2026. Dois pontos que
+não se descobrem lendo o schema:
+
+- **O chaveamento é JavaScript, não plpgsql.** Mora em `src/lib/torneio.ts`,
+  função pura, com teste em `scripts/test-torneio.mjs` (roda no `npm test` com
+  `--experimental-strip-types`). A RPC `gerar_partidas` só grava o que o motor
+  montou. No JSON que ela recebe, `proxima` é **índice dentro do array**, não
+  id: na hora em que a chave é montada nenhuma partida tem id ainda.
+- **`melhor_de` mora na partida**, não numa tabela de fases. É o que dá a regra
+  de vitória flexível (3 nas eliminatórias, 5 na semi, 7 na final) e ainda deixa
+  corrigir uma partida isolada.
+- **Eliminatória dupla**: quem perde vai pra `proxima_derrota`/`proxima_derrota_vaga`,
+  o par exato do `proxima_partida`. Duas coisas dela não se adivinham:
+  **(a)** os byes da primeira rodada não geram perdedor, e isso esvaziaria
+  partidas inteiras do começo da repescagem; `chaveEliminatoriaDupla` conta
+  quantos participantes cada partida terá de verdade e **descarta** as de menos
+  de dois, religando a rota de quem passaria por ali. Por isso a chave dupla não
+  tem número fixo de partidas por rodada, e a numeração das rodadas da
+  repescagem só sai depois do descarte. **(b)** A **final de desempate** não
+  nasce com a chave: se quem veio da repescagem vence a grande final, os dois
+  ficam com uma derrota e falta mais uma partida. A tela gera sob demanda, e a
+  `fechar_torneio` recusa fechar enquanto ela faltar. Os nomes de fase
+  `Grande final` e `Final de desempate` são regra, não legenda: estão em
+  `torneio.ts` como `FASE_GRANDE_FINAL`/`FASE_DESEMPATE` e repetidos dentro da
+  RPC. Campeão do mata-mata é o vencedor da **última** partida da chave (maior
+  `id_partida` por classe), e não "a que não tem seguinte", justamente porque a
+  grande final e o desempate ficam as duas sem seguinte.
+- Bye e "semifinal esperando a outra semi" são idênticos no banco (um lado nulo).
+  O que separa os dois é o bye já nascer com `id_equipe_vencedora` preenchido.
+  Qualquer tela nova que desenhe partida precisa desse teste.
+- **Fechar tem trava dupla**: a tela desabilita o botão e a `fechar_torneio`
+  levanta exceção de novo. Nunca deixe só um dos dois lados.
+
+RPC nova neste projeto nasce com `execute` para `public` e `anon`, e **toda RPC
+de escrita daqui é `{postgres, authenticated, service_role}`**. Depois de criar
+função, rode `revoke execute on function ... from public, anon;` e confira com
+`get_advisors`, senão a lista de `anon_security_definer_function_executable`
+cresce (ela tem que ficar só nos cinco sem argumento).
 
 Regra ao mexer numa tela do painel: **a trava da página filha tem que repetir a
 do índice**. Já aconteceu de `/admin/posts/[id]` e `/admin/modalidades/[id]`

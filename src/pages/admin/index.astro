@@ -20,7 +20,7 @@ const inicioDoAno = hojeBR.slice(0, 4) + "-01-01";
 // E, junto disso, os quatro números que respondem "como está o grupo" sem
 // precisar entrar em seção nenhuma. Todas as consultas são contagem (head:
 // true não traz linha, só o total) ou uma linha só.
-const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes] = await Promise.all([
+const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes, torneios] = await Promise.all([
   supabase
     .from("fTreinos")
     .select("id_treino, data_treino, status")
@@ -64,6 +64,13 @@ const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes] = await Promis
           "foto_pendente_em.not.is.null,apelido_pendente.not.is.null,and(email.not.is.null,auth_user_id.is.null)"
         )
     : Promise.resolve({ count: 0 }),
+  // Lista, e não maybeSingle como o treino: pode haver mais de um torneio de
+  // pé ao mesmo tempo, e todos precisam aparecer aqui.
+  supabase
+    .from("fTorneios")
+    .select("id_torneio, nome, status")
+    .in("status", ["inscricao", "em_andamento"])
+    .order("id_torneio", { ascending: false }),
 ]);
 
 const dataBR = (d: string) =>
@@ -118,6 +125,12 @@ const emAberto = [
     titulo: `${evento.data.nome_evento}, ${evento.data.cidade}`,
     acao: "Registrar participantes e fechar",
   },
+  ...(torneios.data ?? []).map((t) => ({
+    href: `/admin/torneios/${t.id_torneio}`,
+    tipo: t.status === "inscricao" ? "Torneio em inscrição" : "Torneio em andamento",
+    titulo: t.nome,
+    acao: t.status === "inscricao" ? "Inscrever e gerar as chaves" : "Lançar resultado e fechar",
+  })),
   // A fila de aprovação saiu daqui em 14/08 e virou o quarto card de número:
   // ela é uma contagem, e como contagem ela cabe ao lado das outras três em vez
   // de abrir um bloco só pra si. Aparecer nos dois lugares era a mesma
@@ -128,6 +141,7 @@ const atalhos = [
   { href: "/admin/membros", label: "Membros", desc: "Cadastrar, editar e vincular login." },
   { href: "/admin/treinos", label: "Treinos", desc: "Abrir treino, registrar presença, ver histórico." },
   { href: "/admin/eventos", label: "Eventos", desc: "Abrir evento e lançar participação." },
+  { href: "/admin/torneios", label: "Torneios", desc: "Montar chave, lançar placar e premiar." },
   ...(membro.isOrganizador
     ? [
         { href: "/admin/agenda", label: "Agenda", desc: "Marcar os próximos treinos." },
