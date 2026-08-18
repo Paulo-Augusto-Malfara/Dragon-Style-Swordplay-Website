@@ -10,6 +10,8 @@
   import { onMount, onDestroy } from "svelte";
   import { supabase } from "../lib/supabase-browser";
   import { classificacao, vitoriasNecessarias } from "../lib/torneio";
+  import SeletorDeChaves from "./SeletorDeChaves.svelte";
+  import PodioDoTorneio from "./PodioDoTorneio.svelte";
 
   interface Equipe {
     id_equipe: number;
@@ -32,6 +34,7 @@
 
   const porClasse = $derived(torneio.tipo === "classes");
   const aoVivo = $derived(torneio.status === "em_andamento");
+  const fechado = $derived(torneio.status === "finalizado" && partidas.length > 0);
   const mataMata = $derived(
     torneio.formato === "eliminatoria" || torneio.formato === "eliminatoria_dupla",
   );
@@ -158,29 +161,65 @@
   });
 
   const emAberto = $derived(partidas.filter((p) => p.id_equipe_vencedora === null).length);
+
+  /* ---------- uma chave de cada vez ---------- */
+
+  /* Torneio de classes é vários torneios ao mesmo tempo, e as dez chaves na
+     mesma rolagem não deixam ninguém achar a partida que interessa. "Geral" é o
+     panorama, e cada classe abre a chave dela sozinha. */
+  let aba = $state<number | "geral">("geral");
+
+  const chavesClasse = $derived(
+    porClasse ? chavesDoTorneio.filter((c): c is number => c !== null) : [],
+  );
+
+  const soResumo = $derived(porClasse && aba === "geral");
+
+  const gruposVisiveis = $derived(
+    soResumo ? [] : porClasse ? grupos.filter((g) => g.id_classe === aba) : grupos,
+  );
+
+  const chavesVisiveis = $derived(
+    soResumo ? [] : porClasse ? [aba as number] : chavesDoTorneio,
+  );
 </script>
 
 {#if aoVivo}
-  <p class="ao-vivo"><span class="ponto" aria-hidden="true"></span>Ao vivo</p>
+  <!-- Div, e não p: o global tem `p { width: 90% }`, e como ficha ele venceria o
+       inline-flex daqui e esticaria o selo por quase toda a largura da página. -->
+  <div class="ao-vivo"><span class="ponto" aria-hidden="true"></span>Ao vivo</div>
 {/if}
 
-{#if campeoes.length > 0}
-  <h2 class="secao">{campeoes.length === 1 ? "Campeão" : "Campeões"}</h2>
-  <ul class="podio">
-    {#each campeoes as c (c.id_equipe)}
-      <li>
-        {#if porClasse}<span class="podio-classe">{nomeDaClasse(c.id_classe)}</span>{/if}
-        <span class="podio-nome">{nomeEquipe(c.id_equipe)}</span>
-      </li>
-    {/each}
-  </ul>
+{#if fechado}
+  <h2 class="secao">{chavesDoTorneio.length === 1 ? "Pódio" : "Pódio de cada classe"}</h2>
+  <PodioDoTorneio
+    chaves={chavesDoTorneio}
+    {equipes}
+    {partidas}
+    {mataMata}
+    {porClasse}
+    {nomeDaClasse}
+    {nomeEquipe}
+  />
 {/if}
 
 {#if partidas.length === 0}
   <p class="vazio">As chaves ainda não saíram. Assim que o organizador gerar, elas aparecem aqui.</p>
 {/if}
 
-{#each grupos as g (`${g.id_classe}|${g.fase}`)}
+{#if porClasse && partidas.length > 0}
+  <SeletorDeChaves
+    chaves={chavesClasse}
+    {partidas}
+    {campeoes}
+    {nomeDaClasse}
+    {nomeEquipe}
+    mostrarCampeao={!fechado}
+    bind:valor={aba}
+  />
+{/if}
+
+{#each gruposVisiveis as g (`${g.id_classe}|${g.fase}`)}
   <h2 class="secao">{porClasse ? `${nomeDaClasse(g.id_classe)}, ${g.fase}` : g.fase}</h2>
   <ul class="partidas">
     {#each g.linhas as p (p.id_partida)}
@@ -233,7 +272,7 @@
 {/each}
 
 {#if partidas.length > 0 && !mataMata}
-  {#each chavesDoTorneio as c (c)}
+  {#each chavesVisiveis as c (c)}
     {@const tabela = tabelaDaChave(c)}
     {#if tabela.length > 0}
       <h2 class="secao">Classificação{porClasse ? `, ${nomeDaClasse(c)}` : ""}</h2>
@@ -310,7 +349,6 @@
   }
 
   .partidas,
-  .podio,
   .tabela {
     display: flex;
     flex-direction: column;
@@ -389,29 +427,6 @@
   .partida-obs {
     font-size: 0.8rem;
     color: var(--ds-text-5);
-  }
-
-  .podio li {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 12px 16px;
-    border: 1px solid var(--ds-gold-dim);
-    border-radius: 12px;
-    background: var(--ds-gold-wash);
-  }
-
-  .podio-classe {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ds-gold);
-  }
-
-  .podio-nome {
-    font-family: var(--ds-font-display);
-    font-size: 1.05rem;
-    color: var(--ds-gold-light);
   }
 
   .tabela li {

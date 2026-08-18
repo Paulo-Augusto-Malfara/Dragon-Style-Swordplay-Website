@@ -16,6 +16,8 @@ import {
   chaveEliminatoriaDupla,
   partidaDesempate,
   precisaDesempate,
+  emJogo,
+  podio,
   classificacao,
   gerarChaves,
   rodadaSuico,
@@ -363,6 +365,55 @@ for (const n of [2, 3, 5, 6, 8, 11, 16]) {
       );
     }
   }
+}
+
+/* ---- partida acontecendo agora ---- */
+
+{
+  const base = { id_equipe_a: 1, id_equipe_b: 2, id_equipe_vencedora: null, pontos_a: 0, pontos_b: 0 };
+  assert.equal(emJogo(base), false, "placar zerado ainda não começou");
+  assert.equal(emJogo({ ...base, pontos_b: 1 }), true, "primeiro ponto põe a partida em jogo");
+  assert.equal(
+    emJogo({ ...base, pontos_a: 2, id_equipe_vencedora: 1 }),
+    false,
+    "partida decidida sai do ao vivo",
+  );
+  assert.equal(
+    emJogo({ id_equipe_a: 1, id_equipe_b: null, id_equipe_vencedora: 1, pontos_a: 0, pontos_b: 0 }),
+    false,
+    "bye nunca está em jogo",
+  );
+}
+
+/* ---- pódio ---- */
+
+{
+  // 4 equipes, mata-mata: 1 e 2 vencem a semi, 1 vence a final. O bronze sai da
+  // tabela entre 3 e 4, e vai para quem fez mais pontos na derrota.
+  const eqs = equipes(4);
+  const feitas = [
+    { id_partida: 1, id_equipe_a: 1, id_equipe_b: 4, id_equipe_vencedora: 1, pontos_a: 2, pontos_b: 0 },
+    { id_partida: 2, id_equipe_a: 2, id_equipe_b: 3, id_equipe_vencedora: 2, pontos_a: 2, pontos_b: 1 },
+    { id_partida: 3, id_equipe_a: 1, id_equipe_b: 2, id_equipe_vencedora: 1, pontos_a: 3, pontos_b: 2 },
+  ];
+  assert.deepEqual(podio(eqs, feitas, true), [1, 2, 3], "ouro e prata saem da final, bronze da tabela");
+
+  // A decisiva é a de maior id, e não a que não tem seguinte: é o caso da final
+  // de desempate da eliminatória dupla, que nasce depois da grande final.
+  const comDesempate = [
+    ...feitas,
+    { id_partida: 4, id_equipe_a: 2, id_equipe_b: 1, id_equipe_vencedora: 2, pontos_a: 4, pontos_b: 3 },
+  ];
+  assert.deepEqual(podio(eqs, comDesempate, true).slice(0, 2), [2, 1], "o desempate manda no pódio");
+
+  // Sem mata-mata o pódio é a tabela cortada em três.
+  assert.deepEqual(
+    podio(eqs, feitas, false),
+    classificacao(eqs, feitas).slice(0, 3).map((l) => l.id_equipe),
+    "no suíço e no todos contra todos o pódio é a classificação",
+  );
+
+  assert.deepEqual(podio(eqs, [], true), [], "chave sem partida decidida não tem pódio");
 }
 
 /* ---- recusas ---- */

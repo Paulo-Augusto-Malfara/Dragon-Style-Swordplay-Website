@@ -432,6 +432,28 @@ export function precisaDesempate(p: {
   );
 }
 
+/**
+ * Partida acontecendo agora: a mesa já lançou ponto e ela ainda não fechou.
+ *
+ * Os dois lados preenchidos separam da vaga esperando a fase anterior, e o
+ * placar zerado separa da partida que ainda nem começou. O bye cai fora pelos
+ * dois testes: um lado é nulo e ele já nasce decidido.
+ */
+export function emJogo(p: {
+  id_equipe_a: number | null;
+  id_equipe_b: number | null;
+  id_equipe_vencedora: number | null;
+  pontos_a: number;
+  pontos_b: number;
+}): boolean {
+  return (
+    p.id_equipe_vencedora === null &&
+    p.id_equipe_a !== null &&
+    p.id_equipe_b !== null &&
+    (p.pontos_a > 0 || p.pontos_b > 0)
+  );
+}
+
 /** A partida de desempate, com quem venceu a grande final entrando como A. */
 export function partidaDesempate(gf: {
   id_classe: number | null;
@@ -507,6 +529,45 @@ export function classificacao(equipes: Equipe[], feitas: PartidaFeita[]): LinhaC
   return [...linhas.values()].sort(
     (a, b) => b.vitorias - a.vitorias || b.saldo - a.saldo || a.id_equipe - b.id_equipe,
   );
+}
+
+/**
+ * Pódio de uma chave: primeiro, segundo e terceiro, nesta ordem.
+ *
+ * No suíço e no todos contra todos a tabela já é o pódio, e basta cortar em
+ * três. No mata-mata ela não serve para o topo: quem passou de bye chega à
+ * final com menos vitórias que um semifinalista eliminado. Então o ouro e a
+ * prata saem da partida decisiva (a de maior `id_partida` da chave, porque na
+ * eliminatória dupla a grande final e o desempate ficam as duas sem seguinte),
+ * e o bronze é o melhor colocado entre os que sobraram.
+ *
+ * Eliminatória simples não tem disputa de terceiro, então o bronze aqui é
+ * critério de tabela, não resultado de partida: entre os dois que perderam a
+ * semifinal, fica com ele quem venceu mais e tem melhor saldo.
+ *
+ * Devolve menos de três posições quando a chave é pequena demais para elas.
+ */
+export function podio(
+  equipes: Equipe[],
+  partidasDaChave: (PartidaFeita & { id_partida: number })[],
+  mataMata: boolean,
+): number[] {
+  const tabela = classificacao(equipes, partidasDaChave);
+  if (!mataMata) return tabela.slice(0, 3).map((l) => l.id_equipe);
+
+  let decisiva: (PartidaFeita & { id_partida: number }) | null = null;
+  for (const p of partidasDaChave) {
+    if (!decisiva || p.id_partida > decisiva.id_partida) decisiva = p;
+  }
+  if (!decisiva || decisiva.id_equipe_vencedora === null) return [];
+
+  const primeiro = decisiva.id_equipe_vencedora;
+  const segundo =
+    decisiva.id_equipe_a === primeiro ? decisiva.id_equipe_b : decisiva.id_equipe_a;
+  const terceiro =
+    tabela.find((l) => l.id_equipe !== primeiro && l.id_equipe !== segundo)?.id_equipe ?? null;
+
+  return [primeiro, segundo, terceiro].filter((x): x is number => x !== null);
 }
 
 const chaveConfronto = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`);

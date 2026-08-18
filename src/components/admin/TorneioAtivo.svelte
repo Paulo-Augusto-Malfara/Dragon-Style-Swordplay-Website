@@ -19,6 +19,8 @@
   import { supabase } from "../../lib/supabase-browser";
   import MembroPicker from "./MembroPicker.svelte";
   import ConfirmarAcao from "./ConfirmarAcao.svelte";
+  import SeletorDeChaves from "../SeletorDeChaves.svelte";
+  import PodioDoTorneio from "../PodioDoTorneio.svelte";
   import { nomeExibido } from "../../lib/nome";
   import {
     FASE_DESEMPATE,
@@ -457,6 +459,27 @@
       .filter(Boolean) as { id_classe: number | null; id_equipe: number }[];
   });
 
+  /* ---------- uma chave de cada vez ---------- */
+
+  /* Torneio de classes é vários torneios ao mesmo tempo, e as dez chaves na
+     mesma rolagem não deixam a mesa achar a partida que está para lançar.
+     "Geral" é o panorama, e cada classe abre a chave dela sozinha. */
+  let aba = $state<number | "geral">("geral");
+
+  const fechado = $derived(torneio?.status === "finalizado" && partidas.length > 0);
+
+  const chavesClasse = $derived(
+    porClasse ? chavesDoTorneio.filter((c): c is number => c !== null) : [],
+  );
+
+  const soResumo = $derived(porClasse && aba === "geral");
+
+  const gruposVisiveis = $derived(
+    soResumo ? [] : porClasse ? grupos.filter((g) => g.id_classe === aba) : grupos,
+  );
+
+  const chavesVisiveis = $derived(soResumo ? [] : porClasse ? [aba as number] : chavesDoTorneio);
+
   /* ---------- fechar, reabrir, excluir ---------- */
 
   let fechando = $state(false);
@@ -780,24 +803,37 @@
     {/if}
   {/if}
 
-  <!-- ============ CAMPEÕES (torneio fechado) ============ -->
-  {#if torneio.status === "finalizado" && campeoes.length > 0}
+  <!-- ============ PÓDIO (torneio fechado) ============ -->
+  {#if fechado}
     <div class="admin-secao-cab">
-      <h2>{campeoes.length === 1 ? "Campeão" : "Campeões"}</h2>
+      <h2>{chavesDoTorneio.length === 1 ? "Pódio" : "Pódio de cada classe"}</h2>
     </div>
-    <ul class="podio">
-      {#each campeoes as c}
-        <li>
-          {#if porClasse}<span class="podio-classe">{nomeDaClasse(c.id_classe)}</span>{/if}
-          <span class="podio-nome">{nomeEquipe(c.id_equipe)}</span>
-        </li>
-      {/each}
-    </ul>
+    <PodioDoTorneio
+      chaves={chavesDoTorneio}
+      {equipes}
+      {partidas}
+      {mataMata}
+      {porClasse}
+      {nomeDaClasse}
+      {nomeEquipe}
+    />
   {/if}
 
   <!-- ============ PARTIDAS ============ -->
+  {#if porClasse && partidas.length > 0}
+    <SeletorDeChaves
+      chaves={chavesClasse}
+      {partidas}
+      {campeoes}
+      {nomeDaClasse}
+      {nomeEquipe}
+      mostrarCampeao={!fechado}
+      bind:valor={aba}
+    />
+  {/if}
+
   {#if partidas.length > 0}
-    {#each grupos as g (`${g.id_classe}|${g.fase}`)}
+    {#each gruposVisiveis as g (`${g.id_classe}|${g.fase}`)}
       <div class="admin-secao-cab">
         <!-- Título montado numa expressão só. Escrito como `{...}, {/if}{g.fase}`
              o Svelte come o espaço depois da vírgula e sai "Viking,Final". -->
@@ -900,7 +936,7 @@
 
   <!-- ============ CLASSIFICAÇÃO (suíço e todos contra todos) ============ -->
   {#if partidas.length > 0 && !mataMata}
-    {#each chavesDoTorneio as c (c)}
+    {#each chavesVisiveis as c (c)}
       {@const tabela = tabelaDaChave(c)}
       {#if tabela.length > 0}
         <div class="admin-secao-cab">
@@ -1277,38 +1313,6 @@
     background: var(--ds-bg);
     color: var(--ds-text-2);
     font: inherit;
-  }
-
-  .podio {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 0 0 18px;
-    padding: 0;
-    list-style: none;
-  }
-
-  .podio li {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding: 12px 16px;
-    border: 1px solid var(--ds-gold-dim);
-    border-radius: 12px;
-    background: var(--ds-gold-wash);
-  }
-
-  .podio-classe {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: var(--ds-gold);
-  }
-
-  .podio-nome {
-    font-family: var(--ds-font-display);
-    font-size: 1.05rem;
-    color: var(--ds-gold-light);
   }
 
   .classificacao .row-link {

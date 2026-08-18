@@ -171,6 +171,35 @@ PostgREST responder 300 quando a chamada casasse com as duas.
 Arquivos da tela pública: `src/pages/torneios/{index,[id]}.astro`,
 `src/components/TorneioPublico.svelte`.
 
+### Uma chave de cada vez, e o pódio (18/08)
+
+Com dez classes rodando juntas, as duas telas viraram uma rolagem só e
+ninguém achava a partida que interessava. Agora as duas (painel e tela
+pública) abrem em "Geral" e têm uma barra de abas por classe:
+
+- **Geral** é panorama, não despejo: um cartão por classe dizendo em que
+  fase ela está, quantas partidas faltam, e qual luta está acontecendo
+  agora, com o placar correndo. Clicar no cartão abre a classe.
+- **A aba da classe com luta rolando pisca no dourado**, com a bolinha do
+  "ao vivo". Partida "acontecendo agora" é a `emJogo` do motor: os dois
+  lados preenchidos, placar já lançado e sem vencedor ainda. É o que
+  separa do bye (um lado nulo, já decidido) e da partida que nem começou.
+- Escolher uma classe filtra a chave e a classificação daquela classe.
+
+O pódio deixou de ser só o campeão: virou uma grade de cartões, um por
+classe, com primeiro, segundo e terceiro. Quem decide é a `podio` do
+motor, e a regra muda com o formato. No suíço e no todos contra todos o
+pódio é a classificação cortada em três. No mata-mata a tabela não serve
+pro topo (quem passou de bye chega à final com menos vitórias que um
+semifinalista eliminado), então ouro e prata saem da partida decisiva, e
+o bronze é o melhor colocado entre os que sobraram. Eliminatória simples
+não tem disputa de terceiro: ali o bronze é critério de tabela.
+
+Os dois pedaços são componentes compartilhados pelas duas telas,
+`src/components/SeletorDeChaves.svelte` e `PodioDoTorneio.svelte`. O que
+muda entre painel e tela pública é de onde saem os nomes, e por isso eles
+entram como função.
+
 ## O que mudou desde a última escrita deste arquivo (27/07 → 15/08)
 
 Este arquivo tinha parado em 27/07, descrevendo a landing e a
