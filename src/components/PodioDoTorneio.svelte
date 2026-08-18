@@ -49,7 +49,7 @@
         {#if porClasse}<span class="podio-classe">{nomeDaClasse(c.id)}</span>{/if}
         <ol class="podio-lugares">
           {#each c.lugares as idEquipe, i (idEquipe)}
-            <li class:ouro={i === 0}>
+            <li class="pos-{i + 1}" class:ouro={i === 0}>
               <span class="podio-pos">{MEDALHAS[i]}</span>
               <span class="podio-nome">{nomeEquipe(idEquipe)}</span>
             </li>
@@ -112,8 +112,21 @@
     min-width: 1.6em;
     font-family: var(--ds-font-display);
     font-size: 0.82rem;
-    color: var(--ds-text-5);
     font-variant-numeric: tabular-nums;
+  }
+
+  /* Ouro, prata e bronze, os mesmos três do Ranking: a escala mora em tokens no
+     global justamente para não haver duas leituras de 1º, 2º e 3º no site. */
+  .podio-lugares > li.pos-1 > .podio-pos {
+    color: var(--ds-gold-light);
+  }
+
+  .podio-lugares > li.pos-2 > .podio-pos {
+    color: var(--ds-prata);
+  }
+
+  .podio-lugares > li.pos-3 > .podio-pos {
+    color: var(--ds-bronze);
   }
 
   .podio-lugares > li > .podio-nome {
@@ -124,12 +137,8 @@
     overflow-wrap: anywhere;
   }
 
-  /* O campeão é o número dourado da dupla, e o resto do pódio é o rótulo
-     apagado ao lado dele. */
-  .podio-lugares > li.ouro > .podio-pos {
-    color: var(--ds-gold);
-  }
-
+  /* Só o campeão sai em letra de título: o pódio inteiro em display viraria
+     três nomes brigando pela mesma atenção. */
   .podio-lugares > li.ouro > .podio-nome {
     font-family: var(--ds-font-display);
     font-size: 1.05rem;

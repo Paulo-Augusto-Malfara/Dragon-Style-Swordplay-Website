@@ -195,6 +195,16 @@ semifinalista eliminado), então ouro e prata saem da partida decisiva, e
 o bronze é o melhor colocado entre os que sobraram. Eliminatória simples
 não tem disputa de terceiro: ali o bronze é critério de tabela.
 
+Junto disso entrou o **mínimo de 4 inscritos por classe**
+(`MINIMO_POR_CHAVE`, no motor). São quatro por causa do pódio: com dois
+sai campeão e vice, com três o terceiro é quem perdeu a semifinal
+sozinho, e só a partir de quatro o bronze é disputado por gente que jogou
+o mesmo tanto. Classe abaixo disso não vira chave, e a tela avisa antes
+de gerar, nomeando as classes, enquanto ainda dá pra inscrever gente. O
+mínimo vale por chave de classe: o torneio aberto continua aceitando dois,
+porque lá não existe "as outras chaves" e recusar seria recusar o torneio
+inteiro.
+
 Os dois pedaços são componentes compartilhados pelas duas telas,
 `src/components/SeletorDeChaves.svelte` e `PodioDoTorneio.svelte`. O que
 muda entre painel e tela pública é de onde saem os nomes, e por isso eles

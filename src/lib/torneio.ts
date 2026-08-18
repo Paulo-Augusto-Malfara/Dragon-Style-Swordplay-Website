@@ -75,6 +75,19 @@ export const FASE_GRANDE_FINAL = "Grande final";
 export const FASE_DESEMPATE = "Final de desempate";
 
 /**
+ * Mínimo de participantes para uma classe virar chave.
+ *
+ * São quatro por causa do pódio: com dois sai campeão e vice, com três o
+ * terceiro lugar é quem perdeu a semifinal sozinho, e só a partir de quatro o
+ * bronze é disputado por gente que jogou o mesmo tanto. Classe abaixo disso não
+ * é gerada, e a tela avisa antes, enquanto ainda dá pra inscrever mais gente.
+ *
+ * Vale por chave, e não por torneio: uma classe pode ter doze e a do lado
+ * quatro no mesmo dia.
+ */
+export const MINIMO_POR_CHAVE = 4;
+
+/**
  * Quantas vitórias fecham uma partida melhor de N. Esta conta está repetida
  * dentro da RPC `registrar_resultado` de propósito: o banco não pode depender
  * do cliente para saber quem venceu.
@@ -757,9 +770,10 @@ export function gerarChaves(opts: {
 
   return juntarChaves(
     grupos
-      // Classe com uma pessoa só não tem chave: ela é campeã sem jogar, e uma
-      // partida de um lado só quebraria a conta de "falta alguém decidir".
-      .filter(([, doGrupo]) => doGrupo.length >= 2)
+      // Classe abaixo do mínimo não vira chave. No torneio aberto o mínimo é
+      // outro: lá não existe "as outras chaves", e recusar 3 pessoas seria
+      // recusar o torneio inteiro.
+      .filter(([, doGrupo]) => doGrupo.length >= (porClasse ? MINIMO_POR_CHAVE : 2))
       .map(([idClasse, doGrupo]) => {
         const ids = new Set(doGrupo.map((e) => e.id_equipe));
         const feitasDoGrupo = feitas.filter(

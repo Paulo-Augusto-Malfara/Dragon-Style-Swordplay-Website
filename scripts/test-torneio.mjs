@@ -18,6 +18,7 @@ import {
   precisaDesempate,
   emJogo,
   podio,
+  MINIMO_POR_CHAVE,
   classificacao,
   gerarChaves,
   rodadaSuico,
@@ -200,19 +201,28 @@ assert.equal(vitoriasNecessarias(7), 4);
 
 {
   const daClasse1 = equipes(4, 1);
-  const daClasse2 = equipes(2, 2).map((e) => ({ ...e, id_equipe: e.id_equipe + 100 }));
-  // Classe com uma pessoa só: não vira chave, ela é campeã sem jogar.
+  const daClasse2 = equipes(5, 2).map((e) => ({ ...e, id_equipe: e.id_equipe + 100 }));
+  // Abaixo do mínimo por chave: não viram partida nenhuma, e quem está nelas
+  // fica de fora do torneio. A tela avisa antes, enquanto dá pra inscrever mais.
   const daClasse3 = [{ id_equipe: 200, seed: 1, id_classe: 3 }];
+  const daClasse4 = equipes(MINIMO_POR_CHAVE - 1, 4).map((e) => ({
+    ...e,
+    id_equipe: e.id_equipe + 300,
+  }));
 
   const chave = gerarChaves({
     formato: "eliminatoria",
-    equipes: [...daClasse1, ...daClasse2, ...daClasse3],
+    equipes: [...daClasse1, ...daClasse2, ...daClasse3, ...daClasse4],
     melhorDe: MELHOR_DE,
     porClasse: true,
   });
 
-  assert.equal(chave.length, 3 + 1, "4 equipes dão 3 partidas, 2 equipes dão 1");
+  assert.equal(chave.length, 3 + 7, "4 equipes dão 3 partidas, 5 equipes dão 7 com os byes");
   assert.ok(!chave.some((p) => p.id_classe === 3), "classe de uma pessoa só não gera partida");
+  assert.ok(
+    !chave.some((p) => p.id_classe === 4),
+    "classe com um a menos que o mínimo também não gera partida",
+  );
 
   // O deslocamento dos índices é o ponto: sem ele o vencedor da classe 2
   // avançaria para dentro da chave da classe 1.
@@ -349,12 +359,15 @@ for (const n of [2, 3, 5, 6, 8, 11, 16]) {
   // cruzar, e agora isso vale também para a rota do perdedor.
   const chave = gerarChaves({
     formato: "eliminatoria_dupla",
-    equipes: [...equipes(4, 1), ...equipes(3, 2).map((e) => ({ ...e, id_equipe: e.id_equipe + 10 }))],
+    equipes: [...equipes(4, 1), ...equipes(5, 2).map((e) => ({ ...e, id_equipe: e.id_equipe + 10 }))],
     melhorDe: MELHOR_DE,
     porClasse: true,
   });
 
-  assert.equal(chave.length, 6 + 5, "4 equipes dão 6 partidas, 3 equipes dão 4 mais um bye");
+  assert.ok(
+    chave.some((p) => p.id_classe === 1) && chave.some((p) => p.id_classe === 2),
+    "as duas classes acima do mínimo geram chave",
+  );
   for (const p of chave) {
     for (const destino of [p.proxima, p.proxima_derrota]) {
       if (destino === null || destino === undefined) continue;
@@ -365,6 +378,18 @@ for (const n of [2, 3, 5, 6, 8, 11, 16]) {
       );
     }
   }
+}
+
+/* ---- o mínimo é por chave de classe, não do torneio aberto ---- */
+
+{
+  const chave = gerarChaves({
+    formato: "eliminatoria",
+    equipes: equipes(3),
+    melhorDe: MELHOR_DE,
+    porClasse: false,
+  });
+  assert.equal(chave.length, 3, "torneio aberto com três pessoas continua virando chave");
 }
 
 /* ---- partida acontecendo agora ---- */

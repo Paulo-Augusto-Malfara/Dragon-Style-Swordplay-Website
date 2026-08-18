@@ -24,6 +24,7 @@
   import { nomeExibido } from "../../lib/nome";
   import {
     FASE_DESEMPATE,
+    MINIMO_POR_CHAVE,
     classificacao,
     gerarChaves,
     partidaDesempate,
@@ -315,12 +316,13 @@
       : [],
   );
 
-  // Classe com um inscrito só não vira chave, e a pessoa fica campeã sem jogar.
-  // Vale avisar antes de gerar, porque depois disso não dá mais pra inscrever.
-  const classesSozinhas = $derived(
+  /* Classe abaixo do mínimo não vira chave, e quem estiver nela fica de fora do
+     torneio. Vale avisar bem antes de gerar: depois disso não dá mais pra
+     inscrever ninguém, e aí a única saída é reabrir tudo. */
+  const classesCurtas = $derived(
     porClasse
       ? [...new Set(equipes.map((e) => e.id_classe))].filter(
-          (c) => equipes.filter((e) => e.id_classe === c).length === 1,
+          (c) => equipes.filter((e) => e.id_classe === c).length < MINIMO_POR_CHAVE,
         )
       : [],
   );
@@ -746,13 +748,15 @@
           continua editável partida a partida.
         </p>
 
-        {#if classesSozinhas.length > 0}
+        {#if classesCurtas.length > 0}
           <p class="admin-aviso">
-            {classesSozinhas.map(nomeDaClasse).join(", ")}
-            {classesSozinhas.length === 1 ? "tem" : "têm"} só um inscrito, então
-            {classesSozinhas.length === 1 ? "não vira chave" : "não viram chave"}. Inscreva mais
-            gente ou aceite que
-            {classesSozinhas.length === 1 ? "a pessoa é campeã" : "essas pessoas são campeãs"} sem jogar.
+            {classesCurtas.map(nomeDaClasse).join(", ")}
+            {classesCurtas.length === 1 ? "não chega" : "não chegam"} a {MINIMO_POR_CHAVE}
+            inscritos, então {classesCurtas.length === 1 ? "não vira chave" : "não viram chave"} e
+            quem está {classesCurtas.length === 1 ? "nela" : "nelas"} fica de fora do torneio.
+            Inscreva mais gente antes de gerar, ou tire {classesCurtas.length === 1 ? "essa" : "essas"}
+            {classesCurtas.length === 1 ? "pessoa da classe" : "pessoas das classes"}: com menos de
+            {MINIMO_POR_CHAVE} não dá pódio até o terceiro lugar.
           </p>
         {/if}
 
