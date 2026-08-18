@@ -550,9 +550,10 @@
     <h2>{torneio.nome}</h2>
     <p class="torneio-meta">
       {porClasse ? "Por classe" : "Aberto"}, {torneio.tamanho_equipe}x{torneio.tamanho_equipe},
-      {FORMATOS[torneio.formato]}
-      {#if torneio.formato === "suico"}, {torneio.rodadas} rodadas{/if}
-      {#if porClasse}, até {MAX_CLASSES}
+      <!-- Sem quebra de linha antes de cada {#if}: ela virava um espaço solto e
+           o texto saía "Eliminatória simples , até 3 classes". -->
+      {FORMATOS[torneio.formato]}{#if torneio.formato === "suico"}, {torneio.rodadas}
+        rodadas{/if}{#if porClasse}, até {MAX_CLASSES}
         {MAX_CLASSES === 1 ? "classe" : "classes"} por pessoa{/if}
       {" · "}{new Date(torneio.data_torneio + "T00:00:00").toLocaleDateString("pt-BR")}
     </p>
@@ -560,7 +561,12 @@
          porque é só aí que a tela pública passa a mostrar alguma coisa. -->
     {#if torneio.status !== "inscricao"}
       <p class="torneio-publico">
-        <a href={`/torneios/${idTorneio}`} target="_blank" rel="noopener">
+        <a
+          class="links-de-texto"
+          href={`/torneios/${idTorneio}`}
+          target="_blank"
+          rel="noopener"
+        >
           Ver a tela pública deste torneio
         </a>
       </p>
