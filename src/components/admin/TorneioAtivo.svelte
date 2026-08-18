@@ -138,11 +138,55 @@
   /* ---------- inscrição ---------- */
 
   let emMontagem = $state<{ id_membro: number; nome: string }[]>([]);
-  let classeEscolhida = $state<number | null>(null);
+  let classesEscolhidas = $state<number[]>([]);
   let nomeEquipeNova = $state("");
   let inscrevendo = $state(false);
 
   const equipeCompleta = $derived(emMontagem.length === tamanhoEquipe);
+
+  /* O Básico fica fora da grade: torneio de classes é disputa de classe
+     oficial, e o Básico é por onde todo mundo passa antes de ter uma. */
+  const ID_BASICO = 11;
+  const classesOficiais = $derived(classes.filter((c) => c.id_classe !== ID_BASICO));
+
+  /* Teto de classes por pessoa, escolhido na abertura do torneio. A trava de
+     verdade está na `inscrever_equipe`, que recusa a que passar; aqui ela só
+     aparece antes, pra ninguém montar uma inscrição que o banco vai devolver. */
+  const MAX_CLASSES = $derived(torneio?.max_classes ?? 3);
+
+  /* Em que classes esta pessoa já está inscrita neste torneio. Ela pode disputar
+     várias no mesmo dia, mas não duas vezes a mesma: essas saem desmarcáveis da
+     grade, com o motivo escrito no próprio cartão. */
+  const classesJaInscritas = $derived.by(() => {
+    const daMontagem = new Set(emMontagem.map((m) => m.id_membro));
+    const achadas = new Set<number>();
+    for (const e of equipes) {
+      if (e.id_classe != null && e.integrantes.some((m: number) => daMontagem.has(m))) {
+        achadas.add(e.id_classe);
+      }
+    }
+    return achadas;
+  });
+
+  /* As que ela já disputa mais as que estão sendo marcadas agora: o teto é do
+     torneio inteiro, e não de uma inscrição só, senão bastava inscrever três
+     vezes em sequência pra passar por cima dele. */
+  const classesDaPessoa = $derived(classesJaInscritas.size + classesEscolhidas.length);
+  const noTeto = $derived(classesDaPessoa >= MAX_CLASSES);
+
+  function alternarClasse(id: number) {
+    if (classesEscolhidas.includes(id)) {
+      classesEscolhidas = classesEscolhidas.filter((c) => c !== id);
+      erro = "";
+      return;
+    }
+    if (noTeto) {
+      erro = `Cada pessoa disputa no máximo ${MAX_CLASSES} classes no mesmo torneio. Desmarque uma para trocar.`;
+      return;
+    }
+    classesEscolhidas = [...classesEscolhidas, id];
+    erro = "";
+  }
 
   async function selecionarMembro(m: { id_membro: number; nome: string }) {
     if (emMontagem.some((x) => x.id_membro === m.id_membro)) return;
@@ -154,49 +198,76 @@
     // palpite certo na esmagadora maioria das vezes. Por data do treino e não
     // por id: os treinos antigos foram cadastrados depois e têm id maior que a
     // data deles, então ordenar por id apontaria a classe errada como a última.
-    if (porClasse && classeEscolhida === null) {
+    if (porClasse && classesEscolhidas.length === 0) {
       const { data } = await supabase
         .from("fPresencas")
         .select("id_classe, fTreinos(data_treino)")
         .eq("id_membro", m.id_membro);
       let melhor = "";
+      let ultima: number | null = null;
       for (const linha of (data ?? []) as any[]) {
         const d = linha.fTreinos?.data_treino;
         if (d && d > melhor) {
           melhor = d;
-          classeEscolhida = linha.id_classe;
+          ultima = linha.id_classe;
         }
       }
+      // Nada marcado quando a última foi Básico: ela não está na grade, e marcar
+      // no escuro uma classe que a pessoa não vê é pior do que não marcar nada.
+      if (ultima !== null && ultima !== ID_BASICO) classesEscolhidas = [ultima];
     }
   }
 
   function tirarDaMontagem(idMembro: number) {
     emMontagem = emMontagem.filter((x) => x.id_membro !== idMembro);
-    if (emMontagem.length === 0) classeEscolhida = null;
+    if (emMontagem.length === 0) classesEscolhidas = [];
   }
+
+  /* Inscritos chave por chave. A `carregar` já pede as equipes ordenadas por
+     classe e por seed, então basta agrupar mantendo a ordem que veio. */
+  const inscritosPorChave = $derived.by(() => {
+    const mapa = new Map<number | null, { id_classe: number | null; linhas: any[] }>();
+    for (const e of equipes) {
+      const chave = e.id_classe ?? null;
+      if (!mapa.has(chave)) mapa.set(chave, { id_classe: chave, linhas: [] });
+      mapa.get(chave)!.linhas.push(e);
+    }
+    return [...mapa.values()];
+  });
 
   async function inscrever() {
     if (!equipeCompleta) return;
-    if (porClasse && classeEscolhida === null) {
-      erro = "Escolha a classe deste participante.";
+    if (porClasse && classesEscolhidas.length === 0) {
+      erro = "Marque pelo menos uma classe deste participante.";
       return;
     }
     inscrevendo = true;
     erro = "";
-    const { error } = await supabase.rpc("inscrever_equipe", {
-      p_id_torneio: idTorneio,
-      p_membros: emMontagem.map((x) => x.id_membro),
-      p_id_classe: porClasse ? classeEscolhida : null,
-      p_nome_equipe: nomeEquipeNova.trim() || null,
-    });
-    inscrevendo = false;
-    if (error) {
-      erro = error.message;
-      return;
+
+    // Uma inscrição por classe marcada, porque cada classe é uma chave separada.
+    // Em sequência e não em paralelo: o seed sai de um max(seed) por chave, e
+    // duas inserções ao mesmo tempo leriam o mesmo número.
+    const alvos: (number | null)[] = porClasse ? [...classesEscolhidas] : [null];
+    const falhas: string[] = [];
+    for (const c of alvos) {
+      const { error } = await supabase.rpc("inscrever_equipe", {
+        p_id_torneio: idTorneio,
+        p_membros: emMontagem.map((x) => x.id_membro),
+        p_id_classe: c,
+        p_nome_equipe: nomeEquipeNova.trim() || null,
+      });
+      if (error) falhas.push(porClasse ? `${nomeDaClasse(c)}: ${error.message}` : error.message);
     }
-    emMontagem = [];
-    classeEscolhida = null;
-    nomeEquipeNova = "";
+    inscrevendo = false;
+    erro = falhas.join(" ");
+
+    // Se nenhuma entrou, a montagem fica de pé pra corrigir e tentar de novo.
+    // Se pelo menos uma entrou, ela é limpa e o erro do resto continua na tela.
+    if (falhas.length < alvos.length) {
+      emMontagem = [];
+      classesEscolhidas = [];
+      nomeEquipeNova = "";
+    }
     await carregar();
   }
 
@@ -481,8 +552,19 @@
       {porClasse ? "Por classe" : "Aberto"}, {torneio.tamanho_equipe}x{torneio.tamanho_equipe},
       {FORMATOS[torneio.formato]}
       {#if torneio.formato === "suico"}, {torneio.rodadas} rodadas{/if}
+      {#if porClasse}, até {MAX_CLASSES}
+        {MAX_CLASSES === 1 ? "classe" : "classes"} por pessoa{/if}
       {" · "}{new Date(torneio.data_torneio + "T00:00:00").toLocaleDateString("pt-BR")}
     </p>
+    <!-- O link que o organizador manda pro grupo. Só depois das chaves saírem,
+         porque é só aí que a tela pública passa a mostrar alguma coisa. -->
+    {#if torneio.status !== "inscricao"}
+      <p class="torneio-publico">
+        <a href={`/torneios/${idTorneio}`} target="_blank" rel="noopener">
+          Ver a tela pública deste torneio
+        </a>
+      </p>
+    {/if}
   </div>
 
   {#if erro}
@@ -526,20 +608,38 @@
         />
       {/if}
 
-      <div class="campos">
-        {#if porClasse && emMontagem.length > 0}
-          <label>
-            Classe
-            <select bind:value={classeEscolhida}>
-              <option value={null}>Escolha a classe</option>
-              {#each classes as c (c.id_classe)}
-                <option value={c.id_classe}>{c.nome_classe}</option>
-              {/each}
-            </select>
-            <small>Já vem com a classe do último treino da pessoa. Troque se for outra.</small>
-          </label>
-        {/if}
+      {#if porClasse && emMontagem.length > 0}
+        <p class="classes-rotulo">
+          Em que classes ele entra
+          <span class="contagem">{classesDaPessoa} de {MAX_CLASSES}</span>
+        </p>
+        <div class="classes-grade">
+          {#each classesOficiais as c (c.id_classe)}
+            {@const escolhida = classesEscolhidas.includes(c.id_classe)}
+            {@const ja = classesJaInscritas.has(c.id_classe)}
+            {@const fora = !escolhida && !ja && noTeto}
+            <button
+              type="button"
+              class="classe-card"
+              class:escolhida
+              class:apagada={ja || fora}
+              aria-pressed={escolhida}
+              disabled={ja || fora}
+              onclick={() => alternarClasse(c.id_classe)}
+            >
+              <span class="classe-nome">{c.nome_classe}</span>
+              <span class="classe-obs">{ja ? "já inscrito" : escolhida ? "✓" : c.sigla_classe}</span>
+            </button>
+          {/each}
+        </div>
+        <p class="admin-form-nota">
+          {noTeto
+            ? `No teto de ${MAX_CLASSES} classes. Desmarque uma para trocar.`
+            : `A classe do último treino já vem marcada. Pode marcar até ${MAX_CLASSES}: cada classe é uma chave separada, e a mesma pessoa pode disputar mais de uma no mesmo dia.`}
+        </p>
+      {/if}
 
+      <div class="campos">
         {#if tamanhoEquipe > 1 && emMontagem.length > 0}
           <label>
             Nome da equipe
@@ -557,7 +657,13 @@
             onclick={inscrever}
             disabled={inscrevendo || !equipeCompleta}
           >
-            {inscrevendo ? "Inscrevendo..." : equipeCompleta ? "Inscrever" : `Faltam ${tamanhoEquipe - emMontagem.length}`}
+            {inscrevendo
+              ? "Inscrevendo..."
+              : !equipeCompleta
+                ? `Faltam ${tamanhoEquipe - emMontagem.length}`
+                : classesEscolhidas.length > 1
+                  ? `Inscrever nas ${classesEscolhidas.length} classes`
+                  : "Inscrever"}
           </button>
         </div>
       {/if}
@@ -570,29 +676,37 @@
     {#if equipes.length === 0}
       <p class="vazio">Ninguém inscrito ainda.</p>
     {:else}
-      <ul class="admin-list">
-        {#each equipes as e (e.id_equipe)}
-          <li>
-            <div class="row-link">
-              <span class="rank-badge">{e.seed}</span>
-              <span class="row-corpo">
-                <span class="row-titulo">{nomeEquipe(e.id_equipe)}</span>
-                {#if porClasse}
-                  <span class="row-meta"><span>{nomeDaClasse(e.id_classe)}</span></span>
-                {/if}
-              </span>
-              <span class="row-acoes">
-                <button
-                  type="button"
-                  class="btn-icone btn-icone--perigo"
-                  aria-label={`Tirar ${nomeEquipe(e.id_equipe)}`}
-                  onclick={() => removerInscricao(e)}>×</button
-                >
-              </span>
-            </div>
-          </li>
-        {/each}
-      </ul>
+      <!-- Uma lista por chave. O torneio de classes é um torneio de vários ao
+           mesmo tempo, e a lista corrida escondia justamente o que o organizador
+           precisa ver antes de gerar: quantos entraram em cada classe. -->
+      {#each inscritosPorChave as g (g.id_classe ?? 0)}
+        {#if porClasse}
+          <p class="chave-titulo">
+            {nomeDaClasse(g.id_classe)}
+            <span class="contagem">{g.linhas.length}</span>
+          </p>
+        {/if}
+        <ul class="admin-list">
+          {#each g.linhas as e (e.id_equipe)}
+            <li>
+              <div class="row-link">
+                <span class="rank-badge">{e.seed}</span>
+                <span class="row-corpo">
+                  <span class="row-titulo">{nomeEquipe(e.id_equipe)}</span>
+                </span>
+                <span class="row-acoes">
+                  <button
+                    type="button"
+                    class="btn-icone btn-icone--perigo"
+                    aria-label={`Tirar ${nomeEquipe(e.id_equipe)}`}
+                    onclick={() => removerInscricao(e)}>×</button
+                  >
+                </span>
+              </div>
+            </li>
+          {/each}
+        </ul>
+      {/each}
     {/if}
 
     {#if souOrganizador}
@@ -893,6 +1007,11 @@
     color: var(--ds-text-3);
   }
 
+  .torneio-publico {
+    margin: 6px 0 0;
+    font-size: 0.82rem;
+  }
+
   /* Fichas de quem já entrou na equipe em montagem. */
   .montagem {
     display: flex;
@@ -906,16 +1025,139 @@
   .montagem li {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 6px 5px 12px;
+    gap: 4px;
+    padding: 4px 6px 4px 13px;
     border: 1px solid var(--ds-gold-dim);
     border-radius: 999px;
     background: var(--ds-gold-wash);
   }
 
+  /* O × da ficha não é o botão de ícone das listas: lá o quadrado de 36px com
+     borda é o alvo certo numa linha inteira, aqui ele fica maior que a própria
+     cápsula e briga com o arredondado dela. Vira um glifo redondo, e o vermelho
+     do :hover do .btn-icone--perigo continua valendo. */
+  .montagem li > .btn-icone {
+    width: 22px;
+    height: 22px;
+    border-width: 0;
+    border-radius: 50%;
+    font-size: 1.05rem;
+    line-height: 1;
+    color: var(--ds-text-4);
+  }
+
   .montagem-nome {
     font-size: 0.88rem;
     color: var(--ds-gold-light);
+  }
+
+  .classes-rotulo {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin: 4px 0 8px;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ds-text-4);
+  }
+
+  .classes-rotulo > .contagem {
+    text-transform: none;
+    letter-spacing: 0.04em;
+    color: var(--ds-text-5);
+  }
+
+  /* auto-fill com 96px pra caber duas colunas com folga na tela de 320px, que é
+     a do celular do usuário, e ir pra três e quatro conforme sobra espaço. */
+  .classes-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .classe-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 9px 11px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease,
+      color 0.15s ease;
+  }
+
+  .classe-card:hover:not(:disabled) {
+    border-color: var(--ds-line-strong);
+  }
+
+  .classe-card:focus-visible {
+    outline: 2px solid var(--ds-gold-light);
+    outline-offset: 2px;
+  }
+
+  .classe-card.escolhida {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
+  /* Serve pras duas razões de um cartão estar fora de alcance: a pessoa já
+     disputa aquela classe, ou ela chegou no teto de classes. */
+  .classe-card.apagada {
+    cursor: default;
+    opacity: 0.5;
+  }
+
+  .classe-nome {
+    font-size: 0.88rem;
+    color: var(--ds-text-2);
+  }
+
+  .classe-card.escolhida > .classe-nome {
+    color: var(--ds-gold-light);
+    font-weight: 600;
+  }
+
+  /* Sigla apagada no cartão solto, e o mesmo lugar virando o ✓ dourado quando
+     ele é marcado: assim a linha de baixo não muda de altura ao marcar. */
+  .classe-obs {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ds-text-5);
+  }
+
+  .classe-card.escolhida > .classe-obs {
+    color: var(--ds-gold);
+  }
+
+  .chave-titulo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 760px;
+    margin: 14px auto 6px;
+    font-family: var(--ds-font-display);
+    font-size: 0.92rem;
+    color: var(--ds-gold-light);
+  }
+
+  /* A .contagem do global só existe dentro do .admin-secao-cab, e aqui o título
+     é um <p>. Mesma tinta e mesmo peso, pro número ler igual ao das outras
+     seções do painel. */
+  .chave-titulo > .contagem {
+    font-family: var(--ds-font-body);
+    font-size: 0.8rem;
+    font-weight: 400;
+    letter-spacing: 0.04em;
+    color: var(--ds-text-5);
   }
 
   .campos-melhor-de {

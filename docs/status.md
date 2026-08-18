@@ -111,11 +111,65 @@ pede e o passo a passo. Ele registra também a regra de combate que não
 mora no código: no torneio por classe todo mundo luta no nível 1 da
 classe, sem o bônus de nível 3.
 
-**Falta**: a tela pública de acompanhamento ao vivo. O modelo já nasceu
-pronto pra ela, com `fTorneios` e `fTorneioPartidas` na publication
-`supabase_realtime`. O caminho é uma `v_torneios_publicos` no molde das
-views que já existem (só torneio fora de `inscricao`, filtrando
-`not m.oculto`) mais uma página pública assinando o mesmo canal.
+### Tela pública ao vivo (18/08)
+
+`/torneios` lista os que estão acontecendo e o histórico paginado;
+`/torneios/[id]` mostra a chave, o placar e os campeões, em leitura, e se
+atualiza sozinha enquanto a mesa lança resultado. Entrou no menu, em
+Comunidade, e o painel ganhou um link pra ela no cabeçalho do torneio,
+que é o link que o organizador manda pro grupo.
+
+Duas decisões que não se leem no código:
+
+- **A leitura pública é RLS, e não view.** O caminho previsto era uma
+  `v_torneios_publicos`, mas view não serve: o Realtime entrega só a linha
+  que a policy do assinante deixa ver, e sem policy pro anônimo a tela
+  nunca receberia o placar novo. Então `fTorneios` e `fTorneioPartidas`
+  ganharam `public_select` pra torneio fora de `inscricao`. Não há dado
+  pessoal nas duas: são ids, fase e pontos. As tabelas de equipe e de
+  integrante continuam só do staff.
+- **O nome sai por view**, a `v_torneio_equipes`, porque ele mora na
+  `dMembros`, fechada pra quem não é staff. Mesma regra de apelido das
+  outras oito views públicas, e membro `oculto` aparece como
+  "Participante" em vez de sumir: sumir deixaria a chave com um lado em
+  branco. É a nona view `SECURITY DEFINER` da baseline do advisor.
+
+O "ao vivo" não depende só do socket: a tela recarrega quando a aba volta
+a ficar visível e a cada minuto. Se o websocket cai, o supabase-js
+reconecta mas o que passou enquanto ele esteve fora não volta, e a tela
+ficaria parada sem avisar ninguém.
+
+A matriz de permissão foi provada de novo depois da migração, num bloco
+com rollback: anônimo e membro (nível ≥ 4) leem torneio já começado e não
+escrevem nada, por tabela nem por RPC; staff lê tudo, não escreve direto
+na tabela e lança placar pela RPC. Torneio em `inscricao` continua
+invisível de fora.
+
+### Mega torneio de classes (18/08)
+
+O torneio de classes sempre foi uma chave por classe rodando ao mesmo
+tempo. O que faltava era a pessoa poder estar em mais de uma chave, e
+agora ela pode: a inscrição virou uma grade com as 10 classes oficiais
+(o Básico fica fora) e seleção múltipla, no lugar do menu suspenso. Uma
+chamada de `inscrever_equipe` por classe marcada, em sequência, porque o
+seed sai de um `max(seed)` por chave.
+
+O teto é a coluna `max_classes` da `fTorneios`, padrão 3, de 1 a 10,
+escolhida na abertura: 1 faz um torneio de classe única, 10 é sem teto na
+prática. A tela conta "2 de 3", apaga os cartões restantes ao chegar no
+teto e explica ao clicar; a `inscrever_equipe` recusa de novo, contando o
+que já existe e não só a inscrição que está entrando. A lista de
+inscritos passou a ser uma por classe, com a contagem do lado, que é o
+que o organizador precisa ver antes de gerar as chaves.
+
+A `abrir_torneio` mudou de assinatura (ganhou `p_max_classes`), então a
+antiga foi derrubada antes: duas funções com a mesma origem fariam o
+PostgREST responder 300 quando a chamada casasse com as duas.
+
+**Falta**: PH e premiação, adiados de propósito.
+
+Arquivos da tela pública: `src/pages/torneios/{index,[id]}.astro`,
+`src/components/TorneioPublico.svelte`.
 
 ## O que mudou desde a última escrita deste arquivo (27/07 → 15/08)
 

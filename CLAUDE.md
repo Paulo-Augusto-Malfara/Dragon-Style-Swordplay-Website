@@ -75,6 +75,20 @@ não se descobrem lendo o schema:
   Qualquer tela nova que desenhe partida precisa desse teste.
 - **Fechar tem trava dupla**: a tela desabilita o botão e a `fechar_torneio`
   levanta exceção de novo. Nunca deixe só um dos dois lados.
+- **Torneio de classes é vários torneios ao mesmo tempo**, uma chave por classe,
+  todas rodando juntas. Desde 18/08 a mesma pessoa entra em mais de uma chave no
+  mesmo dia: a trava de "já inscrito" da `inscrever_equipe` é por classe quando
+  `tipo = 'classes'`, e por torneio quando é aberto. O teto de classes por
+  pessoa é a coluna `max_classes` (padrão 3, de 1 a 10), escolhida na abertura,
+  e a `inscrever_equipe` conta as inscrições que já existem, não só a que está
+  entrando. A tela mostra o teto antes, o banco recusa depois: as duas travas.
+- **A leitura pública é policy, não view.** `fTorneios` e `fTorneioPartidas`
+  têm `public_select` pra status diferente de `inscricao`, e é de propósito: o
+  Realtime só entrega a linha que a policy do assinante deixa ver, então uma
+  view deixaria a tela pública (`/torneios/[id]`, `TorneioPublico.svelte`) sem
+  receber placar nenhum. Equipe e integrante seguem só do staff, e o nome do
+  participante sai da `v_torneio_equipes`. Se algum dia a tela pública precisar
+  de um campo novo, ele entra na view, não numa policy nova.
 
 RPC nova neste projeto nasce com `execute` para `public` e `anon`, e **toda RPC
 de escrita daqui é `{postgres, authenticated, service_role}`**. Depois de criar
@@ -105,13 +119,16 @@ usuário** em vez de operar no projeto que apareceu.
 
 ## Supabase MCP write policy
 
-The `supabase` MCP server in `.mcp.json` stays at `read_only=false` permanently — don't toggle it back to `true` after a migration, and don't ask the user to flip it before one. Instead, always ask an explicit, clear question in chat before running `apply_migration`, `execute_sql` for anything beyond a plain `SELECT`, or any other DB write — every single time, even in Auto Mode, even if the conversation already implied it. A yes covers only that one action. After any migration, run `get_advisors(type:"security")` and compare against the known baseline (8 intentional `SECURITY DEFINER` views, RPCs intentionally exposed to anon/authenticated by design, leaked password protection warning pre-existing) — flag only genuinely new items.
+The `supabase` MCP server in `.mcp.json` stays at `read_only=false` permanently — don't toggle it back to `true` after a migration, and don't ask the user to flip it before one. Instead, always ask an explicit, clear question in chat before running `apply_migration`, `execute_sql` for anything beyond a plain `SELECT`, or any other DB write — every single time, even in Auto Mode, even if the conversation already implied it. A yes covers only that one action. After any migration, run `get_advisors(type:"security")` and compare against the known baseline (9 intentional `SECURITY DEFINER` views, RPCs intentionally exposed to anon/authenticated by design, leaked password protection warning pre-existing) — flag only genuinely new items.
 
-Baseline auditada em 15/08/2026, item a item: as 8 views (`v_registro_treinos`,
+Baseline auditada em 15/08/2026, item a item: as views (`v_registro_treinos`,
 `v_treinos_publicos`, `v_registro_eventos`, `v_ranking_nivel_geral`,
 `v_ranking_por_classe`, `v_historico_doacoes`, `v_agenda_confirmacoes`) só
 publicam o que o site já mostra e filtram `not m.oculto`; a oitava,
-`v_historico_presencas`, se limita sozinha por `auth.uid()`. Nenhuma expõe
+`v_historico_presencas`, se limita sozinha por `auth.uid()`. A nona,
+`v_torneio_equipes`, entrou em 18/08/2026 com a tela pública de torneios e
+segue a mesma regra: só torneio fora de `inscricao`, apelido aprovado, e membro
+`oculto` sai como "Participante". Nenhuma expõe
 email, telegram_id ou auth_user_id. As 25 funções `SECURITY DEFINER` têm
 guarda interna (`is_admin`, `is_staff`, `is_organizador`, `current_membro_id` ou
 `auth.uid()`); o anônimo só alcança os cinco booleanos sem argumento, que

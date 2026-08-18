@@ -39,6 +39,7 @@ export const menu: GrupoNav[] = [
       { href: "/ranking-geral", label: "Ranking Geral" },
       { href: "/ranking-por-classe", label: "Ranking por Classe" },
       { href: "/registro-de-treinos", label: "Registro de Treinos" },
+      { href: "/torneios", label: "Torneios" },
       { href: "/novidades", label: "Novidades" },
     ],
   },
@@ -73,10 +74,24 @@ export const menu: GrupoNav[] = [
  */
 const porGrupo: Record<string, string[]> = {
   Manual: [
-    "codigo-de-conduta", "regras-de-combate", "novato-x-veterano",
-    "como-funciona", "arqueiro", "barbaro", "cavaleiro", "espadachim",
-    "guerreiro", "hoplita", "lanceiro", "sicario", "templario", "viking",
-    "mentor-de-classe", "bonus-nivel-3", "vestimentas", "pontos-de-honra",
+    "codigo-de-conduta",
+    "regras-de-combate",
+    "novato-x-veterano",
+    "como-funciona",
+    "arqueiro",
+    "barbaro",
+    "cavaleiro",
+    "espadachim",
+    "guerreiro",
+    "hoplita",
+    "lanceiro",
+    "sicario",
+    "templario",
+    "viking",
+    "mentor-de-classe",
+    "bonus-nivel-3",
+    "vestimentas",
+    "pontos-de-honra",
   ],
   Comunidade: ["mural-de-doacoes", "conquistas"],
   Institucional: ["administracao", "doacoes"],
@@ -92,6 +107,9 @@ const detalhes: Record<string, string> = Object.fromEntries(
 /** Em que seção do manual esta rota vive. Devolve undefined quando não há. */
 export function grupoDe(pathname: string): string | undefined {
   const rota = pathname.replace(/\/$/, "") || "/";
-  const noMenu = menu.find((g) => g.items.some((i) => i.href === rota));
-  return noMenu?.label ?? detalhes[rota];
+  const doMenu = (r: string) =>
+    menu.find((g) => g.items.some((i) => i.href === r))?.label;
+  // A terceira tentativa é pra página de detalhe abaixo de uma do menu, como
+  // /torneios/12: ela herda o grupo da lista de onde se chega nela.
+  return doMenu(rota) ?? detalhes[rota] ?? doMenu(`/${rota.split("/")[1]}`);
 }

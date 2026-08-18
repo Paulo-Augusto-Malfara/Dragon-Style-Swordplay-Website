@@ -1,0 +1,76 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import TorneioPublico from "../../components/TorneioPublico.svelte";
+import { supabasePublic } from "../../lib/supabase-public";
+
+export const prerender = false;
+
+const id = Number(Astro.params.id);
+
+// A chave e o placar já vêm no HTML, e não depois pelo navegador: quem abre o
+// link no meio do treino vê o torneio antes de qualquer JavaScript rodar. O
+// componente só cuida do que muda daí em diante.
+const { data: torneio } = Number.isInteger(id)
+  ? await supabasePublic
+      .from("fTorneios")
+      // Colunas nomeadas, e não `*`: quem abriu e quem fechou o torneio são ids
+      // de membro, e não têm o que fazer no HTML de uma página pública.
+      .select("id_torneio, nome, data_torneio, tipo, tamanho_equipe, formato, rodadas, status")
+      .eq("id_torneio", id)
+      .maybeSingle()
+  : { data: null };
+
+// Torneio inexistente e torneio ainda em inscrição são a mesma resposta aqui: a
+// RLS pública não entrega nenhum dos dois, e não cabe ao site dizer qual é qual.
+if (!torneio) return Astro.redirect("/torneios");
+
+const [{ data: equipes }, { data: partidas }, { data: classes }] = await Promise.all([
+  supabasePublic
+    .from("v_torneio_equipes")
+    .select("id_equipe, id_classe, seed, nome")
+    .eq("id_torneio", id)
+    .order("seed"),
+  supabasePublic.from("fTorneioPartidas").select("*").eq("id_torneio", id).order("id_partida"),
+  supabasePublic.from("dClasses").select("id_classe, nome_classe").order("nome_classe"),
+]);
+
+const FORMATOS: Record<string, string> = {
+  eliminatoria: "Eliminatória simples",
+  eliminatoria_dupla: "Eliminatória dupla",
+  suico: "Suíço",
+  todos_contra_todos: "Todos contra todos",
+};
+
+const formato = FORMATOS[torneio.formato] ?? torneio.formato;
+const dataBR = new Date(torneio.data_torneio + "T00:00:00").toLocaleDateString("pt-BR");
+
+const resumo =
+  (torneio.tipo === "classes"
+    ? `Por classe, 1x1, ${formato}`
+    : `Aberto, ${torneio.tamanho_equipe}x${torneio.tamanho_equipe}, ${formato}`) +
+  (torneio.formato === "suico" ? `, ${torneio.rodadas} rodadas` : "") +
+  `, ${dataBR}.`;
+---
+
+<PageLayout
+  title={torneio.nome}
+  description={`${resumo} Chave, placares e campeões, ao vivo.`}
+  resumo={resumo}
+>
+  <TorneioPublico
+    torneio={torneio}
+    equipes={equipes ?? []}
+    classes={classes ?? []}
+    partidasIniciais={partidas ?? []}
+    client:load
+  />
+
+  <p class="voltar"><a href="/torneios">Todos os torneios</a></p>
+</PageLayout>
+
+<style>
+  .voltar {
+    margin-top: 28px;
+    font-size: 0.85rem;
+  }
+</style>

@@ -27,6 +27,9 @@
     "eliminatoria",
   );
   let rodadas = $state(3);
+  // Teto de classes por pessoa. 3 é o padrão combinado; 1 faz um torneio de
+  // classe única, 10 faz um sem teto, já que só existem 10 classes oficiais.
+  let maxClasses = $state(3);
   let abrindo = $state(false);
   let erro = $state("");
 
@@ -49,6 +52,7 @@
       p_tamanho_equipe: soUmContraUm ? 1 : tamanhoEquipe,
       p_formato: formato,
       p_rodadas: formato === "suico" ? rodadas : null,
+      p_max_classes: soUmContraUm ? maxClasses : 3,
     });
     abrindo = false;
     if (error) {
@@ -89,6 +93,20 @@
           : "Chave única, com o tamanho de equipe escolhido abaixo."}
       </small>
     </label>
+
+    {#if soUmContraUm}
+      <label>
+        Classes por pessoa
+        <input type="number" min="1" max="10" bind:value={maxClasses} />
+        <small>
+          {maxClasses === 1
+            ? "Cada pessoa disputa uma classe só."
+            : maxClasses >= 10
+              ? "Sem teto na prática: são 10 classes oficiais."
+              : `Cada pessoa pode entrar em até ${maxClasses} chaves diferentes.`}
+        </small>
+      </label>
+    {/if}
 
     {#if !soUmContraUm}
       <label>

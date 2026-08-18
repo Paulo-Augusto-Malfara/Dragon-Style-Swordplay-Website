@@ -1,0 +1,218 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import Paginacao from "../../components/Paginacao.astro";
+import { supabasePublic } from "../../lib/supabase-public";
+
+export const prerender = false;
+
+// Torneio em inscrição não aparece aqui: a RLS pública da fTorneios só entrega
+// os que já começaram. Enquanto o organizador monta a lista de participantes,
+// não há nada pro público acompanhar.
+const { data: aoVivo } = await supabasePublic
+  .from("fTorneios")
+  .select("id_torneio, nome, data_torneio, tipo, tamanho_equipe, formato, rodadas")
+  .eq("status", "em_andamento")
+  .order("data_torneio", { ascending: false })
+  .order("id_torneio", { ascending: false });
+
+const POR_PAGINA = 10;
+const pedida = Math.max(1, Number(Astro.url.searchParams.get("pagina")) || 1);
+
+const { data: encerrados, count } = await supabasePublic
+  .from("fTorneios")
+  .select("id_torneio, nome, data_torneio, tipo, tamanho_equipe, formato, rodadas", {
+    count: "exact",
+  })
+  .eq("status", "finalizado")
+  .order("data_torneio", { ascending: false })
+  // Desempate estável: sem ele dois torneios da mesma data trocam de lugar
+  // entre uma página e outra, e aí um some e o outro aparece duas vezes.
+  .order("id_torneio", { ascending: false })
+  .range((pedida - 1) * POR_PAGINA, pedida * POR_PAGINA - 1);
+
+const totalPaginas = Math.max(1, Math.ceil((count ?? 0) / POR_PAGINA));
+const pagina = Math.min(pedida, totalPaginas);
+
+if (pedida > totalPaginas) return Astro.redirect("/torneios");
+
+const lista = [...(aoVivo ?? []), ...(encerrados ?? [])];
+
+// Uma consulta só pra contagem de todos os torneios da tela. Um count por
+// torneio seriam onze idas ao banco pra dizer onze números.
+const { data: inscritos } = lista.length
+  ? await supabasePublic
+      .from("v_torneio_equipes")
+      .select("id_torneio")
+      .in(
+        "id_torneio",
+        lista.map((t) => t.id_torneio),
+      )
+  : { data: [] };
+
+const participantes = new Map<number, number>();
+for (const e of inscritos ?? []) {
+  participantes.set(e.id_torneio, (participantes.get(e.id_torneio) ?? 0) + 1);
+}
+
+const FORMATOS: Record<string, string> = {
+  eliminatoria: "Eliminatória simples",
+  eliminatoria_dupla: "Eliminatória dupla",
+  suico: "Suíço",
+  todos_contra_todos: "Todos contra todos",
+};
+
+const dataBR = (d: string) => new Date(d + "T00:00:00").toLocaleDateString("pt-BR");
+
+const descricao = (t: { tipo: string; tamanho_equipe: number; formato: string }) =>
+  t.tipo === "classes"
+    ? `Por classe, 1x1, ${FORMATOS[t.formato]}`
+    : `Aberto, ${t.tamanho_equipe}x${t.tamanho_equipe}, ${FORMATOS[t.formato]}`;
+
+const contagem = (id: number) => {
+  const n = participantes.get(id) ?? 0;
+  return n === 1 ? "1 participante" : `${n} participantes`;
+};
+---
+
+<PageLayout
+  title="Torneios"
+  description="As chaves, os placares e os campeões dos torneios do Dragon Style, ao vivo."
+  resumo="Acompanhe a chave enquanto o torneio acontece. O placar aparece aqui assim que a mesa lança o resultado da partida."
+>
+  {
+    aoVivo && aoVivo.length > 0 && (
+      <>
+        <h2 class="secao">Acontecendo agora</h2>
+        <ul class="torneios">
+          {aoVivo.map((t) => (
+            <li>
+              <a class="torneio torneio-vivo" href={`/torneios/${t.id_torneio}`}>
+                <span class="t-selo">
+                  <span class="t-ponto" aria-hidden="true" />
+                  Ao vivo
+                </span>
+                <span class="t-nome">{t.nome}</span>
+                <span class="t-meta">
+                  {descricao(t)} · {dataBR(t.data_torneio)} · {contagem(t.id_torneio)}
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </>
+    )
+  }
+
+  <h2 class="secao">Encerrados</h2>
+  {
+    !encerrados || encerrados.length === 0 ? (
+      <p class="vazio">Nenhum torneio encerrado ainda.</p>
+    ) : (
+      <ul class="torneios">
+        {encerrados.map((t) => (
+          <li>
+            <a class="torneio" href={`/torneios/${t.id_torneio}`}>
+              <span class="t-nome">{t.nome}</span>
+              <span class="t-meta">
+                {descricao(t)} · {dataBR(t.data_torneio)} · {contagem(t.id_torneio)}
+              </span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
+  }
+
+  <Paginacao
+    pagina={pagina}
+    totalPaginas={totalPaginas}
+    base="/torneios"
+    rotulo="Páginas dos torneios encerrados"
+  />
+</PageLayout>
+
+<style>
+  .secao {
+    margin: 26px 0 12px;
+    font-family: var(--ds-font-display);
+    font-size: 1.05rem;
+    color: var(--ds-gold-light);
+  }
+
+  .torneios {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .torneio {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    padding: 13px 16px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+    text-decoration: none;
+    transition:
+      border-color 0.15s ease,
+      background 0.15s ease;
+  }
+
+  .torneio:hover {
+    border-color: var(--ds-gold-dim);
+    background: var(--ds-gold-wash);
+  }
+
+  .torneio-vivo {
+    border-color: var(--ds-gold-dim);
+  }
+
+  .t-selo {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ds-gold);
+  }
+
+  .t-ponto {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--ds-gold);
+    animation: pulso 1.8s ease-in-out infinite;
+  }
+
+  @keyframes pulso {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .t-ponto {
+      animation: none;
+    }
+  }
+
+  .t-nome {
+    font-family: var(--ds-font-display);
+    font-size: 1.02rem;
+    color: var(--ds-text-1);
+  }
+
+  .t-meta {
+    font-size: 0.8rem;
+    color: var(--ds-text-4);
+  }
+
+  .vazio {
+    color: var(--ds-text-4);
+  }
+</style>
