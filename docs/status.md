@@ -205,6 +205,24 @@ mínimo vale por chave de classe: o torneio aberto continua aceitando dois,
 porque lá não existe "as outras chaves" e recusar seria recusar o torneio
 inteiro.
 
+### Luta fechada minimizada, e um furo no reabrir (18/08)
+
+No painel, partida já decidida virou uma linha enxuta no formato da tela
+pública (nomes, placar, quem venceu) com um botão *Corrigir* do lado. Numa
+chave grande o que já acabou era ruído entre o que ainda falta lançar. O
+*Corrigir* passa pelo `ConfirmarAcao` antes, porque não é editar um
+número: zerar tira o vencedor, e tirar o vencedor desfaz o avanço dele.
+
+Procurando bug no "reabrir e corrigir", achei um, e ele era real. A final
+de desempate não é apontada por `proxima_partida` (nasce depois da grande
+final, sob demanda), então a trava de "corrija de frente pra trás" não a
+enxergava: dava pra mudar quem venceu a grande final deixando de pé um
+desempate decidido por uma premissa já derrubada, e como o campeão é o
+vencedor da última partida da chave, era o desempate velho que seguia
+coroando. Provado em bloco com rollback, corrigido na
+`registrar_resultado` (recusa se o desempate tem resultado, apaga o
+desempate sem resultado) e provado de novo depois.
+
 Os dois pedaços são componentes compartilhados pelas duas telas,
 `src/components/SeletorDeChaves.svelte` e `PodioDoTorneio.svelte`. O que
 muda entre painel e tela pública é de onde saem os nomes, e por isso eles

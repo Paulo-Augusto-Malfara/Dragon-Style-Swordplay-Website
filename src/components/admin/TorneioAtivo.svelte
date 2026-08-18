@@ -403,7 +403,23 @@
     await carregar();
   }
 
-  async function zerar(p: any) {
+  /**
+   * Reabre uma partida já decidida, zerando o placar dela.
+   *
+   * Pergunta antes porque isso não é editar um número: zerar tira o vencedor,
+   * e tirar o vencedor desfaz o avanço dele na chave. A `registrar_resultado`
+   * recusa se a partida seguinte já tiver andado, então correção é sempre da
+   * frente pra trás, mas quem clica não tem como saber disso de antemão.
+   */
+  async function reabrirPartida(p: any) {
+    const ok = await confirmar.pedir({
+      titulo: `Corrigir ${nomeEquipe(p.id_equipe_a)} x ${nomeEquipe(p.id_equipe_b)}?`,
+      texto:
+        "O placar volta a zero e a luta fica aberta pra ser lançada de novo. Isso pode mudar quem venceu, e quem venceu já passou de fase.",
+      acao: "Corrigir",
+      perigo: true,
+    });
+    if (!ok) return;
     erro = "";
     const { error } = await supabase.rpc("registrar_resultado", {
       p_id_partida: p.id_partida,
@@ -874,6 +890,30 @@
                   <span class="partida-obs">Esperando as duas vagas da fase anterior.</span>
                 {/if}
               </div>
+            {:else if decidida}
+              <!-- Luta fechada fica enxuta, no formato da tela pública: numa
+                   chave de dez classes o que já acabou é ruído entre o que
+                   ainda falta lançar. Mexer nela só passando pelo Corrigir. -->
+              <div class="partida-fechada">
+                <span class="partida-nome">
+                  <strong class:venceu={p.id_equipe_vencedora === p.id_equipe_a}>
+                    {nomeEquipe(p.id_equipe_a)}
+                  </strong>
+                  <span class="partida-placar-fixo">{p.pontos_a} a {p.pontos_b}</span>
+                  <strong class:venceu={p.id_equipe_vencedora === p.id_equipe_b}>
+                    {nomeEquipe(p.id_equipe_b)}
+                  </strong>
+                </span>
+                {#if torneio.status === "em_andamento"}
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    onclick={() => reabrirPartida(p)}
+                  >
+                    Corrigir
+                  </button>
+                {/if}
+              </div>
             {:else}
               <div class="partida">
                 {#each ["a", "b"] as lado (lado)}
@@ -897,7 +937,7 @@
                         type="button"
                         class="btn-icone"
                         aria-label={`Dar um ponto a ${nomeEquipe(idEquipe)}`}
-                        disabled={decidida || torneio.status !== "em_andamento"}
+                        disabled={torneio.status !== "em_andamento"}
                         onclick={() => marcar(p, lado as "a" | "b", 1)}>+</button
                       >
                     </div>
@@ -906,17 +946,7 @@
               </div>
 
               <div class="partida-rodape">
-                {#if decidida}
-                  <span class="partida-obs">
-                    {nomeEquipe(p.id_equipe_vencedora)} venceu por {p.pontos_a}
-                    a {p.pontos_b}
-                  </span>
-                  {#if torneio.status === "em_andamento"}
-                    <button type="button" class="btn btn-ghost btn-sm" onclick={() => zerar(p)}>
-                      Corrigir
-                    </button>
-                  {/if}
-                {:else if torneio.status === "em_andamento"}
+                {#if torneio.status === "em_andamento"}
                   <label class="melhor-de">
                     <span>Melhor de</span>
                     <select
@@ -1295,6 +1325,43 @@
     flex-wrap: wrap;
     align-items: baseline;
     gap: 8px;
+  }
+
+  /* Luta fechada: uma linha só, com o Corrigir no fim dela. O wrap deixa o
+     botão cair pra linha de baixo no celular em vez de espremer os nomes. */
+  .partida-fechada {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 12px;
+  }
+
+  .partida-fechada > .partida-nome {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 8px;
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.92rem;
+    color: var(--ds-text-4);
+    overflow-wrap: anywhere;
+  }
+
+  .partida-fechada strong {
+    font-weight: 400;
+  }
+
+  .partida-fechada strong.venceu {
+    font-weight: 600;
+    color: var(--ds-gold-light);
+  }
+
+  .partida-placar-fixo {
+    font-family: var(--ds-font-display);
+    color: var(--ds-gold);
+    font-variant-numeric: tabular-nums;
   }
 
   .partida-bye > .partida-nome {

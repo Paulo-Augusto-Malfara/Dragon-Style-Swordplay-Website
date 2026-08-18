@@ -70,6 +70,17 @@ não se descobrem lendo o schema:
   RPC. Campeão do mata-mata é o vencedor da **última** partida da chave (maior
   `id_partida` por classe), e não "a que não tem seguinte", justamente porque a
   grande final e o desempate ficam as duas sem seguinte.
+- **Corrigir é sempre de frente pra trás**, e a `registrar_resultado` recusa
+  quando a partida seguinte já andou. A final de desempate é a exceção que
+  precisou de código próprio: ela não é apontada por `proxima_partida` (nasce
+  depois da grande final, sob demanda), então a trava não a enxergava, e mudar
+  quem venceu a grande final deixava de pé um desempate decidido por uma
+  premissa já derrubada; como o campeão é o vencedor da última partida da
+  chave, era o desempate velho que seguia coroando. Hoje, quando o vencedor da
+  grande final muda, a RPC recusa se o desempate tiver resultado e **apaga** o
+  desempate sem resultado, senão sobrava uma partida injogável travando o
+  fechar pra sempre. Corrigido em 18/08/2026, com o caso provado em bloco com
+  rollback antes e depois.
 - Bye e "semifinal esperando a outra semi" são idênticos no banco (um lado nulo).
   O que separa os dois é o bye já nascer com `id_equipe_vencedora` preenchido.
   Qualquer tela nova que desenhe partida precisa desse teste.
