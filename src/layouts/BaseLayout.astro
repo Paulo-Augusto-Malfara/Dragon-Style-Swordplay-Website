@@ -5,6 +5,7 @@ import NavMenu from "../components/NavMenu.astro";
 import BottomNav from "../components/BottomNav.astro";
 import BuscaGlobal from "../components/BuscaGlobal.astro";
 import { ClientRouter } from "astro:transitions";
+import Analytics from "@vercel/analytics/astro";
 import "../styles/global.css";
 
 interface Props {
@@ -28,7 +29,12 @@ const ogImageURL = new URL("/assets/img/og-image.webp", Astro.site);
  * Quando o destino não tem ClientRouter, o Astro faz a navegação completa de
  * sempre, então entrar e sair do admin continua funcionando sem nada especial.
  */
-const comTransicao = !/^\/(admin|auth)(\/|$)/.test(Astro.url.pathname);
+/* O que é site público e o que é ferramenta interna. Duas decisões diferentes
+ * penduram neste mesmo teste, cada uma pelo seu motivo: a transição de página
+ * (o comentário acima) e a medição de audiência (o comentário lá embaixo, na
+ * marca do <Analytics />). */
+const areaPublica = !/^\/(admin|auth)(\/|$)/.test(Astro.url.pathname);
+const comTransicao = areaPublica;
 ---
 
 <!doctype html>
@@ -102,6 +108,18 @@ const comTransicao = !/^\/(admin|auth)(\/|$)/.test(Astro.url.pathname);
     </footer>
     <BottomNav />
     <BuscaGlobal />
+    {/* Medição de audiência da Vercel, só no site público.
+
+        O painel fica de fora de propósito, por três motivos. A visita de quem
+        trabalha no site não é audiência, e o staff abre a mesma tela de treino
+        dezenas de vezes num sábado; a URL do painel carrega id de treino, de
+        membro e de torneio, e não há razão pra isso viajar; e o teto de eventos
+        do plano é melhor gasto com visitante de verdade.
+
+        Não é cookie e não identifica ninguém: conta página vista e origem. O
+        caminho vai agrupado por rota, então /torneios/12 e /torneios/13 entram
+        as duas como /torneios/[id]. */}
+    {areaPublica && <Analytics />}
     <script>
   /**
    * As duas regras que valem pra toda janela do site.

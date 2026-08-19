@@ -47,6 +47,18 @@ const ROTAS = ["/novidades", RANKING, "/", "/admin/login"];
 const TRANSICAO = { "/": true, "/novidades": true, "/admin/login": false };
 const MARCA = "/_astro/ClientRouter";
 
+/* Quem é medido e quem não é.
+ *
+ * A audiência do site é gente de fora, e o painel é ferramenta de trabalho: a
+ * visita do staff não é público, a URL de lá carrega id de treino, de membro e
+ * de torneio, e o teto de eventos do plano é melhor gasto com visitante. A
+ * decisão mora no mesmo teste de rota do ClientRouter, no BaseLayout, e é
+ * justamente por isso que ela é conferida aqui junto: quem afrouxar aquela
+ * regex por causa da transição levaria a medição junto sem perceber.
+ */
+const MEDIDO = { "/": true, "/novidades": true, "/admin/login": false };
+const MARCA_MEDICAO = "<vercel-analytics";
+
 assert.ok(existsSync(FUNCAO), `rode npm run build antes: ${FUNCAO} não existe`);
 
 // O .env não é lido sozinho fora do Astro.
@@ -96,6 +108,15 @@ try {
             `essa marcação pra todo visitante. Ele tem que ser aceso pelo navegador.`,
         );
       }
+    }
+
+    const medido = MEDIDO[rota];
+    if (medido !== undefined && html.includes(MARCA_MEDICAO) !== medido) {
+      falhas.push(
+        medido
+          ? `${rota}: perdeu o <Analytics />, a página pública parou de ser medida`
+          : `${rota}: ganhou o <Analytics />, e o painel não entra na medição de audiência`,
+      );
     }
 
     const esperado = TRANSICAO[rota];
