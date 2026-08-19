@@ -1864,6 +1864,9 @@ p {
 .admin-form input[type="url"],
 .admin-form input[type="date"],
 .admin-form input[type="time"],
+/* datetime-local faltava na lista e o campo de data da reuniao saia com o
+   desenho cru do navegador, branco no meio do painel escuro. */
+.admin-form input[type="datetime-local"],
 .admin-form input[type="number"],
 .admin-form select,
 .admin-form textarea {

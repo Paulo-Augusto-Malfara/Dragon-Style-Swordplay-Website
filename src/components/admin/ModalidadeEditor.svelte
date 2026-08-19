@@ -25,6 +25,7 @@
   );
   let errorMessage = $state("");
   let autorDaPauta = $state("");
+  let erroAoCarregar = $state(false);
 
   const toLines = (arr: string[] | null) => (arr ?? []).join("\n");
   const toArray = (text: string) => text.split("\n").map((l) => l.trim()).filter(Boolean);
@@ -42,12 +43,16 @@
   async function loadPauta() {
     const { data, error } = await supabase
       .from("fPautas")
-      .select("titulo, corpo, proposta, dMembros(nome, apelido)")
+      // A chave estrangeira vai nomeada porque fPautas aponta pra dMembros
+      // DUAS vezes, no autor e em quem decidiu. Sem dizer qual, o PostgREST
+      // recusa o embed inteiro e a consulta volta vazia.
+      .select("titulo, corpo, proposta, autor:dMembros!fPautas_id_membro_fkey(nome, apelido)")
       .eq("id_pauta", pauta)
       .single();
     if (error) {
       status = "error";
       errorMessage = error.message;
+      erroAoCarregar = true;
       return;
     }
     const proposta = (data.proposta ?? {}) as Record<string, any>;
@@ -61,7 +66,7 @@
     requirements = toLines(proposta.requirements);
     variations = toLines(proposta.variations);
     minParticipantes = proposta.min_participantes ?? 0;
-    autorDaPauta = data.dMembros?.apelido?.trim() || data.dMembros?.nome || "";
+    autorDaPauta = data.autor?.apelido?.trim() || data.autor?.nome || "";
     status = "idle";
   }
 
@@ -70,6 +75,7 @@
     if (error) {
       status = "error";
       errorMessage = error.message;
+      erroAoCarregar = true;
       return;
     }
     slug = data.slug;
@@ -126,6 +132,13 @@
 
 {#if status === "loading"}
   <div class="esqueleto esqueleto-form"></div>
+{:else if erroAoCarregar}
+  <!-- Erro de CARGA fecha a tela, e não só imprime um aviso embaixo do
+       formulário. Era o que acontecia antes, e o formulário vazio ficava
+       salvável: no caminho da pauta isso publicaria uma modalidade sem título
+       e pagaria os 10 PH. Erro de SALVAR continua embaixo do formulário, que
+       ali o conteúdo digitado não pode sumir da tela. -->
+  <p class="admin-error" role="alert">{errorMessage}</p>
 {:else}
   <form class="admin-form" onsubmit={save}>
     {#if pauta}

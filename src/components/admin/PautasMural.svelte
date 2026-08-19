@@ -369,6 +369,10 @@
   </div>
 
   {#if aberta}
+    <!-- A janela empilha bloco atrás de bloco, e o reset do site zera a margem
+         de tudo: sem esta casca com gap, título, corpo, proposta, votação e
+         discussão colam uns nos outros. -->
+    <div class="det">
     <span class="card-tags">
       <span class="status-badge status-badge--{aberta.status}">{STATUS[aberta.status]}</span>
       <span class="tag">{CATEGORIA[aberta.categoria]}</span>
@@ -488,10 +492,21 @@
     {#if erro}
       <p class="admin-error" role="alert">{erro}</p>
     {/if}
+    </div>
   {/if}
 </dialog>
 
 <style>
+  /* O global.css dá `p { width: 90%; margin: auto }` pra que o texto corrido
+     das páginas do manual ganhe largura de leitura. Dentro de cartão e de
+     janela aquilo vira parágrafo encolhido e boiando no meio da caixa, com
+     cada bloco começando num recuo diferente. Qualquer componente novo que use
+     <p> dentro de caixa precisa desta linha. */
+  p {
+    width: 100%;
+    margin: 0;
+  }
+
   .cabeca {
     display: flex;
     flex-direction: column;
@@ -643,6 +658,12 @@
     color: var(--ds-gold);
   }
 
+  .det {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
   .det-titulo {
     font-family: var(--ds-font-display);
     font-size: 1.35rem;
@@ -741,7 +762,20 @@
     align-items: flex-end;
   }
 
+  /* A caixa de comentário fica fora de um `.admin-form`, e é lá que mora o
+     desenho dos campos do painel. Sem isto ela sai branca e monoespaçada, o
+     controle cru do navegador no meio da janela escura. */
   .conversa-form textarea {
     flex: 1;
+    min-height: 2.9em;
+    padding: 0.6em 0.8em;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 10px;
+    background: var(--ds-bg-alt);
+    color: var(--ds-text-1);
+    font-family: var(--ds-font-body);
+    font-size: 0.95rem;
+    line-height: 1.55;
+    resize: vertical;
   }
 </style>

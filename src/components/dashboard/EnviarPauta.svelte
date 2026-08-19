@@ -270,6 +270,14 @@
 </dialog>
 
 <style>
+  /* Ver a mesma nota em PautasMural: o `p { width: 90%; margin: auto }` do
+     global.css é pra texto corrido de página, e dentro de cartão ele encolhe e
+     centraliza o parágrafo. */
+  p {
+    width: 100%;
+    margin: 0;
+  }
+
   .pautas {
     display: flex;
     flex-direction: column;

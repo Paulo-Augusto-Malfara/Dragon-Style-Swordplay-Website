@@ -38,6 +38,9 @@ const secoes = [
   // Staff enxerga e lança resultado; abrir, gerar chave e fechar é do
   // organizador, e essa parte quem esconde é a tela de dentro.
   { href: "/admin/torneios", label: "Torneios", ver: true },
+  // Staff lê, discute e vota; abrir e fechar a votação de decisão é do
+  // organizador, e quem esconde isso é a tela de dentro, como no torneio.
+  { href: "/admin/pautas", label: "Pautas", ver: true },
   { href: "/admin/agenda", label: "Agenda", ver: membro.isOrganizador },
   // Organizador confere, só o admin do sistema lança: por isso a seção aparece
   // pros dois e o painel dentro dela é que muda (ver podeEditar).

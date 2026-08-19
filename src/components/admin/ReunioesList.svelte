@@ -236,6 +236,14 @@
 {/if}
 
 <style>
+  /* Ver a mesma nota em PautasMural: o `p { width: 90%; margin: auto }` do
+     global.css é pra texto corrido de página, e aqui ele centralizava a nota
+     no meio da lista. */
+  p {
+    width: 100%;
+    margin: 0;
+  }
+
   .nota {
     font-size: 0.8rem;
     color: var(--ds-text-4);
