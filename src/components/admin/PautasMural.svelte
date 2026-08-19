@@ -38,22 +38,28 @@
   const STATUS: Record<string, string> = {
     aberta: "Na fila",
     em_teste: "Em teste",
-    validada: "Validada",
+    validada: "Aprovada",
     recusada: "Recusada",
-    aprovada: "Aprovada",
+    // Status `aprovada` só existe depois que a modalidade virou página e o PH
+    // foi pago, então o selo diz isso em vez de repetir "Aprovada", que é o
+    // selo do passo anterior.
+    aprovada: "Publicada",
     arquivada: "Arquivada",
   };
 
   /* Rótulo de cada opção de decisão, por rodada. */
+  /* `rotulo` é o desfecho, e nomeia o voto. `verbo` é a ordem que o organizador
+     dá ao encerrar, e por isso os botões de encerrar não repetem "encerrar
+     como" três vezes. */
   const OPCOES_MERITO = [
-    { id: "validada", rotulo: "Validada" },
-    { id: "recusada", rotulo: "Recusada" },
-    { id: "adiada", rotulo: "Adiada" },
+    { id: "validada", rotulo: "Aprovada", verbo: "Aprovar" },
+    { id: "recusada", rotulo: "Recusada", verbo: "Recusar" },
+    { id: "adiada", rotulo: "Adiada", verbo: "Adiar" },
   ];
   const OPCOES_TESTE = [
-    { id: "aprovada", rotulo: "Aprovada" },
-    { id: "recusada", rotulo: "Recusada" },
-    { id: "mais_teste", rotulo: "Mais tempo de teste" },
+    { id: "aprovada", rotulo: "Efetivada", verbo: "Efetivar" },
+    { id: "recusada", rotulo: "Recusada", verbo: "Recusar" },
+    { id: "mais_teste", rotulo: "Mais tempo de teste", verbo: "Dar mais tempo" },
   ];
 
   let pautas = $state<any[]>([]);
@@ -65,6 +71,24 @@
 
   let abertaId = $state<number | null>(null);
   let comentarios = $state<any[]>([]);
+  /* Comentário longo entra cortado em duas linhas. `cortados` guarda quem de
+     fato transbordou, medido no elemento, porque contar caractere não sabe a
+     largura da janela; `expandidos` guarda quem o leitor já abriu. */
+  let cortados = $state(new Set<number>());
+  let expandidos = $state(new Set<number>());
+  /* Comentário que a caixa está respondendo, ou nulo pra comentário solto. */
+  let respondendoA = $state<number | null>(null);
+  /* Comentário em edição e o texto que está sendo mexido. */
+  let editandoId = $state<number | null>(null);
+  let rascunho = $state("");
+  /* Texto da resposta em curso. Separado do `mensagem`, que é da caixa lá
+     embaixo: as duas podem estar preenchidas ao mesmo tempo. */
+  let resposta = $state("");
+  /* Só pra tela avisar que o texto de antes voltou. */
+  let temRascunho = $state(false);
+  /* Raízes com as respostas à mostra. Fechado é o padrão: a discussão fica
+     limpa e quem quiser abre. */
+  let respostasAbertas = $state(new Set<number>());
   let decisaoVotos = $state<any[]>([]);
   let mensagem = $state("");
   let ocupado = $state(false);
@@ -128,11 +152,61 @@
     if (canal) supabase.removeChannel(canal);
   });
 
+  /* Rascunho do que a pessoa estava escrevendo, guardado no próprio navegador
+     dela. Fechar a janela sem querer, clicando fora ou no Esc, deixou de
+     custar o texto. Não vai pro banco de propósito: rascunho não é comentário,
+     ninguém mais precisa ver, e assim não existe meio-comentário na discussão
+     de uma reunião. */
+  const chaveRascunho = (id: number) => `ds:pauta-rascunho:${id}`;
+
+  function guardarRascunho() {
+    if (!abertaId) return;
+    const vale = mensagem.trim() || resposta.trim();
+    if (vale) {
+      localStorage.setItem(
+        chaveRascunho(abertaId),
+        JSON.stringify({ mensagem, resposta, respondendoA }),
+      );
+    } else {
+      localStorage.removeItem(chaveRascunho(abertaId));
+    }
+  }
+
+  function recuperarRascunho(id: number) {
+    const cru = localStorage.getItem(chaveRascunho(id));
+    if (!cru) return false;
+    try {
+      const r = JSON.parse(cru);
+      mensagem = r.mensagem ?? "";
+      resposta = r.resposta ?? "";
+      respondendoA = r.respondendoA ?? null;
+      return true;
+    } catch {
+      localStorage.removeItem(chaveRascunho(id));
+      return false;
+    }
+  }
+
+  $effect(() => {
+    // Lê os três pra reagir a qualquer um deles.
+    void mensagem;
+    void resposta;
+    void respondendoA;
+    if (abertaId) guardarRascunho();
+  });
+
   async function abrirPauta(id: number) {
     abertaId = id;
     comentarios = [];
+    cortados = new Set();
+    expandidos = new Set();
+    respondendoA = null;
+    editandoId = null;
+    respostasAbertas = new Set();
     decisaoVotos = [];
     mensagem = "";
+    resposta = "";
+    temRascunho = recuperarRascunho(id);
     dialogo.showModal();
     await carregarConversa(id);
 
@@ -154,11 +228,25 @@
       .subscribe();
   }
 
+  const totalRespostas = $derived(comentarios.filter((c) => c.responde_a).length);
+  const totalRaizes = $derived(comentarios.length - totalRespostas);
+
+  /* A conversa é desenhada em um nível só: raiz e as respostas dela. O banco
+     também achata, então aqui não existe resposta de resposta pra tratar. */
+  const conversa = $derived(
+    comentarios
+      .filter((c) => !c.responde_a)
+      .map((raiz) => ({
+        ...raiz,
+        respostas: comentarios.filter((c) => c.responde_a === raiz.id_comentario),
+      })),
+  );
+
   async function carregarConversa(id: number) {
     const [cs, ds] = await Promise.all([
       supabase
         .from("fPautaComentarios")
-        .select("id_comentario, mensagem, criado_em, id_membro, dMembros(nome, apelido)")
+        .select("id_comentario, mensagem, criado_em, editado_em, id_membro, responde_a, dMembros(nome, apelido)")
         .eq("id_pauta", id)
         .order("criado_em"),
       supabase.from("fPautaDecisaoVotos").select("id_membro, opcao").eq("id_pauta", id),
@@ -168,6 +256,7 @@
   }
 
   function fechar() {
+    guardarRascunho();
     if (canal) {
       supabase.removeChannel(canal);
       canal = null;
@@ -193,19 +282,101 @@
   const votar = (p: any) =>
     chamar(p.votei ? "desvotar_pauta" : "votar_pauta", { p_id_pauta: p.id_pauta });
 
+  /* Uma medida só, quando o parágrafo entra na tela: com o corte aplicado,
+     scrollHeight maior que a altura visível quer dizer que sobrou texto. */
+  function medirCorte(node: HTMLElement, id: number) {
+    if (node.scrollHeight - node.clientHeight > 2) cortados = new Set(cortados).add(id);
+  }
+
+  /* A caixa nasce com o cursor dentro: quem clicou em Responder ou Editar já
+     quer digitar, e no celular isso é o teclado subindo sozinho. */
+  function focar(node: HTMLTextAreaElement) {
+    node.focus();
+  }
+
+  function alternarRespostas(id: number) {
+    const novo = new Set(respostasAbertas);
+    if (!novo.delete(id)) novo.add(id);
+    respostasAbertas = novo;
+  }
+
+  function responder(c: any) {
+    respondendoA = c.id_comentario;
+    editandoId = null;
+    resposta = "";
+    // Responder a uma resposta pendura na mesma raiz, igual ao banco faz.
+    respostasAbertas = new Set(respostasAbertas).add(c.responde_a ?? c.id_comentario);
+  }
+
+  function editarComentario(c: any) {
+    editandoId = c.id_comentario;
+    rascunho = c.mensagem;
+    respondendoA = null;
+  }
+
+  async function salvarEdicao() {
+    const texto = rascunho.trim();
+    if (!texto || !editandoId || ocupado) return;
+    // Salvar sem ter mudado nada não pode carimbar "editado" à toa.
+    const antes = comentarios.find((c) => c.id_comentario === editandoId)?.mensagem;
+    if (texto === antes) {
+      editandoId = null;
+      return;
+    }
+    const ok = await chamar(
+      "editar_comentario",
+      { p_id_comentario: editandoId, p_mensagem: texto },
+      true,
+    );
+    if (ok) editandoId = null;
+  }
+
+  async function apagarComentario(c: any) {
+    const ok = await confirmar.pedir({
+      titulo: "Apagar seu comentário?",
+      texto: "Ele some da discussão para todo mundo, e isso não tem volta.",
+      acao: "Apagar",
+      perigo: true,
+    });
+    if (!ok) return;
+    await chamar("excluir_comentario", { p_id_comentario: c.id_comentario }, true);
+  }
+
+  function alternar(id: number) {
+    const novo = new Set(expandidos);
+    if (!novo.delete(id)) novo.add(id);
+    expandidos = novo;
+  }
+
+  async function enviarResposta() {
+    const texto = resposta.trim();
+    if (!texto || !abertaId || ocupado) return;
+    const ok = await chamar(
+      "comentar_pauta",
+      { p_id_pauta: abertaId, p_mensagem: texto, p_responde_a: respondendoA },
+      true,
+    );
+    if (ok) {
+      resposta = "";
+      respondendoA = null;
+      temRascunho = false;
+    }
+  }
+
   async function comentar(e: SubmitEvent) {
     e.preventDefault();
     const texto = mensagem.trim();
     if (!texto || ocupado || !abertaId) return;
     if (await chamar("comentar_pauta", { p_id_pauta: abertaId, p_mensagem: texto }, true)) {
       mensagem = "";
+      temRascunho = false;
     }
   }
 
   async function fecharDecisao(override: string | null) {
     if (!abertaId) return;
     const ok = await confirmar.pedir({
-      titulo: override ? `Encerrar como "${rotuloOpcao(override)}"?` : "Encerrar a votação?",
+      titulo: override ? `Encerrar a votação como "${rotuloOpcao(override)}"?` : "Encerrar a votação?",
       texto: override
         ? "O desfecho fica registrado como escolha do organizador, e não como resultado da contagem."
         : "Vale a opção mais votada. Se der empate, você escolhe.",
@@ -213,6 +384,18 @@
     });
     if (!ok) return;
     await chamar("fechar_decisao", { p_id_pauta: abertaId, p_override: override }, true);
+  }
+
+  async function reabrirDecisao() {
+    if (!abertaId) return;
+    const ok = await confirmar.pedir({
+      titulo: "Reabrir a votação desta pauta?",
+      texto:
+        "A pauta volta ao estado de antes da decisão e a votação abre de novo. Se o desfecho tinha sido Adiar, os votos de prioridade já foram apagados e não voltam.",
+      acao: "Reabrir",
+    });
+    if (!ok) return;
+    await chamar("reabrir_decisao", { p_id_pauta: abertaId }, true);
   }
 
   async function arquivar() {
@@ -227,11 +410,39 @@
     if (await chamar("arquivar_pauta", { p_id_pauta: abertaId })) fechar();
   }
 
+  /* Cada desfecho tem uma cor, e ela é a mesma no voto e no resultado: verde
+     pra quem passa, vermelho pra quem cai, cinza pra quem fica esperando. */
+  const COR_DA_OPCAO: Record<string, string> = {
+    validada: "sim",
+    aprovada: "sim",
+    recusada: "nao",
+    adiada: "espera",
+    mais_teste: "espera",
+  };
+
   const opcoesDa = (p: any) => (p.status === "em_teste" ? OPCOES_TESTE : OPCOES_MERITO);
+
+  /* Depois de decidida a pauta já mudou de status, então a rodada não sai mais
+     dele: sai do desfecho gravado. "Recusada" existe nas duas, e aí o empate
+     de nome cai na de mérito, que é a mais comum. */
+  const opcoesDoDesfecho = (p: any) =>
+    OPCOES_TESTE.some((o) => o.id === p.decisao) && !OPCOES_MERITO.some((o) => o.id === p.decisao)
+      ? OPCOES_TESTE
+      : OPCOES_MERITO;
   const rotuloOpcao = (id: string) =>
     [...OPCOES_MERITO, ...OPCOES_TESTE].find((o) => o.id === id)?.rotulo ?? id;
   const contar = (opcao: string) => decisaoVotos.filter((v) => v.opcao === opcao).length;
   const meuVoto = $derived(decisaoVotos.find((v) => v.id_membro === euId)?.opcao ?? null);
+
+  /* Prazo do admin pra desfazer um engano. O banco recusa depois disso, aqui
+     só some com o botão. */
+  const HORAS_PRA_REABRIR = 24;
+
+  const podeReabrir = $derived(
+    !!aberta?.decidida_em &&
+      isAdminSistema &&
+      agora - new Date(aberta.decidida_em).getTime() < HORAS_PRA_REABRIR * 3600 * 1000,
+  );
 
   const nomeDe = (m: any) => (m?.apelido?.trim() ? m.apelido : (m?.nome ?? "Alguém"));
 
@@ -428,7 +639,7 @@
 
     {#if isAdminSistema && aberta.status === "validada" && aberta.categoria === "nova_modalidade" && !aberta.id_modalidade}
       <p class="det-publicar">
-        Aprovada no teste e esperando virar página.
+        Efetivada depois do teste, esperando virar página.
         <a class="btn btn-primary" href={`/admin/modalidades/new?pauta=${aberta.id_pauta}`}>
           Publicar modalidade
         </a>
@@ -440,13 +651,15 @@
     {#if aberta.decisao_aberta_em}
       <section class="decisao">
         <p class="det-rotulo">Votação em curso</p>
+        <p class="decisao-nota">Clique na sua escolha. Dá pra trocar enquanto a votação estiver aberta.</p>
         <div class="decisao-opcoes">
           {#each opcoesDa(aberta) as o (o.id)}
             <button
               type="button"
-              class="decisao-opcao"
+              class="decisao-opcao decisao-opcao--{COR_DA_OPCAO[o.id]}"
               class:decisao-opcao--minha={meuVoto === o.id}
               disabled={ocupado}
+              aria-pressed={meuVoto === o.id}
               onclick={() =>
                 chamar("votar_decisao", { p_id_pauta: aberta.id_pauta, p_opcao: o.id }, true)}
             >
@@ -455,16 +668,30 @@
             </button>
           {/each}
         </div>
+
         {#if isOrganizador}
-          <div class="decisao-fechar">
-            <button type="button" class="btn btn-primary" disabled={ocupado} onclick={() => fecharDecisao(null)}>
-              Encerrar pela contagem
-            </button>
-            {#each opcoesDa(aberta) as o (o.id)}
-              <button type="button" class="btn btn-ghost btn-sm" disabled={ocupado} onclick={() => fecharDecisao(o.id)}>
-                Encerrar como {o.rotulo}
+          <div class="decisao-encerrar">
+            <p class="decisao-aviso">
+              Atenção: qualquer botão daqui de baixo encerra a votação na hora e
+              aplica o desfecho na pauta.
+            </p>
+            <div class="decisao-fechar">
+              <button type="button" class="btn btn-primary btn-sm" disabled={ocupado} onclick={() => fecharDecisao(null)}>
+                Encerrar pela contagem
               </button>
-            {/each}
+              <span class="decisao-fechar-manual">
+                {#each opcoesDa(aberta) as o (o.id)}
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-sm"
+                    disabled={ocupado}
+                    onclick={() => fecharDecisao(o.id)}
+                  >
+                    {o.verbo}
+                  </button>
+                {/each}
+              </span>
+            </div>
           </div>
         {/if}
       </section>
@@ -485,25 +712,187 @@
       {#if !aberta.id_reuniao}
         <p class="det-nota">A pauta só entra em votação depois de entrar na fila de uma reunião.</p>
       {/if}
+    {:else if aberta.decisao}
+      <!-- Votação encerrada: a apuração continua à vista, com a vencedora
+           preenchida. Quem decide o rumo da pauta é o selo lá em cima; aqui é
+           a contagem que levou até ele. -->
+      <section class="decisao decisao--fechada">
+        <p class="det-rotulo">Como ficou a votação</p>
+        <div class="decisao-opcoes">
+          {#each opcoesDoDesfecho(aberta) as o (o.id)}
+            <span
+              class="decisao-opcao decisao-opcao--{COR_DA_OPCAO[o.id]}"
+              class:decisao-opcao--vencedora={aberta.decisao === o.id}
+            >
+              <span class="decisao-rotulo">{o.rotulo}</span>
+              <span class="decisao-contagem">{contar(o.id)}</span>
+            </span>
+          {/each}
+        </div>
+        {#if podeReabrir}
+          <p class="decisao-nota">
+            Encerrada {horaBR(aberta.decidida_em)}. Como admin do sistema, você pode
+            desfazer nas primeiras {HORAS_PRA_REABRIR} horas.
+          </p>
+          <div>
+            <button type="button" class="btn btn-sm" disabled={ocupado} onclick={reabrirDecisao}>
+              Reabrir a votação
+            </button>
+          </div>
+        {/if}
+      </section>
     {/if}
 
-    <section class="conversa">
-      <p class="det-rotulo">Discussão</p>
-      {#if comentarios.length === 0}
-        <p class="det-nota">Ninguém comentou ainda.</p>
+    <!-- Um desenho só pro comentário, seja ele raiz ou resposta: o que muda
+         entre os dois é o recuo, que é da lista. -->
+    {#snippet comentario(c: any)}
+      <span class="conversa-quem">{nomeDe(c.dMembros)}</span>
+      <span class="conversa-quando">
+        {horaBR(c.criado_em)}{#if c.editado_em}&nbsp;· editado{/if}
+      </span>
+
+      {#if editandoId === c.id_comentario}
+        <form
+          class="conversa-form conversa-form--edicao"
+          onsubmit={(e) => {
+            e.preventDefault();
+            salvarEdicao();
+          }}
+        >
+          <textarea bind:value={rascunho} rows="3" maxlength="2000" use:focar></textarea>
+          <span class="conversa-edicao-acoes">
+            <button type="submit" class="btn btn-sm" disabled={ocupado || !rascunho.trim()}>
+              Salvar
+            </button>
+            <button type="button" class="conversa-link" onclick={() => (editandoId = null)}>
+              cancelar
+            </button>
+          </span>
+        </form>
       {:else}
+        <p
+          class="conversa-texto"
+          class:conversa-texto--curto={!expandidos.has(c.id_comentario)}
+          use:medirCorte={c.id_comentario}
+        >
+          {c.mensagem}
+        </p>
+        <span class="conversa-acoes">
+          {#if cortados.has(c.id_comentario)}
+            <button type="button" class="conversa-link" onclick={() => alternar(c.id_comentario)}>
+              {expandidos.has(c.id_comentario) ? "Mostrar menos" : "Ler mais"}
+            </button>
+          {/if}
+          {#if ["aberta", "em_teste"].includes(aberta.status)}
+            <button type="button" class="conversa-link" onclick={() => responder(c)}>
+              Responder
+            </button>
+            {#if c.id_membro === euId}
+              <button type="button" class="conversa-link" onclick={() => editarComentario(c)}>
+                Editar
+              </button>
+              <!-- Comentário com resposta não se apaga: a FK é cascata e levaria
+                   junto o que os outros escreveram. O botão some aqui e a
+                   `excluir_comentario` recusa de novo no banco. -->
+              {#if !comentarios.some((x) => x.responde_a === c.id_comentario)}
+                <button
+                  type="button"
+                  class="conversa-link conversa-link--perigo"
+                  disabled={ocupado}
+                  onclick={() => apagarComentario(c)}
+                >
+                  Apagar
+                </button>
+              {/if}
+            {/if}
+          {/if}
+        </span>
+      {/if}
+
+      {#if respondendoA === c.id_comentario}
+        <form
+          class="conversa-form conversa-form--edicao"
+          onsubmit={(e) => {
+            e.preventDefault();
+            enviarResposta();
+          }}
+        >
+          <textarea
+            bind:value={resposta}
+            rows="3"
+            maxlength="2000"
+            placeholder="Responder a {nomeDe(c.dMembros)}"
+            use:focar
+          ></textarea>
+          <span class="conversa-edicao-acoes">
+            <button type="submit" class="btn btn-sm" disabled={ocupado || !resposta.trim()}>
+              Responder
+            </button>
+            <button type="button" class="conversa-link" onclick={() => (respondendoA = null)}>
+              cancelar
+            </button>
+          </span>
+        </form>
+      {/if}
+    {/snippet}
+
+    <!-- A discussão inteira mora num cartão que abre e fecha. Fechado é o
+         padrão: durante a reunião o que importa é a votação, e a conversa se
+         anuncia sozinha pela contagem no cabeçalho. -->
+    <details class="conversa-caixa">
+      <summary>
+        <span class="conversa-cab">
+          <span class="det-rotulo">Discussão</span>
+          <span class="conversa-resumo">
+            {#if comentarios.length === 0}
+              Ninguém comentou ainda
+            {:else}
+              {totalRaizes} {totalRaizes === 1 ? "comentário" : "comentários"}, {totalRespostas}
+              {totalRespostas === 1 ? "resposta" : "respostas"}
+            {/if}
+          </span>
+        </span>
+        <span class="conversa-chevron" aria-hidden="true">›</span>
+      </summary>
+
+      <section class="conversa">
+      <!-- Sem comentário nenhum não repete o aviso: o cabeçalho já disse, e
+           aqui embaixo só a caixa de escrever interessa. -->
+      {#if comentarios.length > 0}
         <ul class="conversa-lista">
-          {#each comentarios as c (c.id_comentario)}
+          {#each conversa as c (c.id_comentario)}
             <li>
-              <span class="conversa-quem">{nomeDe(c.dMembros)}</span>
-              <span class="conversa-quando">{horaBR(c.criado_em)}</span>
-              <p class="conversa-texto">{c.mensagem}</p>
+              {@render comentario(c)}
+              {#if c.respostas.length > 0}
+                <button
+                  type="button"
+                  class="conversa-link conversa-abrir"
+                  aria-expanded={respostasAbertas.has(c.id_comentario)}
+                  onclick={() => alternarRespostas(c.id_comentario)}
+                >
+                  {respostasAbertas.has(c.id_comentario) ? "Ocultar" : "Ver"}
+                  {c.respostas.length}
+                  {c.respostas.length === 1 ? "resposta" : "respostas"}
+                </button>
+                {#if respostasAbertas.has(c.id_comentario)}
+                  <ul class="conversa-respostas">
+                    {#each c.respostas as r (r.id_comentario)}
+                      <li>{@render comentario(r)}</li>
+                    {/each}
+                  </ul>
+                {/if}
+              {/if}
             </li>
           {/each}
         </ul>
       {/if}
 
       {#if ["aberta", "em_teste"].includes(aberta.status)}
+        {#if temRascunho}
+          <p class="conversa-rascunho">
+            Recuperamos o que você estava escrevendo antes de fechar a janela.
+          </p>
+        {/if}
         <form class="conversa-form" onsubmit={comentar}>
           <textarea bind:value={mensagem} rows="2" maxlength="2000" placeholder="Escreva aqui"></textarea>
           <button type="submit" class="btn btn-sm" disabled={ocupado || !mensagem.trim()}>
@@ -513,7 +902,8 @@
       {:else}
         <p class="det-nota">Pauta decidida: a discussão está fechada.</p>
       {/if}
-    </section>
+      </section>
+    </details>
 
     {#if erro}
       <p class="admin-error" role="alert">{erro}</p>
@@ -743,6 +1133,10 @@
     line-height: 1.55;
   }
 
+  .conversa-cab .det-rotulo {
+    margin-top: 0;
+  }
+
   .det-rotulo {
     margin-top: 4px;
     font-size: 0.68rem;
@@ -768,12 +1162,29 @@
   }
 
   .det-acoes,
-  .det-publicar,
-  .decisao-fechar {
+  .det-publicar {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: center;
     gap: 8px;
+  }
+
+  /* Encerrar pela contagem é o caminho normal e fica sozinho na primeira
+     linha; os três desfechos manuais vêm embaixo, com folga entre eles, porque
+     clicar no errado aqui não tem desfazer. */
+  .decisao-fechar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 12px;
+    margin-top: 2px;
+  }
+
+  .decisao-fechar-manual {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
   }
 
   .decisao {
@@ -789,21 +1200,80 @@
     gap: 8px;
   }
 
+  .decisao-nota,
+  .decisao-aviso {
+    font-size: 0.78rem;
+    color: var(--ds-text-4);
+  }
+
+  .decisao-encerrar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+    padding-top: 10px;
+    border-top: 1px solid var(--ds-line);
+  }
+
+  /* O aviso fica ao lado do que ele avisa, e não perdido no meio do cartão:
+     estes botões não pedem confirmação segunda vez depois do sim. */
+  .decisao-aviso {
+    color: #f0a67e;
+  }
+
   .decisao-opcao {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border: 1px solid var(--ds-line-strong);
+    border: 1px solid var(--ds-cor-linha, var(--ds-line-strong));
     border-radius: 10px;
     background: var(--ds-surface-solid);
-    color: var(--ds-text-2);
+    color: var(--ds-cor-texto, var(--ds-text-2));
     cursor: pointer;
   }
 
+  /* Cada desfecho carrega sua cor em duas variáveis, e os estados abaixo só
+     mudam quanto dela aparece: contorno no repouso, fundo lavado na sua
+     escolha, sólido na vencedora. Assim não existe uma regra por combinação
+     de cor e estado. */
+  .decisao-opcao--sim {
+    --ds-cor: #4fd18b;
+    --ds-cor-texto: #4fd18b;
+    --ds-cor-linha: rgba(79, 209, 139, 0.4);
+    --ds-cor-fundo: #0e2a1c;
+  }
+
+  .decisao-opcao--nao {
+    --ds-cor: #f0776e;
+    --ds-cor-texto: #f0776e;
+    --ds-cor-linha: rgba(240, 119, 110, 0.4);
+    --ds-cor-fundo: #2a1414;
+  }
+
+  .decisao-opcao--espera {
+    --ds-cor: var(--ds-text-3);
+    --ds-cor-texto: var(--ds-text-3);
+    --ds-cor-linha: var(--ds-line-strong);
+    --ds-cor-fundo: var(--ds-surface);
+  }
+
   .decisao-opcao--minha {
-    border-color: var(--ds-gold);
-    color: var(--ds-gold);
+    border-color: var(--ds-cor);
+    background: var(--ds-cor-fundo);
+  }
+
+  /* A que levou a votação fica cheia da própria cor. O texto vai pro fundo
+     escuro do site, que é o que dá contraste em cima de verde e de vermelho. */
+  .decisao-opcao--vencedora {
+    border-color: var(--ds-cor);
+    background: var(--ds-cor);
+    color: var(--ds-bg);
+    font-weight: 700;
+  }
+
+  .decisao--fechada .decisao-opcao {
+    cursor: default;
   }
 
   .decisao-contagem {
@@ -811,11 +1281,112 @@
     font-variant-numeric: tabular-nums;
   }
 
+  .conversa-caixa {
+    padding: 12px;
+    border: 1px solid var(--ds-line);
+    border-radius: 12px;
+    background: var(--ds-surface);
+  }
+
+  .conversa-caixa summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .conversa-caixa summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .conversa-caixa[open] summary {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--ds-line);
+  }
+
+  .conversa-cab {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    min-width: 0;
+  }
+
+  .conversa-rascunho {
+    font-size: 0.78rem;
+    color: var(--ds-gold-light);
+  }
+
+  .conversa-resumo {
+    font-size: 0.8rem;
+    color: var(--ds-text-4);
+  }
+
+  .conversa-chevron {
+    flex: none;
+    color: var(--ds-gold);
+    transition: transform 0.2s ease;
+  }
+
+  .conversa-caixa[open] .conversa-chevron {
+    transform: rotate(90deg);
+  }
+
   .conversa-lista {
     display: flex;
     flex-direction: column;
     gap: 10px;
     list-style: none;
+  }
+
+
+  /* Duas linhas e corta. O botão só aparece pra quem transbordou de verdade. */
+  .conversa-texto--curto {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+
+  .conversa-acoes {
+    display: flex;
+    gap: 12px;
+    margin-top: 2px;
+  }
+
+  .conversa-link {
+    padding: 0;
+    border: 0;
+    background: none;
+    color: var(--ds-gold-light);
+    font-size: 0.78rem;
+    cursor: pointer;
+  }
+
+  /* Um nível de recuo, e só. O banco achata resposta de resposta pro mesmo
+     pai, então esta lista nunca aninha de novo. */
+  .conversa-respostas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 8px 0 0 14px;
+    padding-left: 10px;
+    border-left: 2px solid var(--ds-line);
+    list-style: none;
+  }
+
+  /* O mesmo vermelho do `.btn-danger`, que é o `--ds-danger` clareado pra ler
+     no fundo escuro. O token puro é escuro demais pra texto pequeno. */
+  .conversa-link--perigo {
+    color: #e57368;
+  }
+
+  .conversa-abrir {
+    display: block;
+    margin-top: 6px;
   }
 
   .conversa-quem {
@@ -827,6 +1398,19 @@
     display: flex;
     gap: 8px;
     align-items: flex-end;
+  }
+
+  .conversa-form--edicao {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .conversa-edicao-acoes {
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
 
   /* A caixa de comentário fica fora de um `.admin-form`, e é lá que mora o

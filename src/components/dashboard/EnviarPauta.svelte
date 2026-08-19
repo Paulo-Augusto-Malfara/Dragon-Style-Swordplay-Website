@@ -28,22 +28,12 @@
     { id: "nova_modalidade", rotulo: "Nova modalidade" },
   ];
 
-  const STATUS: Record<string, string> = {
-    aberta: "Na fila",
-    em_teste: "Em teste",
-    validada: "Validada",
-    recusada: "Recusada",
-    aprovada: "Aprovada",
-    arquivada: "Arquivada",
-  };
-
   const TITULO_MAX = 120;
   const CORPO_MAX = 4000;
   const OBJETIVO_MAX = 200;
 
   let teto = $state(0);
   let saldo = $state(0);
-  let minhas = $state<any[]>([]);
   let carregando = $state(true);
 
   let dialogo: HTMLDialogElement;
@@ -84,18 +74,11 @@
 
   async function carregar() {
     const supabase = await getSupabase();
-    const [creditos, pautas] = await Promise.all([
-      supabase.rpc("meus_creditos_pauta"),
-      supabase
-        .from("fPautas")
-        .select("id_pauta, categoria, titulo, status, criada_em")
-        .order("criada_em", { ascending: false }),
-    ]);
-    if (creditos.data) {
-      teto = creditos.data.teto ?? 0;
-      saldo = creditos.data.saldo ?? 0;
+    const { data } = await supabase.rpc("meus_creditos_pauta");
+    if (data) {
+      teto = data.teto ?? 0;
+      saldo = data.saldo ?? 0;
     }
-    minhas = pautas.data ?? [];
     carregando = false;
   }
 
@@ -153,8 +136,6 @@
     await carregar();
   }
 
-  const dataBR = (d: string) =>
-    new Date(d).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
 </script>
 
 {#if !carregando}
@@ -180,17 +161,6 @@
       </p>
     {/if}
 
-    {#if minhas.length > 0}
-      <ul class="pautas-lista">
-        {#each minhas as p (p.id_pauta)}
-          <li>
-            <span class="pautas-item-titulo">{p.titulo}</span>
-            <span class="status-badge status-badge--{p.status}">{STATUS[p.status] ?? p.status}</span>
-            <span class="pautas-data">{dataBR(p.criada_em)}</span>
-          </li>
-        {/each}
-      </ul>
-    {/if}
   </section>
 {/if}
 
@@ -350,35 +320,9 @@
   }
 
   .pautas-sub,
-  .pautas-vazio,
-  .pautas-data {
+  .pautas-vazio {
     font-size: 0.78rem;
     color: var(--ds-text-4);
-  }
-
-  .pautas-lista {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    list-style: none;
-  }
-
-  .pautas-lista li {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 0.84rem;
-  }
-
-  /* Só o título estica. O selo e a data dimensionam pelo próprio conteúdo, e o
-     seletor é de filho direto de propósito: descendente solto alcançaria o
-     `.status-badge` aqui dentro e esticaria ele junto. */
-  .pautas-lista li > .pautas-item-titulo {
-    flex: 1;
-    min-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .cats {

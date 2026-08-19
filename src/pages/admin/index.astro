@@ -20,7 +20,7 @@ const inicioDoAno = hojeBR.slice(0, 4) + "-01-01";
 // E, junto disso, os quatro números que respondem "como está o grupo" sem
 // precisar entrar em seção nenhuma. Todas as consultas são contagem (head:
 // true não traz linha, só o total) ou uma linha só.
-const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes, torneios] = await Promise.all([
+const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes, pautas, torneios] = await Promise.all([
   supabase
     .from("fTreinos")
     .select("id_treino, data_treino, status")
@@ -64,6 +64,12 @@ const [treino, evento, ativos, treinosDoAno, proximo, aprovacoes, torneios] = aw
           "foto_pendente_em.not.is.null,apelido_pendente.not.is.null,and(email.not.is.null,auth_user_id.is.null)"
         )
     : Promise.resolve({ count: 0 }),
+  // Pautas esperando decisão. Todo mundo que entra no painel é staff, e votar
+  // nelas é trabalho de staff, então não tem recorte de cargo aqui.
+  supabase
+    .from("fPautas")
+    .select("id_pauta", { count: "exact", head: true })
+    .eq("status", "aberta"),
   // Lista, e não maybeSingle como o treino: pode haver mais de um torneio de
   // pé ao mesmo tempo, e todos precisam aparecer aqui.
   supabase
@@ -107,6 +113,12 @@ const numeros: Numero[] = [
         },
       ]
     : []),
+  {
+    valor: pautas.count ?? 0,
+    rotulo: "Pautas na fila",
+    href: "/admin/pautas",
+    acao: "Abrir mural",
+  },
 ];
 
 const emAberto = [
