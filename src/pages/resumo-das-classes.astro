@@ -60,8 +60,13 @@ const sistema = [
   description="As 10 classes do Dragon Style, com armamento, alcance e dificuldade de cada uma."
   resumo="São 10 classes, e a classe define quais armas você pode levar para o treino. Escolha uma para começar, trocar depois é livre."
 >
-  <section class="cl-guia" aria-label="Guia de escolha">
-    <h2>Não sabe qual escolher?</h2>
+  {/* Fechado por padrão: no celular esse guia empurrava a grade das classes
+      pra baixo da dobra. `details` nativo, sem script. */}
+  <details class="cl-guia">
+    <summary>
+      <h2>Não sabe qual escolher?</h2>
+      <span class="cl-guia-chevron" aria-hidden="true">›</span>
+    </summary>
     <dl>
       {
         guia.map((g) => (
@@ -83,7 +88,7 @@ const sistema = [
       Nenhuma escolha é definitiva: você pode registrar treino com uma classe
       hoje e outra na semana que vem, sem perder o que já acumulou.
     </p>
-  </section>
+  </details>
 
   <h2 class="cl-titulo">As 10 classes</h2>
 
@@ -149,9 +154,36 @@ const sistema = [
     background: var(--ds-surface);
   }
 
+  .cl-guia summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .cl-guia summary::-webkit-details-marker {
+    display: none;
+  }
+
   .cl-guia h2 {
-    margin: 0 0 12px;
+    margin: 0;
     font-size: 1.15rem;
+  }
+
+  .cl-guia[open] h2 {
+    margin-bottom: 12px;
+  }
+
+  .cl-guia-chevron {
+    flex: none;
+    color: var(--ds-gold);
+    transition: transform 0.2s ease;
+  }
+
+  .cl-guia[open] .cl-guia-chevron {
+    transform: rotate(90deg);
   }
 
   .cl-guia dl {
