@@ -2928,6 +2928,55 @@ p {
   align-self: center;
 }
 
+/* ======== LINHA DE AGENDA (painel) ========
+ *
+ * Saiu do <style> escopado do AgendaList quando a lista de reuniões passou a
+ * desenhar a mesma linha. Estilo escopado do Svelte não alcança outro
+ * componente, e a alternativa era a mesma receita escrita duas vezes, livre
+ * pra divergir.
+ */
+/* Bloco de data à esquerda da linha, como num cartão de agenda: a data é a
+   chave do registro, não mais uma frase corrida junto do endereço. */
+.agenda-data {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 74px;
+  padding-right: 12px;
+  border-right: 1px solid var(--ds-line);
+  font-size: 0.75rem;
+  color: var(--ds-text-4);
+}
+
+/* O capitalize existe pro dia da semana, que sai minúsculo do toLocaleDateString
+   ("dom, 16/08"). Ele morava no bloco inteiro e alcançava também a linha do
+   horário, onde virava "15:00 Às 18:00". Escopado no filho direto, como manda
+   a convenção deste projeto. */
+.agenda-data > strong {
+  text-transform: capitalize;
+  font-family: var(--ds-font-display);
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--ds-gold-light);
+}
+
+.agenda-passados {
+  max-width: 760px;
+  margin: 1.4em auto 1em;
+}
+
+.agenda-passados summary {
+  cursor: pointer;
+  padding: 0.5em 0;
+  font-size: 0.88rem;
+  color: var(--ds-text-3);
+}
+
+.agenda-passados summary:hover {
+  color: var(--ds-gold-light);
+}
+
 /* ponytail: pill/tag-style badges (.status-badge, .stat-pill, .belt-swatch, ...)
    must always hug their text -- width/min-width/flex explicitly reset here so a
    descendant selector elsewhere (ex: ".list li span") can never stretch one by
@@ -2946,13 +2995,15 @@ p {
   white-space: nowrap;
 }
 
-.status-badge--agendado {
+.status-badge--agendado,
+.status-badge--agendada {
   background: #0e2a1c;
   color: #4fd18b;
   border: 1px solid rgba(79, 209, 139, 0.35);
 }
 
-.status-badge--cancelado {
+.status-badge--cancelado,
+.status-badge--cancelada {
   background: #2a1414;
   color: #f0776e;
   border: 1px solid rgba(240, 119, 110, 0.35);
@@ -2960,7 +3011,8 @@ p {
 
 /* Treino que já aconteceu. Nem verde nem vermelho: não é um treino que vem, e
    também não é um que foi desmarcado. Dourado apagado, o tom de arquivo. */
-.status-badge--realizado {
+.status-badge--realizado,
+.status-badge--realizada {
   background: var(--ds-gold-wash);
   color: var(--ds-gold-deep);
   border: 1px solid var(--ds-gold-dim);
@@ -2995,6 +3047,42 @@ p {
   background: #2a1414;
   color: #f0776e;
   border: 1px solid rgba(240, 119, 110, 0.35);
+}
+
+/* Estados de pauta. Reaproveitam os três tons que a casa já usa: verde pro que
+   está de pé, dourado pro que exige alguém agir ou já venceu a etapa, vermelho
+   pro que caiu. "Em teste" é o único que ganha o dourado vivo dos avisos de
+   ação, porque é o estado em que o grupo tem tarefa: jogar a modalidade. */
+.status-badge--aberta {
+  background: #0e2a1c;
+  color: #4fd18b;
+  border: 1px solid rgba(79, 209, 139, 0.35);
+}
+
+.status-badge--em_teste {
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-light);
+  border: 1px solid var(--ds-gold);
+}
+
+.status-badge--validada,
+.status-badge--aprovada {
+  background: var(--ds-gold-wash);
+  color: var(--ds-gold-deep);
+  border: 1px solid var(--ds-gold-dim);
+}
+
+.status-badge--recusada {
+  background: #2a1414;
+  color: #f0776e;
+  border: 1px solid rgba(240, 119, 110, 0.35);
+}
+
+/* Arquivada não é derrota nem vitória: some do caminho e fica cinza. */
+.status-badge--arquivada {
+  background: var(--ds-bg);
+  color: var(--ds-text-4);
+  border: 1px solid var(--ds-line);
 }
 
 /* ======== CONFIRMAÇÃO DE PRESENÇA (agenda) ======== */

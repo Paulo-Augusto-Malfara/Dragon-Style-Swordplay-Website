@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import LoginForm from "../auth/LoginForm.svelte";
   import AvatarUploader from "./AvatarUploader.svelte";
+  import EnviarPauta from "./EnviarPauta.svelte";
   import { corDaFaixa } from "../../lib/faixa";
   import {
     CLASSE_BASICO,
@@ -543,6 +544,8 @@
           <span class="value">{totalTreinos}</span>
         </div>
       </div>
+
+      <EnviarPauta {getSupabase} />
 
       {#if !editingApelido}
         <!-- Sobrou uma ação de texto só, e ela ganhou o botão cheio do site (o

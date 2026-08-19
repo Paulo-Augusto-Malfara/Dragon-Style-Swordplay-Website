@@ -3,8 +3,13 @@
 
   interface Props {
     id: string;
+    /* Id da pauta aprovada que originou esta modalidade, quando a criação veio
+       do mural. Só o admin do sistema chega aqui com isso preenchido, e a
+       gravação passa a ser pela RPC, que numa transação só cria a modalidade,
+       fecha a pauta e paga os 10 PH ao autor. */
+    pauta?: number | null;
   }
-  const { id }: Props = $props();
+  const { id, pauta = null }: Props = $props();
   const isNew = id === "new";
 
   let slug = $state("");
@@ -15,11 +20,50 @@
   let requirements = $state("");
   let minParticipantes = $state(0);
   let variations = $state("");
-  let status = $state<"idle" | "loading" | "saving" | "saved" | "error">(isNew ? "idle" : "loading");
+  let status = $state<"idle" | "loading" | "saving" | "saved" | "error">(
+    isNew && !pauta ? "idle" : "loading",
+  );
   let errorMessage = $state("");
+  let autorDaPauta = $state("");
 
   const toLines = (arr: string[] | null) => (arr ?? []).join("\n");
   const toArray = (text: string) => text.split("\n").map((l) => l.trim()).filter(Boolean);
+
+  /* Endereço sugerido a partir do título, só como ponto de partida: quem
+     publica revisa antes de salvar. Sem acento, sem símbolo, sem hífen dobrado. */
+  const sugerirSlug = (texto: string) =>
+    texto
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  async function loadPauta() {
+    const { data, error } = await supabase
+      .from("fPautas")
+      .select("titulo, corpo, proposta, dMembros(nome, apelido)")
+      .eq("id_pauta", pauta)
+      .single();
+    if (error) {
+      status = "error";
+      errorMessage = error.message;
+      return;
+    }
+    const proposta = (data.proposta ?? {}) as Record<string, any>;
+    title = data.titulo;
+    slug = sugerirSlug(data.titulo);
+    // A descrição da modalidade é o corpo da pauta: quem propôs escreveu ali
+    // como o jogo funciona, e não existe um segundo campo pra mesma coisa.
+    description = data.corpo;
+    objective = toLines(proposta.objective);
+    scoringRespawn = toLines(proposta.scoring_respawn);
+    requirements = toLines(proposta.requirements);
+    variations = toLines(proposta.variations);
+    minParticipantes = proposta.min_participantes ?? 0;
+    autorDaPauta = data.dMembros?.apelido?.trim() || data.dMembros?.nome || "";
+    status = "idle";
+  }
 
   async function load() {
     const { data, error } = await supabase.from("modalidades").select("*").eq("id", id).single();
@@ -52,25 +96,45 @@
       min_participantes: Number(minParticipantes) || 0,
       variations: toArray(variations),
     };
-    const { error } = isNew
-      ? await supabase.from("modalidades").insert(payload)
-      : await supabase.from("modalidades").update(payload).eq("id", id);
+    const { error } = pauta
+      ? await supabase.rpc("publicar_modalidade_da_pauta", {
+          p_id_pauta: pauta,
+          p_slug: payload.slug,
+          p_title: payload.title,
+          p_description: payload.description,
+          p_objective: payload.objective,
+          p_scoring_respawn: payload.scoring_respawn,
+          p_requirements: payload.requirements,
+          p_variations: payload.variations,
+          p_min_participantes: payload.min_participantes,
+        })
+      : isNew
+        ? await supabase.from("modalidades").insert(payload)
+        : await supabase.from("modalidades").update(payload).eq("id", id);
     if (error) {
       status = "error";
       errorMessage = error.message;
       return;
     }
     status = "saved";
-    window.location.href = "/admin/modalidades";
+    window.location.href = pauta ? "/admin/pautas" : "/admin/modalidades";
   }
 
-  if (!isNew) load();
+  if (pauta) loadPauta();
+  else if (!isNew) load();
 </script>
 
 {#if status === "loading"}
   <div class="esqueleto esqueleto-form"></div>
 {:else}
   <form class="admin-form" onsubmit={save}>
+    {#if pauta}
+      <p class="admin-form-nota">
+        Proposta de {autorDaPauta || "um membro"}, aprovada no fim do teste.
+        Salvar publica a modalidade e credita 10 PH a quem teve a ideia.
+      </p>
+    {/if}
+
     <p class="admin-form-titulo">Identificação</p>
 
     <div class="campos">
@@ -123,9 +187,15 @@
 
     <div class="form-acoes">
       <button type="submit" class="btn btn-primary" disabled={status === "saving"}>
-        {status === "saving" ? "Salvando..." : isNew ? "Criar modalidade" : "Salvar alterações"}
+        {status === "saving"
+          ? "Salvando..."
+          : pauta
+            ? "Publicar e creditar 10 PH"
+            : isNew
+              ? "Criar modalidade"
+              : "Salvar alterações"}
       </button>
-      <a href="/admin/modalidades" class="btn btn-ghost">Cancelar</a>
+      <a href={pauta ? "/admin/pautas" : "/admin/modalidades"} class="btn btn-ghost">Cancelar</a>
     </div>
 
     {#if status === "error"}

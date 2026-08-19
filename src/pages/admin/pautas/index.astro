@@ -1,0 +1,23 @@
+---
+import AdminShell from "../../../components/admin/AdminShell.astro";
+import PautasMural from "../../../components/admin/PautasMural.svelte";
+
+export const prerender = false;
+
+// Sem trava extra aqui de propósito: o piso desta página é staff, que é
+// exatamente o que o middleware de /admin/* já garante. Quem separa
+// organizador de staff são os botões de abrir e fechar votação, e a trava de
+// verdade deles está na RPC, não na tela.
+const { membro } = Astro.locals;
+---
+
+<AdminShell
+  title="Pautas"
+  resumo="O que o grupo mandou pra reunião. As três mais votadas entram; o resto fica na fila."
+>
+  <PautasMural
+    isOrganizador={membro.isOrganizador}
+    isAdminSistema={membro.isAdminSistema}
+    client:load
+  />
+</AdminShell>

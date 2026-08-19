@@ -10,11 +10,20 @@ const { id } = Astro.params;
 // não é organizador chegava aqui pela URL e só descobria no salvar.
 const { membro } = Astro.locals;
 if (!membro.isOrganizador) return Astro.redirect("/admin");
+
+// Publicar uma modalidade que veio de pauta aprovada não é a mesma coisa que
+// criar uma na mão: além de publicar, credita 10 PH ao autor. Isso é do admin
+// do sistema, como toda escrita de PH neste painel. A RPC recusa de novo, mas a
+// tela não pode deixar chegar até o salvar pra só então dizer não.
+const pauta = Number(Astro.url.searchParams.get("pauta")) || null;
+if (pauta && !membro.isAdminSistema) return Astro.redirect("/admin/pautas");
 ---
 
 <AdminShell
-  title={id === "new" ? "Nova modalidade" : "Editar modalidade"}
-  voltar={{ href: "/admin/modalidades", label: "Modalidades" }}
+  title={pauta ? "Publicar modalidade" : id === "new" ? "Nova modalidade" : "Editar modalidade"}
+  voltar={pauta
+    ? { href: "/admin/pautas", label: "Pautas" }
+    : { href: "/admin/modalidades", label: "Modalidades" }}
 >
-  <ModalidadeEditor id={id} client:load />
+  <ModalidadeEditor id={id} {pauta} client:load />
 </AdminShell>

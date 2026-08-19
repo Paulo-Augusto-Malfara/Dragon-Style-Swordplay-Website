@@ -1,6 +1,7 @@
 ---
 import AdminShell from "../../../components/admin/AdminShell.astro";
 import AgendaList from "../../../components/admin/AgendaList.svelte";
+import ReunioesList from "../../../components/admin/ReunioesList.svelte";
 
 export const prerender = false;
 
@@ -9,8 +10,9 @@ if (!membro.isOrganizador) return Astro.redirect("/admin");
 ---
 
 <AdminShell
-  title="Agenda de Treinos"
-  resumo="O grupo não tem dia fixo, então é aqui que os próximos treinos são marcados."
+  title="Agenda"
+  resumo="Os próximos treinos do grupo e as reuniões de staff. Só o treino aparece no site público."
 >
   <AgendaList client:load />
+  <ReunioesList client:load />
 </AdminShell>
