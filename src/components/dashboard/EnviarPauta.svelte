@@ -39,6 +39,7 @@
 
   const TITULO_MAX = 120;
   const CORPO_MAX = 4000;
+  const OBJETIVO_MAX = 200;
 
   let teto = $state(0);
   let saldo = $state(0);
@@ -49,6 +50,11 @@
   let categoria = $state("ideia");
   let titulo = $state("");
   let corpo = $state("");
+  /* Uma linha dizendo o que a pauta quer melhorar. Opcional, e serve pro staff
+     entender a proposta antes de abrir o corpo inteiro na reunião. Vai no mesmo
+     `proposta` jsonb que a modalidade usa, que é onde mora o extra estruturado
+     de cada categoria. */
+  let resumoObjetivo = $state("");
   /* Campos da proposta de modalidade, um item por linha, do mesmo jeito que o
      ModalidadeEditor do painel pede. A descrição não está aqui: ela é o
      `corpo`, que toda pauta tem. */
@@ -124,7 +130,9 @@
             variations: linhas(variacoes),
             min_participantes: Number(minParticipantes) || 0,
           }
-        : null,
+        : resumoObjetivo.trim()
+          ? { objetivo: resumoObjetivo.trim() }
+          : null,
     });
 
     enviando = false;
@@ -135,6 +143,7 @@
 
     titulo = "";
     corpo = "";
+    resumoObjetivo = "";
     objetivo = "";
     pontuacao = "";
     requisitos = "";
@@ -218,6 +227,17 @@
         <input type="text" bind:value={titulo} maxlength={TITULO_MAX} required />
         <small>{titulo.trim().length}/{TITULO_MAX}</small>
       </label>
+
+      {#if !ehModalidade}
+        <label class="campo-largo">
+          Objetivo (opcional)
+          <input type="text" bind:value={resumoObjetivo} maxlength={OBJETIVO_MAX} />
+          <small>
+            Resuma em poucas palavras o que essa {CATEGORIAS.find((c) => c.id === categoria)
+              ?.rotulo.toLowerCase()} almeja melhorar ou corrigir.
+          </small>
+        </label>
+      {/if}
 
       <label class="campo-largo">
         {ehModalidade ? "Como a modalidade funciona" : "Escreva com calma"}

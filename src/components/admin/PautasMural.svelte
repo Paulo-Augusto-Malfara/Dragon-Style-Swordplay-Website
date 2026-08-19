@@ -90,6 +90,10 @@
     filtro === "fila" ? naFila : filtro === "teste" ? emTeste : arquivo,
   );
 
+  /* O teto é o mesmo da `votar_pauta` no banco, que é quem recusa de verdade.
+     Aqui ele só desenha e desabilita o botão. */
+  const VOTOS_POR_REUNIAO = 3;
+
   /* Votos que a pessoa já gastou nesta reunião. Sai da própria lista, e não de
      uma consulta à parte, pra não existirem dois números que podem divergir. */
   const votosUsados = $derived(naFila.filter((p) => p.votei).length);
@@ -270,13 +274,29 @@
         <span class="cabeca-valor">{dataHoraBR(reuniao.data_hora)}</span>
         {#if reuniao.local}<span class="cabeca-local">{reuniao.local}</span>{/if}
       </p>
-      <p class="cabeca-sub">
-        {#if janelaAberta}
-          Votação aberta, fecha em {faltam(janelaFecha)}. Você usou {votosUsados} de 3 votos.
-        {:else}
-          Votação encerrada: falta menos de 24h para a reunião.
-        {/if}
-      </p>
+      {#if janelaAberta}
+        <!-- Mesmo par número+rótulo do cartão de créditos do perfil: o staff
+             precisa bater o olho e saber quantos votos ainda tem na mão. -->
+        <div class="votos-saldo">
+          <span class="votos-numero">{VOTOS_POR_REUNIAO - votosUsados}<span class="votos-de"
+              >/{VOTOS_POR_REUNIAO}</span
+            ></span>
+          <span class="votos-texto">
+            <span class="votos-titulo">
+              {VOTOS_POR_REUNIAO - votosUsados === 1 ? "voto restante" : "votos restantes"}
+            </span>
+            <span class="votos-sub">
+              {#if votosUsados >= VOTOS_POR_REUNIAO}
+                Você já usou os {VOTOS_POR_REUNIAO}. Tire um voto para mover para outra pauta.
+              {:else}
+                A votação fecha em {faltam(janelaFecha)}.
+              {/if}
+            </span>
+          </span>
+        </div>
+      {:else}
+        <p class="cabeca-sub">Votação encerrada: falta menos de 24h para a reunião.</p>
+      {/if}
     {:else}
       <p class="cabeca-sub">
         Nenhuma reunião agendada. As pautas ficam esperando, e a votação só abre
@@ -343,7 +363,7 @@
               <button
                 type="button"
                 class="btn btn-ghost btn-sm"
-                disabled={!janelaAberta || ocupado || (!p.votei && votosUsados >= 3)}
+                disabled={!janelaAberta || ocupado || (!p.votei && votosUsados >= VOTOS_POR_REUNIAO)}
                 onclick={() => votar(p)}
               >
                 {p.votei ? "Tirar voto" : "Votar"}
@@ -379,6 +399,12 @@
     </span>
     <h2 class="det-titulo">{aberta.titulo}</h2>
     <p class="det-autor">Por {aberta.autor} · {horaBR(aberta.criada_em)}</p>
+
+    {#if aberta.categoria !== "nova_modalidade" && aberta.proposta?.objetivo}
+      <p class="det-rotulo">Objetivo</p>
+      <p class="det-corpo">{aberta.proposta.objetivo}</p>
+      <p class="det-rotulo">O que foi escrito</p>
+    {/if}
 
     <p class="det-corpo">{aberta.corpo}</p>
 
@@ -515,6 +541,47 @@
     border: 1px solid var(--ds-line);
     border-radius: 12px;
     background: var(--ds-bg);
+  }
+
+  .votos-saldo {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-top: 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    background: var(--ds-surface);
+  }
+
+  .votos-numero {
+    flex: none;
+    font-family: var(--ds-font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--ds-gold);
+  }
+
+  .votos-de {
+    font-size: 0.9rem;
+    color: var(--ds-text-4);
+  }
+
+  .votos-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .votos-titulo {
+    font-size: 0.9rem;
+  }
+
+  .votos-sub {
+    font-size: 0.78rem;
+    color: var(--ds-text-4);
   }
 
   .cabeca-linha {
