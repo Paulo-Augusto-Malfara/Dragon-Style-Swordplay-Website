@@ -1741,6 +1741,16 @@ p {
   border-radius: var(--card-radius);
 }
 
+/* Dentro de uma janela o formulário não é cartão: a janela já é o cartão, e o
+   segundo quadro dentro dela come largura duas vezes no celular. */
+.janela .admin-form {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+}
+
 /* No celular o respiro lateral deste cartão é largura que some duas vezes: uma
    de cada lado, e é dentro dele que ficam as grades de dois por linha do
    registro de presença. O vertical continua igual, que é o que separa uma

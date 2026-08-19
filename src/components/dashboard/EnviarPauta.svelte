@@ -213,7 +213,7 @@
     </div>
 
     <div class="campos">
-      <label>
+      <label class="campo-largo">
         Título
         <input type="text" bind:value={titulo} maxlength={TITULO_MAX} required />
         <small>{titulo.trim().length}/{TITULO_MAX}</small>
