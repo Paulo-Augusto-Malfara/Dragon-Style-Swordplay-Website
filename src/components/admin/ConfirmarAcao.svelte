@@ -22,6 +22,15 @@
    *   <ConfirmarAcao bind:this={confirmar} />
    *   if (!(await confirmar.pedir({ titulo: "...", perigo: true }))) return;
    */
+  interface Campo {
+    /** Rótulo em cima da caixa de texto. */
+    rotulo: string;
+    /** Sem texto, o botão de confirmar fica desligado. */
+    obrigatorio?: boolean;
+    dica?: string;
+    max?: number;
+  }
+
   interface Pedido {
     titulo: string;
     /** A consequência, em uma frase. */
@@ -30,25 +39,50 @@
     acao?: string;
     /** Pinta o botão de confirmar de vermelho. */
     perigo?: boolean;
+    /** Pede um texto junto da confirmação. Ver `pedirComTexto`. */
+    campo?: Campo;
   }
 
   let dialogo: HTMLDialogElement;
   let pedido = $state<Pedido | null>(null);
-  let responder: ((ok: boolean) => void) | null = null;
+  let valor = $state("");
+  let responder: ((r: any) => void) | null = null;
+
+  const faltaTexto = $derived(!!pedido?.campo?.obrigatorio && valor.trim().length === 0);
 
   export function pedir(p: Pedido): Promise<boolean> {
     pedido = p;
+    valor = "";
     dialogo.showModal();
     return new Promise((r) => (responder = r));
+  }
+
+  /* Mesma caixa, com um texto junto. Devolve o que foi escrito, ou null se a
+     pessoa cancelou. Função à parte porque `pedir` devolve booleano em catorze
+     lugares do painel, e string vazia é falsa: misturar as duas trocaria um
+     "sim" por "não" no dia em que alguém confirmasse sem escrever nada. */
+  export function pedirComTexto(p: Pedido & { campo: Campo }): Promise<string | null> {
+    pedido = p;
+    valor = "";
+    dialogo.showModal();
+    return new Promise((r) => (responder = r));
+  }
+
+  /* Cursor na caixa assim que ela aparece: quem confirmou já quer escrever. */
+  function focar(node: HTMLTextAreaElement) {
+    node.focus();
   }
 
   function fechar(ok: boolean) {
     // Zera antes de fechar: close() dispara o evento "close", que chama
     // fechar(false) de novo, e sem isso um "sim" viraria "não" no caminho.
     const r = responder;
+    const comCampo = !!pedido?.campo;
+    const texto = valor.trim();
     responder = null;
     if (dialogo.open) dialogo.close();
-    r?.(ok);
+    if (!r) return;
+    r(comCampo ? (ok ? texto : null) : ok);
   }
 </script>
 
@@ -67,11 +101,26 @@
     {#if pedido.texto}
       <p>{pedido.texto}</p>
     {/if}
+    {#if pedido.campo}
+      <label class="confirmar-campo">
+        {pedido.campo.rotulo}
+        <textarea
+          bind:value={valor}
+          rows="3"
+          maxlength={pedido.campo.max ?? 1000}
+          use:focar
+        ></textarea>
+        {#if pedido.campo.dica}
+          <small>{pedido.campo.dica}</small>
+        {/if}
+      </label>
+    {/if}
     <div class="confirmar-acoes">
       <button type="button" class="btn btn-ghost" onclick={() => fechar(false)}>Cancelar</button>
       <button
         type="button"
         class="btn {pedido.perigo ? 'btn-danger' : 'btn-primary'}"
+        disabled={faltaTexto}
         onclick={() => fechar(true)}
       >
         {pedido.acao ?? "Confirmar"}
@@ -114,6 +163,43 @@
     font-size: 0.92rem;
     line-height: 1.55;
     color: var(--ds-text-3);
+  }
+
+  .confirmar-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4em;
+    margin-top: 1em;
+    font-size: 0.78rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ds-text-4);
+    text-align: left;
+  }
+
+  /* A caixa fica fora de um `.admin-form`, que é onde mora o desenho dos
+     campos do painel. Sem isto ela sai branca e monoespaçada. */
+  .confirmar-campo textarea {
+    padding: 0.6em 0.8em;
+    border: 1px solid var(--ds-line-strong);
+    border-radius: 10px;
+    background: var(--ds-bg-alt);
+    color: var(--ds-text-1);
+    font-family: var(--ds-font-body);
+    font-size: 0.95rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
+    line-height: 1.55;
+    resize: vertical;
+  }
+
+  .confirmar-campo small {
+    font-size: 0.72rem;
+    font-weight: 400;
+    letter-spacing: normal;
+    text-transform: none;
   }
 
   .confirmar-acoes {

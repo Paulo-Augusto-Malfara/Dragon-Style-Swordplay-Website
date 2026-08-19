@@ -3092,6 +3092,14 @@ p {
 }
 
 /* Arquivada não é derrota nem vitória: some do caminho e fica cinza. */
+/* Adiada não é status no banco: a pauta volta pra fila. O selo existe porque
+   pro autor a diferença importa, e ela sai da coluna `decisao`. */
+.status-badge--adiada {
+  background: var(--ds-surface);
+  color: var(--ds-text-3);
+  border: 1px solid var(--ds-line-strong);
+}
+
 .status-badge--arquivada {
   background: var(--ds-bg);
   color: var(--ds-text-4);

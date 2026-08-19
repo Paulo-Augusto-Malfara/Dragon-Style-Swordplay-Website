@@ -373,17 +373,34 @@
     }
   }
 
+  /* Desfecho que nega ou empurra a ideia precisa de motivo, e quem lê é quem
+     escreveu a pauta. Pela contagem o desfecho ainda não se sabe, então o
+     campo aparece do mesmo jeito, opcional na tela e exigido pelo banco se
+     cair num deles. */
+  const PRECISA_MOTIVO = ["recusada", "adiada", "mais_teste"];
+
   async function fecharDecisao(override: string | null) {
     if (!abertaId) return;
-    const ok = await confirmar.pedir({
+    const exige = !!override && PRECISA_MOTIVO.includes(override);
+
+    const motivo = await confirmar.pedirComTexto({
       titulo: override ? `Encerrar a votação como "${rotuloOpcao(override)}"?` : "Encerrar a votação?",
       texto: override
         ? "O desfecho fica registrado como escolha do organizador, e não como resultado da contagem."
         : "Vale a opção mais votada. Se der empate, você escolhe.",
       acao: "Encerrar",
+      campo: {
+        rotulo: exige ? "Motivo da decisão" : "Motivo da decisão (se for recusar ou adiar)",
+        obrigatorio: exige,
+        dica: "Quem escreveu a pauta vai ler isto no perfil dele.",
+      },
     });
-    if (!ok) return;
-    await chamar("fechar_decisao", { p_id_pauta: abertaId, p_override: override }, true);
+    if (motivo === null) return;
+    await chamar(
+      "fechar_decisao",
+      { p_id_pauta: abertaId, p_override: override, p_motivo: motivo || null },
+      true,
+    );
   }
 
   async function reabrirDecisao() {
@@ -729,6 +746,10 @@
             </span>
           {/each}
         </div>
+        {#if aberta.motivo_decisao}
+          <p class="det-rotulo">Motivo</p>
+          <p class="det-corpo">{aberta.motivo_decisao}</p>
+        {/if}
         {#if podeReabrir}
           <p class="decisao-nota">
             Encerrada {horaBR(aberta.decidida_em)}. Como admin do sistema, você pode

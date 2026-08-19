@@ -3,6 +3,7 @@
   import LoginForm from "../auth/LoginForm.svelte";
   import AvatarUploader from "./AvatarUploader.svelte";
   import EnviarPauta from "./EnviarPauta.svelte";
+  import StatusFeedbacks from "./StatusFeedbacks.svelte";
   import { corDaFaixa } from "../../lib/faixa";
   import {
     CLASSE_BASICO,
@@ -701,6 +702,8 @@
         </nav>
       {/if}
     {/if}
+
+    <StatusFeedbacks {getSupabase} />
 
     <h2>Conquistas</h2>
     <p class="ficha-aviso">

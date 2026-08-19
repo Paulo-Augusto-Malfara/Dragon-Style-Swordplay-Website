@@ -1,6 +1,6 @@
 <script lang="ts">
   /*
-   * Créditos de pauta na ficha do membro, e a janela que gasta um deles.
+   * Créditos de feedback na ficha do membro, e a janela que gasta um deles.
    *
    * O saldo NÃO é uma coluna do banco: é o teto do mês menos as pautas que a
    * pessoa já mandou neste mês (ver `meus_creditos_pauta`). Por isso aqui não
@@ -139,12 +139,12 @@
 </script>
 
 {#if !carregando}
-  <section class="pautas" aria-label="Créditos de pauta">
+  <section class="pautas" aria-label="Créditos de feedback">
     {#if teto > 0}
       <button type="button" class="pautas-cartao" onclick={abrir} disabled={saldo <= 0}>
         <span class="pautas-numero">{saldo}<span class="pautas-de">/{teto}</span></span>
         <span class="pautas-texto">
-          <span class="pautas-titulo">Créditos de pauta</span>
+          <span class="pautas-titulo">Créditos de feedback</span>
           <span class="pautas-sub">
             {#if saldo > 0}
               Mande uma ideia, sugestão, crítica ou proponha uma modalidade.
@@ -152,11 +152,15 @@
               Seus créditos deste mês acabaram. Volta tudo no dia 1º.
             {/if}
           </span>
+          <!-- Aponta pra lista lá no fim da ficha: sem isto o membro comum não
+               tem como saber que existe um lugar mostrando o destino do que
+               ele mandou. -->
+          <span class="pautas-onde">Status dos seus feedbacks no fim desta página.</span>
         </span>
       </button>
     {:else}
       <p class="pautas-vazio">
-        Créditos de pauta começam na faixa Amarela, no nível geral 3. Cada
+        Créditos de feedback começam na faixa Amarela, no nível geral 3. Cada
         graduação dali pra frente vale mais um por mês.
       </p>
     {/if}
@@ -317,6 +321,13 @@
 
   .pautas-titulo {
     font-size: 0.9rem;
+  }
+
+  .pautas-onde {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.74rem;
+    color: var(--ds-gold-light);
   }
 
   .pautas-sub,
