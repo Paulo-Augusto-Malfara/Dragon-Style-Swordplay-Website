@@ -135,7 +135,7 @@ const links = [
       Seu perfil mostra Nível Geral, Pontos de Honra, faixa atual, quanto falta
       para a próxima e cada classe com o nível e os treinos registrados.
     </p>
-    <a class="btn btn-primary" href="/dashboard">Abrir minha ficha</a>
+    <a class="btn btn-primary" href="/dashboard">Meu Perfil</a>
     <p class="cf-obs">
       É preciso entrar com o e-mail cadastrado no grupo.
     </p>
@@ -172,7 +172,11 @@ const links = [
     font-size: 0.9rem;
   }
 
+  /* Centrado igual ao texto: o parágrafo do site é 90% com margem automática,
+     e o inline-flex encostava na borda esquerda, fora do bloco de leitura. */
   .cf-bloco > .btn {
-    margin: 6px 0 16px;
+    display: flex;
+    width: fit-content;
+    margin: 6px auto 16px;
   }
 </style>

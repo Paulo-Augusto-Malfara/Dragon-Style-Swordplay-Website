@@ -961,6 +961,14 @@ p {
   margin-bottom: 1em;
 }
 
+/* Botão solto entre parágrafos do .mdx: o texto corrido é centrado a 90% e o
+   inline-flex encostava na borda esquerda, fora do bloco de leitura. */
+.prosa > .btn {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 1em;
+}
+
 .lista-comum {
   width: 90%;
   margin: auto;
