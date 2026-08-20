@@ -3137,9 +3137,17 @@ p {
   font-variant-numeric: tabular-nums;
 }
 
-/* O botão é a ação da linha, então encosta na direita e fecha a leitura. */
+/* O botão é a ação da linha, então encosta na direita e fecha a leitura.
+
+   `white-space: normal` desfaz o nowrap do botão comum só aqui: "✓ Presença
+   confirmada (cancelar)" numa linha só é mais largo que o cartão num celular
+   estreito, e o rótulo atravessava a borda direita (no cartão do próximo
+   treino, que é grid, ele ainda esticava a coluna e levava o conteúdo inteiro
+   junto). Quebrar em duas linhas só acontece quando falta largura. */
 .confirma-presenca > .btn {
   margin-left: auto;
+  max-width: 100%;
+  white-space: normal;
 }
 
 .confirma-presenca-lista {
@@ -4145,8 +4153,24 @@ footer {
   .treino-meta {
     justify-content: center;
   }
+  /* O h3 é flex, e `text-align` não move item de flex: o título ficava à
+     esquerda enquanto o resto do cartão centralizava. */
   .treino-info h3 {
     text-align: center;
+    justify-content: center;
+  }
+
+  /* Empilha e centraliza a linha de confirmação. O `margin-left: auto` do botão
+     serve pra linha larga, onde ele fecha a leitura à direita; quebrado numa
+     linha só dele, ele encostava na borda direita e deixava a folga toda de um
+     lado, que é o que fazia o cartão inteiro parecer torto no celular. */
+  .treino-card .confirma-presenca {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .treino-card .confirma-presenca > .btn {
+    margin-left: 0;
   }
 }
 
@@ -4235,10 +4259,14 @@ footer {
   box-shadow: var(--card-shadow);
 }
 
+/* `text-align: center` sozinho não bastava: o h2 do site tem `max-width: 30ch`
+   e o texto centralizava dentro dessa caixa, que continuava encostada na
+   esquerda do cartão. Quem centraliza a caixa é a margem automática. */
 .participar-cta h2 {
   width: auto;
   padding: 0 0 0.5em;
   margin-bottom: 0;
+  margin-inline: auto;
   text-align: center;
 }
 
@@ -4248,4 +4276,16 @@ footer {
   margin: 0 auto 1.8em;
   text-align: center;
   color: var(--text-secondary-color);
+}
+
+/* Último botão da página, e o único que leva pra fora do site: um degrau acima
+   do botão comum. O rótulo perdeu o "do WhatsApp" porque o ícone já diz, e
+   inteiro ele estourava a largura do cartão num celular de 320px. */
+.participar-cta-btn {
+  font-size: 1em;
+  padding: 0.7em 1.6em;
+}
+
+.participar-cta-btn .icon {
+  font-size: 1.25em;
 }

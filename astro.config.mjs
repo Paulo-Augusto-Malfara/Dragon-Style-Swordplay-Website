@@ -1,4 +1,4 @@
-import { defineConfig } from "astro/config";
+import { defineConfig, passthroughImageService } from "astro/config";
 import svelte from "@astrojs/svelte";
 import sitemap from "@astrojs/sitemap";
 import mdx from "@astrojs/mdx";
@@ -40,6 +40,13 @@ export default defineConfig({
   // a server. Only /admin/* and the two Supabase-backed public pages opt in via
   // `export const prerender = false`. The adapter is still required for those.
   adapter: vercel(),
+  // O sharp é o serviço de imagem padrão do Astro, e ele entrava na função da
+  // Vercel com 19 dos 25 MB do pacote, só em binário nativo por plataforma.
+  // Nada aqui usa astro:assets: as imagens são caminho de /public escrito à mão
+  // e nenhum .mdx tem imagem relativa. Isso era peso morto pago no cold start,
+  // que é justamente quando a função precisa baixar e descompactar o pacote.
+  // Se um dia entrar <Image> ou imagem relativa em markdown, esta linha sai.
+  image: { service: passthroughImageService() },
   // O navegador busca o HTML do link antes do clique, então a navegação não
   // espera a rede. Não é cache: a resposta é fresca, só chegou antes, e por
   // isso vale também nas páginas SSR sem risco de mostrar dado velho.

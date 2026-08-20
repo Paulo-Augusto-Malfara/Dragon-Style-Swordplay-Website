@@ -5,6 +5,7 @@
 // As outras cinco páginas de sobre-nos seguem no content collection.
 import PageLayout from "../layouts/PageLayout.astro";
 import ProximoTreino from "../components/ProximoTreino.astro";
+import Icon from "../components/Icon.astro";
 
 // ProximoTreino consulta o banco a cada visita.
 export const prerender = false;
@@ -88,8 +89,9 @@ const WHATSAPP = "https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK";
       É no WhatsApp que combinamos tudo: treinos extras, torneios, eventos e qualquer mudança de data ou de local.
       Entrar no grupo é o jeito mais rápido de saber quando é o próximo treino, e de avisar que você vai aparecer.
     </p>
-    <a class="btn btn-primary" href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-      Entrar no Grupo do WhatsApp
+    <a class="btn btn-primary participar-cta-btn" href={WHATSAPP} target="_blank" rel="noopener noreferrer">
+      <Icon name="whatsapp" />
+      Entrar no grupo
     </a>
   </section>
 </PageLayout>
