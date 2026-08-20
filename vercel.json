@@ -1,4 +1,5 @@
 {
+  "regions": ["gru1"],
   "redirects": [
     {
       "source": "/home",
