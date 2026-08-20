@@ -6,10 +6,13 @@
 
   interface Props {
     meuIdMembro: number;
+    /** Só pra dizer a verdade sobre a foto: a do staff espera aprovação, a do
+        admin do sistema entra direto, porque ele é quem aprovaria. */
+    isAdminSistema?: boolean;
     onCreated?: (membro: { id_membro: number; nome: string }) => void;
     onCancelar?: () => void;
   }
-  const { meuIdMembro, onCreated, onCancelar }: Props = $props();
+  const { meuIdMembro, isAdminSistema = false, onCreated, onCancelar }: Props = $props();
 
   type Etapa = "nome" | "padrinho" | "revisao" | "foto" | "concluido";
   let etapa = $state<Etapa>("nome");
@@ -215,6 +218,12 @@
     {/if}
   {:else if etapa === "foto"}
     <p class="admin-ok">{nomeCriado} foi cadastrado. Falta só a foto, se quiser colocar agora.</p>
+    {#if !isAdminSistema}
+      <p class="admin-form-nota">
+        A foto fica esperando o admin do sistema liberar, na tela de Aprovações,
+        e só aparece no perfil depois disso.
+      </p>
+    {/if}
     <AvatarUploader
       {fotoUrl}
       nome={nomeCriado}

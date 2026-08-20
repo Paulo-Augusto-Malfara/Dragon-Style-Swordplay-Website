@@ -369,8 +369,7 @@
 
     <p class="admin-form-titulo">Imagens (opcional)</p>
     <p class="admin-form-nota">
-      Até {anexosMax} imagens pra ilustrar o que você escreveu. Só o staff vê,
-      junto com a pauta.
+      Até {anexosMax} imagens pra ilustrar o que você escreveu.
     </p>
     <div class="anexos-escolha">
       {#each anexos as a, i (a.previa)}

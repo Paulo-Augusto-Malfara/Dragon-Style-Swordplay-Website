@@ -38,10 +38,18 @@ precisa exigir o mesmo nível que a RPC correspondente, senão a RPC vira sugest
 Seguem no organizador, de propósito, `fAgendaTreinos`, `fAgendaConfirmacoes`,
 `posts`, `modalidades` e `fEventos`.
 
-**`oculto` não é trava de banco.** Ele barra o painel (o `getStaffMembro`
-testa), mas `is_staff()`, `is_organizador()` e `is_admin_sistema()` olham só o
-`auth_level`. Membro escondido com cargo continua com os poderes de RPC. Pra
-desarmar uma conta de verdade, zere o `auth_level` ou o `auth_user_id`.
+**`oculto` desarma no banco, e não só no painel** (desde 20/08/2026). As quatro
+funções de cargo testam `and not oculto`, então esconder alguém tira junto os
+poderes de RPC. Antes disso ele só barrava o painel pelo `getStaffMembro`, e um
+staff escondido seguia registrando presença e votando pauta pela API, que era a
+porta de serviço.
+
+O par disso é uma trava que **não pode sair**: a policy `admin_sistema_update`
+do `dMembros` recusa `oculto = true` em conta nível 1. Sem ela, ocultar o único
+admin o tiraria do `is_admin_sistema()`, e como desocultar exige ser admin, ele
+ficaria trancado do lado de fora, com saída só pelo SQL do painel do Supabase.
+Se um dia o `oculto` voltar a ser só de painel, essa trava é que perde o
+sentido, não o contrário.
 
 Quem faz o quê hoje:
 

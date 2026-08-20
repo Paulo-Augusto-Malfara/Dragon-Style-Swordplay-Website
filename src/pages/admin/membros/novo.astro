@@ -8,5 +8,9 @@ const { membro } = Astro.locals;
 ---
 
 <AdminShell title="Cadastrar membro" voltar={{ href: "/admin/membros", label: "Membros" }}>
-  <RecrutarMembro meuIdMembro={membro.id_membro} client:load />
+  <RecrutarMembro
+    meuIdMembro={membro.id_membro}
+    isAdminSistema={membro.isAdminSistema}
+    client:load
+  />
 </AdminShell>

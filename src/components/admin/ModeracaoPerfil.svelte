@@ -6,6 +6,16 @@
    * Isso é de propósito: se ela virasse link público pra pré-visualizar, o
    * conteúdo que a fila existe pra barrar já estaria no ar, alcançável por quem
    * tivesse o endereço, que é exatamente o que se quer evitar.
+   *
+   * A fila tem DUAS origens, e elas se aprovam de um jeito diferente:
+   *
+   * 1. Foto do próprio membro: mora no bucket privado `avatars-pendentes`, sob
+   *    o `auth_user_id`. Aprovar precisa copiar de bucket, e quem copia é a
+   *    função de borda, porque o Postgres não move arquivo.
+   * 2. Foto que o staff subiu no recrutamento (`foto_pendente_url`): já nasce
+   *    no bucket público, porque o membro novo muitas vezes nem tem conta de
+   *    login ainda, e o caminho do bucket privado é o `auth_user_id`. Aqui
+   *    aprovar é só carimbar a URL, sem mexer em arquivo.
    */
   import { supabase } from "../../lib/supabase-browser";
 
@@ -17,6 +27,8 @@
     apelido: string | null;
     auth_user_id: string | null;
     foto_pendente_em: string | null;
+    /** Preenchida só quando a foto veio do recrutamento, feito por staff. */
+    foto_pendente_url: string | null;
     apelido_pendente: string | null;
     apelido_pendente_em: string | null;
     previa?: string | null;
@@ -38,7 +50,9 @@
     erro = "";
     const { data, error } = await supabase
       .from("dMembros")
-      .select("id_membro, nome, apelido, auth_user_id, foto_pendente_em, apelido_pendente, apelido_pendente_em")
+      .select(
+        "id_membro, nome, apelido, auth_user_id, foto_pendente_em, foto_pendente_url, apelido_pendente, apelido_pendente_em",
+      )
       .or("foto_pendente_em.not.is.null,apelido_pendente.not.is.null")
       .order("foto_pendente_em", { ascending: true, nullsFirst: false });
 
@@ -53,7 +67,13 @@
     // aparece sem prévia e ainda dá pra recusar, que é a ação mais urgente.
     await Promise.all(
       itens.map(async (m) => {
-        if (!m.foto_pendente_em || !m.auth_user_id) return;
+        if (!m.foto_pendente_em) return;
+        // A do recrutamento já é URL pública: não tem o que assinar.
+        if (m.foto_pendente_url) {
+          m.previa = m.foto_pendente_url;
+          return;
+        }
+        if (!m.auth_user_id) return;
         const { data: assinada } = await supabase.storage
           .from("avatars-pendentes")
           .createSignedUrl(`${m.auth_user_id}/avatar.webp`, VALIDADE_PREVIA);
@@ -69,6 +89,18 @@
     ocupado = m.id_membro;
     erro = "";
     try {
+      // Recrutamento: o arquivo já está no bucket público, então aprovar é
+      // carimbar a URL no cadastro. Nada pra copiar, nada pra função de borda.
+      if (m.foto_pendente_url) {
+        const { error } = await supabase.rpc("aplicar_foto_aprovada", {
+          p_id_membro: m.id_membro,
+          p_url: m.foto_pendente_url,
+        });
+        if (error) throw new Error(error.message);
+        await carregar();
+        return;
+      }
+
       const { data: sessao } = await supabase.auth.getSession();
       const token = sessao.session?.access_token;
       if (!token) throw new Error("Sessão expirada, entre de novo.");
