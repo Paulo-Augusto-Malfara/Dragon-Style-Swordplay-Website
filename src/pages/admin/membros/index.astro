@@ -11,7 +11,7 @@ const { membro } = Astro.locals;
   title="Membros"
   resumo={membro.isAdminSistema
     ? "Cadastro do grupo. Toque num membro para editar."
-    : "Cadastro do grupo. Só admin do sistema pode editar."}
+    : "Cadastro do grupo. Você cadastra membro novo; editar é do admin do sistema."}
 >
   <MembrosList podeEditar={membro.isAdminSistema} client:load />
 </AdminShell>

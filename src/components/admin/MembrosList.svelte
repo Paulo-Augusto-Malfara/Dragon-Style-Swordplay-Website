@@ -112,9 +112,12 @@
       <option value={f.chave}>{f.label}</option>
     {/each}
   </select>
-  {#if podeEditar}
-    <a href="/admin/membros/novo" class="btn btn-primary">+ Cadastrar</a>
-  {/if}
+  <!-- Cadastrar não é editar, e por isso não passa pelo `podeEditar`: a RLS
+       deixa staff criar membro de nível 4, e `/admin/membros/novo` nunca teve
+       trava além do piso de staff do middleware. Enquanto isto ficou dentro do
+       `{#if podeEditar}` o staff só chegava lá digitando a URL, que é o índice
+       escondendo o que a página filha permite. -->
+  <a href="/admin/membros/novo" class="btn btn-primary">+ Cadastrar</a>
 </div>
 
 {#if erro}
