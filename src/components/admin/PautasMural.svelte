@@ -116,11 +116,25 @@
    *
    * O `!!p.posicao` não é enfeite: a view devolve `posicao` nula pra pauta sem
    * reunião, e em JavaScript `null <= 3` é verdadeiro. Sem ele, pauta nenhuma
-   * amarrada a reunião nenhuma apareceria como pauta da reunião. */
+   * amarrada a reunião nenhuma apareceria como pauta da reunião.
+   *
+   * Urgente entra por fora: a view põe as prioritárias nas primeiras posições,
+   * então somar quantas são ao corte deixa as três mais votadas entrando
+   * inteiras. Marcar duas urgentes faz a reunião ter cinco pautas, e é isso
+   * mesmo, o voto do staff não perde vaga pra decisão do admin. */
   const daReuniao = (p: any) =>
-    filtro === "fila" && !janelaAberta && !!p.posicao && p.posicao <= 3;
+    filtro === "fila" && !janelaAberta && !!p.posicao && p.posicao <= VAGAS_VOTADAS + urgentes;
 
   const naFila = $derived(pautas.filter((p) => p.status === "aberta"));
+
+  /* As três vagas que a votação de prioridade decide. */
+  const VAGAS_VOTADAS = 3;
+
+  /* A marca de urgente só diz alguma coisa enquanto a pauta espera reunião.
+     Depois de decidida ela continua gravada, e repetir o selo no arquivo seria
+     anunciar uma pressa que já passou. */
+  const urgente = (p: any) => p.prioritaria && ["aberta", "em_teste"].includes(p.status);
+  const urgentes = $derived(naFila.filter((p) => p.prioritaria && !!p.posicao).length);
   const emTeste = $derived(pautas.filter((p) => p.status === "em_teste"));
   const arquivo = $derived(
     pautas.filter((p) => !["aberta", "em_teste"].includes(p.status)),
@@ -139,7 +153,13 @@
 
   async function carregar() {
     const [lista, prox, eu] = await Promise.all([
-      supabase.from("v_pautas_mural").select("*").order("votos", { ascending: false }),
+      // Urgente na frente, senão o cartão que a view numerou em primeiro lugar
+      // apareceria lá embaixo por não ter voto nenhum.
+      supabase
+        .from("v_pautas_mural")
+        .select("*")
+        .order("prioritaria", { ascending: false })
+        .order("votos", { ascending: false }),
       supabase
         .from("fReunioes")
         .select("id_reuniao, data_hora, local, status")
@@ -450,6 +470,12 @@
     await chamar("reabrir_decisao", { p_id_pauta: abertaId }, true);
   }
 
+  /* Marcar e desmarcar é a mesma chamada, e nenhuma das duas é irreversível:
+     sem janela de confirmação. Quem pode é o admin do sistema, e a
+     `priorizar_pauta` recusa qualquer outro. */
+  const priorizar = () =>
+    chamar("priorizar_pauta", { p_id_pauta: abertaId, p_ligar: !aberta.prioritaria }, true);
+
   async function arquivar() {
     if (!abertaId) return;
     const ok = await confirmar.pedir({
@@ -609,6 +635,9 @@
             <span class="card-tags">
               <span class="status-badge status-badge--{p.status}">{STATUS[p.status]}</span>
               <span class="tag">{CATEGORIA[p.categoria]}</span>
+              {#if urgente(p)}
+                <span class="tag tag--urgente">Urgente</span>
+              {/if}
               {#if daReuniao(p)}
                 <span class="tag tag--principal">Pauta da reunião</span>
               {/if}
@@ -659,6 +688,9 @@
     <span class="card-tags">
       <span class="status-badge status-badge--{aberta.status}">{STATUS[aberta.status]}</span>
       <span class="tag">{CATEGORIA[aberta.categoria]}</span>
+      {#if urgente(aberta)}
+        <span class="tag tag--urgente">Urgente</span>
+      {/if}
     </span>
     <h2 class="det-titulo">{aberta.titulo}</h2>
     <p class="det-autor">Por {aberta.autor} · {horaBR(aberta.criada_em)}</p>
@@ -762,7 +794,22 @@
         <button type="button" class="btn btn-ghost btn-sm" disabled={ocupado} onclick={arquivar}>
           Arquivar
         </button>
+        {#if isAdminSistema}
+          <button type="button" class="btn btn-ghost btn-sm" disabled={ocupado} onclick={priorizar}>
+            {aberta.prioritaria ? "Tirar a urgência" : "Marcar como urgente"}
+          </button>
+        {/if}
       </div>
+      {#if isAdminSistema}
+        <p class="det-nota">
+          {#if aberta.prioritaria}
+            Urgente: esta pauta entra na reunião por fora das três mais votadas.
+          {:else}
+            Urgente leva a pauta pra reunião sem depender de voto, por fora das três
+            mais votadas.
+          {/if}
+        </p>
+      {/if}
       {#if !aberta.id_reuniao}
         <p class="det-nota">A pauta só entra em votação depois de entrar na fila de uma reunião.</p>
       {/if}
@@ -1145,6 +1192,14 @@
   .tag--principal {
     border-color: var(--ds-gold-dim);
     color: var(--ds-gold-deep);
+  }
+
+  /* Urgente não é o dourado da pauta escolhida: é o vermelho de "isso não
+     esperou a votação", pra que os dois selos não se confundam quando aparecem
+     lado a lado no mesmo cartão. */
+  .tag--urgente {
+    border-color: var(--ds-danger);
+    color: var(--ds-danger);
   }
 
   .card-titulo {
