@@ -32,6 +32,29 @@
   const CORPO_MAX = 4000;
   const OBJETIVO_MAX = 200;
 
+  /* Anexos.
+   *
+   * Só imagem, e imagem que o navegador redesenha antes de subir: o arquivo
+   * escolhido é decodificado pra pixel e re-codificado aqui, então o que sobe
+   * é pixel novo. EXIF, comentário escondido e arquivo que é imagem e script ao
+   * mesmo tempo não sobrevivem a essa passagem.
+   *
+   * Isso NÃO é a trava de segurança, porque o navegador é de quem envia. As
+   * travas estão no banco: o bucket `pautas-anexos` é privado, aceita só
+   * jpeg/png/webp e no máximo 3MB por arquivo, a policy do storage só deixa
+   * escrever dentro da pasta do próprio `auth.uid()`, e a `enviar_pauta` confere
+   * o teto e o dono de cada caminho. Aqui em cima é comodidade e peso de
+   * upload, lá embaixo é a regra. */
+  /* O teto é por cargo: staff e acima mandam 10, membro comum 5. Quem recusa de
+     verdade é a `enviar_pauta`, que pergunta `is_staff()` no banco; aqui é só
+     pra tela não oferecer o que vai ser recusado depois. */
+  const ANEXOS_MEMBRO = 5;
+  const ANEXOS_STAFF = 10;
+  let anexosMax = $state(ANEXOS_MEMBRO);
+  const ANEXO_BYTES = 8 * 1024 * 1024; // do arquivo original, antes de redesenhar
+  const ANEXO_LADO = 1600; // px no maior lado depois de redesenhar
+  const ANEXO_TIPOS = ["image/jpeg", "image/png", "image/webp"];
+
   let teto = $state(0);
   let saldo = $state(0);
   let carregando = $state(true);
@@ -54,6 +77,11 @@
   let variacoes = $state("");
   let minParticipantes = $state(0);
 
+  let anexos = $state<{ blob: Blob; previa: string }[]>([]);
+  let erroAnexo = $state("");
+  let lendoAnexo = $state(false);
+  let entradaAnexo: HTMLInputElement | undefined = $state();
+
   let enviando = $state(false);
   let erro = $state("");
 
@@ -74,6 +102,8 @@
 
   async function carregar() {
     const supabase = await getSupabase();
+    const { data: staff } = await supabase.rpc("is_staff");
+    anexosMax = staff ? ANEXOS_STAFF : ANEXOS_MEMBRO;
     const { data } = await supabase.rpc("meus_creditos_pauta");
     if (data) {
       teto = data.teto ?? 0;
@@ -94,6 +124,110 @@
     if (dialogo.open) dialogo.close();
   }
 
+  /* Decodifica pra pixel e re-codifica. É aqui que o arquivo de origem deixa de
+     existir: o que sai é um desenho novo feito pelo navegador. */
+  async function redesenhar(file: File): Promise<Blob> {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+        const i = new Image();
+        i.onload = () => resolve(i);
+        i.onerror = () => reject(new Error("Não foi possível ler essa imagem."));
+        i.src = url;
+      });
+
+      const escala = Math.min(1, ANEXO_LADO / Math.max(img.naturalWidth, img.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.naturalWidth * escala);
+      canvas.height = Math.round(img.naturalHeight * escala);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) throw new Error("Canvas indisponível neste navegador.");
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+      /* O Safari do iOS exibe webp mas não codifica: o toBlob ignora o tipo
+         pedido e devolve PNG calado. A descoberta é num canvas de 1px pra não
+         pagar a codificação grande duas vezes, igual ao AvatarUploader. */
+      const sonda = document.createElement("canvas");
+      sonda.width = 1;
+      sonda.height = 1;
+      const tipo = sonda.toDataURL("image/webp").startsWith("data:image/webp")
+        ? "image/webp"
+        : "image/jpeg";
+
+      return await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("Falha ao gerar a imagem."))), tipo, 0.85);
+      });
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  async function escolherAnexos(e: Event) {
+    const alvo = e.target as HTMLInputElement;
+    const arquivos = Array.from(alvo.files ?? []);
+    alvo.value = "";
+    if (arquivos.length === 0) return;
+
+    erroAnexo = "";
+    lendoAnexo = true;
+    for (const file of arquivos) {
+      if (anexos.length >= anexosMax) {
+        erroAnexo = `No máximo ${anexosMax} imagens.`;
+        break;
+      }
+      if (!ANEXO_TIPOS.includes(file.type)) {
+        erroAnexo = "Envie imagem JPG, PNG ou WEBP.";
+        continue;
+      }
+      if (file.size > ANEXO_BYTES) {
+        erroAnexo = "Imagem muito grande (máximo 8MB).";
+        continue;
+      }
+      try {
+        const blob = await redesenhar(file);
+        anexos = [...anexos, { blob, previa: URL.createObjectURL(blob) }];
+      } catch (err) {
+        erroAnexo = err instanceof Error ? err.message : String(err);
+      }
+    }
+    lendoAnexo = false;
+  }
+
+  function tirarAnexo(i: number) {
+    URL.revokeObjectURL(anexos[i].previa);
+    anexos = anexos.filter((_, j) => j !== i);
+    erroAnexo = "";
+  }
+
+  function limparAnexos() {
+    anexos.forEach((a) => URL.revokeObjectURL(a.previa));
+    anexos = [];
+  }
+
+  /* Sobe antes de criar a pauta, porque o caminho vai como argumento da RPC.
+     ponytail: se a pessoa escolher imagem e desistir sem enviar, o arquivo fica
+     órfão no bucket privado. São poucos KB num lugar que ninguém lê; se um dia
+     incomodar, uma função agendada apaga o que não está citado em `fPautas`. */
+  async function subirAnexos(supabase: any): Promise<string[]> {
+    if (anexos.length === 0) return [];
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error("Sessão expirada, entre de novo.");
+
+    const caminhos: string[] = [];
+    for (const a of anexos) {
+      const ext = a.blob.type === "image/webp" ? "webp" : "jpg";
+      const caminho = `${user.id}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage
+        .from("pautas-anexos")
+        .upload(caminho, a.blob, { contentType: a.blob.type });
+      if (error) throw error;
+      caminhos.push(caminho);
+    }
+    return caminhos;
+  }
+
   async function enviar(e: SubmitEvent) {
     e.preventDefault();
     if (!podeEnviar || enviando) return;
@@ -101,6 +235,16 @@
     erro = "";
 
     const supabase = await getSupabase();
+
+    let caminhos: string[] = [];
+    try {
+      caminhos = await subirAnexos(supabase);
+    } catch (err) {
+      enviando = false;
+      erro = err instanceof Error ? err.message : String(err);
+      return;
+    }
+
     const { error } = await supabase.rpc("enviar_pauta", {
       p_categoria: categoria,
       p_titulo: titulo.trim(),
@@ -116,6 +260,7 @@
         : resumoObjetivo.trim()
           ? { objetivo: resumoObjetivo.trim() }
           : null,
+      p_anexos: caminhos,
     });
 
     enviando = false;
@@ -132,6 +277,8 @@
     requisitos = "";
     variacoes = "";
     minParticipantes = 0;
+    limparAnexos();
+    erroAnexo = "";
     fechar();
     await carregar();
   }
@@ -220,6 +367,44 @@
       </label>
     </div>
 
+    <p class="admin-form-titulo">Imagens (opcional)</p>
+    <p class="admin-form-nota">
+      Até {anexosMax} imagens pra ilustrar o que você escreveu. Só o staff vê,
+      junto com a pauta.
+    </p>
+    <div class="anexos-escolha">
+      {#each anexos as a, i (a.previa)}
+        <div class="anexo-item">
+          <img src={a.previa} alt="" />
+          <button type="button" class="anexo-tirar" onclick={() => tirarAnexo(i)} aria-label="Tirar esta imagem">
+            ✕
+          </button>
+        </div>
+      {/each}
+
+      {#if anexos.length < anexosMax}
+        <button
+          type="button"
+          class="anexo-add"
+          onclick={() => entradaAnexo?.click()}
+          disabled={lendoAnexo}
+        >
+          {lendoAnexo ? "..." : "+"}
+        </button>
+      {/if}
+    </div>
+    <input
+      bind:this={entradaAnexo}
+      type="file"
+      accept="image/jpeg,image/png,image/webp"
+      multiple
+      class="anexo-entrada"
+      onchange={escolherAnexos}
+    />
+    {#if erroAnexo}
+      <p class="admin-error" role="alert">{erroAnexo}</p>
+    {/if}
+
     {#if ehModalidade}
       <p class="admin-form-titulo">Regras da modalidade</p>
       <p class="admin-form-nota">
@@ -276,6 +461,69 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+  }
+
+  /* Miniatura quadrada com o ✕ no canto, e o quadro do "+" do mesmo tamanho:
+     a fileira continua alinhada com uma imagem só ou com cinco. */
+  .anexos-escolha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .anexo-item {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    border: 1px solid var(--ds-line);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .anexo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .anexo-tirar {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 22px;
+    height: 22px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(11, 16, 22, 0.8);
+    color: var(--ds-text-1);
+    font-size: 0.75rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .anexo-add {
+    width: 72px;
+    height: 72px;
+    border: 1px dashed var(--ds-line-strong);
+    border-radius: 10px;
+    background: none;
+    color: var(--ds-text-3);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .anexo-add:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+
+  .anexo-entrada {
+    display: none;
   }
 
   .pautas-cartao {

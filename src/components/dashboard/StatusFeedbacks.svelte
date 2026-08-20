@@ -11,6 +11,7 @@
    * pauta nova de uma adiada é a coluna `decisao` do último desfecho.
    */
   import { onMount } from "svelte";
+  import AnexosPauta from "../AnexosPauta.svelte";
 
   interface Props {
     /* A mesma promessa preguiçosa do MemberDashboard: a página do perfil é
@@ -34,6 +35,9 @@
   let pagina = $state(1);
   let aberta = $state<any>(null);
   let dialogo: HTMLDialogElement;
+  /* Guardado no onMount pra não chamar `getSupabase()` a cada desenho: as
+     miniaturas do anexo precisam do cliente e não devem virar promessa nova. */
+  let cliente = $state<any>(null);
 
   /* Um rótulo só, usado no selo da linha e no cabeçalho da janela. */
   const situacao = (p: any) => {
@@ -66,6 +70,7 @@
 
   onMount(async () => {
     const supabase = await getSupabase();
+    cliente = supabase;
     // O filtro por id_membro é obrigatório, e não redundante com a RLS: a
     // policy de fPautas é `is_staff() or id_membro = current_membro_id()`,
     // então pra quem é staff ela deixa passar o mural inteiro. Aqui a lista é
@@ -77,7 +82,7 @@
     }
     const { data } = await supabase
       .from("fPautas")
-      .select("id_pauta, categoria, titulo, corpo, proposta, status, decisao, motivo_decisao, criada_em")
+      .select("id_pauta, categoria, titulo, corpo, proposta, status, decisao, motivo_decisao, anexos, criada_em")
       .eq("id_membro", eu)
       .order("criada_em", { ascending: false });
     itens = data ?? [];
@@ -207,6 +212,10 @@
             </ul>
           {/if}
         {/each}
+      {/if}
+
+      {#if cliente}
+        <AnexosPauta caminhos={aberta.anexos} {cliente} />
       {/if}
     </div>
   {/if}

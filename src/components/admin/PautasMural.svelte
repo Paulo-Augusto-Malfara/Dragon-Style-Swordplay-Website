@@ -21,6 +21,7 @@
   import { onMount, onDestroy } from "svelte";
   import { supabase } from "../../lib/supabase-browser";
   import ConfirmarAcao from "./ConfirmarAcao.svelte";
+  import AnexosPauta from "../AnexosPauta.svelte";
 
   interface Props {
     isOrganizador: boolean;
@@ -104,6 +105,19 @@
     reuniao ? new Date(reuniao.data_hora).getTime() - 24 * 3600 * 1000 : 0,
   );
   const janelaAberta = $derived(!!reuniao && agora < janelaFecha);
+
+  /* Quais pautas de fato entram na reunião.
+   *
+   * Enquanto a janela de voto está aberta a ordem ainda muda a cada voto, então
+   * marcar as três primeiras seria anunciar um resultado que ninguém decidiu
+   * ainda. O selo só aparece depois que a janela fecha, 24h antes da reunião, e
+   * aí ele é o resultado da votação.
+   *
+   * O `!!p.posicao` não é enfeite: a view devolve `posicao` nula pra pauta sem
+   * reunião, e em JavaScript `null <= 3` é verdadeiro. Sem ele, pauta nenhuma
+   * amarrada a reunião nenhuma apareceria como pauta da reunião. */
+  const daReuniao = (p: any) =>
+    filtro === "fila" && !janelaAberta && !!p.posicao && p.posicao <= 3;
 
   const naFila = $derived(pautas.filter((p) => p.status === "aberta"));
   const emTeste = $derived(pautas.filter((p) => p.status === "em_teste"));
@@ -569,12 +583,12 @@
   {:else}
     <ul class="cards">
       {#each visiveis as p (p.id_pauta)}
-        <li class="card" class:card--principal={filtro === "fila" && p.posicao <= 3}>
+        <li class="card" class:card--principal={daReuniao(p)}>
           <button type="button" class="card-corpo" onclick={() => abrirPauta(p.id_pauta)}>
             <span class="card-tags">
               <span class="status-badge status-badge--{p.status}">{STATUS[p.status]}</span>
               <span class="tag">{CATEGORIA[p.categoria]}</span>
-              {#if filtro === "fila" && p.posicao <= 3}
+              {#if daReuniao(p)}
                 <span class="tag tag--principal">Pauta da reunião</span>
               {/if}
             </span>
@@ -653,6 +667,8 @@
         {/if}
       </div>
     {/if}
+
+    <AnexosPauta caminhos={aberta.anexos} cliente={supabase} />
 
     {#if isAdminSistema && aberta.status === "validada" && aberta.categoria === "nova_modalidade" && !aberta.id_modalidade}
       <p class="det-publicar">
