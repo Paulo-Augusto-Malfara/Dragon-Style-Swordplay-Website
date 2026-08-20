@@ -2,6 +2,12 @@
   "regions": ["gru1"],
   "redirects": [
     {
+      "source": "/:caminho*",
+      "has": [{ "type": "host", "value": "(?<sub>.*)\\.vercel\\.app" }],
+      "destination": "https://swordplayds.com.br/:caminho*",
+      "permanent": true
+    },
+    {
       "source": "/home",
       "destination": "/",
       "permanent": true
