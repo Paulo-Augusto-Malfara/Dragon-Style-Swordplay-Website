@@ -109,10 +109,14 @@
   }
 
   async function saveFotoMembro(blob: Blob): Promise<string> {
-    const path = `membro-${idMembroCriado}/avatar.webp`;
+    // Caminho novo a cada envio, e não um `avatar.webp` fixo com upsert: o
+    // caminho fixo sobrescrevia os bytes da foto que já estava aprovada, e a
+    // URL antiga passava a servir a imagem nova. A fila de aprovação viraria
+    // enfeite, porque bastava mandar de novo por cima.
+    const path = `membro-${idMembroCriado}/${Date.now()}.webp`;
     const { error: uploadError } = await supabase.storage
       .from("avatars")
-      .upload(path, blob, { upsert: true, contentType: blob.type });
+      .upload(path, blob, { contentType: blob.type });
     if (uploadError) throw uploadError;
 
     const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);

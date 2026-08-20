@@ -27,6 +27,10 @@
     rotulo: string;
     /** Sem texto, o botão de confirmar fica desligado. */
     obrigatorio?: boolean;
+    /** Exige esta palavra exata pra liberar o botão, sem ligar pra maiúscula
+        nem pra espaço em volta. É pra ação que não tem volta: escrever a
+        palavra é o que separa decidir de esbarrar no botão. */
+    deveSer?: string;
     dica?: string;
     max?: number;
   }
@@ -48,7 +52,11 @@
   let valor = $state("");
   let responder: ((r: any) => void) | null = null;
 
-  const faltaTexto = $derived(!!pedido?.campo?.obrigatorio && valor.trim().length === 0);
+  const faltaTexto = $derived(
+    !!pedido?.campo?.deveSer
+      ? valor.trim().toLowerCase() !== pedido.campo.deveSer.toLowerCase()
+      : !!pedido?.campo?.obrigatorio && valor.trim().length === 0,
+  );
 
   export function pedir(p: Pedido): Promise<boolean> {
     pedido = p;
@@ -106,7 +114,7 @@
         {pedido.campo.rotulo}
         <textarea
           bind:value={valor}
-          rows="3"
+          rows={pedido.campo.deveSer ? 1 : 3}
           maxlength={pedido.campo.max ?? 1000}
           use:focar
         ></textarea>

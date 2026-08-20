@@ -1109,10 +1109,15 @@
     color: var(--ds-text-4);
   }
 
+  /* O reset do site zera a margem de tudo, e cabeçalho, abas e cartões são
+     irmãos soltos aqui, sem pai com gap: sem esta margem os três encostam e a
+     fila parece continuação da caixa da reunião. Mais folga em cima que
+     embaixo, porque a aba pertence à lista que vem depois dela. */
   .abas {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
+    margin: 20px 0 14px;
   }
 
   .aba {

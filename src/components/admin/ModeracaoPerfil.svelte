@@ -18,6 +18,7 @@
    *    aprovar é só carimbar a URL, sem mexer em arquivo.
    */
   import { supabase } from "../../lib/supabase-browser";
+  import ConfirmarAcao from "./ConfirmarAcao.svelte";
 
   const VALIDADE_PREVIA = 300; // segundos; só precisa durar a olhada
 
@@ -44,6 +45,23 @@
   // sistema, e um prompt não deixa nem escrever com calma.
   let recusando = $state<{ id: number; tipo: "foto" | "apelido" } | null>(null);
   let motivo = $state("");
+  let confirmar: ConfirmarAcao;
+
+  const comoChamar = (m: Pendente) => m.apelido?.trim() || m.nome;
+
+  /* Apaga o arquivo da foto reprovada. Sai depois da RPC de propósito: se a
+     ordem fosse ao contrário e a RPC falhasse, o arquivo já teria ido embora
+     com a pendência ainda de pé, e sobraria uma fila apontando pro nada.
+     Falhar aqui deixa um órfão no balde, que não aparece pra ninguém. */
+  async function apagarArquivoPendente(m: Pendente) {
+    if (m.foto_pendente_url) {
+      // Recrutamento: balde público `avatars`, caminho é o que vem depois dele.
+      const caminho = m.foto_pendente_url.split("/avatars/")[1]?.split("?")[0];
+      if (caminho) await supabase.storage.from("avatars").remove([caminho]);
+    } else if (m.auth_user_id) {
+      await supabase.storage.from("avatars-pendentes").remove([`${m.auth_user_id}/avatar.webp`]);
+    }
+  }
 
   async function carregar() {
     carregando = true;
@@ -86,6 +104,12 @@
   }
 
   async function aprovarFoto(m: Pendente) {
+    const ok = await confirmar.pedir({
+      titulo: `Aprovar a foto de ${comoChamar(m)}?`,
+      texto: "Ela passa a aparecer no perfil, no mural de membros e nos rankings.",
+      acao: "Aprovar",
+    });
+    if (!ok) return;
     ocupado = m.id_membro;
     erro = "";
     try {
@@ -134,22 +158,48 @@
   async function confirmarRecusa(m: Pendente) {
     if (!recusando) return;
     const tipo = recusando.tipo;
+
+    // A palavra escrita é o que separa decidir de esbarrar no botão, e aqui a
+    // foto reprovada é apagada do servidor: não tem como voltar atrás nem
+    // olhar de novo depois.
+    // `pedirComTexto` e não `pedir`: com campo na caixa, a promessa devolve o
+    // que foi escrito, não booleano. É a regra do próprio ConfirmarAcao.
+    const escrito = await confirmar.pedirComTexto({
+      titulo: `Reprovar ${tipo === "foto" ? "a foto" : "o apelido"} de ${comoChamar(m)}?`,
+      texto:
+        tipo === "foto"
+          ? "A imagem é apagada do servidor na hora, e o motivo que você escreveu aparece pra pessoa."
+          : "O apelido volta a ser o anterior, e o motivo que você escreveu aparece pra pessoa.",
+      campo: { rotulo: 'Escreva "reprovar" para confirmar', deveSer: "reprovar" },
+      acao: "Reprovar",
+      perigo: true,
+    });
+    if (escrito === null) return;
+
     ocupado = m.id_membro;
     erro = "";
     const { error } = await supabase.rpc(tipo === "foto" ? "recusar_foto" : "recusar_apelido", {
       p_id_membro: m.id_membro,
       p_motivo: motivo,
     });
-    ocupado = null;
     if (error) {
+      ocupado = null;
       erro = error.message;
       return;
     }
+    if (tipo === "foto") await apagarArquivoPendente(m);
+    ocupado = null;
     recusando = null;
     await carregar();
   }
 
   async function aprovarApelido(m: Pendente) {
+    const ok = await confirmar.pedir({
+      titulo: `Aprovar o apelido "${m.apelido_pendente}" para ${m.nome}?`,
+      texto: "É por ele que a pessoa passa a ser chamada no site inteiro.",
+      acao: "Aprovar",
+    });
+    if (!ok) return;
     ocupado = m.id_membro;
     erro = "";
     const { error } = await supabase.rpc("aprovar_apelido", { p_id_membro: m.id_membro });
@@ -308,6 +358,8 @@
     {/each}
   </ul>
 {/if}
+
+<ConfirmarAcao bind:this={confirmar} />
 
 <style>
   .fila {
