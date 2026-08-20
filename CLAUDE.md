@@ -63,6 +63,31 @@ Quem faz o quê hoje:
   reabre e exclui torneio, edita membro, lança/edita/exclui doação e mexe na
   fila de aprovações.
 
+## Foto e vínculo de login (auditoria de 20/08/2026)
+
+Duas travas que nasceram de brechas de verdade e não podem ser afrouxadas sem
+saber por quê:
+
+- **No balde público `avatars`, o staff tem INSERT e não tem UPDATE.** A policy
+  `staff_update_membro_folder` foi apagada. Ela deixava qualquer staff dar
+  UPDATE em qualquer arquivo sob `membro-*`, inclusive numa foto já aprovada, e
+  isso é a mesma brecha de 20/08 pela outra porta: aquela correção tornou o
+  caminho do upload único (`membro-N/<timestamp>.webp`), mas não tirou a
+  permissão de sobrescrever o que já existia. Se um dia o recrutamento precisar
+  trocar arquivo, o certo é subir num caminho novo, nunca devolver o UPDATE.
+- **`vincular_membro_por_email()` só casa linha de nível 4.** A expressão é
+  `coalesce(auth_level,4) >= 4`, literalmente a mesma da policy `staff_insert`
+  da `dMembros` e da trava da edge function `convidar-membro`. As três
+  perguntam "esta linha é de alguém sem privilégio?". Ligar-se a um cadastro
+  nunca pode promover: promover é um segundo ato, no painel de membros, onde a
+  policy de UPDATE já exige admin do sistema.
+
+O que a auditoria de 20/08 olhou e achou limpo, pra não refazer: RLS nas 25
+tabelas, as três edge functions, os três baldes, o middleware, a regra da tela
+filha repetir a trava do índice nas 20 páginas do painel, segredo no histórico
+inteiro do Git, `npm audit` e os cabeçalhos da Vercel. O que ficou de propósito
+sem correção está no handoff de segurança da memória.
+
 ## Torneios
 
 Quatro tabelas (`fTorneios`, `fTorneioEquipes`, `fTorneioIntegrantes`,
