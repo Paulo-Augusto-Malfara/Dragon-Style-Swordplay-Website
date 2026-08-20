@@ -96,6 +96,7 @@
   let dialogo: HTMLDialogElement;
   let confirmar: ConfirmarAcao;
   let canal: any = null;
+  let canalLista: any = null;
   let agora = $state(Date.now());
   let tique: ReturnType<typeof setInterval> | undefined;
 
@@ -156,14 +157,34 @@
     carregando = false;
   }
 
+  /* A lista inteira ao vivo: pauta nova aparece sozinha, e o contador de voto
+     de cada card acompanha quem votou do outro lado. É um canal separado do
+     canal da pauta aberta, que assina só o que é daquela pauta.
+
+     O `recarregar` espera 400ms antes de ir ao banco porque durante a reunião
+     os votos chegam em rajada, e cada linha nova dispararia uma consulta da
+     lista inteira. Uma consulta depois da rajada mostra o mesmo número. */
+  let esperandoRecarga: ReturnType<typeof setTimeout> | undefined;
+  function recarregar() {
+    if (esperandoRecarga) clearTimeout(esperandoRecarga);
+    esperandoRecarga = setTimeout(carregar, 400);
+  }
+
   onMount(() => {
     carregar();
     tique = setInterval(() => (agora = Date.now()), 30_000);
+    canalLista = supabase
+      .channel("pautas-lista")
+      .on("postgres_changes", { event: "*", schema: "public", table: "fPautas" }, recarregar)
+      .on("postgres_changes", { event: "*", schema: "public", table: "fPautaVotos" }, recarregar)
+      .subscribe();
   });
 
   onDestroy(() => {
     if (tique) clearInterval(tique);
+    if (esperandoRecarga) clearTimeout(esperandoRecarga);
     if (canal) supabase.removeChannel(canal);
+    if (canalLista) supabase.removeChannel(canalLista);
   });
 
   /* Rascunho do que a pessoa estava escrevendo, guardado no próprio navegador
