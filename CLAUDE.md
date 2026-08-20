@@ -28,6 +28,21 @@ Rules:
 nova prefira `is_organizador()`, que diz o que faz. As quatro funções têm
 `comment` no banco dizendo isso.
 
+Esse nome já custou uma brecha, achada na auditoria de 20/08/2026: dez tabelas
+tinham policy de escrita `using is_admin()`, então o organizador lançava PH pra
+si mesmo direto na tabela, reescrevia a régua de `dFaixas` e apagava o
+`fMarcoZero`, tudo por REST, sem passar por RPC. Hoje **`fPH`, `fMarcoZero`,
+`dRegrasPH`, `dFaixas`, `dClasses`, `fTreinos` e as quatro `fTorneio*` têm
+escrita `is_admin_sistema()`**, e é assim que tem que continuar: a tabela crua
+precisa exigir o mesmo nível que a RPC correspondente, senão a RPC vira sugestão.
+Seguem no organizador, de propósito, `fAgendaTreinos`, `fAgendaConfirmacoes`,
+`posts`, `modalidades` e `fEventos`.
+
+**`oculto` não é trava de banco.** Ele barra o painel (o `getStaffMembro`
+testa), mas `is_staff()`, `is_organizador()` e `is_admin_sistema()` olham só o
+`auth_level`. Membro escondido com cargo continua com os poderes de RPC. Pra
+desarmar uma conta de verdade, zere o `auth_level` ou o `auth_user_id`.
+
 Quem faz o quê hoje:
 
 - **Staff (3)**: registra e corrige presença de treino e de evento, cadastra
