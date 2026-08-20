@@ -4265,8 +4265,10 @@ footer {
 .participar-cta h2 {
   width: auto;
   padding: 0 0 0.5em;
-  margin-bottom: 0;
-  margin-inline: auto;
+  /* O `margin-top: 2.2em` do h2 separa seção de seção no corpo da página; aqui
+     ele só somava com o padding do cartão e jogava o título pro meio. Quem dá
+     o respiro do topo é o cartão. */
+  margin: 0 auto;
   text-align: center;
 }
 
