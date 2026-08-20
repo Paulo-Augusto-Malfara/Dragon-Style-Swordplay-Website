@@ -110,9 +110,13 @@
   {#if itens.length === 0}
     <!-- Mesmo tratamento de "Últimas presenças": a seção aparece vazia em vez
          de sumir, senão quem nunca mandou nada acha que a lista não existe. -->
+    <!-- O texto não manda usar um crédito "lá em cima" porque quem está abaixo
+         da faixa Amarela tem teto zero, e aí o cartão de créditos nem existe:
+         a frase apontava pra um botão que não estava na tela. Quem tem crédito
+         vê o cartão logo acima com o saldo, e não precisa da instrução. -->
     <p class="ficha-aviso">
-      Você ainda não mandou nenhum feedback. Use um crédito lá em cima para
-      mandar uma ideia, sugestão, crítica ou propor uma modalidade.
+      Você ainda não mandou nenhum feedback. Quando mandar uma ideia, sugestão,
+      crítica ou proposta de modalidade, o destino dela aparece aqui.
     </p>
   {:else}
   <ul class="resumo">
