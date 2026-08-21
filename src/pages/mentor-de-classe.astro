@@ -61,7 +61,9 @@ import PageLayout from "../layouts/PageLayout.astro";
   }
 
   .mc-bloco h2 {
-    margin: 0 0 10px;
+    /* `auto` nas laterais: o estilo escopado ganha da regra de título
+       centralizado do global.css, então a centralização tem que vir daqui. */
+    margin: 0 auto 10px;
     font-size: 1.15rem;
   }
 

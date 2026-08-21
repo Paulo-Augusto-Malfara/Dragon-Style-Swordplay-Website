@@ -228,7 +228,9 @@ const sistema = [
   }
 
   .cl-titulo {
-    margin: 0 0 14px;
+    /* `auto` nas laterais pelo mesmo motivo do global.css: sem isso o texto
+       centraliza dentro de uma caixa de 30ch encostada na esquerda. */
+    margin: 0 auto 14px;
     font-size: 1.15rem;
   }
 

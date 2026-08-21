@@ -150,7 +150,9 @@ const links = [
   }
 
   .cf-bloco h2 {
-    margin: 0 0 10px;
+    /* `auto` nas laterais, e não 0: a regra de título centralizado do
+       global.css perde pra esta, que é escopada. */
+    margin: 0 auto 10px;
     font-size: 1.15rem;
   }
 

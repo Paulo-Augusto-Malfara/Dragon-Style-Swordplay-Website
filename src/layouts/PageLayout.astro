@@ -16,7 +16,9 @@ const grupo = grupoDe(Astro.url.pathname);
 ---
 
 <BaseLayout title={title} description={description}>
-  <div class="pagina">
+  {/* `pagina-conteudo` separa página de leitura do painel: o AdminShell usa a
+      mesma `.pagina`, e a regra de título centralizado é só pra cá. */}
+  <div class="pagina pagina-conteudo">
     <header class="pagina-cab">
       {grupo && <p class="eyebrow">{grupo}</p>}
       <h1>{title}</h1>

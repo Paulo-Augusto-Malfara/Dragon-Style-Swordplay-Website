@@ -133,7 +133,9 @@ const contagem = (id: number) => {
 
 <style>
   .secao {
-    margin: 26px 0 12px;
+    /* `auto` nas laterais: a caixa do h2 tem 30ch e precisa centralizar junto
+       com o texto. */
+    margin: 26px auto 12px;
     font-family: var(--ds-font-display);
     font-size: 1.05rem;
     color: var(--ds-gold-light);

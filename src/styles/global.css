@@ -916,6 +916,25 @@ h2 {
   padding: 0;
 }
 
+/* Título de seção do conteúdo, centralizado.
+
+   O `margin-inline: auto` não é enfeite ao lado do `text-align`: o h2 tem
+   `max-width: 30ch`, então sozinho o `text-align` centraliza o texto dentro de
+   uma caixa que continua encostada na esquerda.
+
+   Filho direto de propósito. Título de cartão, de janela (`dialog.janela`) e de
+   `summary` mora mais fundo e tem layout próprio: o do `summary` divide a linha
+   com o chevron, e o da janela vem embaixo de um `eyebrow`. Um seletor de
+   descendente pegaria os três.
+
+   `.pagina-conteudo` e não `.pagina` porque o AdminShell usa a mesma `.pagina`:
+   no painel o h2 divide a linha com um botão e fica à esquerda. */
+.pagina-conteudo > h2,
+.pagina-conteudo > section > h2 {
+  text-align: center;
+  margin-inline: auto;
+}
+
 h3 {
   padding: 10px;
   width: 90%;
