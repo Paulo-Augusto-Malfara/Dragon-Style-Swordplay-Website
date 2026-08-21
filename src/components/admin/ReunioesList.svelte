@@ -27,6 +27,7 @@
   let criando = $state(false);
   let quando = $state("");
   let local = $state("");
+  let linkCall = $state("");
   let editandoId = $state<number | null>(null);
 
   const agora = new Date().toISOString();
@@ -37,7 +38,7 @@
     loading = true;
     const { data, error } = await supabase
       .from("fReunioes")
-      .select("id_reuniao, data_hora, local, status, ata")
+      .select("id_reuniao, data_hora, local, link_call, status, ata")
       .order("data_hora", { ascending: false });
     erro = error?.message ?? "";
     itens = data ?? [];
@@ -45,6 +46,15 @@
   }
 
   load();
+
+  /* Um lugar só pra zerar o formulário: abrir "+ Marcar" depois de ter editado
+     uma reunião trazia os campos da outra preenchidos. */
+  function limpar() {
+    editandoId = null;
+    quando = "";
+    local = "";
+    linkCall = "";
+  }
 
   async function chamar(fn: string, args: Record<string, unknown>) {
     ocupado = true;
@@ -70,13 +80,12 @@
           p_id_reuniao: editandoId,
           p_data_hora: iso,
           p_local: local,
+          p_link_call: linkCall,
         })
-      : await chamar("agendar_reuniao", { p_data_hora: iso, p_local: local });
+      : await chamar("agendar_reuniao", { p_data_hora: iso, p_local: local, p_link_call: linkCall });
     if (ok) {
       criando = false;
-      editandoId = null;
-      quando = "";
-      local = "";
+      limpar();
     }
   }
 
@@ -87,6 +96,7 @@
     d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
     quando = d.toISOString().slice(0, 16);
     local = r.local ?? "";
+    linkCall = r.link_call ?? "";
     criando = true;
   }
 
@@ -128,8 +138,8 @@
       type="button"
       class="btn btn-primary btn-sm"
       onclick={() => {
+        limpar();
         criando = true;
-        editandoId = null;
       }}>+ Marcar reunião</button
     >
   {/if}
@@ -151,6 +161,10 @@
         Onde (opcional)
         <input type="text" bind:value={local} placeholder="Chamada de vídeo, casa do fulano..." />
       </label>
+      <label>
+        Link da call (opcional)
+        <input type="url" bind:value={linkCall} placeholder="https://meet.google.com/..." />
+      </label>
     </div>
     <div class="form-acoes">
       <button type="submit" class="btn btn-primary" disabled={ocupado || !quando}>
@@ -161,7 +175,7 @@
         class="btn btn-ghost"
         onclick={() => {
           criando = false;
-          editandoId = null;
+          limpar();
         }}>Cancelar</button
       >
     </div>
@@ -196,6 +210,9 @@
             <span class="row-titulo">{r.local ?? "Sem local definido"}</span>
             <span class="row-meta">
               <span class="status-badge status-badge--{r.status}">{ROTULOS[r.status]}</span>
+              {#if r.link_call}
+                <a class="link-call" href={r.link_call} target="_blank" rel="noopener noreferrer">Entrar na call</a>
+              {/if}
             </span>
           </div>
           <div class="row-acoes">
@@ -247,5 +264,11 @@
   .nota {
     font-size: 0.8rem;
     color: var(--ds-text-4);
+  }
+
+  .link-call {
+    font-size: 0.78rem;
+    color: var(--ds-gold);
+    text-decoration: underline;
   }
 </style>

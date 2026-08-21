@@ -162,7 +162,7 @@
         .order("votos", { ascending: false }),
       supabase
         .from("fReunioes")
-        .select("id_reuniao, data_hora, local, status")
+        .select("id_reuniao, data_hora, local, link_call, status")
         .eq("status", "agendada")
         .gt("data_hora", new Date().toISOString())
         .order("data_hora")
@@ -548,6 +548,21 @@
     return `${Math.max(Math.floor(ms / 60000), 1)}min`;
   }
 
+  /* Contagem regressiva até a reunião. Acima de um dia o que a pessoa quer
+     saber é "que dia", e dia com hora resolve; dentro das 24h a pergunta vira
+     "dá tempo de terminar isso antes?", e aí vale o relógio com minuto.
+
+     Anda junto do `agora`, que já bate de 30 em 30 segundos por causa do
+     "fecha em Xh": um relógio de minuto não precisa de tique próprio. */
+  function contagem(alvo: number) {
+    const ms = alvo - agora;
+    if (ms <= 0) return "começou";
+    const min = Math.floor(ms / 60000);
+    if (min >= 1440) return `faltam ${Math.floor(min / 1440)}d ${Math.floor((min % 1440) / 60)}h`;
+    const dois = (n: number) => String(n).padStart(2, "0");
+    return `faltam ${dois(Math.floor(min / 60))}:${dois(min % 60)}`;
+  }
+
   const linhasDe = (v: unknown) => (Array.isArray(v) ? (v as string[]) : []);
 </script>
 
@@ -561,7 +576,11 @@
       <p class="cabeca-linha">
         <span class="cabeca-rotulo">Próxima reunião</span>
         <span class="cabeca-valor">{dataHoraBR(reuniao.data_hora)}</span>
+        <span class="cabeca-contagem">{contagem(new Date(reuniao.data_hora).getTime())}</span>
         {#if reuniao.local}<span class="cabeca-local">{reuniao.local}</span>{/if}
+        {#if reuniao.link_call}
+          <a class="cabeca-call" href={reuniao.link_call} target="_blank" rel="noopener noreferrer">Entrar na call</a>
+        {/if}
       </p>
       {#if janelaAberta}
         <!-- Mesmo par número+rótulo do cartão de créditos do perfil: o staff
@@ -1097,6 +1116,23 @@
     font-family: var(--ds-font-display);
     font-size: 1.1rem;
     color: var(--ds-gold);
+  }
+
+  /* `tabular-nums` porque o número muda sozinho na tela: com fonte
+     proporcional, cada minuto que passa mexe a largura e a linha inteira
+     tremia. */
+  .cabeca-contagem {
+    font-size: 0.8rem;
+    color: var(--ds-text-3);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Dourado e sublinhado porque é a única coisa clicável da linha: o resto do
+     cabeçalho é texto de apoio. */
+  .cabeca-call {
+    font-size: 0.8rem;
+    color: var(--ds-gold);
+    text-decoration: underline;
   }
 
   .cabeca-local,
