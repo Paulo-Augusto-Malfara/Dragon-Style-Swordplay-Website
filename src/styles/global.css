@@ -4313,8 +4313,11 @@ footer {
   margin: 2rem auto 0;
 }
 
+/* `0 1 320px`, e não `1 1`: a primeira e a última novidade só têm um vizinho,
+   e com `flex-grow` esse cartão sozinho esticava pela largura toda, parecendo
+   uma barra vazia. Sem crescer, ele fica do tamanho de um cartão. */
 .post-vizinha {
-  flex: 1 1 220px;
+  flex: 0 1 320px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -4339,9 +4342,11 @@ footer {
   color: var(--ds-text-5);
 }
 
-/* A da frente encosta na direita quando as duas cabem na mesma linha: a ordem
-   do tempo fica desenhada, passado à esquerda e futuro à direita. */
+/* A da frente encosta na direita: a ordem do tempo fica desenhada, passado à
+   esquerda e futuro à direita. O `margin-left: auto` também é o que joga o
+   cartão pra direita quando ele é o único da linha. */
 .post-vizinha--frente {
+  margin-left: auto;
   text-align: right;
 }
 
