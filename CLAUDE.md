@@ -159,6 +159,47 @@ Regra ao mexer numa tela do painel: **a trava da página filha tem que repetir a
 do índice**. Já aconteceu de `/admin/posts/[id]` e `/admin/modalidades/[id]`
 abrirem pra quem a lista escondia, e o erro só aparecer no salvar.
 
+## Voto de pauta: secreto, e placar só na hora certa
+
+Revisado em 21/08/2026. As duas votações do mural são secretas **por policy**,
+não por a tela não desenhar. `fPautaVotos` e `fPautaDecisaoVotos` têm select
+`id_membro = current_membro_id()`: cada um enxerga o próprio voto e mais nada,
+inclusive o admin do sistema. Antes disso era `is_staff()`, e qualquer staff
+lia a lista inteira por REST enquanto a tela ainda baixava `id_membro, opcao`
+pro navegador de todo mundo.
+
+Fechar a policy custou o Realtime, que só entrega a linha que a policy do
+assinante deixa ver. Por isso o placar mora em `fPautas.votos_total` e
+`fPautas.decisao_tally`, mantido por três gatilhos, e a tela assina a
+`fPautas`. **Não troque essas colunas por `count(*)` na view**: elas existem
+pra o Realtime ter o que entregar com o voto fechado. O terceiro gatilho,
+`recontar_ao_trocar_reuniao`, cobre o que não se adivinha: sair da reunião
+congela o placar da decisão (é assim que a pauta adiada guarda como foi
+votada), e só entrar numa reunião nova zera.
+
+Esconder placar é regra de **quando**, e não de quem:
+
+- Prioridade aparece quando a votação trava, 24h antes da reunião, pela mesma
+  `pauta_votacao_aberta` que trava o voto. Um relógio só.
+- Decisão aparece quando o organizador encerra. Durante, sai só
+  `decisao_votantes`, que conta cabeças e não preferência.
+- **A ordem da lista denuncia tanto quanto o número.** Enquanto trava, o mural
+  vem da pauta mais recente pra mais antiga, com as urgentes no topo. Nunca
+  volte a ordenar por voto nesse período.
+
+O motivo é efeito manada, não sigilo: com o placar à vista, quem vota depois
+vota atrás de quem já está na frente.
+
+**Pauta urgente não recebe voto** (`votar_pauta` recusa), porque ela entra na
+reunião por fora das três vagas e o voto seria jogado fora. Marcar como urgente
+**apaga** os votos que a pauta já tinha, devolvendo o saldo de quem votou.
+Desmarcar não traz de volta.
+
+**ARMADILHA**: a `fPautas` não tem mais `select` de tabela pro `authenticated`,
+e sim grant coluna a coluna, sem `votos_total` e `decisao_tally`. Coluna nova
+não nasce visível: quem esquecer de acrescentar no grant vai ver o campo sumir
+do REST calado, sem erro, e o defeito vai parecer da tela.
+
 ## claude-in-chrome usage
 
 Don't open/screenshot the site with claude-in-chrome unprompted. The user runs `npm run dev` himself and watches localhost live (PC and phone) — he checks visual/UI changes on his own. Only use claude-in-chrome when: the user explicitly asks in that turn, a large/whole-feature review he requested calls for it, or there's a genuine need with no other way to verify — and even then, ask for authorization first (yes, even in auto mode) before opening the browser.
@@ -178,7 +219,7 @@ usuário** em vez de operar no projeto que apareceu.
 
 ## Supabase MCP write policy
 
-The `supabase` MCP server in `.mcp.json` stays at `read_only=false` permanently — don't toggle it back to `true` after a migration, and don't ask the user to flip it before one. Instead, always ask an explicit, clear question in chat before running `apply_migration`, `execute_sql` for anything beyond a plain `SELECT`, or any other DB write — every single time, even in Auto Mode, even if the conversation already implied it. A yes covers only that one action. After any migration, run `get_advisors(type:"security")` and compare against the known baseline (9 intentional `SECURITY DEFINER` views, RPCs intentionally exposed to anon/authenticated by design, leaked password protection warning pre-existing) — flag only genuinely new items.
+The `supabase` MCP server in `.mcp.json` stays at `read_only=false` permanently — don't toggle it back to `true` after a migration, and don't ask the user to flip it before one. Instead, always ask an explicit, clear question in chat before running `apply_migration`, `execute_sql` for anything beyond a plain `SELECT`, or any other DB write — every single time, even in Auto Mode, even if the conversation already implied it. A yes covers only that one action. After any migration, run `get_advisors(type:"security")` and compare against the known baseline (10 intentional `SECURITY DEFINER` views, RPCs intentionally exposed to anon/authenticated by design, leaked password protection warning pre-existing) — flag only genuinely new items.
 
 Baseline auditada em 15/08/2026, item a item: as views (`v_registro_treinos`,
 `v_treinos_publicos`, `v_registro_eventos`, `v_ranking_nivel_geral`,
@@ -188,7 +229,10 @@ publicam o que o site já mostra e filtram `not m.oculto`; a oitava,
 `v_torneio_equipes`, entrou em 18/08/2026 com a tela pública de torneios e
 segue a mesma regra: só torneio fora de `inscricao`, apelido aprovado, e membro
 `oculto` sai como "Participante". Nenhuma expõe
-email, telegram_id ou auth_user_id. As 25 funções `SECURITY DEFINER` têm
+email, telegram_id ou auth_user_id. A décima, `v_pautas_mural`, virou definer
+em 21/08/2026 pra esconder placar de votação (veja "Voto de pauta"); ela filtra
+por `is_staff()` dentro de si, e é a única da lista que existe pra **esconder**
+coluna, não pra juntar tabela. As 25 funções `SECURITY DEFINER` têm
 guarda interna (`is_admin`, `is_staff`, `is_organizador`, `current_membro_id` ou
 `auth.uid()`); o anônimo só alcança os cinco booleanos sem argumento, que
 respondem falso pra ele. Refazer essa varredura de tempos em tempos.

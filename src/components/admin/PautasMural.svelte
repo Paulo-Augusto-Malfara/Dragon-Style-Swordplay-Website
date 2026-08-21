@@ -9,11 +9,26 @@
    *    antes dela, e é a `pauta_votacao_aberta` no banco que manda -- o que
    *    esta tela desenha é só o aviso. Nunca deixe só o lado da tela.
    *
+   *    Enquanto ela está aberta o placar não existe pra ninguém: a view devolve
+   *    `votos` e `posicao` nulos, e a coluna crua nem é legível por quem loga.
+   *    É contra efeito manada, não é sigilo. Por isso a ordenação da lista
+   *    também não pode voltar a ser por voto nesse período.
+   *
    * 2. Voto de DECISÃO (fPautaDecisaoVotos): acontece durante a reunião, o
    *    organizador abre e fecha, e é o que define o desfecho. As opções mudam
    *    conforme a rodada: pauta na fila decide mérito (validada/recusada/
    *    adiada), modalidade em teste decide o fim do teste (aprovada/recusada/
    *    mais tempo).
+   *
+   * As duas são SECRETAS, e o segredo é do banco: a policy das duas tabelas de
+   * voto entrega só a linha de quem pergunta. Esta tela nunca recebe a lista de
+   * votantes, e por isso lê contagem de `votos_total` e `decisao_tally`, que o
+   * banco mantém na própria pauta. Não volte a consultar as tabelas de voto
+   * daqui: além de não vir nada, seria o mesmo furo de antes, quando a tela
+   * baixava `id_membro, opcao` de todo mundo pro navegador de qualquer staff.
+   *
+   * Comentário continua assinado, e é pra continuar: a discussão é nominal, o
+   * voto é que não é.
    *
    * Tudo que aparece na tela é texto puro por interpolação, que o Svelte
    * escapa. Nenhum `{@html}` aqui, e não introduza um.
@@ -90,7 +105,6 @@
   /* Raízes com as respostas à mostra. Fechado é o padrão: a discussão fica
      limpa e quem quiser abre. */
   let respostasAbertas = $state(new Set<number>());
-  let decisaoVotos = $state<any[]>([]);
   let mensagem = $state("");
   let ocupado = $state(false);
   let dialogo: HTMLDialogElement;
@@ -155,11 +169,20 @@
     const [lista, prox, eu] = await Promise.all([
       // Urgente na frente, senão o cartão que a view numerou em primeiro lugar
       // apareceria lá embaixo por não ter voto nenhum.
+      //
+      // Enquanto a votação está aberta a view devolve `votos` nulo, e ordenar
+      // por voto seria mostrar o ranking sem mostrar o número: a ordem denuncia
+      // igual. Nesse período todos empatam em nulo e a data desempata, da mais
+      // recente pra mais antiga. É de propósito que seja a mais recente no
+      // topo: qualquer ordem estável que dependa do voto, ou que apenas pareça
+      // depender, entrega quem está na frente. Quando a votação trava, o número
+      // volta e a ordem vira a do placar.
       supabase
         .from("v_pautas_mural")
         .select("*")
         .order("prioritaria", { ascending: false })
-        .order("votos", { ascending: false }),
+        .order("votos", { ascending: false, nullsFirst: false })
+        .order("criada_em", { ascending: false }),
       supabase
         .from("fReunioes")
         .select("id_reuniao, data_hora, local, link_call, status")
@@ -177,13 +200,18 @@
     carregando = false;
   }
 
-  /* A lista inteira ao vivo: pauta nova aparece sozinha, e o contador de voto
-     de cada card acompanha quem votou do outro lado. É um canal separado do
-     canal da pauta aberta, que assina só o que é daquela pauta.
+  /* A lista inteira ao vivo: pauta nova aparece sozinha, e os dois placares
+     acompanham quem votou do outro lado.
+
+     Assina a `fPautas`, e não as tabelas de voto, porque o Realtime só entrega
+     a linha que a policy do assinante deixa ver: com o voto secreto, assinar
+     voto não avisaria nada. Os gatilhos do banco gravam o placar na pauta, e a
+     pauta é que chega aqui. Vale pra apuração da reunião também, que por isso
+     não precisa de canal próprio.
 
      O `recarregar` espera 400ms antes de ir ao banco porque durante a reunião
-     os votos chegam em rajada, e cada linha nova dispararia uma consulta da
-     lista inteira. Uma consulta depois da rajada mostra o mesmo número. */
+     os votos chegam em rajada, e cada um dispararia uma consulta da lista
+     inteira. Uma consulta depois da rajada mostra o mesmo número. */
   let esperandoRecarga: ReturnType<typeof setTimeout> | undefined;
   function recarregar() {
     if (esperandoRecarga) clearTimeout(esperandoRecarga);
@@ -196,7 +224,6 @@
     canalLista = supabase
       .channel("pautas-lista")
       .on("postgres_changes", { event: "*", schema: "public", table: "fPautas" }, recarregar)
-      .on("postgres_changes", { event: "*", schema: "public", table: "fPautaVotos" }, recarregar)
       .subscribe();
   });
 
@@ -258,7 +285,6 @@
     respondendoA = null;
     editandoId = null;
     respostasAbertas = new Set();
-    decisaoVotos = [];
     mensagem = "";
     resposta = "";
     temRascunho = recuperarRascunho(id);
@@ -273,11 +299,6 @@
       .on(
         "postgres_changes",
         { event: "*", schema: "public", table: "fPautaComentarios", filter: `id_pauta=eq.${id}` },
-        () => carregarConversa(id),
-      )
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "fPautaDecisaoVotos", filter: `id_pauta=eq.${id}` },
         () => carregarConversa(id),
       )
       .subscribe();
@@ -298,16 +319,12 @@
   );
 
   async function carregarConversa(id: number) {
-    const [cs, ds] = await Promise.all([
-      supabase
-        .from("fPautaComentarios")
-        .select("id_comentario, mensagem, criado_em, editado_em, id_membro, responde_a, dMembros(nome, apelido)")
-        .eq("id_pauta", id)
-        .order("criado_em"),
-      supabase.from("fPautaDecisaoVotos").select("id_membro, opcao").eq("id_pauta", id),
-    ]);
-    comentarios = cs.data ?? [];
-    decisaoVotos = ds.data ?? [];
+    const { data } = await supabase
+      .from("fPautaComentarios")
+      .select("id_comentario, mensagem, criado_em, editado_em, id_membro, responde_a, dMembros(nome, apelido)")
+      .eq("id_pauta", id)
+      .order("criado_em");
+    comentarios = data ?? [];
   }
 
   function fechar() {
@@ -509,8 +526,15 @@
       : OPCOES_MERITO;
   const rotuloOpcao = (id: string) =>
     [...OPCOES_MERITO, ...OPCOES_TESTE].find((o) => o.id === id)?.rotulo ?? id;
-  const contar = (opcao: string) => decisaoVotos.filter((v) => v.opcao === opcao).length;
-  const meuVoto = $derived(decisaoVotos.find((v) => v.id_membro === euId)?.opcao ?? null);
+  /* A apuração vem do placar que o banco guarda na própria pauta, e o "meu
+     voto" da view. Quem votou o quê não chega mais aqui, e não é a tela que
+     esconde: a policy das duas tabelas de voto é "só a minha linha", então
+     nem o devtools nem um curl com token de staff alcançam a lista. */
+  const contar = (opcao: string) => Number(aberta?.decisao_tally?.[opcao] ?? 0);
+  /* Cabeças, não preferência: a view manda esta contagem mesmo com o placar
+     escondido, senão o organizador encerraria sem saber se a sala votou. */
+  const jaVotaram = $derived(Number(aberta?.decisao_votantes ?? 0));
+  const meuVoto = $derived(aberta?.meu_voto ?? null);
 
   /* Prazo do admin pra desfazer um engano. O banco recusa depois disso, aqui
      só some com o botão. */
@@ -602,6 +626,11 @@
             </span>
           </span>
         </div>
+        <!-- Sem esta frase o cartão sem número parece defeito. -->
+        <p class="cabeca-sub">
+          Os votos ficam escondidos até a votação fechar. Assim ninguém vota
+          atrás de quem já está na frente.
+        </p>
       {:else}
         <p class="cabeca-sub">Votação encerrada: falta menos de 24h para a reunião.</p>
       {/if}
@@ -668,9 +697,11 @@
             </span>
           </button>
 
-          {#if p.status === "aberta"}
+          {#if p.status === "aberta" && !urgente(p)}
             <div class="card-voto">
-              <span class="card-votos">{p.votos}</span>
+              {#if p.votos !== null}
+                <span class="card-votos">{p.votos}</span>
+              {/if}
               <button
                 type="button"
                 class="btn btn-ghost btn-sm"
@@ -752,11 +783,16 @@
     {/if}
 
     <!-- 2ª votação: só existe durante a reunião, e só o organizador abre e
-         fecha. O staff vê a apuração ao vivo enquanto discute. -->
+         fecha. O placar não corre junto: a apuração é o encerramento. O que
+         aparece durante é quantas pessoas já votaram, que diz que a sala
+         terminou sem dizer o que ninguém escolheu. -->
     {#if aberta.decisao_aberta_em}
       <section class="decisao">
         <p class="det-rotulo">Votação em curso</p>
-        <p class="decisao-nota">Clique na sua escolha. Dá pra trocar enquanto a votação estiver aberta.</p>
+        <p class="decisao-nota">
+          Clique na sua escolha. Dá pra trocar enquanto a votação estiver aberta.
+          O resultado só aparece quando o organizador encerrar.
+        </p>
         <div class="decisao-opcoes">
           {#each opcoesDa(aberta) as o (o.id)}
             <button
@@ -769,10 +805,13 @@
                 chamar("votar_decisao", { p_id_pauta: aberta.id_pauta, p_opcao: o.id }, true)}
             >
               <span class="decisao-rotulo">{o.rotulo}</span>
-              <span class="decisao-contagem">{contar(o.id)}</span>
             </button>
           {/each}
         </div>
+
+        <p class="decisao-nota">
+          {jaVotaram === 1 ? "1 pessoa já votou" : `${jaVotaram} pessoas já votaram`}.
+        </p>
 
         {#if isOrganizador}
           <div class="decisao-encerrar">
