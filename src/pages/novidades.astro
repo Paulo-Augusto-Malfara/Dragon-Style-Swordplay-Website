@@ -1,39 +1,42 @@
 ---
-import sanitizeHtml from "sanitize-html";
 import PageLayout from "../layouts/PageLayout.astro";
 import { supabasePublic } from "../lib/supabase-public";
+import { dataDoPost, resumoDoPost } from "../lib/posts";
 
 export const prerender = false;
 
+// Só o que a lista mostra: o corpo inteiro de sete novidades viria junto sem
+// necessidade, e a chamada sai das primeiras linhas dele.
 const { data: posts } = await supabasePublic
   .from("posts")
-  .select("*")
+  .select("slug, title, body, published_at")
   .eq("is_published", true)
   .order("published_at", { ascending: false });
-
-// ponytail: posts.body is admin-authored HTML from a free-text textarea (see
-// PostEditor.svelte); sanitized here so a compromised/careless admin account
-// can't slip a stored XSS payload to every visitor of this page.
-const sanitize = (html: string) =>
-  sanitizeHtml(html, {
-    allowedTags: sanitizeHtml.defaults.allowedTags.concat(["img", "h1", "h2"]),
-    allowedAttributes: {
-      ...sanitizeHtml.defaults.allowedAttributes,
-      img: ["src", "alt", "width", "height"],
-    },
-  });
 ---
 
 <PageLayout
   title="Novidades"
-  resumo="Avisos, recados e o que aconteceu de novo no grupo."
+  description="Avisos, mudanças de regra e atualizações do Dragon Style Swordplay."
+  resumo="Avisos, recados e o que aconteceu de novo no grupo. Cada novidade tem a sua página."
 >
   {
-    (posts ?? []).map((post) => (
-      <section class="news" id={post.slug}>
-        <h3>{post.title}</h3>
-        <Fragment set:html={sanitize(post.body)} />
-      </section>
-    ))
+    (posts ?? []).length === 0 ? (
+      <p class="vazio">Nada publicado por enquanto. Quando tiver, aparece aqui.</p>
+    ) : (
+      <ul class="post-lista">
+        {(posts ?? []).map((post) => (
+          // O id mantém de pé o link antigo `/novidades#slug`, que a home usou
+          // enquanto tudo era uma página só: ele agora para no cartão certo da
+          // lista em vez de morrer no topo.
+          <li id={post.slug}>
+            <a class="post-cartao" href={`/novidades/${post.slug}`}>
+              {dataDoPost(post.published_at) && <span class="post-data">{dataDoPost(post.published_at)}</span>}
+              <strong class="post-titulo">{post.title}</strong>
+              <span class="post-resumo">{resumoDoPost(post.body)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    )
   }
 </PageLayout>

@@ -1,0 +1,60 @@
+---
+import PageLayout from "../../layouts/PageLayout.astro";
+import { supabasePublic } from "../../lib/supabase-public";
+import { dataDoPost, resumoDoPost, sanitizarPost } from "../../lib/posts";
+
+export const prerender = false;
+
+const { slug } = Astro.params;
+
+const { data: post } = slug
+  ? await supabasePublic
+      .from("posts")
+      .select("slug, title, body, published_at")
+      .eq("slug", slug)
+      .eq("is_published", true)
+      .maybeSingle()
+  : { data: null };
+
+// Novidade que não existe e novidade ainda não publicada dão na mesma resposta:
+// a lista. O rascunho do painel não pode vazar por adivinhação de slug.
+if (!post) return Astro.redirect("/novidades");
+
+const { data: vizinhas } = await supabasePublic
+  .from("posts")
+  .select("slug, title, published_at")
+  .eq("is_published", true)
+  .order("published_at", { ascending: false });
+
+const lista = vizinhas ?? [];
+const onde = lista.findIndex((p) => p.slug === post.slug);
+// A lista vem da mais nova pra mais velha, então a "anterior" no tempo é a
+// seguinte no array.
+const maisNova = onde > 0 ? lista[onde - 1] : null;
+const maisVelha = onde >= 0 && onde < lista.length - 1 ? lista[onde + 1] : null;
+---
+
+<PageLayout title={post.title} description={resumoDoPost(post.body, 150)}>
+  {dataDoPost(post.published_at) && <p class="post-data post-data--pagina">{dataDoPost(post.published_at)}</p>}
+
+  <article class="post-corpo">
+    <Fragment set:html={sanitizarPost(post.body)} />
+  </article>
+
+  <nav class="post-vizinhas" aria-label="Outras novidades">
+    {maisVelha && (
+      <a class="post-vizinha" href={`/novidades/${maisVelha.slug}`}>
+        <span>← Anterior</span>
+        <strong>{maisVelha.title}</strong>
+      </a>
+    )}
+    {maisNova && (
+      <a class="post-vizinha post-vizinha--frente" href={`/novidades/${maisNova.slug}`}>
+        <span>Seguinte →</span>
+        <strong>{maisNova.title}</strong>
+      </a>
+    )}
+  </nav>
+
+  <a class="section-link section-link-inline" href="/novidades">Ver todas as novidades</a>
+</PageLayout>

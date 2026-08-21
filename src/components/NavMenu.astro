@@ -18,6 +18,14 @@
 import { menu } from "../lib/navegacao";
 
 const atual = Astro.url.pathname.replace(/\/$/, "") || "/";
+
+/* A página de detalhe marca a lista de onde se chega nela: /novidades/<slug>
+   acende "Novidades", /torneios/12 acende "Torneios". Antes era igualdade
+   exata, e abrir um detalhe apagava o menu inteiro, tirando da pessoa a única
+   pista de onde ela está. O "/" fica de fora do prefixo, senão a Início
+   acenderia em toda página do site. */
+const naSecao = (href: string) =>
+  atual === href || (href !== "/" && atual.startsWith(`${href}/`));
 ---
 
 <section>
@@ -42,7 +50,7 @@ const atual = Astro.url.pathname.replace(/\/$/, "") || "/";
                     <li>
                       <a
                         href={item.href}
-                        aria-current={item.href === atual ? "page" : undefined}
+                        aria-current={naSecao(item.href) ? "page" : undefined}
                       >
                         {item.label}
                       </a>

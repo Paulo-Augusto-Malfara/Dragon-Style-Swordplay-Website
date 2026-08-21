@@ -4193,6 +4193,158 @@ footer {
   }
 }
 
+/* ======== NOVIDADES (blog) ======== */
+
+.post-lista {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 760px;
+  margin: 0 auto 1.5em;
+  padding: 0;
+}
+
+.post-cartao {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px 18px;
+  border: 1px solid var(--ds-line);
+  border-radius: 12px;
+  background: var(--ds-surface);
+  color: inherit;
+  text-decoration: none;
+}
+
+.post-cartao:hover,
+.post-cartao:focus-visible {
+  border-color: var(--ds-gold-dim);
+  background: var(--ds-gold-wash);
+}
+
+.post-data {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ds-text-5);
+}
+
+/* A data da página fica sozinha embaixo do título, no lugar do resumo que as
+   outras páginas têm. `width`/`margin` explícitos por causa do `p` de texto
+   corrido, que a deixaria numa caixa de 90% encostada à esquerda. */
+.post-data--pagina {
+  width: 100%;
+  margin: -0.4em 0 1.4em;
+  text-align: center;
+}
+
+.post-titulo {
+  font-family: var(--ds-font-display);
+  font-size: 1.05rem;
+  color: var(--ds-text-1);
+}
+
+.post-resumo {
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--ds-text-4);
+}
+
+/* O corpo é HTML antigo, escrito quando as classes `links-de-texto` e
+   `gold-title` sobreviviam até a tela. Hoje o sanitizador tira `class` de
+   tudo, então quem veste link e rótulo é o container: texto novo não precisa
+   lembrar de classe nenhuma, e o texto de 2022 volta a ficar certo. */
+.post-corpo {
+  display: block;
+  max-width: 760px;
+  margin: 0 auto;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+.post-corpo p {
+  width: 100%;
+  margin: 0 0 1em;
+}
+
+.post-corpo ul,
+.post-corpo ol {
+  margin: 0 0 1em;
+  padding-left: 1.4em;
+}
+
+.post-corpo li {
+  margin-bottom: 0.5em;
+}
+
+/* Lista dentro de lista é o formato de todo changelog daqui: o recuo separa o
+   detalhe do item, e o respiro extra some pra não virar escada. */
+.post-corpo li > ul,
+.post-corpo li > ol {
+  margin: 0.5em 0 0;
+}
+
+.post-corpo strong {
+  color: var(--ds-gold);
+}
+
+.post-corpo a {
+  text-decoration: underline;
+  font-style: italic;
+  color: var(--text-primary-color);
+}
+
+.post-corpo a:hover {
+  color: var(--golden-color);
+}
+
+.post-corpo img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+}
+
+.post-vizinhas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 760px;
+  margin: 2rem auto 0;
+}
+
+.post-vizinha {
+  flex: 1 1 220px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--ds-line);
+  border-radius: 12px;
+  background: var(--ds-surface);
+  color: inherit;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.post-vizinha:hover,
+.post-vizinha:focus-visible {
+  border-color: var(--ds-gold-dim);
+}
+
+.post-vizinha span {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ds-text-5);
+}
+
+/* A da frente encosta na direita quando as duas cabem na mesma linha: a ordem
+   do tempo fica desenhada, passado à esquerda e futuro à direita. */
+.post-vizinha--frente {
+  text-align: right;
+}
+
 .galeria-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);

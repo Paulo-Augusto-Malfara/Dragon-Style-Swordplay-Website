@@ -14,7 +14,7 @@
   let status = $state<"idle" | "loading" | "saving" | "saved" | "error">(isNew ? "idle" : "loading");
   let errorMessage = $state("");
 
-  // O slug vira a âncora da novidade dentro de /novidades, e digitar
+  // O slug vira o endereço da novidade (/novidades/<slug>), e digitar
   // "primeiro-treino-de-2026" à mão convida a erro de acento e espaço. Aqui
   // ele sai do título enquanto ninguém tiver mexido no campo, e para de
   // seguir no primeiro toque.
@@ -89,7 +89,7 @@
           required
           pattern="[a-z0-9-]+"
         />
-        <small>Só letras minúsculas, números e hífen. É a âncora do link: /novidades#{slug || "..."}</small>
+        <small>Só letras minúsculas, números e hífen. É o endereço da novidade: /novidades/{slug || "..."}</small>
       </label>
       <label class="campo-largo">
         Texto

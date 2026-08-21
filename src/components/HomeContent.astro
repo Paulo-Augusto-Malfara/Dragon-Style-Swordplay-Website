@@ -14,6 +14,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import ProximoTreino from "./ProximoTreino.astro";
 import { supabasePublic } from "../lib/supabase-public";
+import { dataDoPost } from "../lib/posts";
 
 const WHATSAPP = "https://chat.whatsapp.com/JsB70PFcbnlCm0cCy8ShIK";
 
@@ -57,15 +58,9 @@ const numeros = [
   { valor: anosDeGrupo, rotulo: "Anos de grupo" },
 ].filter(Boolean) as { valor: number; rotulo: string }[];
 
-const dataCurta = (iso: string | null) =>
-  iso
-    ? new Date(iso).toLocaleDateString("pt-BR", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-        timeZone: "America/Sao_Paulo",
-      })
-    : null;
+// A data da novidade sai do mesmo lugar que a da página dela, e em UTC: ver o
+// porquê em lib/posts.ts. Aqui ela mostrava um dia a menos.
+const dataCurta = dataDoPost;
 
 const atalhos = [
   { href: "/dashboard", titulo: "Meu Perfil", texto: "Seu nível, suas presenças e seus pontos de honra." },
@@ -193,7 +188,7 @@ const fotos = [
             <ul class="home-novidades">
               {novidades.map((n) => (
                 <li>
-                  <a class="home-novidade" href={`/novidades#${n.slug}`}>
+                  <a class="home-novidade" href={`/novidades/${n.slug}`}>
                     <strong>{n.title}</strong>
                     {dataCurta(n.published_at) && <span>{dataCurta(n.published_at)}</span>}
                   </a>
