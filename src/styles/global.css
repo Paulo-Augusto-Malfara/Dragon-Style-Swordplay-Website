@@ -4220,6 +4220,113 @@ footer {
   transform: scale(1.08);
 }
 
+/* A grade corta a foto em 3/4 pra manter o ritmo das colunas; a lente existe
+   pra mostrar o que o corte esconde. O cursor avisa disso antes do clique. */
+.galeria-item {
+  display: block;
+  cursor: zoom-in;
+}
+
+/* A janela da foto é mais larga que a `.janela` padrão de 560px, e sem o padding
+   dela: aqui o conteúdo é a imagem, e moldura em volta de foto só rouba tela. */
+/* `[open]` não é enfeite: `display` de autor ganha do `display: none` que o
+   navegador dá pro <dialog> fechado, mesmo com especificidade menor. Sem o
+   `[open]`, a janela inteira fica desenhada dentro da página, embaixo da
+   grade, com a altura fixa lá de baixo. */
+.lente[open] {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: min(1100px, calc(100vw - 16px));
+  /* Altura fixa, e não do tamanho da foto: com `height: auto` o trilho não tem
+     altura enquanto as fotos não carregam (elas são `lazy` dentro de um dialog
+     que nasce `display: none`, então só baixam quando a janela abre), e a
+     janela pularia de tamanho a cada foto retrato/paisagem durante o arrasto. */
+  height: min(94vh, 920px);
+  max-height: 94vh;
+  padding: 8px;
+  overflow: hidden;
+}
+
+/* A passagem de foto é rolagem, não troca de `src`: com `scroll-snap` o dedo
+   arrasta a foto com a inércia do sistema e para encaixada, e a seta é a mesma
+   rolagem por botão. Sai de graça o que um carrossel de script faria à mão. */
+.lente-trilho {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.lente-trilho::-webkit-scrollbar {
+  display: none;
+}
+
+.lente-slide {
+  flex: 0 0 100%;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+}
+
+.lente-slide img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+/* Sutis de propósito: a foto é o assunto. Aparecem inteiras no foco do teclado
+   e ao passar o mouse. */
+.lente-seta {
+  position: absolute;
+  top: 50%;
+  translate: 0 -50%;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--ds-line);
+  border-radius: 50%;
+  background: rgba(4, 7, 10, 0.55);
+  color: var(--ds-text-2);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 0.2s ease;
+}
+
+.lente-seta:hover,
+.lente-seta:focus-visible {
+  opacity: 1;
+}
+
+.lente-seta--antes {
+  left: 12px;
+}
+
+.lente-seta--depois {
+  right: 12px;
+}
+
+/* `width` e `margin` explícitos por causa do texto corrido: o `p` do site é
+   `width: 90%` e o `.pagina p` tem `max-width: 68ch`. O teto de 68ch continua
+   valendo aqui e deixa o parágrafo mais estreito que a janela, então a margem
+   lateral tem que ser `auto`: com `0` a caixa encosta na esquerda e o número
+   centraliza dentro dela, fora do centro da janela. */
+.lente-conta {
+  width: 100%;
+  margin: 6px auto 2px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--ds-text-4);
+  font-variant-numeric: tabular-nums;
+}
+
 @media (max-width: 820px) {
   .trio-grid {
     grid-template-columns: 1fr;

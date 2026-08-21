@@ -20,11 +20,111 @@ const fotos = [
 >
   <div class="galeria-grid">
     {
-      fotos.map((f) => (
-        <div class="galeria-item">
+      fotos.map((f, i) => (
+        /* <a href="#galeria">, e não botão com script: quem abre a janela é o
+           BaseLayout olhando o hash, e é isso que faz o voltar do celular
+           fechar a foto em vez de sair da página. O data-i só diz em qual
+           foto o trilho tem que parar. */
+        <a class="galeria-item" href="#galeria" data-i={i} aria-label={`Ampliar: ${f.alt}`}>
           <img src={`/assets/img/galeria/${f.img}.webp`} alt={f.alt} loading="lazy" />
-        </div>
+        </a>
       ))
     }
   </div>
+
+  <dialog id="lente" data-hash="galeria" class="janela lente" aria-label="Foto ampliada">
+    <form method="dialog" class="janela-barra">
+      <button class="janela-fechar" aria-label="Fechar">✕</button>
+    </form>
+
+    {/* A mesma URL da grade: o navegador já tem a foto em cache, então ampliar
+        não baixa nada de novo. */}
+    <div class="lente-trilho" id="lente-trilho">
+      {
+        fotos.map((f) => (
+          <figure class="lente-slide">
+            <img src={`/assets/img/galeria/${f.img}.webp`} alt={f.alt} loading="lazy" />
+          </figure>
+        ))
+      }
+    </div>
+
+    <button type="button" class="lente-seta lente-seta--antes" data-passo="-1" aria-label="Foto anterior">‹</button>
+    <button type="button" class="lente-seta lente-seta--depois" data-passo="1" aria-label="Próxima foto">›</button>
+
+    <p class="lente-conta"><span id="lente-n">1</span> de {fotos.length}</p>
+  </dialog>
 </PageLayout>
+
+<script>
+  /**
+   * A lente da galeria.
+   *
+   * Abrir, fechar, clicar fora e o voltar do celular são do BaseLayout, que
+   * cuida de toda janela do site pelo `#hash`. Sobra pra cá só a posição do
+   * trilho, e por isso este arquivo é curto.
+   *
+   * A passagem de foto é rolagem com `scroll-snap`, não um índice guardado em
+   * variável: assim o dedo no celular arrasta a foto de verdade, com a inércia
+   * do sistema, e a seta é a mesma rolagem dada por botão. Nada de tratar
+   * touchstart na mão.
+   *
+   * Tudo delegado no `document` porque o ClientRouter troca o corpo da página:
+   * listener preso a um elemento não sobreviveria à navegação.
+   */
+  const trilho = () => document.getElementById("lente-trilho");
+
+  document.addEventListener("click", (evento) => {
+    const alvo = evento.target as HTMLElement | null;
+
+    // O listener de captura do BaseLayout já abriu a janela quando este roda,
+    // então o trilho já tem largura pra medir.
+    const card = alvo?.closest(".galeria-item") as HTMLElement | null;
+    if (card) {
+      const faixa = trilho();
+      if (!faixa) return;
+      const i = Number(card.dataset.i ?? 0);
+      faixa.scrollLeft = faixa.clientWidth * i;
+      // Escrita aqui também, e não só no `scroll`: o evento de rolagem só chega
+      // no quadro seguinte, e no meio tempo a janela abria mostrando o número
+      // da foto anterior.
+      const n = document.getElementById("lente-n");
+      if (n) n.textContent = String(i + 1);
+      return;
+    }
+
+    const seta = alvo?.closest(".lente-seta") as HTMLElement | null;
+    if (seta) {
+      const faixa = trilho();
+      faixa?.scrollBy({ left: faixa.clientWidth * Number(seta.dataset.passo), behavior: "smooth" });
+    }
+  });
+
+  /* A contagem é o único listener preso a um elemento, e não delegado: `scroll`
+     de elemento não borbulha, e medido aqui nem sequer chega ao document na
+     fase de captura. Por isso ele é religado quando o ClientRouter troca o
+     corpo da página, com a marca no dataset pra não empilhar duas vezes. */
+  function ligarContagem() {
+    const faixa = document.getElementById("lente-trilho");
+    if (!faixa || faixa.dataset.ligado) return;
+    faixa.dataset.ligado = "1";
+    let ultimo = -1;
+    faixa.addEventListener("scroll", () => {
+      const i = Math.round(faixa.scrollLeft / faixa.clientWidth);
+      if (i === ultimo) return;
+      ultimo = i;
+      const n = document.getElementById("lente-n");
+      if (n) n.textContent = String(i + 1);
+    });
+  }
+
+  ligarContagem();
+  document.addEventListener("astro:page-load", ligarContagem);
+
+  document.addEventListener("keydown", (evento) => {
+    if (evento.key !== "ArrowLeft" && evento.key !== "ArrowRight") return;
+    const faixa = trilho();
+    if (!faixa?.closest("dialog")?.open) return;
+    faixa.scrollBy({ left: evento.key === "ArrowLeft" ? -faixa.clientWidth : faixa.clientWidth, behavior: "smooth" });
+  });
+</script>
