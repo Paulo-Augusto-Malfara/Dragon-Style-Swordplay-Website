@@ -4396,6 +4396,11 @@ footer {
      janela pularia de tamanho a cada foto retrato/paisagem durante o arrasto. */
   height: min(94vh, 920px);
   max-height: 94vh;
+  /* `dvh` porque no celular `vh` é a viewport GRANDE, a de barra de endereço
+     escondida: com a barra à mostra, 94vh é mais alto que a tela e a contagem
+     fica embaixo dela. As duas linhas ficam: a de `vh` é o plano B. */
+  height: min(94dvh, 920px);
+  max-height: 94dvh;
   padding: 8px;
   overflow: hidden;
 }
