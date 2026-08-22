@@ -702,9 +702,13 @@
               {#if p.votos !== null}
                 <span class="card-votos">{p.votos}</span>
               {/if}
+              <!-- Votada fica dourada, e não fantasma: o card precisa dizer de
+                   longe onde os três votos estão. O dourado é o do próprio
+                   `.btn`, sem classe nova. -->
               <button
                 type="button"
-                class="btn btn-ghost btn-sm"
+                class="btn btn-sm"
+                class:btn-ghost={!p.votei}
                 disabled={!janelaAberta || ocupado || (!p.votei && votosUsados >= VOTOS_POR_REUNIAO)}
                 onclick={() => votar(p)}
               >
@@ -1295,7 +1299,10 @@
   .card-voto {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    /* Centro, e não space-between: enquanto a votação está travada o número
+       não existe e o botão sozinho ficava jogado na quina esquerda. Quando o
+       número volta, os dois vêm centrados como um par. */
+    justify-content: center;
     gap: 8px;
     padding: 8px 12px;
     border-top: 1px solid var(--ds-line);
