@@ -200,6 +200,25 @@ e sim grant coluna a coluna, sem `votos_total` e `decisao_tally`. Coluna nova
 não nasce visível: quem esquecer de acrescentar no grant vai ver o campo sumir
 do REST calado, sem erro, e o defeito vai parecer da tela.
 
+## "Em teste" vale pra qualquer pauta
+
+Desde 22/08/2026 `em_teste` é a quarta opção da rodada de mérito, votável em
+ideia, sugestão e crítica também: a sala aprova pra experimentar, a pauta sai da
+reunião, e a rodada seguinte (`aprovada`/`recusada`/`mais_teste`) decide se
+fica. O trilho de volta já existia e não precisou de nada: a `agendar_reuniao`
+sempre puxou `status in ('aberta','em_teste')`, e a segunda rodada nunca olhou
+categoria.
+
+Modalidade continua sendo a exceção pelo outro lado: ela cai em teste **sem
+ninguém votar nisso**, porque `validada` numa `nova_modalidade` nunca pode virar
+página direto. As duas entradas moram no mesmo galho da `fechar_decisao`, e é
+por isso que ele testa `v_resultado = 'em_teste' or (v_resultado = 'validada'
+and v_categoria = 'nova_modalidade')`.
+
+Pauta em teste não recebe voto de prioridade (a `votar_pauta` exige `aberta`) e
+a view não dá `posicao` pra ela: ela volta pra reunião por direito, sem disputar
+as três vagas.
+
 ## claude-in-chrome usage
 
 Don't open/screenshot the site with claude-in-chrome unprompted. The user runs `npm run dev` himself and watches localhost live (PC and phone) — he checks visual/UI changes on his own. Only use claude-in-chrome when: the user explicitly asks in that turn, a large/whole-feature review he requested calls for it, or there's a genuine need with no other way to verify — and even then, ask for authorization first (yes, even in auto mode) before opening the browser.

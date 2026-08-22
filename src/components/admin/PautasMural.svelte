@@ -17,8 +17,9 @@
    * 2. Voto de DECISÃO (fPautaDecisaoVotos): acontece durante a reunião, o
    *    organizador abre e fecha, e é o que define o desfecho. As opções mudam
    *    conforme a rodada: pauta na fila decide mérito (validada/recusada/
-   *    adiada), modalidade em teste decide o fim do teste (aprovada/recusada/
-   *    mais tempo).
+   *    adiada/em teste), pauta em teste decide o fim do teste (aprovada/
+   *    recusada/mais tempo). Qualquer categoria pode ser aprovada em teste, e
+   *    não só modalidade.
    *
    * As duas são SECRETAS, e o segredo é do banco: a policy das duas tabelas de
    * voto entrega só a linha de quem pergunta. Esta tela nunca recebe a lista de
@@ -69,6 +70,11 @@
      como" três vezes. */
   const OPCOES_MERITO = [
     { id: "validada", rotulo: "Aprovada", verbo: "Aprovar" },
+    /* Aprovada pra experimentar. A pauta sai desta reunião e volta na próxima
+       pela `agendar_reuniao`, e aí a rodada de teste decide se fica. Vale pra
+       qualquer categoria: modalidade é a única que cai em teste sem ninguém
+       votar nisso, porque validada nunca vira página direto. */
+    { id: "em_teste", rotulo: "Em teste", verbo: "Deixar em teste" },
     { id: "recusada", rotulo: "Recusada", verbo: "Recusar" },
     { id: "adiada", rotulo: "Adiada", verbo: "Adiar" },
   ];
@@ -513,6 +519,7 @@
     recusada: "nao",
     adiada: "espera",
     mais_teste: "espera",
+    em_teste: "espera",
   };
 
   const opcoesDa = (p: any) => (p.status === "em_teste" ? OPCOES_TESTE : OPCOES_MERITO);
